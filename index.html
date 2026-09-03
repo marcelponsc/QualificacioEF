@@ -27,12 +27,15 @@
           <div class="flex items-center gap-2">
             <h1 class="text-base font-bold tracking-tight text-white">EF Competencial</h1>
             <span class="text-[10px] bg-emerald-500/20 text-emerald-300 font-semibold px-2 py-0.5 rounded-full border border-emerald-500/30 uppercase tracking-wider">LOMLOE</span>
+            <span id="savedIndicator" class="text-[10px] bg-emerald-950 text-emerald-300 border border-emerald-600/40 px-2 py-0.5 rounded flex items-center gap-1 transition-opacity duration-300 opacity-0">
+              <i class="fa-solid fa-cloud-check"></i> Desat automàtic
+            </span>
           </div>
           <p class="text-xs text-slate-400">Avaluació per SdA &amp; Competències Específiques Ponderades</p>
         </div>
       </div>
 
-      <div class="flex items-center gap-3">
+      <div class="flex items-center gap-2">
         <!-- Selector i Gestor de Grups -->
         <div class="flex items-center bg-slate-800 border border-slate-700 rounded-lg p-1 text-xs">
           <span class="text-slate-400 px-2">Grup:</span>
@@ -48,6 +51,17 @@
           <button id="trimBtn1" onclick="setTrim(1)" class="px-3 py-1 rounded-md bg-emerald-500 text-white shadow-sm transition">1r Trim</button>
           <button id="trimBtn2" onclick="setTrim(2)" class="px-3 py-1 rounded-md text-slate-300 hover:text-white transition">2n Trim</button>
           <button id="trimBtn3" onclick="setTrim(3)" class="px-3 py-1 rounded-md text-slate-300 hover:text-white transition">3r Trim</button>
+        </div>
+
+        <!-- Còpia de seguretat (Exportar / Importar) -->
+        <div class="flex items-center gap-1 ml-2">
+          <button onclick="exportBackupJSON()" title="Descarregar Còpia de Seguretat (Fitxer JSON)" class="bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white p-2 rounded-lg border border-slate-700 text-xs transition">
+            <i class="fa-solid fa-download"></i>
+          </button>
+          <label title="Restaurar Còpia de Seguretat" class="bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white p-2 rounded-lg border border-slate-700 text-xs transition cursor-pointer">
+            <i class="fa-solid fa-upload"></i>
+            <input type="file" id="backupFileInput" accept=".json" onchange="importBackupJSON(event)" class="hidden">
+          </label>
         </div>
       </div>
     </div>
@@ -302,7 +316,7 @@
     </div>
   </div>
 
-  <!-- ================= MODAL PROGRAMADOR DE SdA (AMB ASSIGNACIÓ MULTICLASSE) ================= -->
+  <!-- ================= MODAL PROGRAMADOR DE SdA ================= -->
   <div id="sdaModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden no-print">
     <div class="bg-white rounded-2xl shadow-2xl max-w-3xl w-full max-h-[90vh] flex flex-col overflow-hidden border border-slate-200">
       <div class="px-6 py-4 bg-slate-900 text-white flex justify-between items-center">
@@ -319,13 +333,11 @@
       </div>
 
       <div class="p-6 overflow-y-auto space-y-5 flex-1 text-xs">
-        <!-- Títol SdA -->
         <div>
           <label class="block font-bold text-slate-700 mb-1.5 uppercase text-[11px] tracking-wider">Títol de la SdA</label>
           <input type="text" id="modalSdaTitle" placeholder="Ex: Hàbits saludables i condició física" class="w-full text-sm border border-slate-300 rounded-lg p-2.5 focus:ring-2 focus:ring-emerald-500 outline-none font-medium">
         </div>
 
-        <!-- Selector de Classes Implicades (NOU) -->
         <div class="bg-indigo-50/50 border border-indigo-100 p-3.5 rounded-xl space-y-2">
           <div class="flex justify-between items-center">
             <span class="font-bold text-indigo-950 uppercase text-[11px] tracking-wider flex items-center gap-1.5">
@@ -338,11 +350,9 @@
             </div>
           </div>
           <div id="modalTargetGroupsContainer" class="flex flex-wrap gap-2.5 pt-1">
-            <!-- Checkboxes de classes generats dinàmicament -->
           </div>
         </div>
 
-        <!-- Competències Específiques & OAs -->
         <div class="border-t pt-4">
           <div class="flex justify-between items-center mb-3">
             <h4 class="font-bold text-slate-800 text-xs uppercase tracking-wider">Competències Específiques (CE) &amp; Objectius d'Aprenentatge (OA)</h4>
@@ -371,7 +381,10 @@
       { id: 'CE5', name: 'CE5. Adquirir actituds, valors i habilitats socials per a la convivència', short: 'Valors i convivència' }
     ];
 
-    let appData = {
+    const STORAGE_KEY = 'EF_COMPETENCIAL_DATA_V1';
+
+    // Dades inicials per defecte (només s'usen el primer cop si no hi ha dades guardades)
+    const DEFAULT_APP_DATA = {
       activeGroupId: "1esoA",
       groups: {
         "1esoA": {
@@ -449,6 +462,8 @@
       }
     };
 
+    let appData = loadFromStorage();
+
     let appState = {
       currentTrim: 1,
       currentView: 'sda',
@@ -457,7 +472,83 @@
 
     let radarInstance = null;
 
+    // SISTEMA DE PERSISTÈNCIA LOCALSTORAGE
+    function loadFromStorage() {
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if (raw) {
+          const parsed = JSON.parse(raw);
+          if (parsed && parsed.groups && Object.keys(parsed.groups).length > 0) {
+            return parsed;
+          }
+        }
+      } catch (e) {
+        console.warn("No s'ha pogut llegir el localStorage:", e);
+      }
+      return JSON.parse(JSON.stringify(DEFAULT_APP_DATA));
+    }
+
+    function saveToStorage() {
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(appData));
+        showSavedIndicator();
+      } catch (e) {
+        console.error("Error desant a localStorage:", e);
+      }
+    }
+
+    function showSavedIndicator() {
+      const el = document.getElementById('savedIndicator');
+      if (el) {
+        el.classList.remove('opacity-0');
+        clearTimeout(window._savedTimeout);
+        window._savedTimeout = setTimeout(() => {
+          el.classList.add('opacity-0');
+        }, 1500);
+      }
+    }
+
+    // EXPORTAR I IMPORTAR CÒPIES DE SEGURETAT (JSON)
+    function exportBackupJSON() {
+      const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(appData, null, 2));
+      const downloadAnchor = document.createElement('a');
+      const dateStr = new Date().toISOString().slice(0, 10);
+      downloadAnchor.setAttribute("href", dataStr);
+      downloadAnchor.setAttribute("download", `EF_Competencial_Backup_${dateStr}.json`);
+      document.body.appendChild(downloadAnchor);
+      downloadAnchor.click();
+      downloadAnchor.remove();
+    }
+
+    function importBackupJSON(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        try {
+          const imported = JSON.parse(e.target.result);
+          if (imported && imported.groups) {
+            if (confirm("Vols substituir les dades actuals per les d'aquesta còpia de seguretat?")) {
+              appData = imported;
+              saveToStorage();
+              init();
+              alert("Còpia de seguretat restaurada correctament!");
+            }
+          } else {
+            alert("El fitxer seleccionat no té el format vàlid d'EF Competencial.");
+          }
+        } catch (err) {
+          alert("Error llegint el fitxer JSON.");
+        }
+      };
+      reader.readAsText(file);
+      event.target.value = ''; // Neteja l'input
+    }
+
     function getCurrentGroup() {
+      if (!appData.groups[appData.activeGroupId]) {
+        appData.activeGroupId = Object.keys(appData.groups)[0];
+      }
       return appData.groups[appData.activeGroupId];
     }
 
@@ -478,6 +569,7 @@
 
     function changeActiveGroup(groupId) {
       appData.activeGroupId = groupId;
+      saveToStorage();
       populateSdaSelect();
       populateReportStudents();
       renderSdaGrid();
@@ -553,6 +645,7 @@
       };
       document.getElementById('newGroupNameInput').value = '';
       changeActiveGroup(gId);
+      saveToStorage();
       renderGroupStudentModalContent();
     }
 
@@ -561,6 +654,7 @@
         delete appData.groups[gId];
         const remainingKeys = Object.keys(appData.groups);
         appData.activeGroupId = remainingKeys[0];
+        saveToStorage();
         renderGroupSelectorOptions();
         renderGroupStudentModalContent();
       }
@@ -576,6 +670,7 @@
         name: name
       });
       input.value = '';
+      saveToStorage();
       renderGroupStudentModalContent();
     }
 
@@ -592,6 +687,7 @@
         });
       });
       area.value = '';
+      saveToStorage();
       renderGroupStudentModalContent();
     }
 
@@ -600,6 +696,7 @@
       const st = curGroup.students.find(s => s.id === stId);
       if (st && newName.trim()) {
         st.name = newName.trim();
+        saveToStorage();
       }
     }
 
@@ -607,6 +704,7 @@
       const curGroup = getCurrentGroup();
       if (confirm("Vols eliminar aquest alumne/a?")) {
         curGroup.students = curGroup.students.filter(s => s.id !== stId);
+        saveToStorage();
         renderGroupStudentModalContent();
       }
     }
@@ -860,10 +958,11 @@
       } else {
         curGroup.grades[sdaId][stId][key] = parseFloat(val);
       }
+      saveToStorage();
       renderSdaGrid();
     }
 
-    // MODAL SdA: INCLOU CHECKBOXES MULTICLASSE
+    // MODAL SdA MULTICLASSE
     function openSdaModal(isNew) {
       appState.editingIsNew = isNew;
       const curGroup = getCurrentGroup();
@@ -894,7 +993,6 @@
       const cont = document.getElementById('modalTargetGroupsContainer');
       cont.innerHTML = Object.keys(appData.groups).map(gId => {
         const group = appData.groups[gId];
-        // Si és nova, marca per defecte la classe activa. Si és editada, marca els grups que ja la tinguin
         let isChecked = false;
         if (appState.editingIsNew) {
           isChecked = (gId === appData.activeGroupId);
@@ -1006,7 +1104,6 @@
       badge.className = sum === 100 ? "text-xs font-bold px-2 py-0.5 rounded bg-emerald-100 text-emerald-800" : "text-xs font-bold px-2 py-0.5 rounded bg-amber-100 text-amber-800";
     }
 
-    // DESAR SdA MULTICLASSE
     function saveSdaFromModal() {
       const targetGroupIds = Array.from(document.querySelectorAll('.target-group-checkbox:checked')).map(cb => cb.value);
       if (targetGroupIds.length === 0) {
@@ -1040,7 +1137,6 @@
         }
       });
 
-      // Aplica a cadascuna de les classes seleccionades
       targetGroupIds.forEach(gId => {
         const grp = appData.groups[gId];
         let targetSda = grp.sdas.find(s => s.title === title && s.trim === appState.currentTrim);
@@ -1059,6 +1155,7 @@
         }
       });
 
+      saveToStorage();
       closeSdaModal();
       populateSdaSelect();
       renderSdaGrid();
