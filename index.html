@@ -6,428 +6,87 @@
   <title>Quadern EF - Decret 175/2022</title>
   <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body class="bg-slate-50 text-slate-800 p-4 md:p-6 font-sans">
-  <div class="max-w-7xl mx-auto space-y-6">
+<body class="bg-slate-50 text-slate-800 min-h-screen font-sans">
+  <div class="max-w-7xl mx-auto p-4 md:p-6 space-y-6">
 
-    <header class="flex flex-col sm:flex-row justify-between items-start sm:items-center bg-white p-5 rounded-xl border border-slate-200 shadow-sm gap-4">
+    <header class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4">
       <div>
-        <h1 class="text-2xl font-bold text-slate-900 tracking-tight">Quadern d'Avaluació EF (LOMLOE)</h1>
-        <p class="text-xs text-slate-500 font-medium">Currículum Catalunya (Decret 175/2022) · Escala LOMLOE (1 a 4)</p>
+        <div class="flex items-center gap-2">
+          <span class="text-xl">🏃‍♂️</span>
+          <h1 class="text-2xl font-bold text-slate-900 tracking-tight">Quadern EF Digital</h1>
+          <span class="bg-emerald-100 text-emerald-800 text-xs font-semibold px-2.5 py-0.5 rounded-full border border-emerald-200">Decret 175/2022</span>
+        </div>
+        <p class="text-xs text-slate-500 mt-1">Avaluació competencial d'Educació Física a Secundària (LOMLOE)</p>
       </div>
-      <button onclick="toggleModal(true)" class="bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-semibold px-4 py-2.5 rounded-lg transition-colors shadow-sm flex items-center gap-2">
-        <span>⚙️</span> Configurar Situació d'Aprenentatge (SdA)
-      </button>
+
+      <nav class="flex bg-slate-100 p-1 rounded-xl border border-slate-200" role="tablist">
+        <button 
+          id="tabBtnGraella" 
+          onclick="switchTab('graella')" 
+          class="flex items-center gap-2 px-4 py-2 text-sm font-semibold rounded-lg transition-all shadow-sm bg-white text-emerald-700">
+          <span>📊</span>
+          <span>Graella d'Avaluació</span>
+        </button>
+        <button 
+          id="tabBtnConfig" 
+          onclick="switchTab('config')" 
+          class="flex items-center gap-2 px-4 py-2 text-sm font-semibold rounded-lg transition-all text-slate-600 hover:text-slate-900">
+          <span>⚙️</span>
+          <span>Configurador SdA</span>
+        </button>
+        <button 
+          id="tabBtnAlumnat" 
+          onclick="switchTab('alumnat')" 
+          class="flex items-center gap-2 px-4 py-2 text-sm font-semibold rounded-lg transition-all text-slate-600 hover:text-slate-900">
+          <span>👥</span>
+          <span>Llistat d'Alumnat</span>
+        </button>
+      </nav>
     </header>
 
-    <main class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
-      <div class="p-4 border-b border-slate-200 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 bg-slate-50/50">
-        <div>
-          <span class="text-xs font-semibold uppercase tracking-wider text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">SdA Actual</span>
-          <h2 id="sdaTitleDisplay" class="text-lg font-bold text-slate-800 mt-1">HÀBITS SALUDABLES I CONDICIÓ FÍSICA</h2>
-        </div>
-        <div class="flex items-center gap-2">
-          <input type="text" id="newStudentInput" placeholder="Nom de l'alumne/a..." class="text-sm border border-slate-300 rounded-lg px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-emerald-500">
-          <button onclick="addStudent()" class="bg-slate-800 hover:bg-slate-900 text-white text-sm font-medium px-3 py-1.5 rounded-lg transition-colors">
-            + Afegir Alumne
-          </button>
-        </div>
+    <section id="viewGraella" class="space-y-4">
+      <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm flex flex-col items-center justify-center min-h-[350px] text-center space-y-3">
+        <div class="w-12 h-12 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center text-xl font-bold">1</div>
+        <h2 class="text-lg font-bold text-slate-800">Graella de Qualificacions LOMLOE</h2>
+        <p class="text-sm text-slate-500 max-w-md">Aquí visualitzarem la graella dinàmica amb columnes per cada CE/OA i càlcul automàtic de nivells (NA, EPA, AS, AN, AE).</p>
       </div>
+    </section>
 
-      <div class="overflow-x-auto">
-        <table class="w-full text-left border-collapse text-sm">
-          <thead id="tableHeader" class="bg-slate-100 text-slate-700 border-b border-slate-200"></thead>
-          <tbody id="tableBody" class="divide-y divide-slate-200"></tbody>
-        </table>
+    <section id="viewConfig" class="space-y-4 hidden">
+      <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm flex flex-col items-center justify-center min-h-[350px] text-center space-y-3">
+        <div class="w-12 h-12 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center text-xl font-bold">2</div>
+        <h2 class="text-lg font-bold text-slate-800">Creador de Situacions d'Aprenentatge (SdA)</h2>
+        <p class="text-sm text-slate-500 max-w-md">Aquí anirà el formulari complet de les competències CE1 a CE5, pesos globals, criteris i addició dinàmica d'OAs.</p>
       </div>
-    </main>
-  </div>
+    </section>
 
-  <div id="sdaModal" class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm hidden z-50 flex items-center justify-center p-4">
-    <div class="bg-white rounded-2xl max-w-3xl w-full max-h-[90vh] flex flex-col shadow-2xl border border-slate-200">
-      <div class="p-5 border-b border-slate-200 flex justify-between items-center">
-        <div>
-          <h3 class="text-lg font-bold text-slate-800">Disseny de la SdA i Competències</h3>
-          <p class="text-xs text-slate-500">Activa competències, assigna pesos i desglossa en Objectius d'Aprenentatge.</p>
-        </div>
-        <button onclick="toggleModal(false)" class="text-slate-400 hover:text-slate-600 text-xl font-bold leading-none">&times;</button>
+    <section id="viewAlumnat" class="space-y-4 hidden">
+      <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm flex flex-col items-center justify-center min-h-[350px] text-center space-y-3">
+        <div class="w-12 h-12 rounded-full bg-purple-50 text-purple-600 flex items-center justify-center text-xl font-bold">3</div>
+        <h2 class="text-lg font-bold text-slate-800">Gestió del Grup-Classe</h2>
+        <p class="text-sm text-slate-500 max-w-md">Panell ràpid per afegir, eliminar o importar la llista d'estudiants del curs.</p>
       </div>
+    </section>
 
-      <div class="p-6 overflow-y-auto space-y-6">
-        <div>
-          <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Títol de la SdA</label>
-          <input type="text" id="sdaTitleInput" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-emerald-500 focus:outline-none font-medium">
-        </div>
-
-        <div class="space-y-4">
-          <h4 class="text-xs font-bold text-slate-700 uppercase tracking-wider">Competències Específiques implicades</h4>
-          <div id="ceConfigContainer" class="space-y-4"></div>
-        </div>
-      </div>
-
-      <div class="p-4 border-t border-slate-200 bg-slate-50 flex justify-between items-center rounded-b-2xl">
-        <span id="totalWeightWarning" class="text-xs font-semibold"></span>
-        <div class="flex gap-2">
-          <button onclick="toggleModal(false)" class="px-4 py-2 border border-slate-300 text-slate-600 rounded-lg text-sm hover:bg-slate-100 font-medium">Cancel·lar</button>
-          <button onclick="saveSdaConfig()" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-sm font-semibold shadow-sm">Guardar i Actualitzar</button>
-        </div>
-      </div>
-    </div>
   </div>
 
   <script>
-    const CE_CATALOGUE = [
-      { id: "CE1", name: "Estil de vida actiu i autònom" },
-      { id: "CE2", name: "Processos de decisió i acció motriu" },
-      { id: "CE3", name: "Expressió, comunicació i cultura motriu" },
-      { id: "CE4", name: "Autoregulació emocional i habilitats socials" },
-      { id: "CE5", name: "Interacció sostenible amb l'entorn" }
-    ];
+    const tabs = ['graella', 'config', 'alumnat'];
 
-    let state = {
-      sdaTitle: "HÀBITS SALUDABLES I CONDICIÓ FÍSICA",
-      ces: {
-        CE1: {
-          active: true,
-          weight: 80,
-          criteria: "1.1 - 1.2 - 1.3",
-          oas: [
-            { id: "oa_1_1", text: "Registra pulsacions i intensitat", weight: 25 },
-            { id: "oa_1_2", text: "Coneix zones de treball aeròbic", weight: 25 },
-            { id: "oa_1_3", text: "Executa escalfament específic", weight: 25 },
-            { id: "oa_1_4", text: "Completa dossier de condició física", weight: 25 }
-          ]
-        },
-        CE2: { active: false, weight: 0, criteria: "", oas: [] },
-        CE3: { active: false, weight: 0, criteria: "", oas: [] },
-        CE4: { active: false, weight: 0, criteria: "", oas: [] },
-        CE5: {
-          active: true,
-          weight: 20,
-          criteria: "5.1 - 5.2",
-          oas: [
-            { id: "oa_5_1", text: "Ús responsable dels espais", weight: 25 },
-            { id: "oa_5_2", text: "Respecte pel material comú", weight: 25 },
-            { id: "oa_5_3", text: "Gestió activa de residus", weight: 25 },
-            { id: "oa_5_4", text: "Aposta per mobilitat activa", weight: 25 }
-          ]
-        }
-      },
-      students: [
-        {
-          id: "s1",
-          name: "Marcel Pons",
-          scores: {
-            "oa_1_1": 2, "oa_1_2": 3, "oa_1_3": 3, "oa_1_4": 1,
-            "oa_5_1": 3, "oa_5_2": 3, "oa_5_3": 4, "oa_5_4": 4
-          }
-        }
-      ]
-    };
+    function switchTab(activeTabId) {
+      tabs.forEach(tabId => {
+        const view = document.getElementById(`view${tabId.charAt(0).toUpperCase() + tabId.slice(1)}`);
+        const btn = document.getElementById(`tabBtn${tabId.charAt(0).toUpperCase() + tabId.slice(1)}`);
 
-    function getCurricularLevel(score) {
-      if (score === null || isNaN(score) || score === "") return { code: "-", color: "bg-slate-100 text-slate-400" };
-      const val = parseFloat(score);
-      if (val < 1) return { code: "NA", color: "bg-rose-100 text-rose-800" };
-      if (val < 2) return { code: "EPA", color: "bg-orange-100 text-orange-800" };
-      if (val < 3) return { code: "AS", color: "bg-amber-100 text-amber-800" };
-      if (val < 4) return { code: "AN", color: "bg-emerald-100 text-emerald-800" };
-      return { code: "AE", color: "bg-blue-100 text-blue-800" };
-    }
-
-    function calculateStudentCeScore(student, ceKey) {
-      const ce = state.ces[ceKey];
-      if (!ce || !ce.active) return null;
-
-      if (!ce.oas || ce.oas.length === 0) {
-        const val = parseFloat(student.scores[ceKey]);
-        return isNaN(val) ? null : val;
-      }
-
-      let totalWeight = 0;
-      let weightedSum = 0;
-      ce.oas.forEach(oa => {
-        const score = parseFloat(student.scores[oa.id]);
-        const weight = parseFloat(oa.weight) || 0;
-        if (!isNaN(score) && weight > 0) {
-          weightedSum += score * weight;
-          totalWeight += weight;
-        }
-      });
-
-      return totalWeight > 0 ? (weightedSum / totalWeight) : null;
-    }
-
-    function calculateStudentGlobalScore(student) {
-      let totalWeight = 0;
-      let weightedSum = 0;
-
-      Object.keys(state.ces).forEach(ceKey => {
-        const ce = state.ces[ceKey];
-        if (ce.active) {
-          const ceScore = calculateStudentCeScore(student, ceKey);
-          const weight = parseFloat(ce.weight) || 0;
-          if (ceScore !== null && weight > 0) {
-            weightedSum += ceScore * weight;
-            totalWeight += weight;
-          }
-        }
-      });
-
-      return totalWeight > 0 ? (weightedSum / totalWeight) : null;
-    }
-
-    function renderTable() {
-      document.getElementById('sdaTitleDisplay').textContent = state.sdaTitle || "Sense Títol";
-      const header = document.getElementById('tableHeader');
-      const body = document.getElementById('tableBody');
-
-      let tr1 = '<tr class="text-xs uppercase tracking-wider text-slate-500 border-b border-slate-200">';
-      tr1 += '<th rowspan="2" class="p-3 bg-slate-50 border-r border-slate-200 text-left min-w-[180px]">Alumnat</th>';
-
-      let tr2 = '<tr class="text-[11px] text-slate-600 bg-slate-50/70 border-b border-slate-200">';
-
-      Object.keys(state.ces).forEach(ceKey => {
-        const ce = state.ces[ceKey];
-        if (!ce.active) return;
-
-        const hasOas = ce.oas && ce.oas.length > 0;
-        const colSpan = hasOas ? ce.oas.length + 1 : 1;
-
-        tr1 += `<th colspan="${colSpan}" class="p-2 border-r border-slate-200 text-center font-bold bg-slate-100/70">
-          <div class="flex items-center justify-center gap-2">
-            <span>${ceKey} (${ce.weight || 0}%)</span>
-            ${ce.criteria ? `<span class="font-normal text-[10px] text-slate-500">Crit: ${ce.criteria}</span>` : ''}
-          </div>
-        </th>`;
-
-        if (hasOas) {
-          ce.oas.forEach(oa => {
-            tr2 += `<th class="p-2 border-r border-slate-200 text-center font-medium max-w-[130px] truncate" title="${oa.text || 'OA'} (${oa.weight || 0}%)">
-              <div class="truncate text-slate-700">${oa.text || 'OA'}</div>
-              <div class="text-[10px] text-slate-400 font-semibold">${oa.weight || 0}%</div>
-            </th>`;
-          });
-          tr2 += `<th class="p-2 border-r border-slate-200 text-center font-bold bg-slate-100 text-slate-800">Global ${ceKey}</th>`;
+        if (tabId === activeTabId) {
+          view.classList.remove('hidden');
+          btn.className = "flex items-center gap-2 px-4 py-2 text-sm font-semibold rounded-lg transition-all shadow-sm bg-white text-emerald-700";
         } else {
-          tr2 += `<th class="p-2 border-r border-slate-200 text-center font-bold bg-slate-100 text-slate-800">Qualificació</th>`;
+          view.classList.add('hidden');
+          btn.className = "flex items-center gap-2 px-4 py-2 text-sm font-semibold rounded-lg transition-all text-slate-600 hover:text-slate-900";
         }
       });
-
-      tr1 += '<th rowspan="2" class="p-3 text-center min-w-[120px] bg-emerald-50 text-emerald-900 border-l border-slate-200">Mitjana SdA</th>';
-      tr1 += '<th rowspan="2" class="p-2 text-center w-10"></th>';
-      tr1 += '</tr>';
-      tr2 += '</tr>';
-
-      header.innerHTML = tr1 + tr2;
-
-      body.innerHTML = state.students.map(student => {
-        const globalScore = calculateStudentGlobalScore(student);
-        const globalLvl = getCurricularLevel(globalScore);
-
-        let rowHtml = `<tr class="hover:bg-slate-50/80 transition-colors">`;
-        rowHtml += `<td class="p-3 font-semibold text-slate-900 border-r border-slate-200 bg-white">${student.name}</td>`;
-
-        Object.keys(state.ces).forEach(ceKey => {
-          const ce = state.ces[ceKey];
-          if (!ce.active) return;
-
-          const hasOas = ce.oas && ce.oas.length > 0;
-          if (hasOas) {
-            ce.oas.forEach(oa => {
-              const val = student.scores[oa.id] !== undefined ? student.scores[oa.id] : "";
-              rowHtml += `<td class="p-1 border-r border-slate-200 text-center">
-                <input type="number" step="0.1" min="1" max="4" value="${val}" 
-                  onchange="updateScore('${student.id}', '${oa.id}', this.value)"
-                  class="w-14 text-center py-1 border border-slate-200 rounded focus:border-emerald-500 focus:outline-none text-xs font-semibold">
-              </td>`;
-            });
-            const ceScore = calculateStudentCeScore(student, ceKey);
-            const ceLvl = getCurricularLevel(ceScore);
-            rowHtml += `<td class="p-2 border-r border-slate-200 text-center bg-slate-50/50">
-              <span class="font-bold text-xs">${ceScore !== null ? ceScore.toFixed(2) : '-'}</span>
-              <span class="inline-block px-1.5 py-0.5 text-[10px] font-bold rounded ml-1 ${ceLvl.color}">${ceLvl.code}</span>
-            </td>`;
-          } else {
-            const val = student.scores[ceKey] !== undefined ? student.scores[ceKey] : "";
-            const ceLvl = getCurricularLevel(val);
-            rowHtml += `<td class="p-1 border-r border-slate-200 text-center bg-slate-50/30">
-              <div class="flex items-center justify-center gap-1">
-                <input type="number" step="0.1" min="1" max="4" value="${val}" 
-                  onchange="updateScore('${student.id}', '${ceKey}', this.value)"
-                  class="w-14 text-center py-1 border border-slate-200 rounded focus:border-emerald-500 focus:outline-none text-xs font-semibold">
-                <span class="inline-block px-1 py-0.5 text-[10px] font-bold rounded ${ceLvl.color}">${ceLvl.code}</span>
-              </div>
-            </td>`;
-          }
-        });
-
-        rowHtml += `<td class="p-2 text-center bg-emerald-50/40 border-l border-slate-200">
-          <span class="font-bold text-sm text-slate-800">${globalScore !== null ? globalScore.toFixed(2) : '-'}</span>
-          <span class="inline-block px-2 py-0.5 text-xs font-bold rounded ml-1.5 ${globalLvl.color}">${globalLvl.code}</span>
-        </td>`;
-
-        rowHtml += `<td class="p-2 text-center">
-          <button onclick="removeStudent('${student.id}')" class="text-slate-300 hover:text-rose-500 font-bold text-sm leading-none">&times;</button>
-        </td>`;
-
-        rowHtml += `</tr>`;
-        return rowHtml;
-      }).join('');
     }
-
-    function updateScore(studentId, key, value) {
-      const student = state.students.find(s => s.id === studentId);
-      if (student) {
-        if (value === "") {
-          delete student.scores[key];
-        } else {
-          student.scores[key] = parseFloat(value);
-        }
-        renderTable();
-      }
-    }
-
-    function addStudent() {
-      const input = document.getElementById('newStudentInput');
-      const name = input.value.trim();
-      if (!name) return;
-      state.students.push({
-        id: "s_" + Date.now(),
-        name: name,
-        scores: {}
-      });
-      input.value = "";
-      renderTable();
-    }
-
-    function removeStudent(id) {
-      state.students = state.students.filter(s => s.id !== id);
-      renderTable();
-    }
-
-    let modalTempState = {};
-
-    function toggleModal(open) {
-      const modal = document.getElementById('sdaModal');
-      if (open) {
-        modalTempState = JSON.parse(JSON.stringify(state));
-        document.getElementById('sdaTitleInput').value = modalTempState.sdaTitle || "";
-        renderModalCeConfig();
-        modal.classList.remove('hidden');
-      } else {
-        modal.classList.add('hidden');
-      }
-    }
-
-    function renderModalCeConfig() {
-      const container = document.getElementById('ceConfigContainer');
-      let totalWeight = 0;
-
-      container.innerHTML = CE_CATALOGUE.map(cat => {
-        const ce = modalTempState.ces[cat.id] || { active: false, weight: 0, criteria: "", oas: [] };
-        if (ce.active) totalWeight += parseFloat(ce.weight) || 0;
-
-        return `
-          <div class="border ${ce.active ? 'border-emerald-300 bg-emerald-50/20' : 'border-slate-200 bg-slate-50/50'} rounded-xl p-4 transition-all">
-            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-              <label class="flex items-center gap-2 cursor-pointer font-bold text-slate-800 text-sm">
-                <input type="checkbox" ${ce.active ? 'checked' : ''} onchange="toggleCeActive('${cat.id}', this.checked)" class="rounded text-emerald-600 focus:ring-emerald-500 w-4 h-4">
-                <span>${cat.id}: ${cat.name}</span>
-              </label>
-              ${ce.active ? `
-                <div class="flex items-center gap-3">
-                  <div class="flex items-center gap-1">
-                    <span class="text-xs font-semibold text-slate-500">Pes CE:</span>
-                    <input type="number" min="0" max="100" value="${ce.weight || 0}" onchange="updateCeWeight('${cat.id}', this.value)" class="w-16 text-center border border-slate-300 rounded px-1.5 py-1 text-xs font-bold">
-                    <span class="text-xs font-semibold text-slate-500">%</span>
-                  </div>
-                </div>
-              ` : ''}
-            </div>
-
-            ${ce.active ? `
-              <div class="mt-4 pt-3 border-t border-slate-200 space-y-3">
-                <div>
-                  <input type="text" placeholder="Criteris curriculars opcionals (ex: 1.1 - 1.2)..." value="${ce.criteria || ''}" onchange="updateCeCriteria('${cat.id}', this.value)" class="w-full text-xs border border-slate-200 rounded px-2.5 py-1.5 bg-white">
-                </div>
-                
-                <div class="space-y-2">
-                  <div class="flex justify-between items-center">
-                    <span class="text-[11px] font-bold uppercase tracking-wider text-slate-500">Objectius d'Aprenentatge (OAs)</span>
-                    <button onclick="addOa('${cat.id}')" class="text-xs font-semibold text-emerald-700 hover:text-emerald-800">+ Afegir OA</button>
-                  </div>
-                  
-                  <div class="space-y-2">
-                    ${(ce.oas || []).map((oa, index) => `
-                      <div class="flex items-center gap-2">
-                        <input type="text" placeholder="Descripció de l'aprenentatge..." value="${oa.text || ''}" onchange="updateOaText('${cat.id}', ${index}, this.value)" class="flex-1 text-xs border border-slate-300 rounded px-2 py-1">
-                        <div class="flex items-center gap-1">
-                          <input type="number" min="0" max="100" value="${oa.weight || 0}" onchange="updateOaWeight('${cat.id}', ${index}, this.value)" class="w-14 text-center text-xs border border-slate-300 rounded py-1 font-semibold">
-                          <span class="text-xs text-slate-400">%</span>
-                        </div>
-                        <button onclick="removeOa('${cat.id}', ${index})" class="text-slate-400 hover:text-rose-500 font-bold text-sm px-1">&times;</button>
-                      </div>
-                    `).join('')}
-                    ${(!ce.oas || ce.oas.length === 0) ? `<p class="text-xs text-slate-400 italic">Sense OAs individuals (s'avaluarà la CE en una única nota directa).</p>` : ''}
-                  </div>
-                </div>
-              </div>
-            ` : ''}
-          </div>
-        `;
-      }).join('');
-
-      const warningEl = document.getElementById('totalWeightWarning');
-      warningEl.textContent = `Suma pesos CE: ${totalWeight}%`;
-      warningEl.className = totalWeight === 100 ? "text-xs font-bold text-emerald-700" : "text-xs font-bold text-amber-600";
-    }
-
-    function toggleCeActive(ceKey, isActive) {
-      modalTempState.ces[ceKey].active = isActive;
-      renderModalCeConfig();
-    }
-
-    function updateCeWeight(ceKey, val) {
-      modalTempState.ces[ceKey].weight = parseFloat(val) || 0;
-      renderModalCeConfig();
-    }
-
-    function updateCeCriteria(ceKey, val) {
-      modalTempState.ces[ceKey].criteria = val;
-    }
-
-    function addOa(ceKey) {
-      if (!modalTempState.ces[ceKey].oas) modalTempState.ces[ceKey].oas = [];
-      modalTempState.ces[ceKey].oas.push({
-        id: "oa_" + Date.now() + "_" + Math.floor(Math.random() * 100),
-        text: "",
-        weight: 0
-      });
-      renderModalCeConfig();
-    }
-
-    function removeOa(ceKey, index) {
-      modalTempState.ces[ceKey].oas.splice(index, 1);
-      renderModalCeConfig();
-    }
-
-    function updateOaText(ceKey, index, val) {
-      modalTempState.ces[ceKey].oas[index].text = val;
-    }
-
-    function updateOaWeight(ceKey, index, val) {
-      modalTempState.ces[ceKey].oas[index].weight = parseFloat(val) || 0;
-      renderModalCeConfig();
-    }
-
-    function saveSdaConfig() {
-      modalTempState.sdaTitle = document.getElementById('sdaTitleInput').value.trim();
-      state = JSON.parse(JSON.stringify(modalTempState));
-      toggleModal(false);
-      renderTable();
-    }
-
-    renderTable();
   </script>
 </body>
 </html>
