@@ -37,7 +37,6 @@
         <div class="flex items-center bg-slate-800 border border-slate-700 rounded-lg p-1 text-xs">
           <span class="text-slate-400 px-2">Grup:</span>
           <select id="groupSelector" onchange="changeActiveGroup(this.value)" class="bg-slate-900 text-white font-semibold py-1 px-2 rounded focus:outline-none cursor-pointer border border-slate-700">
-            <!-- Dinàmic -->
           </select>
           <button onclick="openGroupStudentModal()" title="Gestionar Grups i Alumnes" class="ml-1.5 px-2 py-1 bg-slate-700 hover:bg-slate-600 text-emerald-400 rounded transition flex items-center gap-1 font-semibold">
             <i class="fa-solid fa-users-gear"></i> Gestió
@@ -241,15 +240,12 @@
       </div>
 
       <div class="p-6 overflow-y-auto space-y-6 flex-1 text-xs">
-        <!-- 1. Gestió de Classes / Grups -->
         <div class="bg-slate-50 p-4 rounded-xl border border-slate-200 space-y-3">
           <h4 class="font-bold text-slate-800 text-xs uppercase tracking-wider flex items-center gap-2">
             <i class="fa-solid fa-graduation-cap text-indigo-600"></i> Classes Disponibles
           </h4>
           <div class="flex flex-wrap items-center gap-2">
-            <div id="groupsListContainer" class="flex flex-wrap gap-2">
-              <!-- Botons de grups -->
-            </div>
+            <div id="groupsListContainer" class="flex flex-wrap gap-2"></div>
           </div>
           <div class="flex items-center gap-2 pt-2 border-t border-slate-200">
             <input type="text" id="newGroupNameInput" placeholder="Ex: 2n ESO B o 3r ESO A" class="border border-slate-300 rounded-lg px-3 py-1.5 text-xs w-60 focus:ring-2 focus:ring-emerald-500 outline-none">
@@ -259,7 +255,6 @@
           </div>
         </div>
 
-        <!-- 2. Llista d'Alumnes del Grup Actiu -->
         <div class="space-y-3">
           <div class="flex justify-between items-center">
             <h4 class="font-bold text-slate-800 text-xs uppercase tracking-wider flex items-center gap-2">
@@ -268,7 +263,6 @@
             <span id="modalStudentCountBadge" class="text-xs bg-slate-200 text-slate-700 px-2 py-0.5 rounded font-bold">0 alumnes</span>
           </div>
 
-          <!-- Formulari afegir alumne individual i ràpid massiu -->
           <div class="grid grid-cols-1 md:grid-cols-2 gap-3 bg-slate-50 p-3 rounded-xl border border-slate-200">
             <div class="space-y-1.5">
               <span class="font-semibold text-slate-700 block">Afegir Alumne/a Individual:</span>
@@ -278,7 +272,7 @@
               </div>
             </div>
             <div class="space-y-1.5">
-              <span class="font-semibold text-slate-700 block">Importar Llista (un alumne per línia des d'Esfera/Excel):</span>
+              <span class="font-semibold text-slate-700 block">Importar Llista (un alumne per línia):</span>
               <div class="flex gap-2">
                 <textarea id="bulkStudentsInput" rows="1" placeholder="Enganxa llista d'alumnes..." class="flex-1 border border-slate-300 rounded-lg p-1.5 text-xs focus:ring-2 focus:ring-emerald-500 outline-none"></textarea>
                 <button onclick="addBulkStudents()" class="bg-slate-800 hover:bg-slate-700 text-white font-semibold px-3 py-1.5 rounded-lg transition">Carregar</button>
@@ -286,7 +280,6 @@
             </div>
           </div>
 
-          <!-- Taula d'alumnes existents editable -->
           <div class="border border-slate-200 rounded-xl overflow-hidden max-h-60 overflow-y-auto">
             <table class="w-full text-left text-xs">
               <thead class="bg-slate-100 text-slate-600 border-b border-slate-200 sticky top-0">
@@ -297,7 +290,6 @@
                 </tr>
               </thead>
               <tbody id="modalStudentsTableBody" class="divide-y divide-slate-200 bg-white">
-                <!-- Generat dinàmicament -->
               </tbody>
             </table>
           </div>
@@ -310,7 +302,7 @@
     </div>
   </div>
 
-  <!-- ================= MODAL PROGRAMADOR DE SdA & OAs ================= -->
+  <!-- ================= MODAL PROGRAMADOR DE SdA (AMB ASSIGNACIÓ MULTICLASSE) ================= -->
   <div id="sdaModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden no-print">
     <div class="bg-white rounded-2xl shadow-2xl max-w-3xl w-full max-h-[90vh] flex flex-col overflow-hidden border border-slate-200">
       <div class="px-6 py-4 bg-slate-900 text-white flex justify-between items-center">
@@ -319,19 +311,38 @@
             <i class="fa-solid fa-sliders text-emerald-400"></i>
             Programació de la Situació d'Aprenentatge (SdA)
           </h3>
-          <p class="text-xs text-slate-400 mt-0.5">Defineix les CE implicades, els criteris curriculars i els OAs que vulguis (tot és opcional).</p>
+          <p class="text-xs text-slate-400 mt-0.5">Defineix les CE implicades, criteris curriculars, OAs i les classes on s'aplicarà.</p>
         </div>
         <button onclick="closeSdaModal()" class="text-slate-400 hover:text-white text-lg">
           <i class="fa-solid fa-xmark"></i>
         </button>
       </div>
 
-      <div class="p-6 overflow-y-auto space-y-6 flex-1 text-xs">
+      <div class="p-6 overflow-y-auto space-y-5 flex-1 text-xs">
+        <!-- Títol SdA -->
         <div>
           <label class="block font-bold text-slate-700 mb-1.5 uppercase text-[11px] tracking-wider">Títol de la SdA</label>
           <input type="text" id="modalSdaTitle" placeholder="Ex: Hàbits saludables i condició física" class="w-full text-sm border border-slate-300 rounded-lg p-2.5 focus:ring-2 focus:ring-emerald-500 outline-none font-medium">
         </div>
 
+        <!-- Selector de Classes Implicades (NOU) -->
+        <div class="bg-indigo-50/50 border border-indigo-100 p-3.5 rounded-xl space-y-2">
+          <div class="flex justify-between items-center">
+            <span class="font-bold text-indigo-950 uppercase text-[11px] tracking-wider flex items-center gap-1.5">
+              <i class="fa-solid fa-school text-indigo-600"></i> Afegir a quines classes?
+            </span>
+            <div class="flex gap-2">
+              <button type="button" onclick="selectAllModalGroups(true)" class="text-[11px] font-semibold text-indigo-600 hover:underline">Marcar totes</button>
+              <span class="text-slate-300">|</span>
+              <button type="button" onclick="selectAllModalGroups(false)" class="text-[11px] font-semibold text-slate-500 hover:underline">Desmarcar</button>
+            </div>
+          </div>
+          <div id="modalTargetGroupsContainer" class="flex flex-wrap gap-2.5 pt-1">
+            <!-- Checkboxes de classes generats dinàmicament -->
+          </div>
+        </div>
+
+        <!-- Competències Específiques & OAs -->
         <div class="border-t pt-4">
           <div class="flex justify-between items-center mb-3">
             <h4 class="font-bold text-slate-800 text-xs uppercase tracking-wider">Competències Específiques (CE) &amp; Objectius d'Aprenentatge (OA)</h4>
@@ -342,7 +353,7 @@
       </div>
 
       <div class="px-6 py-3.5 bg-slate-100 border-t flex justify-between items-center">
-        <span class="text-xs text-slate-500">Recorda que la suma de les CE de la SdA ha de fer el 100%.</span>
+        <span class="text-xs text-slate-500">La suma de les CEs de la SdA ha de ser el 100%.</span>
         <div class="flex gap-2">
           <button onclick="closeSdaModal()" class="px-4 py-2 border border-slate-300 rounded-lg font-semibold text-slate-600 hover:bg-slate-200 transition">Cancel·lar</button>
           <button onclick="saveSdaFromModal()" class="px-4 py-2 bg-emerald-600 text-white rounded-lg font-semibold hover:bg-emerald-500 transition shadow">Desar SdA</button>
@@ -360,7 +371,6 @@
       { id: 'CE5', name: 'CE5. Adquirir actituds, valors i habilitats socials per a la convivència', short: 'Valors i convivència' }
     ];
 
-    // Estructura multi-classe
     let appData = {
       activeGroupId: "1esoA",
       groups: {
@@ -459,7 +469,6 @@
       switchView('sda');
     }
 
-    // GESTIÓ DE CLASSES / GRUPS
     function renderGroupSelectorOptions() {
       const sel = document.getElementById('groupSelector');
       sel.innerHTML = Object.keys(appData.groups).map(gId => {
@@ -497,7 +506,6 @@
       document.getElementById('modalCurrentGroupName').textContent = curGroup.name;
       document.getElementById('modalStudentCountBadge').textContent = `${curGroup.students.length} alumnes`;
 
-      // Llista de classes (badges)
       const grpCont = document.getElementById('groupsListContainer');
       grpCont.innerHTML = Object.keys(appData.groups).map(gId => {
         const isCurrent = gId === appData.activeGroupId;
@@ -512,7 +520,6 @@
         `;
       }).join('');
 
-      // Taula d'alumnes editables
       const tbody = document.getElementById('modalStudentsTableBody');
       tbody.innerHTML = curGroup.students.map((st, idx) => `
         <tr class="hover:bg-slate-50">
@@ -550,7 +557,7 @@
     }
 
     function deleteGroup(gId) {
-      if (confirm(`Segur que vols eliminar la classe "${appData.groups[gId].name}" i totes les seves notes?`)) {
+      if (confirm(`Segur que vols eliminar la classe "${appData.groups[gId].name}" i totes les seves dades?`)) {
         delete appData.groups[gId];
         const remainingKeys = Object.keys(appData.groups);
         appData.activeGroupId = remainingKeys[0];
@@ -604,7 +611,6 @@
       }
     }
 
-    // NAVEGACIÓ I TRIMESTRES
     function setTrim(t) {
       appState.currentTrim = t;
       [1, 2, 3].forEach(n => {
@@ -710,7 +716,6 @@
       sel.innerHTML = trimSdas.map(s => `<option value="${s.id}">${s.title}</option>`).join('');
     }
 
-    // RENDER GRAELLA SdA AMB NOTA FINAL DE LA SdA
     function renderSdaGrid() {
       const sdaId = document.getElementById('sdaSelect').value;
       const curGroup = getCurrentGroup();
@@ -734,7 +739,6 @@
       titleBar.textContent = `${sda.title} (${curGroup.name} - Trimestre ${sda.trim})`;
       const activeCes = OFFICIAL_CES.filter(ce => sda.competences && sda.competences[ce.id] && sda.competences[ce.id].active);
 
-      // Fila 1: CEs + Capçalera Nota Global SdA
       let r1 = `<tr class="border-b border-slate-300"><th rowspan="4" class="p-2 border-r border-slate-300 w-10 text-center bg-slate-200">#</th><th rowspan="4" class="p-2 border-r border-slate-300 w-48 bg-slate-200">Alumne/a</th>`;
       activeCes.forEach(ce => {
         const conf = sda.competences[ce.id];
@@ -744,7 +748,6 @@
       r1 += `<th colspan="2" class="p-2 text-center border-l-2 border-emerald-500 bg-slate-900 text-emerald-400 font-bold uppercase tracking-wider">Qualificació SdA</th>`;
       r1 += `</tr>`;
 
-      // Fila 2: Criteris curriculars
       let r2 = `<tr class="border-b border-slate-300 text-[11px] text-slate-600 bg-slate-50">`;
       activeCes.forEach(ce => {
         const conf = sda.competences[ce.id];
@@ -755,7 +758,6 @@
       r2 += `<th colspan="2" rowspan="2" class="p-1.5 text-center border-l-2 border-emerald-500 bg-slate-800 text-slate-300 font-semibold">Consolidació SdA</th>`;
       r2 += `</tr>`;
 
-      // Fila 3: OAs
       let r3 = `<tr class="border-b border-slate-300 text-[10px] bg-slate-50">`;
       activeCes.forEach(ce => {
         const conf = sda.competences[ce.id];
@@ -769,7 +771,6 @@
       });
       r3 += `</tr>`;
 
-      // Fila 4: Ponderacions
       let r4 = `<tr class="border-b border-slate-300 text-xs bg-emerald-50 text-emerald-950 font-semibold">`;
       activeCes.forEach(ce => {
         const conf = sda.competences[ce.id];
@@ -789,7 +790,6 @@
 
       head.innerHTML = r1 + r2 + r3 + r4;
 
-      // Cos de la graella d'alumnes
       const currentGrades = curGroup.grades[sda.id] || {};
       let rowsHtml = '';
 
@@ -863,7 +863,7 @@
       renderSdaGrid();
     }
 
-    // MODAL SdA & OAs
+    // MODAL SdA: INCLOU CHECKBOXES MULTICLASSE
     function openSdaModal(isNew) {
       appState.editingIsNew = isNew;
       const curGroup = getCurrentGroup();
@@ -885,8 +885,34 @@
       }
 
       document.getElementById('modalSdaTitle').value = sda.title || '';
+      renderModalTargetGroups(isNew ? null : sda.title);
       renderModalCeCards(sda);
       document.getElementById('sdaModal').classList.remove('hidden');
+    }
+
+    function renderModalTargetGroups(existingTitle) {
+      const cont = document.getElementById('modalTargetGroupsContainer');
+      cont.innerHTML = Object.keys(appData.groups).map(gId => {
+        const group = appData.groups[gId];
+        // Si és nova, marca per defecte la classe activa. Si és editada, marca els grups que ja la tinguin
+        let isChecked = false;
+        if (appState.editingIsNew) {
+          isChecked = (gId === appData.activeGroupId);
+        } else {
+          isChecked = group.sdas.some(s => s.title === existingTitle && s.trim === appState.currentTrim);
+        }
+
+        return `
+          <label class="inline-flex items-center gap-2 bg-white px-3 py-1.5 rounded-lg border border-indigo-200 cursor-pointer hover:bg-indigo-50/50 transition">
+            <input type="checkbox" value="${gId}" ${isChecked ? 'checked' : ''} class="target-group-checkbox rounded text-emerald-600 focus:ring-emerald-500 w-4 h-4">
+            <span class="font-bold text-slate-800 text-xs">${group.name}</span>
+          </label>
+        `;
+      }).join('');
+    }
+
+    function selectAllModalGroups(checked) {
+      document.querySelectorAll('.target-group-checkbox').forEach(cb => cb.checked = checked);
     }
 
     function closeSdaModal() {
@@ -980,23 +1006,16 @@
       badge.className = sum === 100 ? "text-xs font-bold px-2 py-0.5 rounded bg-emerald-100 text-emerald-800" : "text-xs font-bold px-2 py-0.5 rounded bg-amber-100 text-amber-800";
     }
 
+    // DESAR SdA MULTICLASSE
     function saveSdaFromModal() {
-      const curGroup = getCurrentGroup();
-      let sda;
-      if (appState.editingIsNew) {
-        sda = {
-          id: 'sda_' + Date.now(),
-          trim: appState.currentTrim,
-          title: document.getElementById('modalSdaTitle').value || 'Nova SdA',
-          competences: {}
-        };
-        curGroup.sdas.push(sda);
-      } else {
-        const sdaId = document.getElementById('sdaSelect').value;
-        sda = curGroup.sdas.find(s => s.id === sdaId);
-        sda.title = document.getElementById('modalSdaTitle').value || 'SdA sense títol';
-        sda.competences = {};
+      const targetGroupIds = Array.from(document.querySelectorAll('.target-group-checkbox:checked')).map(cb => cb.value);
+      if (targetGroupIds.length === 0) {
+        alert("Has de seleccionar com a mínim una classe on aplicar aquesta SdA.");
+        return;
       }
+
+      const title = document.getElementById('modalSdaTitle').value.trim() || 'Nova SdA';
+      const competences = {};
 
       OFFICIAL_CES.forEach(ce => {
         const chk = document.getElementById(`check_${ce.id}`);
@@ -1012,7 +1031,7 @@
               weight: parseFloat(inputs[1].value) || 0
             });
           });
-          sda.competences[ce.id] = {
+          competences[ce.id] = {
             active: true,
             weight: weight,
             curricularCriteria: crit,
@@ -1021,9 +1040,27 @@
         }
       });
 
+      // Aplica a cadascuna de les classes seleccionades
+      targetGroupIds.forEach(gId => {
+        const grp = appData.groups[gId];
+        let targetSda = grp.sdas.find(s => s.title === title && s.trim === appState.currentTrim);
+        
+        if (!targetSda) {
+          targetSda = {
+            id: 'sda_' + Date.now() + '_' + Math.floor(Math.random()*1000),
+            trim: appState.currentTrim,
+            title: title,
+            competences: JSON.parse(JSON.stringify(competences))
+          };
+          grp.sdas.push(targetSda);
+        } else {
+          targetSda.title = title;
+          targetSda.competences = JSON.parse(JSON.stringify(competences));
+        }
+      });
+
       closeSdaModal();
       populateSdaSelect();
-      document.getElementById('sdaSelect').value = sda.id;
       renderSdaGrid();
       renderTrimView();
     }
