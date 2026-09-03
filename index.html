@@ -3,466 +3,431 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Avaluació Competencial EF - Decret 175/2022</title>
+  <title>Quadern EF - Decret 175/2022</title>
   <script src="https://cdn.tailwindcss.com"></script>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  <style>
-    @media print {
-      .no-print { display: none !important; }
-      body { background: white !important; }
-    }
-  </style>
 </head>
-<body class="bg-slate-100 text-slate-800 font-sans min-h-screen">
+<body class="bg-slate-50 text-slate-800 p-4 md:p-6 font-sans">
+  <div class="max-w-7xl mx-auto space-y-6">
 
-  <!-- Header -->
-  <header class="bg-indigo-900 text-white shadow-md no-print">
-    <div class="max-w-7xl mx-auto px-4 py-3 flex flex-wrap justify-between items-center gap-4">
+    <header class="flex flex-col sm:flex-row justify-between items-start sm:items-center bg-white p-5 rounded-xl border border-slate-200 shadow-sm gap-4">
       <div>
-        <h1 class="text-xl font-bold flex items-center gap-2">
-          <i class="fa-solid fa-person-running text-amber-400"></i>
-          Qualificació Competencial EF (LOMLOE)
-        </h1>
-        <p class="text-xs text-indigo-200">Model Educació Secundària Obligatòria - Catalunya (Decret 175/2022)</p>
+        <h1 class="text-2xl font-bold text-slate-900 tracking-tight">Quadern d'Avaluació EF (LOMLOE)</h1>
+        <p class="text-xs text-slate-500 font-medium">Currículum Catalunya (Decret 175/2022) · Escala LOMLOE (1 a 4)</p>
       </div>
-      <div class="flex items-center gap-2">
-        <button onclick="openSdaModal()" class="bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold px-3 py-2 rounded-lg flex items-center gap-2 transition shadow">
-          <i class="fa-solid fa-plus"></i> Programar / Editar SdA
-        </button>
-        <button onclick="resetDefaultData()" class="bg-slate-700 hover:bg-slate-600 text-white text-xs px-3 py-2 rounded-lg transition">
-          Restablir Demo
-        </button>
-      </div>
-    </div>
-  </header>
+      <button onclick="toggleModal(true)" class="bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-semibold px-4 py-2.5 rounded-lg transition-colors shadow-sm flex items-center gap-2">
+        <span>⚙️</span> Configurar Situació d'Aprenentatge (SdA)
+      </button>
+    </header>
 
-  <!-- Controls de la SdA -->
-  <div class="max-w-7xl mx-auto px-4 py-4 no-print flex flex-wrap items-center justify-between gap-3">
-    <div class="flex items-center gap-3">
-      <span class="text-sm font-semibold text-slate-700">SdA Activa:</span>
-      <select id="sdaSelector" onchange="changeActiveSda(this.value)" class="bg-white border border-slate-300 text-sm rounded-lg px-3 py-1.5 focus:ring-2 focus:ring-indigo-500 outline-none font-medium text-indigo-900 shadow-sm">
-      </select>
-    </div>
-    <div class="flex items-center gap-4 text-xs font-medium">
-      <span class="inline-flex items-center gap-1.5"><span class="w-3 h-3 rounded bg-red-100 border border-red-300"></span> NA: 0.1-0.9</span>
-      <span class="inline-flex items-center gap-1.5"><span class="w-3 h-3 rounded bg-amber-100 border border-amber-300"></span> EPA: 1.0-1.9</span>
-      <span class="inline-flex items-center gap-1.5"><span class="w-3 h-3 rounded bg-yellow-100 border border-yellow-300"></span> AS: 2.0-2.9</span>
-      <span class="inline-flex items-center gap-1.5"><span class="w-3 h-3 rounded bg-blue-100 border border-blue-300"></span> AN: 3.0-3.9</span>
-      <span class="inline-flex items-center gap-1.5"><span class="w-3 h-3 rounded bg-emerald-100 border border-emerald-300"></span> AE: 4.0</span>
-    </div>
-  </div>
-
-  <!-- Contenidor Taula SdA estil Captura -->
-  <main class="max-w-7xl mx-auto px-4 pb-12">
-    <div class="bg-white border border-slate-300 shadow-sm rounded-xl overflow-hidden">
-      <div id="sdaTitleBar" class="bg-slate-200 text-slate-800 text-center font-bold uppercase py-2 tracking-wider text-sm border-b border-slate-300">
+    <main class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+      <div class="p-4 border-b border-slate-200 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 bg-slate-50/50">
+        <div>
+          <span class="text-xs font-semibold uppercase tracking-wider text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">SdA Actual</span>
+          <h2 id="sdaTitleDisplay" class="text-lg font-bold text-slate-800 mt-1">HÀBITS SALUDABLES I CONDICIÓ FÍSICA</h2>
+        </div>
+        <div class="flex items-center gap-2">
+          <input type="text" id="newStudentInput" placeholder="Nom de l'alumne/a..." class="text-sm border border-slate-300 rounded-lg px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-emerald-500">
+          <button onclick="addStudent()" class="bg-slate-800 hover:bg-slate-900 text-white text-sm font-medium px-3 py-1.5 rounded-lg transition-colors">
+            + Afegir Alumne
+          </button>
+        </div>
       </div>
 
       <div class="overflow-x-auto">
-        <table class="w-full text-left border-collapse text-xs">
-          <thead id="sdaTableHead" class="bg-slate-100 text-slate-700">
-          </thead>
-          <tbody id="sdaTableBody" class="divide-y divide-slate-200">
-          </tbody>
+        <table class="w-full text-left border-collapse text-sm">
+          <thead id="tableHeader" class="bg-slate-100 text-slate-700 border-b border-slate-200"></thead>
+          <tbody id="tableBody" class="divide-y divide-slate-200"></tbody>
         </table>
       </div>
-    </div>
-  </main>
+    </main>
+  </div>
 
-  <!-- Modal Programar SdA Flexible -->
-  <div id="sdaModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
-    <div class="bg-white rounded-2xl shadow-2xl max-w-3xl w-full max-h-[90vh] flex flex-col overflow-hidden">
-      <div class="px-6 py-4 bg-indigo-900 text-white flex justify-between items-center">
+  <div id="sdaModal" class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm hidden z-50 flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl max-w-3xl w-full max-h-[90vh] flex flex-col shadow-2xl border border-slate-200">
+      <div class="p-5 border-b border-slate-200 flex justify-between items-center">
         <div>
-          <h2 class="text-base font-bold flex items-center gap-2">
-            <i class="fa-solid fa-sliders text-amber-400"></i>
-            Programar Situació d'Aprenentatge (SdA)
-          </h2>
-          <p class="text-xs text-indigo-200 mt-0.5">Omple només els camps que necessitis. Cap camp curricular és obligatori d'entrada.</p>
+          <h3 class="text-lg font-bold text-slate-800">Disseny de la SdA i Competències</h3>
+          <p class="text-xs text-slate-500">Activa competències, assigna pesos i desglossa en Objectius d'Aprenentatge.</p>
         </div>
-        <button onclick="closeSdaModal()" class="text-indigo-200 hover:text-white text-lg">
-          <i class="fa-solid fa-xmark"></i>
-        </button>
+        <button onclick="toggleModal(false)" class="text-slate-400 hover:text-slate-600 text-xl font-bold leading-none">&times;</button>
       </div>
 
-      <div class="p-6 overflow-y-auto space-y-6 flex-1 text-xs">
+      <div class="p-6 overflow-y-auto space-y-6">
         <div>
-          <label class="block font-semibold text-slate-700 mb-1">Nom / Títol de la SdA</label>
-          <input type="text" id="modalSdaTitle" placeholder="Ex: Hàbits saludables i condició física" class="w-full text-sm border border-slate-300 rounded-lg p-2.5 focus:ring-2 focus:ring-indigo-500 outline-none">
+          <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Títol de la SdA</label>
+          <input type="text" id="sdaTitleInput" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-emerald-500 focus:outline-none font-medium">
         </div>
 
-        <div class="border-t pt-4">
-          <h3 class="font-bold text-slate-800 text-sm mb-3">Competències Específiques i Criteris Implicats</h3>
-          <div id="modalCompetencesContainer" class="space-y-4">
-          </div>
+        <div class="space-y-4">
+          <h4 class="text-xs font-bold text-slate-700 uppercase tracking-wider">Competències Específiques implicades</h4>
+          <div id="ceConfigContainer" class="space-y-4"></div>
         </div>
       </div>
 
-      <div class="px-6 py-3 bg-slate-100 border-t flex justify-between items-center">
-        <span id="modalTotalWeightIndicator" class="text-xs font-semibold text-slate-600">Total Ponderació CE: 0%</span>
+      <div class="p-4 border-t border-slate-200 bg-slate-50 flex justify-between items-center rounded-b-2xl">
+        <span id="totalWeightWarning" class="text-xs font-semibold"></span>
         <div class="flex gap-2">
-          <button onclick="closeSdaModal()" class="px-4 py-2 border border-slate-300 rounded-lg font-medium text-slate-700 hover:bg-slate-200 transition">Cancel·lar</button>
-          <button onclick="saveSdaConfig()" class="px-4 py-2 bg-indigo-600 text-white rounded-lg font-medium hover:bg-indigo-500 transition shadow">Desar SdA</button>
+          <button onclick="toggleModal(false)" class="px-4 py-2 border border-slate-300 text-slate-600 rounded-lg text-sm hover:bg-slate-100 font-medium">Cancel·lar</button>
+          <button onclick="saveSdaConfig()" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-sm font-semibold shadow-sm">Guardar i Actualitzar</button>
         </div>
       </div>
     </div>
   </div>
 
   <script>
-    const OFFICIAL_CES = [
-      { id: 'CE1', name: 'CE 1. Estil de vida actiu i saludable' },
-      { id: 'CE2', name: 'CE 2. Jocs i esports / Situacions motrius' },
-      { id: 'CE3', name: 'CE 3. Recursos expressius i comunicació' },
-      { id: 'CE4', name: 'CE 4. Activitats físiques a l’entorn natural' },
-      { id: 'CE5', name: 'CE 5. Actituds, valors i habilitats socials' }
+    const CE_CATALOGUE = [
+      { id: "CE1", name: "Estil de vida actiu i autònom" },
+      { id: "CE2", name: "Processos de decisió i acció motriu" },
+      { id: "CE3", name: "Expressió, comunicació i cultura motriu" },
+      { id: "CE4", name: "Autoregulació emocional i habilitats socials" },
+      { id: "CE5", name: "Interacció sostenible amb l'entorn" }
     ];
 
-    const DEFAULT_STUDENTS = [
-      { id: 1, name: "Marcel Pons" },
-      { id: 2, name: "Laia Rovira" },
-      { id: 3, name: "Pol Vila" },
-      { id: 4, name: "Clara Mir" }
-    ];
-
-    const DEFAULT_SDA = {
-      id: "sda1",
-      title: "HÀBITS SALUDABLES I CONDICIÓ FÍSICA",
-      competences: {
+    let state = {
+      sdaTitle: "HÀBITS SALUDABLES I CONDICIÓ FÍSICA",
+      ces: {
         CE1: {
           active: true,
           weight: 80,
-          curricularCriteria: "1.1 - 1.2 - 1.3",
+          criteria: "1.1 - 1.2 - 1.3",
           oas: [
-            { id: "oa1", label: "OA1: Identificar i localitzar els principals grups musculars i ossos...", weight: 25 },
-            { id: "oa2", label: "OA2: Reconèixer i diferenciar les 4 Qualitats Físiques Bàsiques (QFB)...", weight: 25 },
-            { id: "oa3", label: "OA3: Valorar el seu nivell inicial de condició física i adaptacions...", weight: 25 },
-            { id: "oa4", label: "OA4: Adoptar i defensar hàbits saludables (escalfament, descans...)", weight: 25 }
+            { id: "oa_1_1", text: "Registra pulsacions i intensitat", weight: 25 },
+            { id: "oa_1_2", text: "Coneix zones de treball aeròbic", weight: 25 },
+            { id: "oa_1_3", text: "Executa escalfament específic", weight: 25 },
+            { id: "oa_1_4", text: "Completa dossier de condició física", weight: 25 }
           ]
         },
+        CE2: { active: false, weight: 0, criteria: "", oas: [] },
+        CE3: { active: false, weight: 0, criteria: "", oas: [] },
+        CE4: { active: false, weight: 0, criteria: "", oas: [] },
         CE5: {
           active: true,
           weight: 20,
-          curricularCriteria: "5.1 - 5.3",
+          criteria: "5.1 - 5.2",
           oas: [
-            { id: "oa5_1", label: "OG_MAT1: Assumir la responsabilitat de portar el material...", weight: 25 },
-            { id: "oa5_2", label: "OG_ESF1: Participar activament en totes les activitats proposades...", weight: 25 },
-            { id: "oa5_3", label: "OG_ACT1: Respectar les normes de funcionament i indicacions...", weight: 25 },
-            { id: "oa5_4", label: "OG_ACT2: Mantenir una actitud de respecte i col·laboració...", weight: 25 }
+            { id: "oa_5_1", text: "Ús responsable dels espais", weight: 25 },
+            { id: "oa_5_2", text: "Respecte pel material comú", weight: 25 },
+            { id: "oa_5_3", text: "Gestió activa de residus", weight: 25 },
+            { id: "oa_5_4", text: "Aposta per mobilitat activa", weight: 25 }
           ]
         }
-      }
-    };
-
-    let appState = {
-      students: DEFAULT_STUDENTS,
-      sdas: [DEFAULT_SDA],
-      activeSdaId: "sda1",
-      grades: {
-        "sda1": {
-          1: {
-            "CE1_oa1": 2, "CE1_oa2": 3, "CE1_oa3": 3, "CE1_oa4": 1,
-            "CE5_oa5_1": 3, "CE5_oa5_2": 3, "CE5_oa5_3": 4, "CE5_oa5_4": 4
+      },
+      students: [
+        {
+          id: "s1",
+          name: "Marcel Pons",
+          scores: {
+            "oa_1_1": 2, "oa_1_2": 3, "oa_1_3": 3, "oa_1_4": 1,
+            "oa_5_1": 3, "oa_5_2": 3, "oa_5_3": 4, "oa_5_4": 4
           }
         }
-      }
+      ]
     };
 
-    function init() {
-      renderSdaSelector();
-      renderTable();
+    function getCurricularLevel(score) {
+      if (score === null || isNaN(score) || score === "") return { code: "-", color: "bg-slate-100 text-slate-400" };
+      const val = parseFloat(score);
+      if (val < 1) return { code: "NA", color: "bg-rose-100 text-rose-800" };
+      if (val < 2) return { code: "EPA", color: "bg-orange-100 text-orange-800" };
+      if (val < 3) return { code: "AS", color: "bg-amber-100 text-amber-800" };
+      if (val < 4) return { code: "AN", color: "bg-emerald-100 text-emerald-800" };
+      return { code: "AE", color: "bg-blue-100 text-blue-800" };
     }
 
-    function renderSdaSelector() {
-      const sel = document.getElementById('sdaSelector');
-      sel.innerHTML = appState.sdas.map(s => `<option value="${s.id}" ${s.id === appState.activeSdaId ? 'selected' : ''}>${s.title}</option>`).join('');
+    function calculateStudentCeScore(student, ceKey) {
+      const ce = state.ces[ceKey];
+      if (!ce || !ce.active) return null;
+
+      if (!ce.oas || ce.oas.length === 0) {
+        const val = parseFloat(student.scores[ceKey]);
+        return isNaN(val) ? null : val;
+      }
+
+      let totalWeight = 0;
+      let weightedSum = 0;
+      ce.oas.forEach(oa => {
+        const score = parseFloat(student.scores[oa.id]);
+        const weight = parseFloat(oa.weight) || 0;
+        if (!isNaN(score) && weight > 0) {
+          weightedSum += score * weight;
+          totalWeight += weight;
+        }
+      });
+
+      return totalWeight > 0 ? (weightedSum / totalWeight) : null;
     }
 
-    function changeActiveSda(id) {
-      appState.activeSdaId = id;
-      renderTable();
-    }
+    function calculateStudentGlobalScore(student) {
+      let totalWeight = 0;
+      let weightedSum = 0;
 
-    function getAchievementLevel(val) {
-      if (val === null || val === undefined || isNaN(val) || val === 0) return { code: "-", color: "bg-slate-100 text-slate-400" };
-      if (val < 1.0) return { code: "NA", color: "bg-red-100 text-red-700 font-bold" };
-      if (val < 2.0) return { code: "EPA", color: "bg-amber-100 text-amber-800 font-bold" };
-      if (val < 3.0) return { code: "AS", color: "bg-yellow-100 text-yellow-800 font-bold" };
-      if (val < 4.0) return { code: "AN", color: "bg-blue-100 text-blue-800 font-bold" };
-      return { code: "AE", color: "bg-emerald-100 text-emerald-800 font-bold" };
+      Object.keys(state.ces).forEach(ceKey => {
+        const ce = state.ces[ceKey];
+        if (ce.active) {
+          const ceScore = calculateStudentCeScore(student, ceKey);
+          const weight = parseFloat(ce.weight) || 0;
+          if (ceScore !== null && weight > 0) {
+            weightedSum += ceScore * weight;
+            totalWeight += weight;
+          }
+        }
+      });
+
+      return totalWeight > 0 ? (weightedSum / totalWeight) : null;
     }
 
     function renderTable() {
-      const sda = appState.sdas.find(s => s.id === appState.activeSdaId) || appState.sdas[0];
-      document.getElementById('sdaTitleBar').textContent = sda.title;
+      document.getElementById('sdaTitleDisplay').textContent = state.sdaTitle || "Sense Títol";
+      const header = document.getElementById('tableHeader');
+      const body = document.getElementById('tableBody');
 
-      const thead = document.getElementById('sdaTableHead');
-      const tbody = document.getElementById('sdaTableBody');
+      let tr1 = '<tr class="text-xs uppercase tracking-wider text-slate-500 border-b border-slate-200">';
+      tr1 += '<th rowspan="2" class="p-3 bg-slate-50 border-r border-slate-200 text-left min-w-[180px]">Alumnat</th>';
 
-      const activeCes = OFFICIAL_CES.filter(ce => sda.competences && sda.competences[ce.id] && sda.competences[ce.id].active);
+      let tr2 = '<tr class="text-[11px] text-slate-600 bg-slate-50/70 border-b border-slate-200">';
 
-      let r1 = `<tr class="border-b border-slate-300"><th rowspan="4" class="p-2 border-r border-slate-300 w-10 text-center bg-slate-200">#</th><th rowspan="4" class="p-2 border-r border-slate-300 w-48 bg-slate-200">Alumne/a</th>`;
-      activeCes.forEach(ce => {
-        const conf = sda.competences[ce.id];
-        const oasCount = (conf.oas && conf.oas.length > 0) ? conf.oas.length : 1;
-        const colSpan = oasCount + 2;
-        r1 += `<th colspan="${colSpan}" class="p-2 text-center border-r border-slate-300 bg-slate-100 font-bold text-slate-800">${ce.name}</th>`;
-      });
-      r1 += `</tr>`;
+      Object.keys(state.ces).forEach(ceKey => {
+        const ce = state.ces[ceKey];
+        if (!ce.active) return;
 
-      let r2 = `<tr class="border-b border-slate-300 text-[11px] text-slate-600 bg-slate-50">`;
-      activeCes.forEach(ce => {
-        const conf = sda.competences[ce.id];
-        const oasCount = (conf.oas && conf.oas.length > 0) ? conf.oas.length : 1;
-        r2 += `<th colspan="${oasCount}" class="p-1.5 text-center border-r border-slate-200">${conf.curricularCriteria || '<span class="text-slate-400 italic">Sense criteris definits</span>'}</th>`;
-        r2 += `<th colspan="2" rowspan="2" class="p-1.5 text-center border-r border-slate-300 bg-indigo-50/70 font-bold text-indigo-900">Grau d'assoliment ${ce.id}</th>`;
-      });
-      r2 += `</tr>`;
+        const hasOas = ce.oas && ce.oas.length > 0;
+        const colSpan = hasOas ? ce.oas.length + 1 : 1;
 
-      let r3 = `<tr class="border-b border-slate-300 text-[10px] bg-slate-50">`;
-      activeCes.forEach(ce => {
-        const conf = sda.competences[ce.id];
-        if (conf.oas && conf.oas.length > 0) {
-          conf.oas.forEach(oa => {
-            r3 += `<th class="p-2 border-r border-slate-200 font-normal max-w-[140px] truncate" title="${oa.label}">${oa.label}</th>`;
+        tr1 += `<th colspan="${colSpan}" class="p-2 border-r border-slate-200 text-center font-bold bg-slate-100/70">
+          <div class="flex items-center justify-center gap-2">
+            <span>${ceKey} (${ce.weight || 0}%)</span>
+            ${ce.criteria ? `<span class="font-normal text-[10px] text-slate-500">Crit: ${ce.criteria}</span>` : ''}
+          </div>
+        </th>`;
+
+        if (hasOas) {
+          ce.oas.forEach(oa => {
+            tr2 += `<th class="p-2 border-r border-slate-200 text-center font-medium max-w-[130px] truncate" title="${oa.text || 'OA'} (${oa.weight || 0}%)">
+              <div class="truncate text-slate-700">${oa.text || 'OA'}</div>
+              <div class="text-[10px] text-slate-400 font-semibold">${oa.weight || 0}%</div>
+            </th>`;
           });
+          tr2 += `<th class="p-2 border-r border-slate-200 text-center font-bold bg-slate-100 text-slate-800">Global ${ceKey}</th>`;
         } else {
-          r3 += `<th class="p-2 border-r border-slate-200 font-normal italic text-slate-400">Avaluació directa de la competència</th>`;
+          tr2 += `<th class="p-2 border-r border-slate-200 text-center font-bold bg-slate-100 text-slate-800">Qualificació</th>`;
         }
       });
-      r3 += `</tr>`;
 
-      let r4 = `<tr class="border-b border-slate-300 text-xs bg-emerald-50 text-emerald-950 font-semibold">`;
-      activeCes.forEach(ce => {
-        const conf = sda.competences[ce.id];
-        if (conf.oas && conf.oas.length > 0) {
-          conf.oas.forEach(oa => {
-            r4 += `<th class="p-1.5 text-center border-r border-slate-200">${oa.weight || 0}%</th>`;
-          });
-        } else {
-          r4 += `<th class="p-1.5 text-center border-r border-slate-200">100%</th>`;
-        }
-        r4 += `<th class="p-1.5 text-center border-r border-slate-200 bg-amber-50 text-amber-900">${conf.weight || 0}%</th>`;
-        r4 += `<th class="p-1.5 text-center border-r border-slate-300 bg-amber-50 text-amber-900">Nivell</th>`;
-      });
-      r4 += `</tr>`;
+      tr1 += '<th rowspan="2" class="p-3 text-center min-w-[120px] bg-emerald-50 text-emerald-900 border-l border-slate-200">Mitjana SdA</th>';
+      tr1 += '<th rowspan="2" class="p-2 text-center w-10"></th>';
+      tr1 += '</tr>';
+      tr2 += '</tr>';
 
-      thead.innerHTML = r1 + r2 + r3 + r4;
+      header.innerHTML = tr1 + tr2;
 
-      const currentGrades = appState.grades[sda.id] || {};
-      let rowsHtml = '';
+      body.innerHTML = state.students.map(student => {
+        const globalScore = calculateStudentGlobalScore(student);
+        const globalLvl = getCurricularLevel(globalScore);
 
-      appState.students.forEach((st, idx) => {
-        const stGrades = currentGrades[st.id] || {};
-        rowsHtml += `<tr class="hover:bg-slate-50 transition border-b border-slate-200">
-          <td class="p-2 text-center text-slate-400 border-r border-slate-200">${idx + 1}</td>
-          <td class="p-2 font-medium text-slate-800 border-r border-slate-200">${st.name}</td>`;
+        let rowHtml = `<tr class="hover:bg-slate-50/80 transition-colors">`;
+        rowHtml += `<td class="p-3 font-semibold text-slate-900 border-r border-slate-200 bg-white">${student.name}</td>`;
 
-        activeCes.forEach(ce => {
-          const conf = sda.competences[ce.id];
-          let ceWeightedSum = 0;
-          let totalOaWeight = 0;
+        Object.keys(state.ces).forEach(ceKey => {
+          const ce = state.ces[ceKey];
+          if (!ce.active) return;
 
-          if (conf.oas && conf.oas.length > 0) {
-            conf.oas.forEach(oa => {
-              const gradeKey = `${ce.id}_${oa.id}`;
-              const val = stGrades[gradeKey] !== undefined ? stGrades[gradeKey] : '';
-              if (val !== '' && !isNaN(val)) {
-                ceWeightedSum += parseFloat(val) * ((oa.weight || 0) / 100);
-                totalOaWeight += (oa.weight || 0);
-              }
-              rowsHtml += `<td class="p-1 border-r border-slate-200 text-center">
-                <input type="number" step="0.1" min="0" max="4" value="${val}" onchange="updateGrade('${sda.id}', ${st.id}, '${gradeKey}', this.value)" class="w-12 text-center p-1 border rounded focus:ring-1 focus:ring-indigo-500 font-medium">
+          const hasOas = ce.oas && ce.oas.length > 0;
+          if (hasOas) {
+            ce.oas.forEach(oa => {
+              const val = student.scores[oa.id] !== undefined ? student.scores[oa.id] : "";
+              rowHtml += `<td class="p-1 border-r border-slate-200 text-center">
+                <input type="number" step="0.1" min="1" max="4" value="${val}" 
+                  onchange="updateScore('${student.id}', '${oa.id}', this.value)"
+                  class="w-14 text-center py-1 border border-slate-200 rounded focus:border-emerald-500 focus:outline-none text-xs font-semibold">
               </td>`;
             });
+            const ceScore = calculateStudentCeScore(student, ceKey);
+            const ceLvl = getCurricularLevel(ceScore);
+            rowHtml += `<td class="p-2 border-r border-slate-200 text-center bg-slate-50/50">
+              <span class="font-bold text-xs">${ceScore !== null ? ceScore.toFixed(2) : '-'}</span>
+              <span class="inline-block px-1.5 py-0.5 text-[10px] font-bold rounded ml-1 ${ceLvl.color}">${ceLvl.code}</span>
+            </td>`;
           } else {
-            const gradeKey = `${ce.id}_direct`;
-            const val = stGrades[gradeKey] !== undefined ? stGrades[gradeKey] : '';
-            if (val !== '' && !isNaN(val)) {
-              ceWeightedSum = parseFloat(val);
-              totalOaWeight = 100;
-            }
-            rowsHtml += `<td class="p-1 border-r border-slate-200 text-center">
-              <input type="number" step="0.1" min="0" max="4" value="${val}" onchange="updateGrade('${sda.id}', ${st.id}, '${gradeKey}', this.value)" class="w-12 text-center p-1 border rounded focus:ring-1 focus:ring-indigo-500 font-medium">
+            const val = student.scores[ceKey] !== undefined ? student.scores[ceKey] : "";
+            const ceLvl = getCurricularLevel(val);
+            rowHtml += `<td class="p-1 border-r border-slate-200 text-center bg-slate-50/30">
+              <div class="flex items-center justify-center gap-1">
+                <input type="number" step="0.1" min="1" max="4" value="${val}" 
+                  onchange="updateScore('${student.id}', '${ceKey}', this.value)"
+                  class="w-14 text-center py-1 border border-slate-200 rounded focus:border-emerald-500 focus:outline-none text-xs font-semibold">
+                <span class="inline-block px-1 py-0.5 text-[10px] font-bold rounded ${ceLvl.color}">${ceLvl.code}</span>
+              </div>
             </td>`;
           }
-
-          let finalCeScore = totalOaWeight > 0 ? (ceWeightedSum * (100 / totalOaWeight)) : 0;
-          let lvl = (ceWeightedSum > 0) ? getAchievementLevel(finalCeScore) : { code: '-', color: 'bg-slate-50 text-slate-400' };
-
-          rowsHtml += `
-            <td class="p-2 text-center font-bold bg-indigo-50/50 border-r border-slate-200 text-slate-700">
-              ${ceWeightedSum > 0 ? finalCeScore.toFixed(2) : '-'}
-            </td>
-            <td class="p-2 text-center border-r border-slate-300 ${lvl.color}">
-              ${lvl.code}
-            </td>
-          `;
         });
 
-        rowsHtml += `</tr>`;
-      });
+        rowHtml += `<td class="p-2 text-center bg-emerald-50/40 border-l border-slate-200">
+          <span class="font-bold text-sm text-slate-800">${globalScore !== null ? globalScore.toFixed(2) : '-'}</span>
+          <span class="inline-block px-2 py-0.5 text-xs font-bold rounded ml-1.5 ${globalLvl.color}">${globalLvl.code}</span>
+        </td>`;
 
-      tbody.innerHTML = rowsHtml;
+        rowHtml += `<td class="p-2 text-center">
+          <button onclick="removeStudent('${student.id}')" class="text-slate-300 hover:text-rose-500 font-bold text-sm leading-none">&times;</button>
+        </td>`;
+
+        rowHtml += `</tr>`;
+        return rowHtml;
+      }).join('');
     }
 
-    function updateGrade(sdaId, studentId, key, value) {
-      if (!appState.grades[sdaId]) appState.grades[sdaId] = {};
-      if (!appState.grades[sdaId][studentId]) appState.grades[sdaId][studentId] = {};
-      if (value === '') {
-        delete appState.grades[sdaId][studentId][key];
-      } else {
-        appState.grades[sdaId][studentId][key] = parseFloat(value);
+    function updateScore(studentId, key, value) {
+      const student = state.students.find(s => s.id === studentId);
+      if (student) {
+        if (value === "") {
+          delete student.scores[key];
+        } else {
+          student.scores[key] = parseFloat(value);
+        }
+        renderTable();
       }
+    }
+
+    function addStudent() {
+      const input = document.getElementById('newStudentInput');
+      const name = input.value.trim();
+      if (!name) return;
+      state.students.push({
+        id: "s_" + Date.now(),
+        name: name,
+        scores: {}
+      });
+      input.value = "";
       renderTable();
     }
 
-    function openSdaModal() {
-      const sda = appState.sdas.find(s => s.id === appState.activeSdaId) || appState.sdas[0];
-      document.getElementById('modalSdaTitle').value = sda.title;
-      renderModalCompetences(sda);
-      document.getElementById('sdaModal').classList.remove('hidden');
+    function removeStudent(id) {
+      state.students = state.students.filter(s => s.id !== id);
+      renderTable();
     }
 
-    function closeSdaModal() {
-      document.getElementById('sdaModal').classList.add('hidden');
+    let modalTempState = {};
+
+    function toggleModal(open) {
+      const modal = document.getElementById('sdaModal');
+      if (open) {
+        modalTempState = JSON.parse(JSON.stringify(state));
+        document.getElementById('sdaTitleInput').value = modalTempState.sdaTitle || "";
+        renderModalCeConfig();
+        modal.classList.remove('hidden');
+      } else {
+        modal.classList.add('hidden');
+      }
     }
 
-    function renderModalCompetences(sda) {
-      const container = document.getElementById('modalCompetencesContainer');
-      container.innerHTML = OFFICIAL_CES.map(ce => {
-        const conf = (sda.competences && sda.competences[ce.id]) || { active: false, weight: 0, curricularCriteria: '', oas: [] };
+    function renderModalCeConfig() {
+      const container = document.getElementById('ceConfigContainer');
+      let totalWeight = 0;
+
+      container.innerHTML = CE_CATALOGUE.map(cat => {
+        const ce = modalTempState.ces[cat.id] || { active: false, weight: 0, criteria: "", oas: [] };
+        if (ce.active) totalWeight += parseFloat(ce.weight) || 0;
+
         return `
-          <div class="border border-slate-200 rounded-xl p-4 bg-slate-50/60" id="ce_block_${ce.id}">
-            <div class="flex items-center justify-between gap-4">
-              <label class="flex items-center gap-2 cursor-pointer font-bold text-slate-800">
-                <input type="checkbox" id="check_${ce.id}" ${conf.active ? 'checked' : ''} onchange="toggleCeBlock('${ce.id}')" class="rounded text-indigo-600 focus:ring-indigo-500 w-4 h-4">
-                <span>${ce.name}</span>
+          <div class="border ${ce.active ? 'border-emerald-300 bg-emerald-50/20' : 'border-slate-200 bg-slate-50/50'} rounded-xl p-4 transition-all">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+              <label class="flex items-center gap-2 cursor-pointer font-bold text-slate-800 text-sm">
+                <input type="checkbox" ${ce.active ? 'checked' : ''} onchange="toggleCeActive('${cat.id}', this.checked)" class="rounded text-emerald-600 focus:ring-emerald-500 w-4 h-4">
+                <span>${cat.id}: ${cat.name}</span>
               </label>
-              <div class="flex items-center gap-2">
-                <span class="text-slate-500">Ponderació CE:</span>
-                <input type="number" id="weight_${ce.id}" value="${conf.weight || 0}" min="0" max="100" ${!conf.active ? 'disabled' : ''} onchange="calcModalWeights()" class="w-16 p-1.5 border border-slate-300 rounded text-center font-bold text-indigo-900 bg-white">
-                <span class="text-slate-500">%</span>
-              </div>
+              ${ce.active ? `
+                <div class="flex items-center gap-3">
+                  <div class="flex items-center gap-1">
+                    <span class="text-xs font-semibold text-slate-500">Pes CE:</span>
+                    <input type="number" min="0" max="100" value="${ce.weight || 0}" onchange="updateCeWeight('${cat.id}', this.value)" class="w-16 text-center border border-slate-300 rounded px-1.5 py-1 text-xs font-bold">
+                    <span class="text-xs font-semibold text-slate-500">%</span>
+                  </div>
+                </div>
+              ` : ''}
             </div>
 
-            <div id="details_${ce.id}" class="mt-3 pl-6 space-y-3 ${!conf.active ? 'hidden' : ''}">
-              <div>
-                <label class="block text-slate-600 font-medium mb-1">Criteri d'Avaluació Curricular (Opcional):</label>
-                <input type="text" id="crit_${ce.id}" value="${conf.curricularCriteria || ''}" placeholder="Ex: 1.1 - 1.2 - 1.3" class="w-full p-2 border border-slate-300 rounded bg-white">
-              </div>
-
-              <div>
-                <div class="flex justify-between items-center mb-1.5">
-                  <span class="font-medium text-slate-600">Objectius d'Aprenentatge / Activitats (OAs) (Opcional):</span>
-                  <button type="button" onclick="addOaRow('${ce.id}')" class="text-indigo-600 hover:text-indigo-800 font-semibold text-[11px] flex items-center gap-1">
-                    <i class="fa-solid fa-plus"></i> Afegir OA
-                  </button>
+            ${ce.active ? `
+              <div class="mt-4 pt-3 border-t border-slate-200 space-y-3">
+                <div>
+                  <input type="text" placeholder="Criteris curriculars opcionals (ex: 1.1 - 1.2)..." value="${ce.criteria || ''}" onchange="updateCeCriteria('${cat.id}', this.value)" class="w-full text-xs border border-slate-200 rounded px-2.5 py-1.5 bg-white">
                 </div>
-                <div id="oas_container_${ce.id}" class="space-y-2">
-                  ${(conf.oas || []).map((oa, idx) => `
-                    <div class="flex items-center gap-2 oa-item" data-id="${oa.id || 'oa_' + idx}">
-                      <input type="text" value="${oa.label || ''}" placeholder="Descripció de l'OA o activitat..." class="flex-1 p-1.5 border border-slate-300 rounded bg-white text-xs">
-                      <input type="number" value="${oa.weight || 0}" min="0" max="100" placeholder="%" class="w-14 p-1.5 border border-slate-300 rounded text-center text-xs">
-                      <span class="text-slate-400">%</span>
-                      <button type="button" onclick="this.parentElement.remove()" class="text-slate-400 hover:text-red-500 p-1">
-                        <i class="fa-solid fa-trash-can"></i>
-                      </button>
-                    </div>
-                  `).join('')}
+                
+                <div class="space-y-2">
+                  <div class="flex justify-between items-center">
+                    <span class="text-[11px] font-bold uppercase tracking-wider text-slate-500">Objectius d'Aprenentatge (OAs)</span>
+                    <button onclick="addOa('${cat.id}')" class="text-xs font-semibold text-emerald-700 hover:text-emerald-800">+ Afegir OA</button>
+                  </div>
+                  
+                  <div class="space-y-2">
+                    ${(ce.oas || []).map((oa, index) => `
+                      <div class="flex items-center gap-2">
+                        <input type="text" placeholder="Descripció de l'aprenentatge..." value="${oa.text || ''}" onchange="updateOaText('${cat.id}', ${index}, this.value)" class="flex-1 text-xs border border-slate-300 rounded px-2 py-1">
+                        <div class="flex items-center gap-1">
+                          <input type="number" min="0" max="100" value="${oa.weight || 0}" onchange="updateOaWeight('${cat.id}', ${index}, this.value)" class="w-14 text-center text-xs border border-slate-300 rounded py-1 font-semibold">
+                          <span class="text-xs text-slate-400">%</span>
+                        </div>
+                        <button onclick="removeOa('${cat.id}', ${index})" class="text-slate-400 hover:text-rose-500 font-bold text-sm px-1">&times;</button>
+                      </div>
+                    `).join('')}
+                    ${(!ce.oas || ce.oas.length === 0) ? `<p class="text-xs text-slate-400 italic">Sense OAs individuals (s'avaluarà la CE en una única nota directa).</p>` : ''}
+                  </div>
                 </div>
               </div>
-            </div>
+            ` : ''}
           </div>
         `;
       }).join('');
-      calcModalWeights();
+
+      const warningEl = document.getElementById('totalWeightWarning');
+      warningEl.textContent = `Suma pesos CE: ${totalWeight}%`;
+      warningEl.className = totalWeight === 100 ? "text-xs font-bold text-emerald-700" : "text-xs font-bold text-amber-600";
     }
 
-    function toggleCeBlock(ceId) {
-      const active = document.getElementById(`check_${ceId}`).checked;
-      document.getElementById(`details_${ceId}`).classList.toggle('hidden', !active);
-      document.getElementById(`weight_${ceId}`).disabled = !active;
-      calcModalWeights();
+    function toggleCeActive(ceKey, isActive) {
+      modalTempState.ces[ceKey].active = isActive;
+      renderModalCeConfig();
     }
 
-    function addOaRow(ceId) {
-      const container = document.getElementById(`oas_container_${ceId}`);
-      const newId = 'oa_' + Date.now();
-      const div = document.createElement('div');
-      div.className = "flex items-center gap-2 oa-item";
-      div.setAttribute('data-id', newId);
-      div.innerHTML = `
-        <input type="text" placeholder="Descripció de l'OA o activitat..." class="flex-1 p-1.5 border border-slate-300 rounded bg-white text-xs">
-        <input type="number" value="25" min="0" max="100" placeholder="%" class="w-14 p-1.5 border border-slate-300 rounded text-center text-xs">
-        <span class="text-slate-400">%</span>
-        <button type="button" onclick="this.parentElement.remove()" class="text-slate-400 hover:text-red-500 p-1">
-          <i class="fa-solid fa-trash-can"></i>
-        </button>
-      `;
-      container.appendChild(div);
+    function updateCeWeight(ceKey, val) {
+      modalTempState.ces[ceKey].weight = parseFloat(val) || 0;
+      renderModalCeConfig();
     }
 
-    function calcModalWeights() {
-      let sum = 0;
-      OFFICIAL_CES.forEach(ce => {
-        const chk = document.getElementById(`check_${ce.id}`);
-        if (chk && chk.checked) {
-          sum += parseFloat(document.getElementById(`weight_${ce.id}`).value) || 0;
-        }
+    function updateCeCriteria(ceKey, val) {
+      modalTempState.ces[ceKey].criteria = val;
+    }
+
+    function addOa(ceKey) {
+      if (!modalTempState.ces[ceKey].oas) modalTempState.ces[ceKey].oas = [];
+      modalTempState.ces[ceKey].oas.push({
+        id: "oa_" + Date.now() + "_" + Math.floor(Math.random() * 100),
+        text: "",
+        weight: 0
       });
-      const ind = document.getElementById('modalTotalWeightIndicator');
-      ind.textContent = `Total Ponderació CE: ${sum}%`;
-      ind.className = sum === 100 ? "text-xs font-bold text-emerald-600" : "text-xs font-semibold text-amber-600";
+      renderModalCeConfig();
+    }
+
+    function removeOa(ceKey, index) {
+      modalTempState.ces[ceKey].oas.splice(index, 1);
+      renderModalCeConfig();
+    }
+
+    function updateOaText(ceKey, index, val) {
+      modalTempState.ces[ceKey].oas[index].text = val;
+    }
+
+    function updateOaWeight(ceKey, index, val) {
+      modalTempState.ces[ceKey].oas[index].weight = parseFloat(val) || 0;
+      renderModalCeConfig();
     }
 
     function saveSdaConfig() {
-      const sda = appState.sdas.find(s => s.id === appState.activeSdaId);
-      sda.title = document.getElementById('modalSdaTitle').value || "Nova SdA";
-      sda.competences = {};
-
-      OFFICIAL_CES.forEach(ce => {
-        const active = document.getElementById(`check_${ce.id}`).checked;
-        if (active) {
-          const weight = parseFloat(document.getElementById(`weight_${ce.id}`).value) || 0;
-          const crit = document.getElementById(`crit_${ce.id}`).value;
-          const oas = [];
-          document.querySelectorAll(`#oas_container_${ce.id} .oa-item`).forEach(el => {
-            const inputs = el.querySelectorAll('input');
-            oas.push({
-              id: el.getAttribute('data-id'),
-              label: inputs[0].value,
-              weight: parseFloat(inputs[1].value) || 0
-            });
-          });
-          sda.competences[ce.id] = {
-            active: true,
-            weight: weight,
-            curricularCriteria: crit,
-            oas: oas
-          };
-        }
-      });
-
-      closeSdaModal();
-      renderSdaSelector();
+      modalTempState.sdaTitle = document.getElementById('sdaTitleInput').value.trim();
+      state = JSON.parse(JSON.stringify(modalTempState));
+      toggleModal(false);
       renderTable();
     }
 
-    function resetDefaultData() {
-      appState.sdas = [JSON.parse(JSON.stringify(DEFAULT_SDA))];
-      appState.activeSdaId = "sda1";
-      appState.grades = {
-        "sda1": {
-          1: {
-            "CE1_oa1": 2, "CE1_oa2": 3, "CE1_oa3": 3, "CE1_oa4": 1,
-            "CE5_oa5_1": 3, "CE5_oa5_2": 3, "CE5_oa5_3": 4, "CE5_oa5_4": 4
-          }
-        }
-      };
-      init();
-    }
-
-    window.onload = init;
+    renderTable();
   </script>
 </body>
 </html>
