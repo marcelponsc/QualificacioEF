@@ -90,13 +90,13 @@
         </div>
       </div>
 
-      <!-- Subbarra de Navegació de Classe (només visible dins d'un grup) -->
+      <!-- Subbarra de Navegació de Classe -->
       <nav id="classSubNav" class="hidden flex space-x-1 -mb-px overflow-x-auto border-t border-slate-100 py-1.5 text-xs font-medium">
         <button id="tabBtnSda" onclick="switchView('sda')" class="inline-flex items-center gap-2 px-3 py-1.5 rounded-md font-semibold bg-indigo-50 text-indigo-700 transition">
           <i class="fa-regular fa-folder-open text-indigo-500"></i> Situacions d'Aprenentatge (SdA)
         </button>
         <button id="tabBtnTrim" onclick="switchView('trim')" class="inline-flex items-center gap-2 px-3 py-1.5 rounded-md text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition">
-          <i class="fa-solid fa-table-cells text-slate-400"></i> Resum Trimestral CE
+          <i class="fa-solid fa-table-cells text-slate-400"></i> Resum Trimestral &amp; Ponderacions
         </button>
         <button id="tabBtnFinal" onclick="switchView('final')" class="inline-flex items-center gap-2 px-3 py-1.5 rounded-md text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition">
           <i class="fa-regular fa-calendar-check text-slate-400"></i> Avaluació Final de Curs
@@ -111,7 +111,7 @@
   <!-- ================= BODY CONTENT ================= -->
   <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6">
 
-    <!-- ================= PANTALLA D'INICI (HOME / DASHBOARD) ================= -->
+    <!-- ================= PANTALLA D'INICI (HOME) ================= -->
     <section id="screenHome" class="space-y-6">
       
       <!-- Welcome Hero Banner -->
@@ -125,7 +125,7 @@
           </span>
           <h2 class="text-2xl sm:text-3xl font-extrabold tracking-tight">Quadern d'Avaluació LOMLOE</h2>
           <p class="text-xs sm:text-sm text-slate-300 font-normal leading-relaxed">
-            Gestiona les teves classes, programa Situacions d'Aprenentatge competencials i qualifica segons els nivells oficials d'assoliment de Catalunya (NA, EPA, AS, AN, AE).
+            Gestiona les teves classes, pondera les Situacions d'Aprenentatge per trimestre i qualifica segons els nivells oficials d'assoliment de Catalunya (NA, EPA, AS, AN, AE).
           </p>
           <div class="pt-3 flex flex-wrap gap-2.5">
             <button onclick="openNewGroupModal()" class="inline-flex items-center gap-2 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold px-4 py-2 rounded-xl shadow-xs transition">
@@ -171,7 +171,7 @@
         </div>
       </div>
 
-      <!-- Llistat de Classes / Grups en Targetes -->
+      <!-- Llistat de Classes en Targetes -->
       <div class="space-y-3 pt-2">
         <div class="flex justify-between items-center">
           <h3 class="text-sm font-bold text-slate-900 uppercase tracking-wider flex items-center gap-2">
@@ -180,9 +180,7 @@
           <span class="text-xs text-slate-400">Fes clic sobre una classe per accedir al seu quadern</span>
         </div>
 
-        <div id="homeClassesGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          <!-- Targetes generades dinàmicament per JS -->
-        </div>
+        <div id="homeClassesGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4"></div>
       </div>
     </section>
 
@@ -195,7 +193,7 @@
           <button onclick="goToHome()" class="text-slate-500 hover:text-slate-900 text-xs font-semibold flex items-center gap-1 transition pr-2 border-r border-slate-200">
             <i class="fa-solid fa-arrow-left"></i> Tornar a Classes
           </button>
-          <span class="text-xs font-bold text-slate-700">Trimestre de treball:</span>
+          <span class="text-xs font-bold text-slate-700">Trimestre:</span>
           <div class="inline-flex rounded-lg bg-slate-100 p-0.5 border border-slate-200/70 text-xs font-semibold">
             <button id="trimBtn1_class" onclick="setTrim(1)" class="px-2.5 py-1 rounded-md transition shadow-xs bg-white text-slate-900 font-semibold">1r Trim</button>
             <button id="trimBtn2_class" onclick="setTrim(2)" class="px-2.5 py-1 rounded-md transition text-slate-600 hover:text-slate-900">2n Trim</button>
@@ -218,7 +216,7 @@
             <select id="sdaSelect" onchange="renderSdaGrid()" class="bg-slate-50 border border-slate-300 text-xs font-bold text-slate-900 rounded-lg px-3 py-1.5 focus:ring-2 focus:ring-indigo-500 focus:bg-white outline-none cursor-pointer">
             </select>
             <button onclick="openSdaModal(false)" class="inline-flex items-center gap-1.5 text-xs font-semibold text-indigo-600 hover:text-indigo-700 bg-indigo-50/60 hover:bg-indigo-50 px-2.5 py-1.5 rounded-lg border border-indigo-100 transition">
-              <i class="fa-solid fa-pen-to-square text-[11px]"></i> Editar CEs i OAs
+              <i class="fa-solid fa-pen-to-square text-[11px]"></i> Editar CEs, OAs i Pes Trimestral
             </button>
           </div>
           <button onclick="openSdaModal(true)" class="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-semibold text-white bg-indigo-600 hover:bg-indigo-700 shadow-xs shadow-indigo-600/30 transition">
@@ -238,48 +236,38 @@
         </div>
       </section>
 
-      <!-- 2. VISTA RESUM TRIMESTRAL -->
+      <!-- 2. VISTA RESUM TRIMESTRAL (AMB PONDERACIONS DE SdAs) -->
       <section id="viewTrim" class="space-y-4 hidden">
         <div class="flex flex-wrap items-end justify-between gap-4 border-b border-slate-200/80 pb-4">
           <div>
-            <span class="inline-flex items-center rounded-md bg-indigo-50 px-2 py-0.5 text-[11px] font-semibold text-indigo-700 border border-indigo-100">Avaluació Contínua</span>
-            <h2 id="trimTitle" class="text-xl font-bold text-slate-900 tracking-tight mt-1">Resum Competencial del Trimestre 1</h2>
-            <p class="text-xs text-slate-500 mt-0.5">Grau d'assoliment ponderat de les 5 Competències Específiques a partir de totes les SdA creades.</p>
+            <span class="inline-flex items-center rounded-md bg-indigo-50 px-2 py-0.5 text-[11px] font-semibold text-indigo-700 border border-indigo-100">Avaluació Contínua Trimestral</span>
+            <h2 id="trimTitle" class="text-xl font-bold text-slate-900 tracking-tight mt-1">Resum i Ponderació del Trimestre 1</h2>
+            <p class="text-xs text-slate-500 mt-0.5">Pondera el pes de cada Situació d'Aprenentatge per calcular automàticament la qualificació global del trimestre.</p>
           </div>
           <button onclick="exportCSV()" class="inline-flex items-center gap-2 bg-white border border-slate-300 text-slate-700 hover:bg-slate-50 text-xs font-semibold px-3 py-2 rounded-lg shadow-xs transition">
             <i class="fa-solid fa-file-csv text-slate-400"></i> Exportar a CSV
           </button>
         </div>
 
+        <!-- Targeta de Ponderacions Ràpides de SdAs del Trimestre -->
+        <div class="bg-white border border-slate-200/90 rounded-xl p-4 shadow-xs space-y-3">
+          <div class="flex items-center justify-between">
+            <h4 class="text-xs font-bold text-slate-800 uppercase tracking-wider flex items-center gap-2">
+              <i class="fa-solid fa-weight-scale text-indigo-600"></i> Ponderació de les SdAs en aquest Trimestre
+            </h4>
+            <span id="trimTotalWeightBadge" class="text-xs font-mono font-bold px-2.5 py-0.5 rounded-md">Total: 0%</span>
+          </div>
+          <div id="trimSdaWeightInputsContainer" class="flex flex-wrap gap-3 pt-1">
+            <!-- Inputs ràpids de ponderació generats per JS -->
+          </div>
+        </div>
+
+        <!-- Taula Consolidada Trimestral -->
         <div class="bg-white border border-slate-200 rounded-xl shadow-xs overflow-hidden">
           <div class="overflow-x-auto">
             <table class="w-full text-left border-collapse text-xs">
-              <thead>
-                <tr class="bg-slate-900 text-white">
-                  <th class="py-3 px-3 w-10 text-center font-mono text-slate-400 font-medium">#</th>
-                  <th class="py-3 px-4 font-semibold text-slate-100 min-w-[200px]">Alumne/a</th>
-                  <th class="py-2.5 px-3 text-center border-l border-slate-800">
-                    <div class="font-bold text-slate-100">CE1</div>
-                    <div class="text-[10px] text-slate-400 font-normal truncate max-w-[120px] mx-auto">Estil de vida actiu</div>
-                  </th>
-                  <th class="py-2.5 px-3 text-center border-l border-slate-800">
-                    <div class="font-bold text-slate-100">CE2</div>
-                    <div class="text-[10px] text-slate-400 font-normal truncate max-w-[120px] mx-auto">Situacions motrius</div>
-                  </th>
-                  <th class="py-2.5 px-3 text-center border-l border-slate-800">
-                    <div class="font-bold text-slate-100">CE3</div>
-                    <div class="text-[10px] text-slate-400 font-normal truncate max-w-[120px] mx-auto">Expressió corporal</div>
-                  </th>
-                  <th class="py-2.5 px-3 text-center border-l border-slate-800">
-                    <div class="font-bold text-slate-100">CE4</div>
-                    <div class="text-[10px] text-slate-400 font-normal truncate max-w-[120px] mx-auto">Entorn i sostenibilitat</div>
-                  </th>
-                  <th class="py-2.5 px-3 text-center border-l border-slate-800">
-                    <div class="font-bold text-slate-100">CE5</div>
-                    <div class="text-[10px] text-slate-400 font-normal truncate max-w-[120px] mx-auto">Valors i convivència</div>
-                  </th>
-                  <th class="py-3 px-3 text-center border-l border-slate-800 bg-slate-950/70 font-bold text-indigo-300">Nota Trimestre</th>
-                </tr>
+              <thead id="trimTableHead" class="bg-slate-900 text-white">
+                <!-- Generat per JS per mostrar cada SdA ponderada + CEs + Nota Final Trimestre -->
               </thead>
               <tbody id="trimTableBody" class="divide-y divide-slate-100 bg-white tabular-nums"></tbody>
             </table>
@@ -287,7 +275,7 @@
         </div>
       </section>
 
-      <!-- 3. VISTA FINAL -->
+      <!-- 3. VISTA FINAL DE CURS -->
       <section id="viewFinal" class="space-y-4 hidden">
         <div class="border-b border-slate-200/80 pb-4">
           <span class="inline-flex items-center rounded-md bg-emerald-50 px-2 py-0.5 text-[11px] font-semibold text-emerald-700 border border-emerald-100">Convocatòria Ordinària</span>
@@ -431,7 +419,7 @@
     </div>
   </div>
 
-  <!-- ================= MODAL PROGRAMADOR DE SdA ================= -->
+  <!-- ================= MODAL PROGRAMADOR DE SdA (AMB PONDERACIÓ TRIMESTRAL) ================= -->
   <div id="sdaModal" class="fixed inset-0 bg-slate-900/40 backdrop-blur-xs z-50 flex items-center justify-center p-4 hidden no-print">
     <div class="bg-white rounded-2xl shadow-xl max-w-3xl w-full max-h-[90vh] flex flex-col overflow-hidden border border-slate-200">
       <div class="px-6 py-4 bg-slate-900 text-white flex justify-between items-center">
@@ -441,16 +429,27 @@
           </div>
           <div>
             <h3 class="text-sm font-bold tracking-tight">Configuració de la Situació d'Aprenentatge (SdA)</h3>
-            <p class="text-[11px] text-slate-400">Ponderacions, criteris i Objectius d'Aprenentatge (tot opcional).</p>
+            <p class="text-[11px] text-slate-400">Ponderació de la SdA al trimestre, CEs implicades i OAs.</p>
           </div>
         </div>
         <button onclick="closeSdaModal()" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
       </div>
 
       <div class="p-6 overflow-y-auto space-y-5 flex-1 text-xs">
-        <div>
-          <label class="block font-semibold text-slate-700 mb-1">Títol de la Situació d'Aprenentatge</label>
-          <input type="text" id="modalSdaTitle" placeholder="Ex: Hàbits saludables i condició física" class="w-full text-sm border border-slate-300 rounded-lg p-2.5 focus:ring-2 focus:ring-indigo-500 outline-none font-semibold text-slate-900">
+        
+        <!-- Títol SdA & Ponderació en el Trimestre -->
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+          <div class="sm:col-span-2">
+            <label class="block font-semibold text-slate-700 mb-1">Títol de la Situació d'Aprenentatge</label>
+            <input type="text" id="modalSdaTitle" placeholder="Ex: Hàbits saludables i condició física" class="w-full text-sm border border-slate-300 rounded-lg p-2.5 focus:ring-2 focus:ring-indigo-500 outline-none font-semibold text-slate-900">
+          </div>
+          <div>
+            <label class="block font-semibold text-indigo-700 mb-1">Pes al Trimestre (%)</label>
+            <div class="flex items-center gap-1.5">
+              <input type="number" id="modalSdaTrimWeight" value="50" min="0" max="100" class="w-full text-sm border border-indigo-200 bg-indigo-50/50 rounded-lg p-2.5 focus:ring-2 focus:ring-indigo-500 outline-none font-mono font-bold text-indigo-900 text-center">
+              <span class="text-slate-400 font-mono font-bold text-sm">%</span>
+            </div>
+          </div>
         </div>
 
         <!-- Target Groups Multi-selection -->
@@ -468,10 +467,11 @@
           <div id="modalTargetGroupsContainer" class="flex flex-wrap gap-2 pt-1"></div>
         </div>
 
+        <!-- CEs & OAs -->
         <div class="border-t border-slate-200 pt-4 space-y-3">
           <div class="flex items-center justify-between">
-            <span class="font-bold text-slate-800 text-[11px] uppercase tracking-wider">Competències Específiques &amp; OAs</span>
-            <span id="modalWeightSumBadge" class="text-xs font-mono font-bold px-2 py-0.5 rounded-md">Total: 0%</span>
+            <span class="font-bold text-slate-800 text-[11px] uppercase tracking-wider">Competències Específiques &amp; OAs dins la SdA</span>
+            <span id="modalWeightSumBadge" class="text-xs font-mono font-bold px-2 py-0.5 rounded-md">Total CEs: 0%</span>
           </div>
           <div id="modalCeCardsContainer" class="space-y-3.5"></div>
         </div>
@@ -496,7 +496,7 @@
       { id: 'CE5', name: 'CE5. Adquirir actituds, valors i habilitats socials per a la convivència', short: 'Valors i convivència' }
     ];
 
-    const STORAGE_KEY = 'EF_COMPETENCIAL_DATA_V2';
+    const STORAGE_KEY = 'EF_COMPETENCIAL_DATA_V3';
 
     const DEFAULT_APP_DATA = {
       activeGroupId: "1esoA",
@@ -515,6 +515,7 @@
               id: "sda_1",
               trim: 1,
               title: "HÀBITS SALUDABLES I CONDICIÓ FÍSICA",
+              trimWeight: 60, // 60% del trimestre 1
               competences: {
                 CE1: {
                   active: true,
@@ -544,6 +545,7 @@
               id: "sda_2",
               trim: 1,
               title: "JOCS D'OPOSICIÓ I ESPORTS DE COLLABORACIÓ",
+              trimWeight: 40, // 40% del trimestre 1
               competences: {
                 CE2: { active: true, weight: 60, curricularCriteria: "2.1 - 2.2", oas: [] },
                 CE5: { active: true, weight: 40, curricularCriteria: "5.2", oas: [] }
@@ -579,7 +581,7 @@
     let appData = loadFromStorage();
 
     let appState = {
-      currentScreen: 'home', // 'home' o 'class'
+      currentScreen: 'home',
       currentTrim: 1,
       currentView: 'sda',
       editingIsNew: false
@@ -773,12 +775,11 @@
       }
     }
 
-    // MODAL GLOBAL DE SdA MULTICLASSE DES D'INICI
     function openGlobalSdaModal() {
       openSdaModal(true);
     }
 
-    // GESTIÓ D'ALUMNES (MODAL D'ALUMNES)
+    // GESTIÓ ALUMNES
     function openGroupStudentModal() {
       renderGroupStudentModalContent();
       document.getElementById('groupStudentModal').classList.remove('hidden');
@@ -865,7 +866,7 @@
           }
         }
       });
-      document.getElementById('trimTitle').textContent = `Resum Competencial del Trimestre ${t}`;
+      document.getElementById('trimTitle').textContent = `Resum i Ponderació del Trimestre ${t}`;
       populateSdaSelect();
       if (appState.currentView === 'sda') renderSdaGrid();
       if (appState.currentView === 'trim') renderTrimView();
@@ -898,7 +899,6 @@
       if (view === 'report') renderIndividualReport();
     }
 
-    // NIVELLS LOMLOE
     function getLevel(val) {
       if (val === null || val === undefined || isNaN(val) || val <= 0) {
         return { code: "—", badge: "bg-slate-50 text-slate-400 ring-slate-200" };
@@ -952,6 +952,28 @@
       return (totalWeightedScore * 100) / totalActiveWeight;
     }
 
+    // CÀLCUL QUALIFICACIÓ TRIMESTRAL PONDERADA PER SdAs
+    function getStudentTrimScore(stId) {
+      const curGroup = getCurrentGroup();
+      const trimSdas = (curGroup.sdas || []).filter(s => s.trim === appState.currentTrim);
+      if (trimSdas.length === 0) return null;
+
+      let weightedSum = 0;
+      let totalWeight = 0;
+
+      trimSdas.forEach(sda => {
+        const sdaScore = getStudentOverallSdaScore(sda, stId);
+        const weight = sda.trimWeight !== undefined ? sda.trimWeight : (100 / trimSdas.length);
+        if (sdaScore !== null) {
+          weightedSum += sdaScore * (weight / 100);
+          totalWeight += weight;
+        }
+      });
+
+      if (totalWeight === 0) return null;
+      return (weightedSum * 100) / totalWeight;
+    }
+
     function populateSdaSelect() {
       const sel = document.getElementById('sdaSelect');
       const curGroup = getCurrentGroup();
@@ -960,7 +982,7 @@
         sel.innerHTML = `<option value="">Sense SdAs en aquest trimestre</option>`;
         return;
       }
-      sel.innerHTML = trimSdas.map(s => `<option value="${s.id}">${s.title}</option>`).join('');
+      sel.innerHTML = trimSdas.map(s => `<option value="${s.id}">${s.title} (${s.trimWeight || 0}%)</option>`).join('');
     }
 
     // GRAELLA SdA
@@ -992,7 +1014,8 @@
         <div class="flex items-center gap-2">
           <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
           <span class="font-bold text-slate-100 uppercase tracking-wide">${sda.title}</span>
-          <span class="text-slate-400 font-mono">(${curGroup.name} · T${sda.trim})</span>
+          <span class="text-indigo-300 font-mono font-bold bg-indigo-950 px-2 py-0.5 rounded border border-indigo-700/50">Pes Trimestre: ${sda.trimWeight || 0}%</span>
+          <span class="text-slate-400 font-mono text-[11px]">(${curGroup.name} · T${sda.trim})</span>
         </div>
         <div class="text-[11px] text-slate-400 font-mono">Escala oficial 0.1 a 4.0</div>
       `;
@@ -1130,7 +1153,7 @@
       const curGroup = getCurrentGroup();
       let sda;
       if (isNew) {
-        sda = { id: 'sda_' + Date.now(), trim: appState.currentTrim, title: '', competences: {} };
+        sda = { id: 'sda_' + Date.now(), trim: appState.currentTrim, title: '', trimWeight: 50, competences: {} };
       } else {
         const sdaId = document.getElementById('sdaSelect').value;
         sda = (curGroup.sdas || []).find(s => s.id === sdaId);
@@ -1138,6 +1161,7 @@
       }
 
       document.getElementById('modalSdaTitle').value = sda.title || '';
+      document.getElementById('modalSdaTrimWeight').value = sda.trimWeight !== undefined ? sda.trimWeight : 50;
       renderModalTargetGroups(isNew ? null : sda.title);
       renderModalCeCards(sda);
       document.getElementById('sdaModal').classList.remove('hidden');
@@ -1251,7 +1275,7 @@
         }
       });
       const badge = document.getElementById('modalWeightSumBadge');
-      badge.textContent = `Total: ${sum}%`;
+      badge.textContent = `Total CEs: ${sum}%`;
       badge.className = sum === 100 
         ? "text-xs font-mono font-bold px-2 py-0.5 rounded-md bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200" 
         : "text-xs font-mono font-bold px-2 py-0.5 rounded-md bg-amber-50 text-amber-700 ring-1 ring-amber-200";
@@ -1265,6 +1289,7 @@
       }
 
       const title = document.getElementById('modalSdaTitle').value.trim() || 'Nova SdA';
+      const trimWeight = parseFloat(document.getElementById('modalSdaTrimWeight').value) || 0;
       const competences = {};
 
       OFFICIAL_CES.forEach(ce => {
@@ -1293,11 +1318,13 @@
             id: 'sda_' + Date.now() + '_' + Math.floor(Math.random()*1000),
             trim: appState.currentTrim,
             title: title,
+            trimWeight: trimWeight,
             competences: JSON.parse(JSON.stringify(competences))
           };
           grp.sdas.push(targetSda);
         } else {
           targetSda.title = title;
+          targetSda.trimWeight = trimWeight;
           targetSda.competences = JSON.parse(JSON.stringify(competences));
         }
       });
@@ -1314,56 +1341,118 @@
       }
     }
 
-    // RESUM TRIMESTRAL
+    // ACTUALITZAR PONDERACIÓ DE LA SdA DIRECTAMENT DES DEL RESUM TRIMESTRAL
+    function updateSdaTrimWeight(sdaId, newWeight) {
+      const curGroup = getCurrentGroup();
+      const sda = (curGroup.sdas || []).find(s => s.id === sdaId);
+      if (sda) {
+        sda.trimWeight = parseFloat(newWeight) || 0;
+        saveToStorage();
+        renderTrimView();
+      }
+    }
+
+    // RENDER RESUM TRIMESTRAL (AMB SdAs PONDERADES I CEs)
     function renderTrimView() {
+      const thead = document.getElementById('trimTableHead');
       const tbody = document.getElementById('trimTableBody');
+      const weightInputsContainer = document.getElementById('trimSdaWeightInputsContainer');
       const curGroup = getCurrentGroup();
       const trimSdas = (curGroup.sdas || []).filter(s => s.trim === appState.currentTrim);
 
-      let html = '';
+      // 1. Barra ràpida de configuració de ponderacions de SdAs
+      let totalTrimWeight = 0;
+      weightInputsContainer.innerHTML = trimSdas.map(sda => {
+        const w = sda.trimWeight !== undefined ? sda.trimWeight : 50;
+        totalTrimWeight += w;
+        return `
+          <div class="flex items-center gap-2 bg-slate-50 border border-slate-200 px-3 py-1.5 rounded-lg">
+            <span class="font-bold text-slate-800 text-xs truncate max-w-[160px]">${sda.title}:</span>
+            <input type="number" min="0" max="100" value="${w}" onchange="updateSdaTrimWeight('${sda.id}', this.value)" class="w-14 text-center font-mono font-bold text-xs bg-white border border-slate-300 rounded p-1 outline-none focus:ring-2 focus:ring-indigo-500">
+            <span class="text-slate-400 font-mono text-xs">%</span>
+          </div>
+        `;
+      }).join('') || '<span class="text-xs text-slate-400 italic">No hi ha cap SdA programada en aquest trimestre.</span>';
+
+      const weightBadge = document.getElementById('trimTotalWeightBadge');
+      weightBadge.textContent = `Total SdAs: ${totalTrimWeight}%`;
+      weightBadge.className = totalTrimWeight === 100 
+        ? "text-xs font-mono font-bold px-2.5 py-0.5 rounded-md bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200" 
+        : "text-xs font-mono font-bold px-2.5 py-0.5 rounded-md bg-amber-50 text-amber-700 ring-1 ring-amber-200";
+
+      // 2. Capçalera de la taula
+      let headHtml = `<tr>
+        <th class="py-3 px-3 w-10 text-center font-mono text-slate-400 font-medium">#</th>
+        <th class="py-3 px-4 font-semibold text-slate-100 min-w-[190px]">Alumne/a</th>`;
+      
+      // Columnes de cada SdA del trimestre
+      trimSdas.forEach(sda => {
+        headHtml += `<th class="py-2.5 px-3 text-center border-l border-slate-800">
+          <div class="font-bold text-slate-100 max-w-[130px] truncate mx-auto">${sda.title}</div>
+          <div class="text-[10px] text-indigo-300 font-mono font-semibold">Pes: ${sda.trimWeight || 0}%</div>
+        </th>`;
+      });
+
+      // Columnes de les CEs
+      OFFICIAL_CES.forEach(ce => {
+        headHtml += `<th class="py-2.5 px-2 text-center border-l border-slate-800">
+          <div class="font-bold text-slate-100">${ce.id}</div>
+          <div class="text-[9px] text-slate-400 font-normal truncate max-w-[90px] mx-auto">${ce.short}</div>
+        </th>`;
+      });
+
+      headHtml += `<th class="py-3 px-4 text-center border-l-2 border-indigo-500 bg-slate-950 font-bold text-indigo-300 uppercase tracking-wider">Qualificació Trimestre</th></tr>`;
+      thead.innerHTML = headHtml;
+
+      // 3. Cos de la taula
       if (curGroup.students.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="8" class="p-8 text-center text-slate-400">Sense alumnes registrats.</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="25" class="p-8 text-center text-slate-400">Sense alumnes registrats.</td></tr>`;
         return;
       }
 
+      let rowsHtml = '';
       curGroup.students.forEach((st, idx) => {
-        let studentCeScores = {};
-        let totalCeSum = 0, validCeCount = 0;
+        rowsHtml += `<tr class="hover:bg-slate-50/70 transition-colors">
+          <td class="py-2.5 px-3 text-center text-slate-400 font-mono">${idx + 1}</td>
+          <td class="py-2.5 px-4 font-semibold text-slate-800">${st.name}</td>`;
 
+        // Notes de cada SdA
+        trimSdas.forEach(sda => {
+          const sdaScore = getStudentOverallSdaScore(sda, st.id);
+          const lvl = getLevel(sdaScore);
+          rowsHtml += `<td class="py-2 px-3 text-center border-l border-slate-100">
+            <div class="font-bold font-mono text-slate-800">${sdaScore !== null ? sdaScore.toFixed(2) : '<span class="text-slate-300 font-normal">—</span>'}</div>
+            <span class="inline-flex items-center mt-0.5 text-[10px] px-1.5 py-0.2 rounded font-bold ring-1 ring-inset ${lvl.badge}">${lvl.code}</span>
+          </td>`;
+        });
+
+        // Mitjanes de cada CE en el trimestre
         OFFICIAL_CES.forEach(ce => {
           let ceSum = 0, count = 0;
           trimSdas.forEach(sda => {
             const sc = getStudentCeScoreInSda(sda, st.id, ce.id);
             if (sc !== null) { ceSum += sc; count++; }
           });
-          const avg = count > 0 ? ceSum / count : null;
-          studentCeScores[ce.id] = avg;
-          if (avg !== null) { totalCeSum += avg; validCeCount++; }
-        });
+          const avg = count > 0 ? (ceSum / count) : null;
+          const lvl = getLevel(avg);
 
-        const overallTrimScore = validCeCount > 0 ? (totalCeSum / validCeCount) : null;
-        const overallLvl = getLevel(overallTrimScore);
-
-        html += `<tr class="hover:bg-slate-50/70 transition-colors">
-          <td class="py-2.5 px-3 text-center text-slate-400 font-mono">${idx + 1}</td>
-          <td class="py-2.5 px-4 font-semibold text-slate-800">${st.name}</td>`;
-
-        OFFICIAL_CES.forEach(ce => {
-          const sc = studentCeScores[ce.id];
-          const lvl = getLevel(sc);
-          html += `<td class="py-2 px-3 text-center border-l border-slate-100">
-            <div class="font-bold font-mono text-slate-800">${sc ? sc.toFixed(2) : '<span class="text-slate-300 font-normal">—</span>'}</div>
-            <span class="inline-flex items-center mt-0.5 text-[10px] px-2 py-0.5 rounded font-bold ring-1 ring-inset ${lvl.badge}">${lvl.code}</span>
+          rowsHtml += `<td class="py-2 px-2 text-center border-l border-slate-100 bg-slate-50/30">
+            <div class="font-semibold font-mono text-slate-700 text-xs">${avg !== null ? avg.toFixed(2) : '<span class="text-slate-300 font-normal">—</span>'}</div>
+            <span class="inline-flex items-center text-[9px] px-1 rounded font-semibold ${lvl.badge}">${lvl.code}</span>
           </td>`;
         });
 
-        html += `<td class="py-2.5 px-3 text-center border-l border-slate-200 bg-slate-50/60 font-bold">
-          <div class="text-sm font-black font-mono text-slate-900">${overallTrimScore ? overallTrimScore.toFixed(2) : '<span class="text-slate-300 font-normal">—</span>'}</div>
-          <span class="inline-flex items-center mt-0.5 text-[10px] px-2 py-0.5 rounded font-bold ring-1 ring-inset ${overallLvl.badge}">${overallLvl.code}</span>
+        // Qualificació Final del Trimestre Ponderada per SdAs
+        const overallTrimScore = getStudentTrimScore(st.id);
+        const overallLvl = getLevel(overallTrimScore);
+
+        rowsHtml += `<td class="py-2.5 px-4 text-center border-l-2 border-indigo-500 bg-slate-50/80 font-bold">
+          <div class="text-sm font-black font-mono text-slate-950">${overallTrimScore !== null ? overallTrimScore.toFixed(2) : '<span class="text-slate-300 font-normal">—</span>'}</div>
+          <span class="inline-flex items-center mt-0.5 text-[10px] px-2.5 py-0.5 rounded font-bold ring-1 ring-inset ${overallLvl.badge}">${overallLvl.code}</span>
         </td></tr>`;
       });
 
-      tbody.innerHTML = html;
+      tbody.innerHTML = rowsHtml;
     }
 
     // FINAL DE CURS
@@ -1515,24 +1604,15 @@
 
     function exportCSV() {
       const curGroup = getCurrentGroup();
-      let csv = `Alumne,CE1,CE2,CE3,CE4,CE5,Grup\n`;
+      let csv = `Alumne,Qualificacio_Trimestre_T${appState.currentTrim},Grup\n`;
       curGroup.students.forEach(st => {
-        let row = [`"${st.name}"`];
-        OFFICIAL_CES.forEach(ce => {
-          let sum = 0, c = 0;
-          (curGroup.sdas || []).filter(s => s.trim === appState.currentTrim).forEach(sda => {
-            const sc = getStudentCeScoreInSda(sda, st.id, ce.id);
-            if (sc !== null) { sum += sc; c++; }
-          });
-          row.push(c > 0 ? (sum / c).toFixed(2) : "");
-        });
-        row.push(`"${curGroup.name}"`);
-        csv += row.join(",") + "\n";
+        const sc = getStudentTrimScore(st.id);
+        csv += `"${st.name}",${sc !== null ? sc.toFixed(2) : ""},"${curGroup.name}"\n`;
       });
       const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
       const a = document.createElement("a");
       a.href = URL.createObjectURL(blob);
-      a.download = `Resum_${curGroup.name.replace(/\s+/g, '_')}_T${appState.currentTrim}.csv`;
+      a.download = `Resum_Ponderat_${curGroup.name.replace(/\s+/g, '_')}_T${appState.currentTrim}.csv`;
       a.click();
     }
 
