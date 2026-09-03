@@ -33,14 +33,15 @@
       </div>
 
       <div class="flex items-center gap-3">
-        <!-- Selector de grup -->
-        <div class="flex items-center bg-slate-800 border border-slate-700 rounded-lg px-2.5 py-1 text-xs">
-          <span class="text-slate-400 mr-2">Grup:</span>
-          <select id="groupSelector" class="bg-transparent text-white font-semibold focus:outline-none cursor-pointer">
-            <option value="1esoA" class="bg-slate-800 text-white">1r ESO A</option>
-            <option value="1esoB" class="bg-slate-800 text-white">1r ESO B</option>
-            <option value="2esoA" class="bg-slate-800 text-white">2n ESO A</option>
+        <!-- Selector i Gestor de Grups -->
+        <div class="flex items-center bg-slate-800 border border-slate-700 rounded-lg p-1 text-xs">
+          <span class="text-slate-400 px-2">Grup:</span>
+          <select id="groupSelector" onchange="changeActiveGroup(this.value)" class="bg-slate-900 text-white font-semibold py-1 px-2 rounded focus:outline-none cursor-pointer border border-slate-700">
+            <!-- Dinàmic -->
           </select>
+          <button onclick="openGroupStudentModal()" title="Gestionar Grups i Alumnes" class="ml-1.5 px-2 py-1 bg-slate-700 hover:bg-slate-600 text-emerald-400 rounded transition flex items-center gap-1 font-semibold">
+            <i class="fa-solid fa-users-gear"></i> Gestió
+          </button>
         </div>
 
         <!-- Botons de trimestre -->
@@ -80,12 +81,17 @@
           <select id="sdaSelect" onchange="renderSdaGrid()" class="bg-slate-50 border border-slate-300 text-xs rounded-lg px-3 py-1.5 font-bold text-indigo-950 focus:ring-2 focus:ring-emerald-500 outline-none">
           </select>
           <button onclick="openSdaModal(false)" class="text-xs text-indigo-600 hover:text-indigo-800 font-semibold flex items-center gap-1.5 ml-2">
-            <i class="fa-solid fa-pen-to-square"></i> Editar CEs i OAs d'aquesta SdA
+            <i class="fa-solid fa-pen-to-square"></i> Editar CEs i OAs
           </button>
         </div>
-        <button onclick="openSdaModal(true)" class="bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold px-3 py-2 rounded-lg flex items-center gap-1.5 shadow transition">
-          <i class="fa-solid fa-plus"></i> Nova SdA
-        </button>
+        <div class="flex gap-2">
+          <button onclick="openGroupStudentModal()" class="bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold px-3 py-2 rounded-lg border border-slate-300 flex items-center gap-1.5 transition">
+            <i class="fa-solid fa-user-plus text-emerald-600"></i> Afegir/Modificar Alumnes
+          </button>
+          <button onclick="openSdaModal(true)" class="bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold px-3 py-2 rounded-lg flex items-center gap-1.5 shadow transition">
+            <i class="fa-solid fa-plus"></i> Nova SdA
+          </button>
+        </div>
       </div>
 
       <div class="bg-white border border-slate-200 shadow-sm rounded-xl overflow-hidden">
@@ -106,7 +112,7 @@
         <div>
           <span class="text-[11px] font-bold tracking-wider text-emerald-600 uppercase">Avaluació Contínua Trimestral</span>
           <h2 id="trimTitle" class="text-xl font-bold text-slate-900 tracking-tight">Resum Competencial del Trimestre 1</h2>
-          <p class="text-xs text-slate-500">Càlcul consolidat per Competències Específiques (CE1..CE5) a partir de totes les SdA desenvolupades al trimestre.</p>
+          <p class="text-xs text-slate-500">Càlcul consolidat per Competències Específiques (CE1..CE5) a partir de totes les SdA del trimestre.</p>
         </div>
         <div class="flex gap-2">
           <button onclick="exportCSV()" class="bg-white border border-slate-300 text-slate-700 hover:bg-slate-50 text-xs font-semibold px-3 py-2 rounded-lg flex items-center gap-2 shadow-sm transition">
@@ -156,7 +162,7 @@
     <section id="viewFinal" class="space-y-4 hidden">
       <div class="pb-2 border-b border-slate-200">
         <span class="text-[11px] font-bold tracking-wider text-emerald-600 uppercase">Avaluació Ordinària Final</span>
-        <h2 class="text-xl font-bold text-slate-900 tracking-tight">Qualificació Final de Curs (Ponderació 1r, 2n i 3r Trimestre)</h2>
+        <h2 class="text-xl font-bold text-slate-900 tracking-tight">Qualificació Final de Curs</h2>
         <p class="text-xs text-slate-500">Agregació ponderada de les 5 Competències Específiques durant tot el curs escolar.</p>
       </div>
 
@@ -198,7 +204,7 @@
         <div class="border-b pb-4 flex justify-between items-start">
           <div>
             <h3 id="repStudentName" class="text-2xl font-black text-slate-900">Alumne</h3>
-            <p class="text-xs text-slate-500 font-medium">Curs: 1r d'ESO | Matèria: Educació Física | Convocatòria Ordinària</p>
+            <p id="repGroupLabel" class="text-xs text-slate-500 font-medium">Curs: 1r d'ESO | Matèria: Educació Física | Convocatòria Ordinària</p>
           </div>
           <div class="text-right">
             <span class="text-xs text-slate-400 font-semibold block uppercase">Grau Global Assolit</span>
@@ -217,6 +223,92 @@
     </section>
 
   </main>
+
+  <!-- ================= MODAL GESTIÓ DE GRUPS I ALUMNES ================= -->
+  <div id="groupStudentModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden no-print">
+    <div class="bg-white rounded-2xl shadow-2xl max-w-4xl w-full max-h-[90vh] flex flex-col overflow-hidden border border-slate-200">
+      <div class="px-6 py-4 bg-slate-900 text-white flex justify-between items-center">
+        <div class="flex items-center gap-2.5">
+          <i class="fa-solid fa-users-gear text-emerald-400 text-lg"></i>
+          <div>
+            <h3 class="text-sm font-bold">Gestió de Classes, Grups i Alumnes</h3>
+            <p class="text-xs text-slate-400">Afegeix noves classes o modifica la llista d'alumnes del grup actiu.</p>
+          </div>
+        </div>
+        <button onclick="closeGroupStudentModal()" class="text-slate-400 hover:text-white text-lg">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <div class="p-6 overflow-y-auto space-y-6 flex-1 text-xs">
+        <!-- 1. Gestió de Classes / Grups -->
+        <div class="bg-slate-50 p-4 rounded-xl border border-slate-200 space-y-3">
+          <h4 class="font-bold text-slate-800 text-xs uppercase tracking-wider flex items-center gap-2">
+            <i class="fa-solid fa-graduation-cap text-indigo-600"></i> Classes Disponibles
+          </h4>
+          <div class="flex flex-wrap items-center gap-2">
+            <div id="groupsListContainer" class="flex flex-wrap gap-2">
+              <!-- Botons de grups -->
+            </div>
+          </div>
+          <div class="flex items-center gap-2 pt-2 border-t border-slate-200">
+            <input type="text" id="newGroupNameInput" placeholder="Ex: 2n ESO B o 3r ESO A" class="border border-slate-300 rounded-lg px-3 py-1.5 text-xs w-60 focus:ring-2 focus:ring-emerald-500 outline-none">
+            <button onclick="addNewGroup()" class="bg-emerald-600 hover:bg-emerald-500 text-white font-semibold px-3 py-1.5 rounded-lg flex items-center gap-1 transition">
+              <i class="fa-solid fa-plus"></i> Crear Nova Classe
+            </button>
+          </div>
+        </div>
+
+        <!-- 2. Llista d'Alumnes del Grup Actiu -->
+        <div class="space-y-3">
+          <div class="flex justify-between items-center">
+            <h4 class="font-bold text-slate-800 text-xs uppercase tracking-wider flex items-center gap-2">
+              <i class="fa-solid fa-user-graduate text-emerald-600"></i> Alumnes de: <span id="modalCurrentGroupName" class="text-indigo-900 font-black">--</span>
+            </h4>
+            <span id="modalStudentCountBadge" class="text-xs bg-slate-200 text-slate-700 px-2 py-0.5 rounded font-bold">0 alumnes</span>
+          </div>
+
+          <!-- Formulari afegir alumne individual i ràpid massiu -->
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-3 bg-slate-50 p-3 rounded-xl border border-slate-200">
+            <div class="space-y-1.5">
+              <span class="font-semibold text-slate-700 block">Afegir Alumne/a Individual:</span>
+              <div class="flex gap-2">
+                <input type="text" id="newStudentNameInput" placeholder="Cognoms, Nom" class="flex-1 border border-slate-300 rounded-lg px-3 py-1.5 text-xs focus:ring-2 focus:ring-emerald-500 outline-none">
+                <button onclick="addSingleStudent()" class="bg-indigo-600 hover:bg-indigo-500 text-white font-semibold px-3 py-1.5 rounded-lg transition">Afegir</button>
+              </div>
+            </div>
+            <div class="space-y-1.5">
+              <span class="font-semibold text-slate-700 block">Importar Llista (un alumne per línia des d'Esfera/Excel):</span>
+              <div class="flex gap-2">
+                <textarea id="bulkStudentsInput" rows="1" placeholder="Enganxa llista d'alumnes..." class="flex-1 border border-slate-300 rounded-lg p-1.5 text-xs focus:ring-2 focus:ring-emerald-500 outline-none"></textarea>
+                <button onclick="addBulkStudents()" class="bg-slate-800 hover:bg-slate-700 text-white font-semibold px-3 py-1.5 rounded-lg transition">Carregar</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Taula d'alumnes existents editable -->
+          <div class="border border-slate-200 rounded-xl overflow-hidden max-h-60 overflow-y-auto">
+            <table class="w-full text-left text-xs">
+              <thead class="bg-slate-100 text-slate-600 border-b border-slate-200 sticky top-0">
+                <tr>
+                  <th class="p-2 w-10 text-center">#</th>
+                  <th class="p-2">Nom i Cognoms (Modifica directament)</th>
+                  <th class="p-2 w-20 text-center">Accions</th>
+                </tr>
+              </thead>
+              <tbody id="modalStudentsTableBody" class="divide-y divide-slate-200 bg-white">
+                <!-- Generat dinàmicament -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <div class="px-6 py-3.5 bg-slate-100 border-t flex justify-end items-center">
+        <button onclick="closeGroupStudentModal()" class="px-5 py-2 bg-slate-800 hover:bg-slate-700 text-white font-semibold rounded-lg transition shadow">Tancar i Aplicar Canvis</button>
+      </div>
+    </div>
+  </div>
 
   <!-- ================= MODAL PROGRAMADOR DE SdA & OAs ================= -->
   <div id="sdaModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden no-print">
@@ -268,82 +360,251 @@
       { id: 'CE5', name: 'CE5. Adquirir actituds, valors i habilitats socials per a la convivència', short: 'Valors i convivència' }
     ];
 
-    const INITIAL_STUDENTS = [
-      { id: 1, name: "Alonso Martí, Marc" },
-      { id: 2, name: "Balaguer Soler, Clara" },
-      { id: 3, name: "Castelló Font, Roc" },
-      { id: 4, name: "Domingo Serra, Júlia" },
-      { id: 5, name: "Pons Vidal, Marcel" }
-    ];
-
-    let appState = {
-      currentTrim: 1,
-      currentView: 'sda',
-      editingIsNew: false,
-      students: INITIAL_STUDENTS,
-      sdas: [
-        {
-          id: "sda_1",
-          trim: 1,
-          title: "HÀBITS SALUDABLES I CONDICIÓ FÍSICA",
-          competences: {
-            CE1: {
-              active: true,
-              weight: 80,
-              curricularCriteria: "1.1 - 1.2 - 1.3",
-              oas: [
-                { id: "oa1", label: "OA1: Identificar grups musculars i ossos", weight: 25 },
-                { id: "oa2", label: "OA2: Reconèixer les 4 Qualitats Físiques Bàsiques", weight: 25 },
-                { id: "oa3", label: "OA3: Valorar el nivell inicial de condició física", weight: 25 },
-                { id: "oa4", label: "OA4: Adoptar i defensar hàbits saludables (escalfament)", weight: 25 }
-              ]
+    // Estructura multi-classe
+    let appData = {
+      activeGroupId: "1esoA",
+      groups: {
+        "1esoA": {
+          name: "1r ESO A",
+          students: [
+            { id: 1, name: "Alonso Martí, Marc" },
+            { id: 2, name: "Balaguer Soler, Clara" },
+            { id: 3, name: "Castelló Font, Roc" },
+            { id: 4, name: "Domingo Serra, Júlia" },
+            { id: 5, name: "Pons Vidal, Marcel" }
+          ],
+          sdas: [
+            {
+              id: "sda_1",
+              trim: 1,
+              title: "HÀBITS SALUDABLES I CONDICIÓ FÍSICA",
+              competences: {
+                CE1: {
+                  active: true,
+                  weight: 80,
+                  curricularCriteria: "1.1 - 1.2 - 1.3",
+                  oas: [
+                    { id: "oa1", label: "OA1: Identificar grups musculars i ossos", weight: 25 },
+                    { id: "oa2", label: "OA2: Reconèixer les 4 Qualitats Físiques Bàsiques", weight: 25 },
+                    { id: "oa3", label: "OA3: Valorar el nivell inicial de condició física", weight: 25 },
+                    { id: "oa4", label: "OA4: Adoptar i defensar hàbits saludables (escalfament)", weight: 25 }
+                  ]
+                },
+                CE5: {
+                  active: true,
+                  weight: 20,
+                  curricularCriteria: "5.1 - 5.3",
+                  oas: [
+                    { id: "oa5_1", label: "OG_MAT1: Material i higiene esportiva", weight: 25 },
+                    { id: "oa5_2", label: "OG_ESF1: Participació activa i esforç constant", weight: 25 },
+                    { id: "oa5_3", label: "OG_ACT1: Respecte a les normes de la sessió", weight: 25 },
+                    { id: "oa5_4", label: "OG_ACT2: Treball cooperatiu i actitud inclusiva", weight: 25 }
+                  ]
+                }
+              }
             },
-            CE5: {
-              active: true,
-              weight: 20,
-              curricularCriteria: "5.1 - 5.3",
-              oas: [
-                { id: "oa5_1", label: "OG_MAT1: Material i higiene esportiva", weight: 25 },
-                { id: "oa5_2", label: "OG_ESF1: Participació activa i esforç constant", weight: 25 },
-                { id: "oa5_3", label: "OG_ACT1: Respecte a les normes de la sessió", weight: 25 },
-                { id: "oa5_4", label: "OG_ACT2: Treball cooperatiu i actitud inclusiva", weight: 25 }
-              ]
+            {
+              id: "sda_2",
+              trim: 1,
+              title: "JOCS D'OPOSICIÓ I ESPORTS DE COLLABORACIÓ",
+              competences: {
+                CE2: { active: true, weight: 60, curricularCriteria: "2.1 - 2.2", oas: [] },
+                CE5: { active: true, weight: 40, curricularCriteria: "5.2", oas: [] }
+              }
+            }
+          ],
+          grades: {
+            "sda_1": {
+              1: { "CE1_oa1": 3.5, "CE1_oa2": 3.5, "CE1_oa3": 3.5, "CE1_oa4": 3.5, "CE5_oa5_1": 4, "CE5_oa5_2": 4, "CE5_oa5_3": 3.5, "CE5_oa5_4": 4 },
+              2: { "CE1_oa1": 4, "CE1_oa2": 3.5, "CE1_oa3": 4, "CE1_oa4": 3.7, "CE5_oa5_1": 4, "CE5_oa5_2": 4, "CE5_oa5_3": 4, "CE5_oa5_4": 4 },
+              5: { "CE1_oa1": 2, "CE1_oa2": 3, "CE1_oa3": 3, "CE1_oa4": 1, "CE5_oa5_1": 3, "CE5_oa5_2": 3, "CE5_oa5_3": 4, "CE5_oa5_4": 4 }
+            },
+            "sda_2": {
+              1: { "CE2_direct": 3.8, "CE5_direct": 3.8 },
+              2: { "CE2_direct": 3.8, "CE5_direct": 4.0 },
+              5: { "CE2_direct": 2.5, "CE5_direct": 3.0 }
             }
           }
         },
-        {
-          id: "sda_2",
-          trim: 1,
-          title: "JOCS D'OPOSICIÓ I ESPORTS DE COLLABORACIÓ",
-          competences: {
-            CE2: { active: true, weight: 60, curricularCriteria: "2.1 - 2.2", oas: [] },
-            CE5: { active: true, weight: 40, curricularCriteria: "5.2", oas: [] }
-          }
-        }
-      ],
-      grades: {
-        "sda_1": {
-          1: { "CE1_oa1": 3.5, "CE1_oa2": 3.5, "CE1_oa3": 3.5, "CE1_oa4": 3.5, "CE5_oa5_1": 4, "CE5_oa5_2": 4, "CE5_oa5_3": 3.5, "CE5_oa5_4": 4 },
-          2: { "CE1_oa1": 4, "CE1_oa2": 3.5, "CE1_oa3": 4, "CE1_oa4": 3.7, "CE5_oa5_1": 4, "CE5_oa5_2": 4, "CE5_oa5_3": 4, "CE5_oa5_4": 4 },
-          5: { "CE1_oa1": 2, "CE1_oa2": 3, "CE1_oa3": 3, "CE1_oa4": 1, "CE5_oa5_1": 3, "CE5_oa5_2": 3, "CE5_oa5_3": 4, "CE5_oa5_4": 4 }
-        },
-        "sda_2": {
-          1: { "CE2_direct": 3.8, "CE5_direct": 3.8 },
-          2: { "CE2_direct": 3.8, "CE5_direct": 4.0 },
-          5: { "CE2_direct": 2.5, "CE5_direct": 3.0 }
+        "1esoB": {
+          name: "1r ESO B",
+          students: [
+            { id: 101, name: "Aragó Garcia, Arnau" },
+            { id: 102, name: "Bernat Pujol, Mireia" },
+            { id: 103, name: "Casanovas Costa, Biel" }
+          ],
+          sdas: [],
+          grades: {}
         }
       }
     };
 
+    let appState = {
+      currentTrim: 1,
+      currentView: 'sda',
+      editingIsNew: false
+    };
+
     let radarInstance = null;
 
+    function getCurrentGroup() {
+      return appData.groups[appData.activeGroupId];
+    }
+
     function init() {
+      renderGroupSelectorOptions();
       populateSdaSelect();
       populateReportStudents();
       renderSdaGrid();
       switchView('sda');
     }
 
+    // GESTIÓ DE CLASSES / GRUPS
+    function renderGroupSelectorOptions() {
+      const sel = document.getElementById('groupSelector');
+      sel.innerHTML = Object.keys(appData.groups).map(gId => {
+        return `<option value="${gId}" ${gId === appData.activeGroupId ? 'selected' : ''}>${appData.groups[gId].name}</option>`;
+      }).join('');
+    }
+
+    function changeActiveGroup(groupId) {
+      appData.activeGroupId = groupId;
+      populateSdaSelect();
+      populateReportStudents();
+      renderSdaGrid();
+      renderTrimView();
+      if (appState.currentView === 'final') renderFinalView();
+      if (appState.currentView === 'report') renderIndividualReport();
+    }
+
+    function openGroupStudentModal() {
+      renderGroupStudentModalContent();
+      document.getElementById('groupStudentModal').classList.remove('hidden');
+    }
+
+    function closeGroupStudentModal() {
+      document.getElementById('groupStudentModal').classList.add('hidden');
+      renderGroupSelectorOptions();
+      populateReportStudents();
+      renderSdaGrid();
+      renderTrimView();
+      if (appState.currentView === 'final') renderFinalView();
+      if (appState.currentView === 'report') renderIndividualReport();
+    }
+
+    function renderGroupStudentModalContent() {
+      const curGroup = getCurrentGroup();
+      document.getElementById('modalCurrentGroupName').textContent = curGroup.name;
+      document.getElementById('modalStudentCountBadge').textContent = `${curGroup.students.length} alumnes`;
+
+      // Llista de classes (badges)
+      const grpCont = document.getElementById('groupsListContainer');
+      grpCont.innerHTML = Object.keys(appData.groups).map(gId => {
+        const isCurrent = gId === appData.activeGroupId;
+        return `
+          <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg border text-xs font-semibold ${isCurrent ? 'bg-indigo-600 text-white border-indigo-600 shadow' : 'bg-white text-slate-700 border-slate-300'}">
+            <button onclick="switchActiveGroupInModal('${gId}')" class="hover:underline">${appData.groups[gId].name}</button>
+            ${Object.keys(appData.groups).length > 1 ? `
+              <button onclick="deleteGroup('${gId}')" title="Eliminar classe" class="text-slate-400 hover:text-red-400 ml-1">
+                <i class="fa-solid fa-xmark"></i>
+              </button>` : ''}
+          </div>
+        `;
+      }).join('');
+
+      // Taula d'alumnes editables
+      const tbody = document.getElementById('modalStudentsTableBody');
+      tbody.innerHTML = curGroup.students.map((st, idx) => `
+        <tr class="hover:bg-slate-50">
+          <td class="p-2 text-center text-slate-400">${idx + 1}</td>
+          <td class="p-2">
+            <input type="text" value="${st.name}" onchange="updateStudentName(${st.id}, this.value)" class="w-full border border-slate-300 rounded px-2 py-1 font-semibold text-slate-800 focus:ring-2 focus:ring-emerald-500 outline-none">
+          </td>
+          <td class="p-2 text-center">
+            <button onclick="deleteStudent(${st.id})" title="Eliminar alumne" class="text-slate-400 hover:text-red-500 p-1">
+              <i class="fa-solid fa-trash-can"></i>
+            </button>
+          </td>
+        </tr>
+      `).join('');
+    }
+
+    function switchActiveGroupInModal(gId) {
+      changeActiveGroup(gId);
+      renderGroupStudentModalContent();
+    }
+
+    function addNewGroup() {
+      const name = document.getElementById('newGroupNameInput').value.trim();
+      if (!name) return;
+      const gId = 'g_' + Date.now();
+      appData.groups[gId] = {
+        name: name,
+        students: [],
+        sdas: [],
+        grades: {}
+      };
+      document.getElementById('newGroupNameInput').value = '';
+      changeActiveGroup(gId);
+      renderGroupStudentModalContent();
+    }
+
+    function deleteGroup(gId) {
+      if (confirm(`Segur que vols eliminar la classe "${appData.groups[gId].name}" i totes les seves notes?`)) {
+        delete appData.groups[gId];
+        const remainingKeys = Object.keys(appData.groups);
+        appData.activeGroupId = remainingKeys[0];
+        renderGroupSelectorOptions();
+        renderGroupStudentModalContent();
+      }
+    }
+
+    function addSingleStudent() {
+      const input = document.getElementById('newStudentNameInput');
+      const name = input.value.trim();
+      if (!name) return;
+      const curGroup = getCurrentGroup();
+      curGroup.students.push({
+        id: Date.now(),
+        name: name
+      });
+      input.value = '';
+      renderGroupStudentModalContent();
+    }
+
+    function addBulkStudents() {
+      const area = document.getElementById('bulkStudentsInput');
+      const text = area.value.trim();
+      if (!text) return;
+      const lines = text.split('\n').map(l => l.trim()).filter(l => l.length > 0);
+      const curGroup = getCurrentGroup();
+      lines.forEach((line, i) => {
+        curGroup.students.push({
+          id: Date.now() + i,
+          name: line
+        });
+      });
+      area.value = '';
+      renderGroupStudentModalContent();
+    }
+
+    function updateStudentName(stId, newName) {
+      const curGroup = getCurrentGroup();
+      const st = curGroup.students.find(s => s.id === stId);
+      if (st && newName.trim()) {
+        st.name = newName.trim();
+      }
+    }
+
+    function deleteStudent(stId) {
+      const curGroup = getCurrentGroup();
+      if (confirm("Vols eliminar aquest alumne/a?")) {
+        curGroup.students = curGroup.students.filter(s => s.id !== stId);
+        renderGroupStudentModalContent();
+      }
+    }
+
+    // NAVEGACIÓ I TRIMESTRES
     function setTrim(t) {
       appState.currentTrim = t;
       [1, 2, 3].forEach(n => {
@@ -399,7 +660,8 @@
     function getStudentCeScoreInSda(sda, stId, ceId) {
       const conf = sda.competences[ceId];
       if (!conf || !conf.active) return null;
-      const sdaGrades = (appState.grades[sda.id] && appState.grades[sda.id][stId]) || {};
+      const curGroup = getCurrentGroup();
+      const sdaGrades = (curGroup.grades[sda.id] && curGroup.grades[sda.id][stId]) || {};
 
       if (conf.oas && conf.oas.length > 0) {
         let sum = 0, weightSum = 0;
@@ -417,7 +679,6 @@
       }
     }
 
-    // Calcula la nota global d'un alumne a la SdA (ponderada per CE)
     function getStudentOverallSdaScore(sda, stId) {
       let totalWeightedScore = 0;
       let totalActiveWeight = 0;
@@ -440,7 +701,8 @@
 
     function populateSdaSelect() {
       const sel = document.getElementById('sdaSelect');
-      const trimSdas = appState.sdas.filter(s => s.trim === appState.currentTrim);
+      const curGroup = getCurrentGroup();
+      const trimSdas = (curGroup.sdas || []).filter(s => s.trim === appState.currentTrim);
       if (trimSdas.length === 0) {
         sel.innerHTML = `<option value="">Sense SdAs en aquest trimestre</option>`;
         return;
@@ -448,22 +710,28 @@
       sel.innerHTML = trimSdas.map(s => `<option value="${s.id}">${s.title}</option>`).join('');
     }
 
-    // RENDER GRAELLA SdA AMB LA NOTA FINAL DE LA SdA
+    // RENDER GRAELLA SdA AMB NOTA FINAL DE LA SdA
     function renderSdaGrid() {
       const sdaId = document.getElementById('sdaSelect').value;
-      const sda = appState.sdas.find(s => s.id === sdaId);
+      const curGroup = getCurrentGroup();
+      const sda = (curGroup.sdas || []).find(s => s.id === sdaId);
       const head = document.getElementById('sdaGridHead');
       const body = document.getElementById('sdaGridBody');
       const titleBar = document.getElementById('sdaGridTitleBar');
 
       if (!sda) {
-        titleBar.textContent = "Cap SdA seleccionada";
+        titleBar.textContent = `Sense SdA seleccionada a ${curGroup.name}`;
         head.innerHTML = '';
-        body.innerHTML = '<tr><td class="p-4 text-center text-slate-400">Crea una SdA per començar a avaluar.</td></tr>';
+        body.innerHTML = `<tr><td class="p-8 text-center text-slate-400">
+          <p class="font-bold text-slate-600 mb-1">Cap SdA creada al trimestre ${appState.currentTrim} per a ${curGroup.name}</p>
+          <button onclick="openSdaModal(true)" class="text-xs bg-emerald-600 text-white px-3 py-1.5 rounded-lg mt-2 font-semibold hover:bg-emerald-500">
+            <i class="fa-solid fa-plus"></i> Crear la primera SdA
+          </button>
+        </td></tr>`;
         return;
       }
 
-      titleBar.textContent = `${sda.title} (Trimestre ${sda.trim})`;
+      titleBar.textContent = `${sda.title} (${curGroup.name} - Trimestre ${sda.trim})`;
       const activeCes = OFFICIAL_CES.filter(ce => sda.competences && sda.competences[ce.id] && sda.competences[ce.id].active);
 
       // Fila 1: CEs + Capçalera Nota Global SdA
@@ -473,7 +741,6 @@
         const oasCount = (conf.oas && conf.oas.length > 0) ? conf.oas.length : 1;
         r1 += `<th colspan="${oasCount + 2}" class="p-2 text-center border-r border-slate-300 bg-slate-100 font-bold text-slate-800">${ce.name}</th>`;
       });
-      // Capçalera global de la SdA
       r1 += `<th colspan="2" class="p-2 text-center border-l-2 border-emerald-500 bg-slate-900 text-emerald-400 font-bold uppercase tracking-wider">Qualificació SdA</th>`;
       r1 += `</tr>`;
 
@@ -522,11 +789,16 @@
 
       head.innerHTML = r1 + r2 + r3 + r4;
 
-      // Cos de dades
-      const currentGrades = appState.grades[sda.id] || {};
+      // Cos de la graella d'alumnes
+      const currentGrades = curGroup.grades[sda.id] || {};
       let rowsHtml = '';
 
-      appState.students.forEach((st, idx) => {
+      if (curGroup.students.length === 0) {
+        body.innerHTML = `<tr><td colspan="20" class="p-6 text-center text-slate-400">No hi ha alumnes en aquesta classe. Fes clic a <b>Afegir/Modificar Alumnes</b> per començar.</td></tr>`;
+        return;
+      }
+
+      curGroup.students.forEach((st, idx) => {
         const stGrades = currentGrades[st.id] || {};
         rowsHtml += `<tr class="hover:bg-slate-50 transition border-b border-slate-200">
           <td class="p-2.5 text-center text-slate-400 border-r border-slate-200">${idx + 1}</td>
@@ -563,7 +835,6 @@
           `;
         });
 
-        // COLUMNA FINAL DE LA SdA
         const overallSdaScore = getStudentOverallSdaScore(sda, st.id);
         const overallSdaLvl = getLevel(overallSdaScore);
 
@@ -581,19 +852,21 @@
     }
 
     function setGrade(sdaId, stId, key, val) {
-      if (!appState.grades[sdaId]) appState.grades[sdaId] = {};
-      if (!appState.grades[sdaId][stId]) appState.grades[sdaId][stId] = {};
+      const curGroup = getCurrentGroup();
+      if (!curGroup.grades[sdaId]) curGroup.grades[sdaId] = {};
+      if (!curGroup.grades[sdaId][stId]) curGroup.grades[sdaId][stId] = {};
       if (val === '') {
-        delete appState.grades[sdaId][stId][key];
+        delete curGroup.grades[sdaId][stId][key];
       } else {
-        appState.grades[sdaId][stId][key] = parseFloat(val);
+        curGroup.grades[sdaId][stId][key] = parseFloat(val);
       }
       renderSdaGrid();
     }
 
-    // MODAL DE SdA & OAs
+    // MODAL SdA & OAs
     function openSdaModal(isNew) {
       appState.editingIsNew = isNew;
+      const curGroup = getCurrentGroup();
       let sda;
       if (isNew) {
         sda = {
@@ -604,7 +877,11 @@
         };
       } else {
         const sdaId = document.getElementById('sdaSelect').value;
-        sda = appState.sdas.find(s => s.id === sdaId);
+        sda = (curGroup.sdas || []).find(s => s.id === sdaId);
+        if (!sda) {
+          openSdaModal(true);
+          return;
+        }
       }
 
       document.getElementById('modalSdaTitle').value = sda.title || '';
@@ -704,6 +981,7 @@
     }
 
     function saveSdaFromModal() {
+      const curGroup = getCurrentGroup();
       let sda;
       if (appState.editingIsNew) {
         sda = {
@@ -712,10 +990,10 @@
           title: document.getElementById('modalSdaTitle').value || 'Nova SdA',
           competences: {}
         };
-        appState.sdas.push(sda);
+        curGroup.sdas.push(sda);
       } else {
         const sdaId = document.getElementById('sdaSelect').value;
-        sda = appState.sdas.find(s => s.id === sdaId);
+        sda = curGroup.sdas.find(s => s.id === sdaId);
         sda.title = document.getElementById('modalSdaTitle').value || 'SdA sense títol';
         sda.competences = {};
       }
@@ -747,15 +1025,22 @@
       populateSdaSelect();
       document.getElementById('sdaSelect').value = sda.id;
       renderSdaGrid();
+      renderTrimView();
     }
 
     // RESUM TRIMESTRAL
     function renderTrimView() {
       const tbody = document.getElementById('trimTableBody');
-      const trimSdas = appState.sdas.filter(s => s.trim === appState.currentTrim);
+      const curGroup = getCurrentGroup();
+      const trimSdas = (curGroup.sdas || []).filter(s => s.trim === appState.currentTrim);
 
       let html = '';
-      appState.students.forEach((st, idx) => {
+      if (curGroup.students.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="8" class="p-6 text-center text-slate-400">Sense alumnes en aquesta classe.</td></tr>`;
+        return;
+      }
+
+      curGroup.students.forEach((st, idx) => {
         let studentCeScores = {};
         let totalCeSum = 0, validCeCount = 0;
 
@@ -805,15 +1090,21 @@
     // FINAL DE CURS
     function renderFinalView() {
       const tbody = document.getElementById('finalTableBody');
+      const curGroup = getCurrentGroup();
       let html = '';
 
-      appState.students.forEach((st, idx) => {
+      if (curGroup.students.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="8" class="p-6 text-center text-slate-400">Sense alumnes.</td></tr>`;
+        return;
+      }
+
+      curGroup.students.forEach((st, idx) => {
         let globalCeScores = {};
         let totalSum = 0, count = 0;
 
         OFFICIAL_CES.forEach(ce => {
           let sum = 0, c = 0;
-          appState.sdas.forEach(sda => {
+          (curGroup.sdas || []).forEach(sda => {
             const sc = getStudentCeScoreInSda(sda, st.id, ce.id);
             if (sc !== null) {
               sum += sc;
@@ -857,13 +1148,28 @@
     // BUTLLETÍ INDIVIDUAL
     function populateReportStudents() {
       const sel = document.getElementById('reportStudentSelect');
-      sel.innerHTML = appState.students.map(s => `<option value="${s.id}">${s.name}</option>`).join('');
+      const curGroup = getCurrentGroup();
+      if (!curGroup || curGroup.students.length === 0) {
+        sel.innerHTML = `<option value="">Sense alumnes</option>`;
+        return;
+      }
+      sel.innerHTML = curGroup.students.map(s => `<option value="${s.id}">${s.name}</option>`).join('');
     }
 
     function renderIndividualReport() {
-      const stId = parseInt(document.getElementById('reportStudentSelect').value) || 1;
-      const st = appState.students.find(s => s.id === stId);
+      const curGroup = getCurrentGroup();
+      const sel = document.getElementById('reportStudentSelect');
+      const stId = parseInt(sel.value);
+      const st = curGroup.students.find(s => s.id === stId);
+
+      if (!st) {
+        document.getElementById('repStudentName').textContent = "Cap alumne seleccionat";
+        document.getElementById('repDetailsContainer').innerHTML = "";
+        return;
+      }
+
       document.getElementById('repStudentName').textContent = st.name;
+      document.getElementById('repGroupLabel').textContent = `Classe: ${curGroup.name} | Matèria: Educació Física | LOMLOE`;
 
       let ceValues = [];
       let total = 0, count = 0;
@@ -871,7 +1177,7 @@
 
       OFFICIAL_CES.forEach(ce => {
         let sum = 0, c = 0;
-        appState.sdas.forEach(sda => {
+        (curGroup.sdas || []).forEach(sda => {
           const sc = getStudentCeScoreInSda(sda, st.id, ce.id);
           if (sc !== null) {
             sum += sc;
@@ -939,23 +1245,25 @@
     }
 
     function exportCSV() {
-      let csv = "Alumne,CE1,CE2,CE3,CE4,CE5\n";
-      appState.students.forEach(st => {
+      const curGroup = getCurrentGroup();
+      let csv = `Alumne,CE1,CE2,CE3,CE4,CE5,Grup\n`;
+      curGroup.students.forEach(st => {
         let row = [`"${st.name}"`];
         OFFICIAL_CES.forEach(ce => {
           let sum = 0, c = 0;
-          appState.sdas.filter(s => s.trim === appState.currentTrim).forEach(sda => {
+          (curGroup.sdas || []).filter(s => s.trim === appState.currentTrim).forEach(sda => {
             const sc = getStudentCeScoreInSda(sda, st.id, ce.id);
             if (sc !== null) { sum += sc; c++; }
           });
           row.push(c > 0 ? (sum / c).toFixed(2) : "");
         });
+        row.push(`"${curGroup.name}"`);
         csv += row.join(",") + "\n";
       });
       const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
       const link = document.createElement("a");
       link.href = URL.createObjectURL(blob);
-      link.download = `Resum_Trimestre_${appState.currentTrim}.csv`;
+      link.download = `Resum_${curGroup.name.replace(/\s+/g, '_')}_Trim_${appState.currentTrim}.csv`;
       link.click();
     }
 
