@@ -1024,12 +1024,16 @@
     function renderSdaGrid() {
       const curGroup = getCurrentGroup();
       const trimSdas = (curGroup.sdas || []).filter(s => s.trim === appState.currentTrim);
-      let sdaId = document.getElementById('sdaSelect').value;
+      
+      const sel = document.getElementById('sdaSelect');
+      let sdaId = sel.value;
 
       let sda = trimSdas.find(s => s.id === sdaId);
+      
+      // Si no hi ha cap SdA seleccionada però n'hi ha al trimestre, assignem la primera
       if (!sda && trimSdas.length > 0) {
         sda = trimSdas[0];
-        document.getElementById('sdaSelect').value = sda.id;
+        sel.value = sda.id;
       }
 
       const head = document.getElementById('sdaGridHead');
