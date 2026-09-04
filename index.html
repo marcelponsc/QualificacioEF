@@ -314,28 +314,41 @@
         </div>
       </section>
 
-      <!-- VISTA 4: FINAL DE CURS (AMB PONDERACIÓ DE CEs) -->
+      <!-- VISTA 4: FINAL DE CURS (SELECTOR DE MÈTODE: TRIMESTRES O CEs) -->
       <section id="viewFinal" class="space-y-4 hidden">
         <div class="flex flex-wrap items-end justify-between gap-4 border-b border-slate-200/80 pb-4">
           <div>
             <span class="inline-flex items-center rounded-md bg-emerald-50 px-2 py-0.5 text-[11px] font-semibold text-emerald-700 border border-emerald-100">Convocatòria Ordinària</span>
             <h2 class="text-xl font-bold text-slate-900 tracking-tight mt-1">Avaluació Final de Curs</h2>
-            <p class="text-xs text-slate-500 mt-0.5">Defineix el pes ponderat de cada Competència Específica per calcular la qualificació de final de curs.</p>
+            <p class="text-xs text-slate-500 mt-0.5">Tria el mètode de càlcul de final de curs i pondera els percentatges.</p>
           </div>
-          <button onclick="exportCSV()" class="inline-flex items-center gap-2 bg-white border border-slate-300 text-slate-700 hover:bg-slate-50 text-xs font-semibold px-3 py-2 rounded-lg shadow-2xs transition">
-            <i class="fa-solid fa-file-csv text-slate-400"></i> Exportar a CSV
-          </button>
+
+          <div class="flex flex-wrap items-center gap-3">
+            <!-- Selector de Mètode -->
+            <div class="flex items-center bg-slate-100 p-1 rounded-xl border border-slate-200 text-xs">
+              <button id="finalMethodTrimBtn" onclick="setFinalCalculationMethod('trim')" class="px-3 py-1.5 rounded-lg font-semibold transition">
+                <i class="fa-solid fa-calendar-days mr-1"></i> Per Trimestres (T1, T2, T3)
+              </button>
+              <button id="finalMethodCeBtn" onclick="setFinalCalculationMethod('ce')" class="px-3 py-1.5 rounded-lg font-semibold transition">
+                <i class="fa-solid fa-scale-balanced mr-1"></i> Per Competències (CE1-CE5)
+              </button>
+            </div>
+
+            <button onclick="exportCSV()" class="inline-flex items-center gap-2 bg-white border border-slate-300 text-slate-700 hover:bg-slate-50 text-xs font-semibold px-3 py-2 rounded-lg shadow-2xs transition">
+              <i class="fa-solid fa-file-csv text-slate-400"></i> Exportar a CSV
+            </button>
+          </div>
         </div>
 
-        <!-- Panell de Ponderació de CEs -->
+        <!-- Panell de Ponderació Dinàmic (Canvia segons el mètode) -->
         <div class="bg-white border border-slate-200/90 rounded-xl p-4 shadow-2xs space-y-3">
           <div class="flex items-center justify-between">
-            <h4 class="text-xs font-bold text-slate-800 uppercase tracking-wider flex items-center gap-2">
-              <i class="fa-solid fa-scale-balanced text-indigo-600"></i> Ponderació de les Competències Específiques
+            <h4 id="finalWeightPanelTitle" class="text-xs font-bold text-slate-800 uppercase tracking-wider flex items-center gap-2">
+              <i class="fa-solid fa-sliders text-indigo-600"></i> Ponderació del Càlcul Final
             </h4>
-            <span id="finalCeWeightSumBadge" class="text-xs font-mono font-bold px-2.5 py-0.5 rounded-md">Total CEs: 100%</span>
+            <span id="finalWeightSumBadge" class="text-xs font-mono font-bold px-2.5 py-0.5 rounded-md">Total: 100%</span>
           </div>
-          <div id="finalCeWeightsContainer" class="flex flex-wrap gap-3 pt-1"></div>
+          <div id="finalWeightsContainer" class="flex flex-wrap gap-3 pt-1"></div>
         </div>
 
         <div class="bg-white border border-slate-200 rounded-xl shadow-2xs overflow-hidden">
@@ -741,6 +754,12 @@
       CE5: 20
     };
 
+    const DEFAULT_FINAL_TRIM_WEIGHTS = {
+      t1: 33.33,
+      t2: 33.33,
+      t3: 33.34
+    };
+
     let gradeThresholds = loadThresholds();
 
     function loadThresholds() {
@@ -764,6 +783,8 @@
       groups: {
         "1esoA": {
           name: "1r ESO A",
+          finalMethod: 'trim', // 'trim' o 'ce'
+          finalTrimWeights: { t1: 33.33, t2: 33.33, t3: 33.34 },
           finalCeWeights: { CE1: 20, CE2: 20, CE3: 20, CE4: 20, CE5: 20 },
           students: [
             { id: 1, name: "Alonso Martí, Marc" },
@@ -830,6 +851,8 @@
         },
         "1esoB": {
           name: "1r ESO B",
+          finalMethod: 'trim',
+          finalTrimWeights: { t1: 33.33, t2: 33.33, t3: 33.34 },
           finalCeWeights: { CE1: 20, CE2: 20, CE3: 20, CE4: 20, CE5: 20 },
           students: [
             { id: 11, name: "Bassa Solà, Jordi" },
@@ -906,6 +929,8 @@
               if (!Array.isArray(parsed.groups[k].sdas)) parsed.groups[k].sdas = [];
               if (!parsed.groups[k].grades) parsed.groups[k].grades = {};
               if (!parsed.groups[k].finalCeWeights) parsed.groups[k].finalCeWeights = { ...DEFAULT_FINAL_CE_WEIGHTS };
+              if (!parsed.groups[k].finalTrimWeights) parsed.groups[k].finalTrimWeights = { ...DEFAULT_FINAL_TRIM_WEIGHTS };
+              if (!parsed.groups[k].finalMethod) parsed.groups[k].finalMethod = 'trim';
             });
             return parsed;
           }
@@ -982,6 +1007,8 @@
       }
       const grp = appData.groups[appData.activeGroupId];
       if (!grp.finalCeWeights) grp.finalCeWeights = { ...DEFAULT_FINAL_CE_WEIGHTS };
+      if (!grp.finalTrimWeights) grp.finalTrimWeights = { ...DEFAULT_FINAL_TRIM_WEIGHTS };
+      if (!grp.finalMethod) grp.finalMethod = 'trim';
       return grp;
     }
 
@@ -1096,6 +1123,8 @@
         students: [], 
         sdas: [], 
         grades: {},
+        finalMethod: 'trim',
+        finalTrimWeights: { ...DEFAULT_FINAL_TRIM_WEIGHTS },
         finalCeWeights: { ...DEFAULT_FINAL_CE_WEIGHTS }
       };
       saveToStorage();
@@ -1359,9 +1388,10 @@
       return (totalWeightedScore * 100) / totalActiveWeight;
     }
 
-    function getStudentTrimScore(stId, group = null) {
+    // Retorna la nota del trimestre especificat
+    function getStudentTrimScoreByTrim(stId, trimNum, group = null) {
       const curGroup = group || getCurrentGroup();
-      const trimSdas = (curGroup.sdas || []).filter(s => s.trim === appState.currentTrim);
+      const trimSdas = (curGroup.sdas || []).filter(s => s.trim === trimNum);
       if (trimSdas.length === 0) return null;
 
       let weightedSum = 0;
@@ -1378,6 +1408,52 @@
 
       if (totalWeight === 0) return null;
       return (weightedSum * 100) / totalWeight;
+    }
+
+    function getStudentTrimScore(stId, group = null) {
+      return getStudentTrimScoreByTrim(stId, appState.currentTrim, group);
+    }
+
+    // CÀLCUL FINAL DE CURS UNIFICAT (SEGONS EL MÈTODE ESCOLLIT)
+    function getStudentCourseFinalScore(stId, group = null) {
+      const curGroup = group || getCurrentGroup();
+      const method = curGroup.finalMethod || 'trim';
+
+      if (method === 'trim') {
+        const weights = curGroup.finalTrimWeights || DEFAULT_FINAL_TRIM_WEIGHTS;
+        const s1 = getStudentTrimScoreByTrim(stId, 1, curGroup);
+        const s2 = getStudentTrimScoreByTrim(stId, 2, curGroup);
+        const s3 = getStudentTrimScoreByTrim(stId, 3, curGroup);
+
+        let totalWeighted = 0;
+        let activeWeight = 0;
+
+        if (s1 !== null) { totalWeighted += s1 * (weights.t1 / 100); activeWeight += weights.t1; }
+        if (s2 !== null) { totalWeighted += s2 * (weights.t2 / 100); activeWeight += weights.t2; }
+        if (s3 !== null) { totalWeighted += s3 * (weights.t3 / 100); activeWeight += weights.t3; }
+
+        return activeWeight > 0 ? (totalWeighted * 100) / activeWeight : null;
+      } else {
+        const weights = curGroup.finalCeWeights || DEFAULT_FINAL_CE_WEIGHTS;
+        let totalWeighted = 0;
+        let activeWeight = 0;
+
+        OFFICIAL_CES.forEach(ce => {
+          let sum = 0, c = 0;
+          (curGroup.sdas || []).forEach(sda => {
+            const sc = getStudentCeScoreInSda(sda, stId, ce.id, curGroup.grades);
+            if (sc !== null) { sum += sc; c++; }
+          });
+          if (c > 0) {
+            const avg = sum / c;
+            const w = weights[ce.id] !== undefined ? weights[ce.id] : 20;
+            totalWeighted += avg * (w / 100);
+            activeWeight += w;
+          }
+        });
+
+        return activeWeight > 0 ? (totalWeighted * 100) / activeWeight : null;
+      }
     }
 
     function populateSdaSelect() {
@@ -1641,7 +1717,6 @@
       }
     }
 
-    // MODAL SdA
     function openSdaModal(isNew) {
       appState.editingIsNew = isNew;
       const curGroup = getCurrentGroup();
@@ -1971,8 +2046,23 @@
     }
 
     // ========================================================
-    // FINAL DE CURS (GESTIÓ I PONDERACIÓ DE LES CEs)
+    // FINAL DE CURS (SELECTOR TRIMESTRES VS COMPETÈNCIES)
     // ========================================================
+    function setFinalCalculationMethod(method) {
+      const curGroup = getCurrentGroup();
+      curGroup.finalMethod = method;
+      saveToStorage();
+      renderFinalView();
+    }
+
+    function updateFinalTrimWeight(trimKey, newWeight) {
+      const curGroup = getCurrentGroup();
+      if (!curGroup.finalTrimWeights) curGroup.finalTrimWeights = { ...DEFAULT_FINAL_TRIM_WEIGHTS };
+      curGroup.finalTrimWeights[trimKey] = parseFloat(newWeight) || 0;
+      saveToStorage();
+      renderFinalView();
+    }
+
     function updateFinalCeWeight(ceId, newWeight) {
       const curGroup = getCurrentGroup();
       if (!curGroup.finalCeWeights) curGroup.finalCeWeights = { ...DEFAULT_FINAL_CE_WEIGHTS };
@@ -1983,95 +2073,147 @@
 
     function renderFinalView() {
       const curGroup = getCurrentGroup();
-      if (!curGroup.finalCeWeights) curGroup.finalCeWeights = { ...DEFAULT_FINAL_CE_WEIGHTS };
+      const method = curGroup.finalMethod || 'trim';
 
-      // 1. Panell de Ponderació
-      const weightsContainer = document.getElementById('finalCeWeightsContainer');
+      // 1. Botons de commutació
+      const btnTrim = document.getElementById('finalMethodTrimBtn');
+      const btnCe = document.getElementById('finalMethodCeBtn');
+      if (method === 'trim') {
+        btnTrim.className = "px-3 py-1.5 rounded-lg font-semibold bg-white text-slate-900 shadow-2xs transition";
+        btnCe.className = "px-3 py-1.5 rounded-lg font-medium text-slate-600 hover:text-slate-900 transition";
+      } else {
+        btnCe.className = "px-3 py-1.5 rounded-lg font-semibold bg-white text-slate-900 shadow-2xs transition";
+        btnTrim.className = "px-3 py-1.5 rounded-lg font-medium text-slate-600 hover:text-slate-900 transition";
+      }
+
+      // 2. Panell de Ponderació Dinàmic
+      const weightsContainer = document.getElementById('finalWeightsContainer');
+      const badge = document.getElementById('finalWeightSumBadge');
+      const panelTitle = document.getElementById('finalWeightPanelTitle');
+
       let sumWeights = 0;
-      weightsContainer.innerHTML = OFFICIAL_CES.map(ce => {
-        const w = curGroup.finalCeWeights[ce.id] !== undefined ? curGroup.finalCeWeights[ce.id] : 20;
-        sumWeights += w;
-        return `
+
+      if (method === 'trim') {
+        panelTitle.innerHTML = `<i class="fa-solid fa-calendar-days text-indigo-600"></i> Ponderació dels Trimestres (T1, T2, T3) al Curs`;
+        const tw = curGroup.finalTrimWeights || DEFAULT_FINAL_TRIM_WEIGHTS;
+        sumWeights = (tw.t1 || 0) + (tw.t2 || 0) + (tw.t3 || 0);
+
+        weightsContainer.innerHTML = [
+          { key: 't1', label: '1r Trimestre (T1)', val: tw.t1 },
+          { key: 't2', label: '2n Trimestre (T2)', val: tw.t2 },
+          { key: 't3', label: '3r Trimestre (T3)', val: tw.t3 }
+        ].map(item => `
           <div class="flex items-center gap-2 bg-slate-50 border border-slate-200 px-3 py-1.5 rounded-lg">
-            <span class="font-bold text-slate-800 text-xs">${ce.id}:</span>
-            <input type="number" min="0" max="100" value="${w}" onchange="updateFinalCeWeight('${ce.id}', this.value)" class="w-14 text-center font-mono font-bold text-xs bg-white border border-slate-300 rounded p-1 outline-none focus:ring-2 focus:ring-indigo-500">
+            <span class="font-bold text-slate-800 text-xs">${item.label}:</span>
+            <input type="number" step="0.1" min="0" max="100" value="${item.val}" onchange="updateFinalTrimWeight('${item.key}', this.value)" class="w-16 text-center font-mono font-bold text-xs bg-white border border-slate-300 rounded p-1 outline-none focus:ring-2 focus:ring-indigo-500">
             <span class="text-slate-400 font-mono text-xs">%</span>
           </div>
-        `;
-      }).join('');
+        `).join('');
 
-      const badge = document.getElementById('finalCeWeightSumBadge');
-      badge.textContent = `Total CEs: ${sumWeights}%`;
-      badge.className = sumWeights === 100 
+      } else {
+        panelTitle.innerHTML = `<i class="fa-solid fa-scale-balanced text-indigo-600"></i> Ponderació de les Competències Específiques (CEs)`;
+        const cw = curGroup.finalCeWeights || DEFAULT_FINAL_CE_WEIGHTS;
+        OFFICIAL_CES.forEach(ce => sumWeights += (cw[ce.id] !== undefined ? cw[ce.id] : 20));
+
+        weightsContainer.innerHTML = OFFICIAL_CES.map(ce => {
+          const w = cw[ce.id] !== undefined ? cw[ce.id] : 20;
+          return `
+            <div class="flex items-center gap-2 bg-slate-50 border border-slate-200 px-3 py-1.5 rounded-lg">
+              <span class="font-bold text-slate-800 text-xs">${ce.id}:</span>
+              <input type="number" min="0" max="100" value="${w}" onchange="updateFinalCeWeight('${ce.id}', this.value)" class="w-14 text-center font-mono font-bold text-xs bg-white border border-slate-300 rounded p-1 outline-none focus:ring-2 focus:ring-indigo-500">
+              <span class="text-slate-400 font-mono text-xs">%</span>
+            </div>
+          `;
+        }).join('');
+      }
+
+      const isRounded100 = Math.round(sumWeights) === 100;
+      badge.textContent = `Total: ${sumWeights.toFixed(1)}%`;
+      badge.className = isRounded100 
         ? "text-xs font-mono font-bold px-2.5 py-0.5 rounded-md bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200" 
         : "text-xs font-mono font-bold px-2.5 py-0.5 rounded-md bg-amber-50 text-amber-700 ring-1 ring-amber-200";
 
-      // 2. Capçalera de la taula
+      // 3. Capçalera de la Taula
       const thead = document.getElementById('finalTableHead');
       let headHtml = `<tr class="bg-slate-900 text-white">
         <th class="py-3 px-3 w-10 text-center font-mono text-slate-400 font-medium">#</th>
         <th class="py-3 px-4 font-semibold text-slate-100 min-w-[200px]">Alumne/a</th>`;
 
-      OFFICIAL_CES.forEach(ce => {
-        const w = curGroup.finalCeWeights[ce.id] !== undefined ? curGroup.finalCeWeights[ce.id] : 20;
-        headHtml += `<th class="py-2 px-3 text-center border-l border-slate-800">
-          <div>${ce.id} (${ce.short})</div>
-          <div class="text-[10px] text-indigo-300 font-mono font-semibold">Pes: ${w}%</div>
-        </th>`;
-      });
+      if (method === 'trim') {
+        const tw = curGroup.finalTrimWeights || DEFAULT_FINAL_TRIM_WEIGHTS;
+        headHtml += `
+          <th class="py-2.5 px-3 text-center border-l border-slate-800">
+            <div>1r Trimestre</div>
+            <div class="text-[10px] text-indigo-300 font-mono font-semibold">Pes: ${tw.t1}%</div>
+          </th>
+          <th class="py-2.5 px-3 text-center border-l border-slate-800">
+            <div>2n Trimestre</div>
+            <div class="text-[10px] text-indigo-300 font-mono font-semibold">Pes: ${tw.t2}%</div>
+          </th>
+          <th class="py-2.5 px-3 text-center border-l border-slate-800">
+            <div>3r Trimestre</div>
+            <div class="text-[10px] text-indigo-300 font-mono font-semibold">Pes: ${tw.t3}%</div>
+          </th>
+        `;
+      } else {
+        const cw = curGroup.finalCeWeights || DEFAULT_FINAL_CE_WEIGHTS;
+        OFFICIAL_CES.forEach(ce => {
+          const w = cw[ce.id] !== undefined ? cw[ce.id] : 20;
+          headHtml += `<th class="py-2 px-3 text-center border-l border-slate-800">
+            <div>${ce.id} (${ce.short})</div>
+            <div class="text-[10px] text-indigo-300 font-mono font-semibold">Pes: ${w}%</div>
+          </th>`;
+        });
+      }
 
-      headHtml += `<th class="py-3 px-3 text-center border-l border-slate-800 bg-slate-950 font-bold text-emerald-300">Qualificació Final</th></tr>`;
+      headHtml += `<th class="py-3 px-4 text-center border-l-2 border-emerald-500 bg-slate-950 font-bold text-emerald-300 uppercase tracking-wider">Qualificació Final</th></tr>`;
       thead.innerHTML = headHtml;
 
-      // 3. Cos de la taula
+      // 4. Cos de la Taula
       const tbody = document.getElementById('finalTableBody');
       const students = curGroup.students || [];
       if (students.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="8" class="p-8 text-center text-slate-400">Sense alumnes.</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="10" class="p-8 text-center text-slate-400">Sense alumnes.</td></tr>`;
         return;
       }
 
       let html = '';
       students.forEach((st, idx) => {
-        let globalCeScores = {};
-        let totalWeightedSum = 0;
-        let activeWeightSum = 0;
-
-        OFFICIAL_CES.forEach(ce => {
-          let sum = 0, c = 0;
-          (curGroup.sdas || []).forEach(sda => {
-            const sc = getStudentCeScoreInSda(sda, st.id, ce.id);
-            if (sc !== null) { sum += sc; c++; }
-          });
-          const avg = c > 0 ? sum / c : null;
-          globalCeScores[ce.id] = avg;
-
-          const ceWeight = curGroup.finalCeWeights[ce.id] !== undefined ? curGroup.finalCeWeights[ce.id] : 20;
-          if (avg !== null) {
-            totalWeightedSum += avg * (ceWeight / 100);
-            activeWeightSum += ceWeight;
-          }
-        });
-
-        // Càlcul de la nota final ponderada
-        const finalScore = activeWeightSum > 0 ? (totalWeightedSum * 100) / activeWeightSum : null;
+        const finalScore = getStudentCourseFinalScore(st.id, curGroup);
         const finalLvl = getLevel(finalScore);
 
         html += `<tr class="hover:bg-slate-50/70 transition-colors">
           <td class="py-2.5 px-3 text-center text-slate-400 font-mono">${idx + 1}</td>
           <td class="py-2.5 px-4 font-semibold text-slate-800">${st.name}</td>`;
 
-        OFFICIAL_CES.forEach(ce => {
-          const sc = globalCeScores[ce.id];
-          const lvl = getLevel(sc);
-          html += `<td class="py-2 px-3 text-center border-l border-slate-100">
-            <div class="font-bold font-mono text-slate-800">${sc ? sc.toFixed(2) : '<span class="text-slate-300 font-normal">—</span>'}</div>
-            <span class="inline-flex items-center mt-0.5 text-[10px] px-2 py-0.5 rounded font-bold ring-1 ring-inset ${lvl.badge}">${lvl.code}</span>
-          </td>`;
-        });
+        if (method === 'trim') {
+          [1, 2, 3].forEach(tNum => {
+            const sc = getStudentTrimScoreByTrim(st.id, tNum, curGroup);
+            const lvl = getLevel(sc);
+            html += `<td class="py-2 px-3 text-center border-l border-slate-100">
+              <div class="font-bold font-mono text-slate-800">${sc !== null ? sc.toFixed(2) : '<span class="text-slate-300 font-normal">—</span>'}</div>
+              <span class="inline-flex items-center mt-0.5 text-[10px] px-2 py-0.5 rounded font-bold ring-1 ring-inset ${lvl.badge}">${lvl.code}</span>
+            </td>`;
+          });
+        } else {
+          OFFICIAL_CES.forEach(ce => {
+            let sum = 0, c = 0;
+            (curGroup.sdas || []).forEach(sda => {
+              const sc = getStudentCeScoreInSda(sda, st.id, ce.id, curGroup.grades);
+              if (sc !== null) { sum += sc; c++; }
+            });
+            const avg = c > 0 ? sum / c : null;
+            const lvl = getLevel(avg);
 
-        html += `<td class="py-2.5 px-3 text-center border-l border-slate-200 bg-slate-50/60 font-bold">
-          <div class="text-sm font-black font-mono text-slate-900">${finalScore ? finalScore.toFixed(2) : '<span class="text-slate-300 font-normal">—</span>'}</div>
+            html += `<td class="py-2 px-3 text-center border-l border-slate-100">
+              <div class="font-bold font-mono text-slate-800">${avg !== null ? avg.toFixed(2) : '<span class="text-slate-300 font-normal">—</span>'}</div>
+              <span class="inline-flex items-center mt-0.5 text-[10px] px-2 py-0.5 rounded font-bold ring-1 ring-inset ${lvl.badge}">${lvl.code}</span>
+            </td>`;
+          });
+        }
+
+        html += `<td class="py-2.5 px-4 text-center border-l-2 border-emerald-500 bg-slate-50/70 font-bold">
+          <div class="text-sm font-black font-mono text-slate-900">${finalScore !== null ? finalScore.toFixed(2) : '<span class="text-slate-300 font-normal">—</span>'}</div>
           <span class="inline-flex items-center mt-0.5 text-[10px] px-2.5 py-0.5 rounded font-bold ring-1 ring-inset ${finalLvl.badge}">${finalLvl.code}</span>
         </td></tr>`;
       });
@@ -2106,7 +2248,6 @@
       document.getElementById('repGroupLabel').textContent = `Classe: ${curGroup.name} | 1r i 2n d'ESO | LOMLOE`;
 
       let ceValues = [];
-      let totalWeighted = 0, totalWeight = 0;
       let detailsHtml = '';
 
       OFFICIAL_CES.forEach(ce => {
@@ -2117,20 +2258,13 @@
         });
         const avg = c > 0 ? sum / c : 0;
         ceValues.push(avg);
-
-        const ceWeight = curGroup.finalCeWeights[ce.id] !== undefined ? curGroup.finalCeWeights[ce.id] : 20;
-        if (c > 0) {
-          totalWeighted += avg * (ceWeight / 100);
-          totalWeight += ceWeight;
-        }
-
         const lvl = getLevel(avg);
 
         detailsHtml += `
           <div class="flex items-center justify-between p-2.5 rounded-xl border border-slate-100 bg-slate-50/70">
             <div>
               <div class="font-bold text-slate-800">${ce.name}</div>
-              <div class="text-[11px] text-slate-400">${ce.short} · Pes Curs: ${ceWeight}%</div>
+              <div class="text-[11px] text-slate-400">${ce.short}</div>
             </div>
             <div class="text-right">
               <span class="font-bold font-mono text-slate-900 mr-2">${avg > 0 ? avg.toFixed(2) : '—'}</span>
@@ -2140,10 +2274,11 @@
         `;
       });
 
-      const globalAvg = totalWeight > 0 ? (totalWeighted * 100) / totalWeight : null;
-      const globalLvl = getLevel(globalAvg);
+      // Nota final de curs calculada segons el mètode seleccionat (Trimestres o CEs)
+      const globalScore = getStudentCourseFinalScore(st.id, curGroup);
+      const globalLvl = getLevel(globalScore);
       const repBadge = document.getElementById('repGlobalBadge');
-      repBadge.textContent = `${globalAvg ? globalAvg.toFixed(2) : '—'} (${globalLvl.code})`;
+      repBadge.textContent = `${globalScore !== null ? globalScore.toFixed(2) : '—'} (${globalLvl.code})`;
       repBadge.className = `inline-flex items-center mt-1 px-3 py-1 rounded-md text-xs font-bold ring-1 ring-inset ${globalLvl.badge}`;
 
       document.getElementById('repDetailsContainer').innerHTML = detailsHtml;
@@ -2275,24 +2410,15 @@
               if (count > 0) ceScoresAgg[ce.id].push(ceSum / count);
             });
           } else if (scopeType === 'course') {
-            let totalWeighted = 0, activeWeight = 0;
-            const weights = grp.finalCeWeights || DEFAULT_FINAL_CE_WEIGHTS;
-
+            score = getStudentCourseFinalScore(st.id, grp);
             OFFICIAL_CES.forEach(ce => {
               let sum = 0, c = 0;
               (grp.sdas || []).forEach(sda => {
                 const sc = getStudentCeScoreInSda(sda, st.id, ce.id, grp.grades);
                 if (sc !== null) { sum += sc; c++; }
               });
-              if (c > 0) {
-                const avg = sum / c;
-                ceScoresAgg[ce.id].push(avg);
-                const w = weights[ce.id] !== undefined ? weights[ce.id] : 20;
-                totalWeighted += avg * (w / 100);
-                activeWeight += w;
-              }
+              if (c > 0) ceScoresAgg[ce.id].push(sum / c);
             });
-            if (activeWeight > 0) score = (totalWeighted * 100) / activeWeight;
           }
 
           if (score !== null && !isNaN(score)) {
@@ -2456,15 +2582,15 @@
 
     function exportCSV() {
       const curGroup = getCurrentGroup();
-      let csv = `Alumne,Qualificacio_Trimestre_T${appState.currentTrim},Grup\n`;
+      let csv = `Alumne,Qualificacio_Final_${curGroup.finalMethod === 'trim' ? 'Trimestres' : 'Competencies'},Grup\n`;
       (curGroup.students || []).forEach(st => {
-        const sc = getStudentTrimScore(st.id);
+        const sc = getStudentCourseFinalScore(st.id, curGroup);
         csv += `"${st.name}",${sc !== null ? sc.toFixed(2) : ""},"${curGroup.name}"\n`;
       });
       const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
       const a = document.createElement("a");
       a.href = URL.createObjectURL(blob);
-      a.download = `Resum_Ponderat_${curGroup.name.replace(/\s+/g, '_')}_T${appState.currentTrim}.csv`;
+      a.download = `Resum_Final_${curGroup.name.replace(/\s+/g, '_')}.csv`;
       a.click();
     }
 
