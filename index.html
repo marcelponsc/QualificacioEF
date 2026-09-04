@@ -27,7 +27,7 @@
   <style>
     body { font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11'; }
     .tabular-nums { font-variant-numeric: tabular-nums; }
-    ::-webkit-scrollbar { width: 5px; height: 5px; }
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
     ::-webkit-scrollbar-track { background: #f8fafc; }
     ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 9999px; }
     ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
@@ -37,75 +37,62 @@
     }
   </style>
 </head>
-<body class="min-h-full flex flex-col text-slate-800 bg-[#f8fafc] selection:bg-indigo-500 selection:text-white">
+<body class="min-h-full flex flex-col text-slate-800 bg-[#f8fafc]">
 
-  <!-- ================= CAPÇALERA ================= -->
-  <header class="bg-white/80 backdrop-blur-md border-b border-slate-200/70 sticky top-0 z-40 no-print transition-all">
+  <!-- CAPÇALERA NETEJA -->
+  <header class="bg-white border-b border-slate-200/80 sticky top-0 z-40 backdrop-blur-md bg-white/95 no-print">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      <div class="flex items-center justify-between h-15 gap-4 py-2.5">
+      <div class="flex items-center justify-between h-16 gap-4">
         
-        <!-- Identitat Visual -->
         <div class="flex items-center gap-3">
           <button onclick="goToHome()" class="flex items-center gap-2.5 text-left group">
-            <div class="w-8 h-8 rounded-lg bg-gradient-to-tr from-indigo-600 to-indigo-500 text-white flex items-center justify-center shadow-xs shadow-indigo-500/20 group-hover:shadow-md group-hover:scale-105 transition-all">
-              <i class="fa-solid fa-person-running text-sm"></i>
+            <div class="w-8 h-8 rounded-lg bg-indigo-600 text-white flex items-center justify-center shadow-xs text-sm font-bold">
+              <i class="fa-solid fa-person-running"></i>
             </div>
-            <div class="flex items-baseline gap-2">
-              <span class="text-sm font-bold tracking-tight text-slate-900 group-hover:text-indigo-600 transition-colors">Quadern de Qualificació Docent</span>
-              <span class="text-[10px] font-semibold text-indigo-600 bg-indigo-50 px-1.5 py-0.5 rounded border border-indigo-100/60 uppercase">LOMLOE</span>
+            <div>
+              <span class="text-sm font-bold text-slate-900 group-hover:text-indigo-600 transition">Quadern de Qualificació Docent</span>
+              <span class="text-[10px] font-semibold text-indigo-600 bg-indigo-50 px-1.5 py-0.5 rounded border border-indigo-100/60 uppercase ml-1.5">LOMLOE</span>
             </div>
           </button>
 
-          <!-- Indicador de classe activa -->
-          <div id="headerBreadcrumb" class="hidden items-center gap-2 ml-2 pl-3 border-l border-slate-200 text-xs">
+          <div id="headerBreadcrumb" class="hidden items-center gap-2 ml-3 pl-3 border-l border-slate-200 text-xs">
             <span class="text-slate-400 font-medium">Classe:</span>
-            <span id="breadcrumbGroupName" class="font-semibold text-slate-800 bg-slate-100 px-2 py-0.5 rounded-md border border-slate-200/80">--</span>
+            <span id="breadcrumbGroupName" class="font-bold text-indigo-700 bg-indigo-50 px-2 py-0.5 rounded-md border border-indigo-100/80">--</span>
           </div>
         </div>
 
-        <!-- Accions Ràpides de Capçalera -->
         <div class="flex items-center gap-2">
-          <div id="savedIndicator" class="flex items-center gap-1.5 text-[11px] font-medium text-emerald-600 px-2 py-1 rounded-md opacity-0 transition-opacity duration-300">
-            <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
-            <span>Desat</span>
-          </div>
+          <span id="savedIndicator" class="inline-flex items-center gap-1 text-[11px] font-medium text-emerald-600 opacity-0 transition-opacity duration-300 mr-2">
+            <i class="fa-solid fa-circle-check text-[10px]"></i> Desat
+          </span>
 
-          <button onclick="goToHome()" id="homeNavBtn" class="inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-lg border border-slate-200 bg-white text-slate-700 hover:bg-slate-50 hover:text-slate-900 shadow-2xs transition">
-            <i class="fa-solid fa-house text-slate-400 text-[11px]"></i>
-            <span class="hidden sm:inline">Inici</span>
+          <button onclick="goToHome()" class="inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-lg border border-slate-200 bg-white text-slate-700 hover:bg-slate-50 transition">
+            <i class="fa-solid fa-house text-slate-400 text-[11px]"></i> Inici
           </button>
 
-          <div class="flex items-center pl-1 border-l border-slate-200 gap-1">
-            <button onclick="resetDefaultData()" title="Restablir dades de mostra" class="p-1.5 text-slate-400 hover:text-indigo-600 hover:bg-slate-100 rounded-lg text-xs transition">
-              <i class="fa-solid fa-rotate-left"></i>
-            </button>
-            <button onclick="exportBackupJSON()" title="Descarregar Còpia de Seguretat (JSON)" class="p-1.5 text-slate-400 hover:text-slate-800 hover:bg-slate-100 rounded-lg text-xs transition">
-              <i class="fa-solid fa-arrow-down-to-line"></i>
-            </button>
-            <label title="Restaurar Còpia de Seguretat" class="p-1.5 text-slate-400 hover:text-slate-800 hover:bg-slate-100 rounded-lg text-xs transition cursor-pointer">
-              <i class="fa-solid fa-arrow-up-from-line"></i>
-              <input type="file" id="backupFileInput" accept=".json" onchange="importBackupJSON(event)" class="hidden">
-            </label>
-          </div>
+          <button onclick="resetDefaultData()" title="Recarregar dades de mostra" class="inline-flex items-center gap-1 text-xs font-medium px-2.5 py-1.5 rounded-lg border border-slate-200 bg-slate-50 text-slate-600 hover:text-indigo-600 transition">
+            <i class="fa-solid fa-rotate-left text-[11px]"></i> Restablir Demo
+          </button>
+
+          <button onclick="exportBackupJSON()" title="Descarregar Còpia" class="p-2 text-slate-400 hover:text-slate-800 rounded-lg text-xs">
+            <i class="fa-solid fa-arrow-down-to-line"></i>
+          </button>
         </div>
       </div>
 
-      <!-- Barra de Navegació de Classe -->
+      <!-- Subpestanyes Classe -->
       <nav id="classSubNav" class="hidden flex space-x-1 -mb-px overflow-x-auto border-t border-slate-100 py-1.5 text-xs font-medium">
-        <button id="tabBtnSda" onclick="switchView('sda')" class="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg font-semibold bg-indigo-50 text-indigo-700 transition">
+        <button id="tabBtnSda" onclick="switchView('sda')" class="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg font-semibold bg-indigo-50 text-indigo-700">
           <i class="fa-regular fa-folder-open text-indigo-500"></i> Qualificació SdA
         </button>
-        <button id="tabBtnRoster" onclick="switchView('roster')" class="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition">
-          <i class="fa-solid fa-users text-slate-400"></i> Alumnat (<span id="tabStudentCount">0</span>)
+        <button id="tabBtnRoster" onclick="switchView('roster')" class="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg text-slate-600 hover:text-slate-900 hover:bg-slate-100">
+          <i class="fa-solid fa-users text-slate-400"></i> Llista d'Alumnes (<span id="tabStudentCount">0</span>)
         </button>
-        <button id="tabBtnTrim" onclick="switchView('trim')" class="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition">
+        <button id="tabBtnTrim" onclick="switchView('trim')" class="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg text-slate-600 hover:text-slate-900 hover:bg-slate-100">
           <i class="fa-solid fa-table-cells text-slate-400"></i> Resum Trimestral
         </button>
-        <button id="tabBtnFinal" onclick="switchView('final')" class="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition">
+        <button id="tabBtnFinal" onclick="switchView('final')" class="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg text-slate-600 hover:text-slate-900 hover:bg-slate-100">
           <i class="fa-regular fa-calendar-check text-slate-400"></i> Final de Curs
-        </button>
-        <button id="tabBtnReport" onclick="switchView('report')" class="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition">
-          <i class="fa-regular fa-address-card text-slate-400"></i> Butlletí Individual
         </button>
       </nav>
     </div>
@@ -114,151 +101,107 @@
   <!-- BODY CONTENT -->
   <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6">
 
-    <!-- ================= PANTALLA D'INICI (HOME) ================= -->
+    <!-- PANTALLA D'INICI -->
     <section id="screenHome" class="space-y-6">
-      
-      <!-- Banner Principal Net i Elegant -->
-      <div class="bg-gradient-to-r from-slate-900 via-slate-800 to-indigo-950 rounded-2xl p-6 sm:p-7 text-white shadow-sm border border-slate-800/80 relative overflow-hidden">
-        <div class="relative z-10 max-w-2xl space-y-2">
-          <div class="inline-flex items-center gap-2 text-[11px] font-medium text-indigo-300">
-            <span class="w-1.5 h-1.5 rounded-full bg-indigo-400"></span>
-            <span>Educació Física · 1r Cicle d'ESO</span>
+      <div class="bg-gradient-to-r from-slate-900 via-slate-800 to-indigo-950 rounded-2xl p-6 text-white shadow-sm flex flex-wrap justify-between items-center gap-4">
+        <div>
+          <div class="inline-flex items-center gap-2 text-[11px] font-medium text-indigo-300 mb-1">
+            <span class="w-1.5 h-1.5 rounded-full bg-indigo-400"></span> Educació Física · 1r Cicle d'ESO
           </div>
-          <h2 class="text-xl sm:text-2xl font-bold tracking-tight">Quadern de Qualificació Docent</h2>
-          <div class="pt-2 flex flex-wrap gap-2.5">
-            <button onclick="openNewGroupModal()" class="inline-flex items-center gap-1.5 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold px-3.5 py-2 rounded-xl shadow-xs transition">
-              <i class="fa-solid fa-plus text-[10px]"></i> Nova Classe
-            </button>
-            <button onclick="openGlobalSdaModal()" class="inline-flex items-center gap-1.5 bg-white/10 hover:bg-white/15 text-white text-xs font-semibold px-3.5 py-2 rounded-xl border border-white/10 transition">
-              <i class="fa-solid fa-sliders text-[10px]"></i> Programar SdA
-            </button>
-          </div>
+          <h2 class="text-xl font-bold">Quadern de Qualificació Docent</h2>
+        </div>
+        <div class="flex gap-2">
+          <button onclick="openNewGroupModal()" class="inline-flex items-center gap-1.5 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold px-3.5 py-2 rounded-xl shadow-xs transition">
+            <i class="fa-solid fa-plus text-[10px]"></i> Nova Classe
+          </button>
+          <button onclick="openGlobalSdaModal()" class="inline-flex items-center gap-1.5 bg-white/10 hover:bg-white/15 text-white text-xs font-semibold px-3.5 py-2 rounded-xl border border-white/10 transition">
+            <i class="fa-solid fa-sliders text-[10px]"></i> Programar SdA
+          </button>
         </div>
       </div>
 
-      <!-- Mètriques Ràpides -->
-      <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <div class="bg-white border border-slate-200/80 rounded-xl p-4 shadow-2xs flex items-center gap-3.5">
-          <div class="w-9 h-9 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center text-base">
-            <i class="fa-solid fa-graduation-cap"></i>
-          </div>
-          <div>
-            <div id="statTotalClasses" class="text-lg font-bold font-mono text-slate-900">0</div>
-            <div class="text-[11px] font-medium text-slate-400">Classes Actives</div>
-          </div>
-        </div>
-
-        <div class="bg-white border border-slate-200/80 rounded-xl p-4 shadow-2xs flex items-center gap-3.5">
-          <div class="w-9 h-9 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center text-base">
-            <i class="fa-solid fa-users"></i>
-          </div>
-          <div>
-            <div id="statTotalStudents" class="text-lg font-bold font-mono text-slate-900">0</div>
-            <div class="text-[11px] font-medium text-slate-400">Alumnes Registrats</div>
-          </div>
-        </div>
-
-        <div class="bg-white border border-slate-200/80 rounded-xl p-4 shadow-2xs flex items-center gap-3.5">
-          <div class="w-9 h-9 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center text-base">
-            <i class="fa-solid fa-clipboard-list"></i>
-          </div>
-          <div>
-            <div id="statTotalSdas" class="text-lg font-bold font-mono text-slate-900">0</div>
-            <div class="text-[11px] font-medium text-slate-400">SdAs Creades</div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Targetes de Classes -->
-      <div class="space-y-3 pt-1">
-        <div class="flex justify-between items-center">
-          <h3 class="text-xs font-bold text-slate-900 uppercase tracking-wider flex items-center gap-2">
-            <i class="fa-solid fa-chalkboard-user text-indigo-600"></i> Classes Registrades
-          </h3>
-          <span class="text-xs text-slate-400">Selecciona un grup per qualificar o gestionar alumnes</span>
-        </div>
-        <div id="homeClassesGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4"></div>
-      </div>
+      <div id="homeClassesGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 pt-2"></div>
     </section>
 
-    <!-- ================= PANTALLA DE TREBALL DE LA CLASSE ================= -->
+    <!-- ESPAI DE TREBALL DE LA CLASSE -->
     <div id="screenClassWorkspace" class="hidden space-y-5">
 
-      <!-- Barra de Trimestre i Controls de la Classe -->
-      <div class="flex flex-wrap items-center justify-between gap-3 bg-white border border-slate-200/80 p-3 rounded-xl shadow-2xs no-print">
+      <!-- Barra de controls de classe -->
+      <div class="flex flex-wrap items-center justify-between gap-3 bg-white border border-slate-200/80 p-3 rounded-xl shadow-xs no-print">
         <div class="flex items-center gap-3">
-          <button onclick="goToHome()" class="text-slate-500 hover:text-slate-900 text-xs font-semibold flex items-center gap-1.5 transition pr-3 border-r border-slate-200">
+          <button onclick="goToHome()" class="text-slate-500 hover:text-slate-900 text-xs font-semibold flex items-center gap-1.5 pr-3 border-r border-slate-200">
             <i class="fa-solid fa-arrow-left text-[11px]"></i> Tornar
           </button>
           <span class="text-xs font-semibold text-slate-500">Trimestre:</span>
           <div class="inline-flex rounded-lg bg-slate-100 p-0.5 border border-slate-200/70 text-xs font-semibold">
-            <button id="trimBtn1_class" onclick="setTrim(1)" class="px-2.5 py-1 rounded-md transition shadow-2xs bg-white text-slate-900 font-semibold">1r Trim</button>
-            <button id="trimBtn2_class" onclick="setTrim(2)" class="px-2.5 py-1 rounded-md transition text-slate-600 hover:text-slate-900">2n Trim</button>
-            <button id="trimBtn3_class" onclick="setTrim(3)" class="px-2.5 py-1 rounded-md transition text-slate-600 hover:text-slate-900">3r Trim</button>
+            <button id="trimBtn1_class" onclick="setTrim(1)" class="px-2.5 py-1 rounded-md bg-white text-slate-900 font-semibold shadow-xs">1r Trim</button>
+            <button id="trimBtn2_class" onclick="setTrim(2)" class="px-2.5 py-1 rounded-md text-slate-600 hover:text-slate-900">2n Trim</button>
+            <button id="trimBtn3_class" onclick="setTrim(3)" class="px-2.5 py-1 rounded-md text-slate-600 hover:text-slate-900">3r Trim</button>
           </div>
         </div>
 
         <div class="flex items-center gap-2">
-          <button onclick="switchView('roster')" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-700 bg-white border border-slate-300 hover:bg-slate-50 shadow-2xs transition">
+          <button onclick="switchView('roster')" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-700 bg-white border border-slate-300 hover:bg-slate-50 shadow-xs">
             <i class="fa-solid fa-user-gear text-slate-400"></i> Gestionar Alumnes
           </button>
         </div>
       </div>
 
-      <!-- VISTA 1: GRAELLA SdA -->
+      <!-- VISTA 1: GRAELLA QUALIFICACIÓ SdA -->
       <section id="viewSda" class="space-y-4">
-        <div class="bg-white border border-slate-200/90 rounded-xl p-3 shadow-2xs flex flex-wrap items-center justify-between gap-3">
+        <div class="bg-white border border-slate-200/90 rounded-xl p-3 shadow-xs flex flex-wrap items-center justify-between gap-3">
           <div class="flex items-center gap-3">
             <span class="text-[11px] font-bold text-slate-400 uppercase tracking-wider">SdA Activa:</span>
-            <select id="sdaSelect" onchange="renderSdaGrid()" class="bg-slate-50 border border-slate-300 text-xs font-bold text-slate-900 rounded-lg px-3 py-1.5 focus:ring-2 focus:ring-indigo-500 focus:bg-white outline-none cursor-pointer">
+            <select id="sdaSelect" onchange="renderSdaGrid()" class="bg-slate-50 border border-slate-300 text-xs font-bold text-slate-900 rounded-lg px-3 py-1.5 outline-none focus:ring-2 focus:ring-indigo-500">
             </select>
-            <button onclick="openSdaModal(false)" class="inline-flex items-center gap-1.5 text-xs font-semibold text-indigo-600 hover:text-indigo-700 bg-indigo-50/60 hover:bg-indigo-50 px-2.5 py-1.5 rounded-lg border border-indigo-100 transition">
+            <button onclick="openSdaModal(false)" class="inline-flex items-center gap-1.5 text-xs font-semibold text-indigo-600 hover:text-indigo-700 bg-indigo-50/60 hover:bg-indigo-50 px-2.5 py-1.5 rounded-lg border border-indigo-100">
               <i class="fa-solid fa-pen-to-square text-[11px]"></i> Editar SdA
             </button>
           </div>
-          <button onclick="openSdaModal(true)" class="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-semibold text-white bg-indigo-600 hover:bg-indigo-700 shadow-2xs transition">
+          <button onclick="openSdaModal(true)" class="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-semibold text-white bg-indigo-600 hover:bg-indigo-700 shadow-xs">
             <i class="fa-solid fa-plus text-[11px]"></i> Nova SdA
           </button>
         </div>
 
-        <div class="bg-white border border-slate-200 rounded-xl shadow-2xs overflow-hidden">
-          <div id="sdaGridTitleBar" class="bg-slate-900 text-white px-4 py-3 flex items-center justify-between text-xs">
+        <!-- Taula Principal -->
+        <div class="bg-white border border-slate-200 rounded-xl shadow-xs overflow-hidden">
+          <div id="sdaGridTitleBar" class="bg-slate-900 text-white px-4 py-3 flex items-center justify-between text-xs font-semibold">
           </div>
-          <div class="overflow-x-auto">
+          <div class="overflow-x-auto w-full">
             <table class="w-full text-left border-collapse text-xs">
-              <thead id="sdaGridHead" class="select-none"></thead>
-              <tbody id="sdaGridBody" class="divide-y divide-slate-100 bg-white tabular-nums"></tbody>
+              <thead id="sdaGridHead"></thead>
+              <tbody id="sdaGridBody" class="divide-y divide-slate-200 bg-white tabular-nums"></tbody>
             </table>
           </div>
         </div>
       </section>
 
-      <!-- VISTA 2: LLISTA D'ALUMNAT -->
+      <!-- VISTA 2: LLISTAT ALUMNES -->
       <section id="viewRoster" class="space-y-4 hidden">
-        <div class="bg-white border border-slate-200 rounded-xl p-5 shadow-2xs space-y-4">
+        <div class="bg-white border border-slate-200 rounded-xl p-5 shadow-xs space-y-4">
           <div class="flex items-center justify-between border-b pb-3">
             <div>
               <h3 class="text-base font-bold text-slate-900 flex items-center gap-2">
                 <i class="fa-solid fa-user-graduate text-indigo-600"></i> Llista d'Alumnat Registrat
               </h3>
-              <p class="text-xs text-slate-500 mt-0.5">Edita els noms directament sobre la taula o importa llistats nous.</p>
+              <p class="text-xs text-slate-500 mt-0.5">Pots editar els noms directament sobre la taula.</p>
             </div>
             <span id="rosterCountBadge" class="text-xs font-mono font-bold bg-indigo-50 text-indigo-700 px-3 py-1 rounded-full border border-indigo-100">0 alumnes</span>
           </div>
 
           <div class="grid grid-cols-1 md:grid-cols-2 gap-3 bg-slate-50 border border-slate-200/80 p-3 rounded-xl">
             <div>
-              <label class="block font-medium text-slate-600 mb-1">Afegir Alumne/a individual:</label>
+              <label class="block font-medium text-slate-600 mb-1">Afegir Alumne/a:</label>
               <div class="flex gap-2">
-                <input type="text" id="rosterNewStudentInput" placeholder="Cognoms, Nom" class="flex-1 bg-white border border-slate-300 rounded-lg px-3 py-1.5 text-xs focus:ring-2 focus:ring-indigo-500 outline-none">
-                <button onclick="addSingleStudentFromRoster()" class="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold px-3 py-1.5 rounded-lg text-xs">Afegir</button>
+                <input type="text" id="rosterNewStudentInput" placeholder="Cognoms, Nom" class="flex-1 bg-white border border-slate-300 rounded-lg px-3 py-1.5 text-xs outline-none">
+                <button onclick="addSingleStudentFromRoster()" class="bg-indigo-600 text-white font-semibold px-3 py-1.5 rounded-lg text-xs">Afegir</button>
               </div>
             </div>
             <div>
-              <label class="block font-medium text-slate-600 mb-1">Importació ràpida (un per línia d'Esfera/Excel):</label>
+              <label class="block font-medium text-slate-600 mb-1">Importació massiva (un per línia):</label>
               <div class="flex gap-2">
-                <textarea id="rosterBulkInput" rows="1" placeholder="Enganxa llista d'alumnes..." class="flex-1 bg-white border border-slate-300 rounded-lg p-1.5 text-xs focus:ring-2 focus:ring-indigo-500 outline-none resize-none"></textarea>
-                <button onclick="addBulkStudentsFromRoster()" class="bg-slate-800 hover:bg-slate-700 text-white font-semibold px-3 py-1.5 rounded-lg text-xs">Carregar</button>
+                <textarea id="rosterBulkInput" rows="1" placeholder="Enganxa llista d'alumnes..." class="flex-1 bg-white border border-slate-300 rounded-lg p-1.5 text-xs outline-none resize-none"></textarea>
+                <button onclick="addBulkStudentsFromRoster()" class="bg-slate-800 text-white font-semibold px-3 py-1.5 rounded-lg text-xs">Carregar</button>
               </div>
             </div>
           </div>
@@ -268,7 +211,7 @@
               <thead class="bg-slate-50 text-slate-600 font-semibold border-b">
                 <tr>
                   <th class="py-2.5 px-3 w-12 text-center font-mono">#</th>
-                  <th class="py-2.5 px-4">Nom i Cognoms (Editable)</th>
+                  <th class="py-2.5 px-4">Nom i Cognoms</th>
                   <th class="py-2.5 px-3 w-20 text-center">Acció</th>
                 </tr>
               </thead>
@@ -280,19 +223,8 @@
 
       <!-- VISTA 3: RESUM TRIMESTRAL -->
       <section id="viewTrim" class="space-y-4 hidden">
-        <div class="flex flex-wrap items-end justify-between gap-4 border-b border-slate-200/80 pb-4">
-          <div>
-            <span class="inline-flex items-center rounded-md bg-indigo-50 px-2 py-0.5 text-[11px] font-semibold text-indigo-700 border border-indigo-100">Avaluació Contínua Trimestral</span>
-            <h2 id="trimTitle" class="text-xl font-bold text-slate-900 tracking-tight mt-1">Resum del Trimestre 1</h2>
-            <p class="text-xs text-slate-500 mt-0.5">Pondera el pes de cada SdA per calcular automàticament la qualificació trimestral.</p>
-          </div>
-          <button onclick="exportCSV()" class="inline-flex items-center gap-2 bg-white border border-slate-300 text-slate-700 hover:bg-slate-50 text-xs font-semibold px-3 py-2 rounded-lg shadow-2xs transition">
-            <i class="fa-solid fa-file-csv text-slate-400"></i> Exportar a CSV
-          </button>
-        </div>
-
-        <div class="bg-white border border-slate-200/90 rounded-xl p-4 shadow-2xs space-y-3">
-          <div class="flex items-center justify-between">
+        <div class="bg-white border border-slate-200 rounded-xl p-4 shadow-xs space-y-3">
+          <div class="flex items-center justify-between border-b pb-2">
             <h4 class="text-xs font-bold text-slate-800 uppercase tracking-wider flex items-center gap-2">
               <i class="fa-solid fa-weight-scale text-indigo-600"></i> Ponderació de les SdAs en aquest Trimestre
             </h4>
@@ -301,7 +233,7 @@
           <div id="trimSdaWeightInputsContainer" class="flex flex-wrap gap-3 pt-1"></div>
         </div>
 
-        <div class="bg-white border border-slate-200 rounded-xl shadow-2xs overflow-hidden">
+        <div class="bg-white border border-slate-200 rounded-xl shadow-xs overflow-hidden">
           <div class="overflow-x-auto">
             <table class="w-full text-left border-collapse text-xs">
               <thead id="trimTableHead" class="bg-slate-900 text-white"></thead>
@@ -313,25 +245,19 @@
 
       <!-- VISTA 4: FINAL DE CURS -->
       <section id="viewFinal" class="space-y-4 hidden">
-        <div class="border-b border-slate-200/80 pb-4">
-          <span class="inline-flex items-center rounded-md bg-emerald-50 px-2 py-0.5 text-[11px] font-semibold text-emerald-700 border border-emerald-100">Convocatòria Ordinària</span>
-          <h2 class="text-xl font-bold text-slate-900 tracking-tight mt-1">Avaluació Final de Curs</h2>
-          <p class="text-xs text-slate-500 mt-0.5">Qualificació consolidada de les Competències Específiques durant tot el curs.</p>
-        </div>
-
-        <div class="bg-white border border-slate-200 rounded-xl shadow-2xs overflow-hidden">
+        <div class="bg-white border border-slate-200 rounded-xl shadow-xs overflow-hidden">
           <div class="overflow-x-auto">
             <table class="w-full text-left border-collapse text-xs">
               <thead>
                 <tr class="bg-slate-900 text-white">
-                  <th class="py-3 px-3 w-10 text-center font-mono text-slate-400 font-medium">#</th>
+                  <th class="py-3 px-3 w-10 text-center font-mono text-slate-400">#</th>
                   <th class="py-3 px-4 font-semibold text-slate-100 min-w-[200px]">Alumne/a</th>
-                  <th class="py-3 px-3 text-center border-l border-slate-800">CE1 (Salut)</th>
-                  <th class="py-3 px-3 text-center border-l border-slate-800">CE2 (Motricitat)</th>
-                  <th class="py-3 px-3 text-center border-l border-slate-800">CE3 (Expressió)</th>
-                  <th class="py-3 px-3 text-center border-l border-slate-800">CE4 (Entorn)</th>
-                  <th class="py-3 px-3 text-center border-l border-slate-800">CE5 (Valors)</th>
-                  <th class="py-3 px-3 text-center border-l border-slate-800 bg-slate-950 font-bold text-emerald-300">Qualificació Final</th>
+                  <th class="py-3 px-3 text-center border-l border-slate-800">CE1</th>
+                  <th class="py-3 px-3 text-center border-l border-slate-800">CE2</th>
+                  <th class="py-3 px-3 text-center border-l border-slate-800">CE3</th>
+                  <th class="py-3 px-3 text-center border-l border-slate-800">CE4</th>
+                  <th class="py-3 px-3 text-center border-l border-slate-800">CE5</th>
+                  <th class="py-3 px-3 text-center border-l border-slate-800 bg-slate-950 font-bold text-emerald-300">Final</th>
                 </tr>
               </thead>
               <tbody id="finalTableBody" class="divide-y divide-slate-100 bg-white tabular-nums"></tbody>
@@ -340,192 +266,131 @@
         </div>
       </section>
 
-      <!-- VISTA 5: BUTLLETÍ INDIVIDUAL -->
-      <section id="viewReport" class="space-y-4 hidden">
-        <div class="flex items-center justify-between bg-white p-3 rounded-xl border border-slate-200 shadow-2xs no-print">
-          <div class="flex items-center gap-3">
-            <label for="reportStudentSelect" class="text-xs font-semibold text-slate-500">Selecciona Alumne/a:</label>
-            <select id="reportStudentSelect" onchange="renderIndividualReport()" class="bg-slate-50 border border-slate-300 text-xs rounded-lg px-3 py-1.5 font-bold text-slate-800 outline-none focus:ring-2 focus:ring-indigo-500">
-            </select>
-          </div>
-          <button onclick="window.print()" class="inline-flex items-center gap-2 bg-slate-900 hover:bg-slate-800 text-white text-xs font-semibold px-4 py-2 rounded-lg shadow-2xs transition">
-            <i class="fa-solid fa-print"></i> Imprimir Informe
-          </button>
-        </div>
-
-        <div class="bg-white border border-slate-200 rounded-2xl p-8 shadow-sm max-w-4xl mx-auto space-y-6">
-          <div class="flex justify-between items-start border-b border-slate-200 pb-5">
-            <div>
-              <span class="text-[11px] font-bold text-indigo-600 uppercase tracking-wider">Informe Individual Competencial</span>
-              <h3 id="repStudentName" class="text-2xl font-black text-slate-900 tracking-tight mt-0.5">Alumne</h3>
-              <p id="repGroupLabel" class="text-xs text-slate-500 mt-1 font-medium">1r i 2n d'ESO | Matèria: Educació Física | LOMLOE</p>
-            </div>
-            <div class="text-right">
-              <span class="text-[11px] font-semibold text-slate-400 block uppercase">Nivell Global</span>
-              <span id="repGlobalBadge" class="inline-flex items-center mt-1 px-3 py-1 rounded-md text-xs font-bold ring-1 ring-inset">--</span>
-            </div>
-          </div>
-
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-8 items-center pt-2">
-            <div class="h-64 flex justify-center items-center">
-              <canvas id="radarChart"></canvas>
-            </div>
-            <div id="repDetailsContainer" class="space-y-2 text-xs"></div>
-          </div>
-        </div>
-      </section>
-
     </div>
   </main>
 
-  <!-- MODAL NOVA CLASSE -->
+  <!-- MODALS -->
   <div id="newGroupModal" class="fixed inset-0 bg-slate-900/40 backdrop-blur-xs z-50 flex items-center justify-center p-4 hidden no-print">
     <div class="bg-white rounded-2xl shadow-xl max-w-md w-full overflow-hidden border border-slate-200">
       <div class="px-6 py-4 bg-slate-900 text-white flex justify-between items-center">
-        <h3 class="text-sm font-bold flex items-center gap-2">
-          <i class="fa-solid fa-graduation-cap text-indigo-400"></i> Crear Nova Classe
-        </h3>
+        <h3 class="text-sm font-bold">Crear Nova Classe</h3>
         <button onclick="closeNewGroupModal()" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
       </div>
       <div class="p-6 space-y-4 text-xs">
         <div>
-          <label class="block font-semibold text-slate-700 mb-1">Nom de la Classe o Curs</label>
-          <input type="text" id="modalNewGroupNameInput" placeholder="Ex: 1r ESO A, 2n ESO B..." class="w-full text-sm border border-slate-300 rounded-lg p-2.5 focus:ring-2 focus:ring-indigo-500 outline-none font-semibold">
+          <label class="block font-semibold text-slate-700 mb-1">Nom del Grup</label>
+          <input type="text" id="modalNewGroupNameInput" placeholder="Ex: 1r ESO B, 2n ESO A..." class="w-full text-sm border border-slate-300 rounded-lg p-2.5 outline-none font-semibold">
         </div>
       </div>
       <div class="px-6 py-3 bg-slate-50 border-t border-slate-200 flex justify-end gap-2 text-xs">
-        <button onclick="closeNewGroupModal()" class="px-4 py-2 border border-slate-300 rounded-lg font-semibold text-slate-600 hover:bg-slate-100">Cancel·lar</button>
-        <button onclick="confirmCreateNewGroup()" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg font-semibold shadow-xs">Crear Classe</button>
+        <button onclick="closeNewGroupModal()" class="px-4 py-2 border border-slate-300 rounded-lg font-semibold text-slate-600">Cancel·lar</button>
+        <button onclick="confirmCreateNewGroup()" class="px-4 py-2 bg-indigo-600 text-white rounded-lg font-semibold">Crear</button>
       </div>
     </div>
   </div>
 
-  <!-- MODAL SdA -->
   <div id="sdaModal" class="fixed inset-0 bg-slate-900/40 backdrop-blur-xs z-50 flex items-center justify-center p-4 hidden no-print">
     <div class="bg-white rounded-2xl shadow-xl max-w-3xl w-full max-h-[90vh] flex flex-col overflow-hidden border border-slate-200">
       <div class="px-6 py-4 bg-slate-900 text-white flex justify-between items-center">
-        <div class="flex items-center gap-3">
-          <div class="w-8 h-8 rounded-lg bg-indigo-500/20 text-indigo-400 flex items-center justify-center">
-            <i class="fa-solid fa-sliders text-sm"></i>
-          </div>
-          <div>
-            <h3 class="text-sm font-bold tracking-tight">Configuració de la Situació d'Aprenentatge (SdA)</h3>
-            <p class="text-[11px] text-slate-400">Ponderació de la SdA, Criteris oficials de 1r i 2n d'ESO i OAs.</p>
-          </div>
-        </div>
+        <h3 class="text-sm font-bold">Configuració de la SdA</h3>
         <button onclick="closeSdaModal()" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
       </div>
-
-      <div class="p-6 overflow-y-auto space-y-5 flex-1 text-xs">
+      <div class="p-6 overflow-y-auto space-y-4 flex-1 text-xs">
         <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
           <div class="sm:col-span-2">
-            <label class="block font-semibold text-slate-700 mb-1">Títol de la Situació d'Aprenentatge</label>
-            <input type="text" id="modalSdaTitle" placeholder="Ex: Hàbits saludables i condició física" class="w-full text-sm border border-slate-300 rounded-lg p-2.5 focus:ring-2 focus:ring-indigo-500 outline-none font-semibold text-slate-900">
+            <label class="block font-semibold text-slate-700 mb-1">Títol</label>
+            <input type="text" id="modalSdaTitle" class="w-full text-sm border border-slate-300 rounded-lg p-2.5 font-semibold text-slate-900 outline-none">
           </div>
           <div>
             <label class="block font-semibold text-indigo-700 mb-1">Pes al Trimestre (%)</label>
-            <div class="flex items-center gap-1.5">
-              <input type="number" id="modalSdaTrimWeight" value="50" min="0" max="100" class="w-full text-sm border border-indigo-200 bg-indigo-50/50 rounded-lg p-2.5 focus:ring-2 focus:ring-indigo-500 outline-none font-mono font-bold text-indigo-900 text-center">
-              <span class="text-slate-400 font-mono font-bold text-sm">%</span>
-            </div>
+            <input type="number" id="modalSdaTrimWeight" value="50" min="0" max="100" class="w-full text-sm border border-indigo-200 bg-indigo-50/50 rounded-lg p-2.5 font-mono font-bold text-center outline-none">
           </div>
         </div>
 
-        <div class="bg-slate-50 border border-slate-200/80 p-3.5 rounded-xl space-y-2">
-          <div class="flex justify-between items-center">
-            <span class="font-bold text-slate-700 text-[11px] uppercase tracking-wider flex items-center gap-1.5">
-              <i class="fa-solid fa-layer-group text-indigo-600"></i> A quines classes s'aplica?
-            </span>
-            <div class="flex gap-2 text-[11px]">
-              <button type="button" onclick="selectAllModalGroups(true)" class="font-semibold text-indigo-600 hover:underline">Marcar totes</button>
-              <span class="text-slate-300">|</span>
-              <button type="button" onclick="selectAllModalGroups(false)" class="font-semibold text-slate-500 hover:underline">Desmarcar</button>
-            </div>
-          </div>
+        <div class="bg-slate-50 border p-3.5 rounded-xl space-y-2">
+          <span class="font-bold text-slate-700 uppercase text-[11px]">A quines classes s'aplica?</span>
           <div id="modalTargetGroupsContainer" class="flex flex-wrap gap-2 pt-1"></div>
         </div>
 
-        <div class="border-t border-slate-200 pt-4 space-y-3">
-          <div class="flex items-center justify-between">
-            <span class="font-bold text-slate-800 text-[11px] uppercase tracking-wider">Competències Específiques &amp; OAs dins la SdA</span>
-            <span id="modalWeightSumBadge" class="text-xs font-mono font-bold px-2 py-0.5 rounded-md">Total CEs: 0%</span>
+        <div class="border-t pt-4 space-y-3">
+          <div class="flex justify-between items-center">
+            <span class="font-bold text-slate-800 text-[11px] uppercase">Competències &amp; OAs</span>
+            <span id="modalWeightSumBadge" class="text-xs font-mono font-bold px-2 py-0.5 rounded-md">Total: 0%</span>
           </div>
           <div id="modalCeCardsContainer" class="space-y-3.5"></div>
         </div>
       </div>
-
-      <div class="px-6 py-3.5 bg-slate-50 border-t border-slate-200 flex justify-between items-center text-xs">
-        <span class="text-[11px] text-slate-400">Els criteris i OAs són opcionals i es poden modificar en qualsevol moment.</span>
-        <div class="flex gap-2">
-          <button onclick="closeSdaModal()" class="px-3.5 py-1.5 border border-slate-300 rounded-lg font-semibold text-slate-600 hover:bg-slate-100">Cancel·lar</button>
-          <button onclick="saveSdaFromModal()" class="px-4 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg font-semibold shadow-xs">Desar SdA</button>
-        </div>
+      <div class="px-6 py-3.5 bg-slate-50 border-t flex justify-end gap-2 text-xs">
+        <button onclick="closeSdaModal()" class="px-4 py-2 border rounded-lg font-semibold text-slate-600">Cancel·lar</button>
+        <button onclick="saveSdaFromModal()" class="px-4 py-2 bg-indigo-600 text-white rounded-lg font-semibold">Desar SdA</button>
       </div>
     </div>
   </div>
 
   <script>
     const CE_COLOR_THEMES = {
-      CE1: { header: 'bg-sky-100/80 text-sky-950 border-sky-200', critHeader: 'bg-sky-50/60 text-sky-800 border-sky-200', weightHeader: 'bg-sky-100/50 text-sky-900 border-sky-200', oaEven: 'bg-sky-50/30', oaOdd: 'bg-sky-50/60', scoreCe: 'bg-sky-100/90 text-sky-950 font-bold border-sky-300', levelCe: 'bg-sky-50/80 border-sky-200' },
-      CE2: { header: 'bg-emerald-100/80 text-emerald-950 border-emerald-200', critHeader: 'bg-emerald-50/60 text-emerald-800 border-emerald-200', weightHeader: 'bg-emerald-100/50 text-emerald-900 border-emerald-200', oaEven: 'bg-emerald-50/30', oaOdd: 'bg-emerald-50/60', scoreCe: 'bg-emerald-100/90 text-emerald-950 font-bold border-emerald-300', levelCe: 'bg-emerald-50/80 border-emerald-200' },
-      CE3: { header: 'bg-purple-100/80 text-purple-950 border-purple-200', critHeader: 'bg-purple-50/60 text-purple-800 border-purple-200', weightHeader: 'bg-purple-100/50 text-purple-900 border-purple-200', oaEven: 'bg-purple-50/30', oaOdd: 'bg-purple-50/60', scoreCe: 'bg-purple-100/90 text-purple-950 font-bold border-purple-300', levelCe: 'bg-purple-50/80 border-purple-200' },
-      CE4: { header: 'bg-amber-100/80 text-amber-950 border-amber-200', critHeader: 'bg-amber-50/60 text-amber-800 border-amber-200', weightHeader: 'bg-amber-100/50 text-amber-900 border-amber-200', oaEven: 'bg-amber-50/30', oaOdd: 'bg-amber-50/60', scoreCe: 'bg-amber-100/90 text-amber-950 font-bold border-amber-300', levelCe: 'bg-amber-50/80 border-amber-200' },
-      CE5: { header: 'bg-rose-100/80 text-rose-950 border-rose-200', critHeader: 'bg-rose-50/60 text-rose-800 border-rose-200', weightHeader: 'bg-rose-100/50 text-rose-900 border-rose-200', oaEven: 'bg-rose-50/30', oaOdd: 'bg-rose-50/60', scoreCe: 'bg-rose-100/90 text-rose-950 font-bold border-rose-300', levelCe: 'bg-rose-50/80 border-rose-200' }
+      CE1: { header: 'bg-sky-100 text-sky-950 border-sky-300', cell: 'bg-sky-50/30' },
+      CE2: { header: 'bg-emerald-100 text-emerald-950 border-emerald-300', cell: 'bg-emerald-50/30' },
+      CE3: { header: 'bg-purple-100 text-purple-950 border-purple-300', cell: 'bg-purple-50/30' },
+      CE4: { header: 'bg-amber-100 text-amber-950 border-amber-300', cell: 'bg-amber-50/30' },
+      CE5: { header: 'bg-rose-100 text-rose-950 border-rose-300', cell: 'bg-rose-50/30' }
     };
 
     const CURRICULAR_CRITERIA_CATALOG = {
       CE1: [
         { code: "1.1", label: "1.1. Executar activitats i exercicis orientats a l’adquisició d’un estil de vida actiu i saludable." },
         { code: "1.2", label: "1.2. Identificar els elements d’un pla de treball de la condició física a través de la pràctica motriu." },
-        { code: "1.3", label: "1.3. Incorporar hàbits saludables (alimentació i hidratació, descans, educació postural, relaxació i higiene) valorant la millora integral." },
-        { code: "1.4", label: "1.4. Aplicar els protocols d’actuació de prevenció i intervenció en accidents i mesures bàsiques de primers auxilis." },
-        { code: "1.5", label: "1.5. Utilitzar recursos i aplicacions digitals per a la pràctica d’activitat física i l’adquisició d’hàbits saludables." }
+        { code: "1.3", label: "1.3. Incorporar hàbits saludables (alimentació i hidratació, descans, educació postural, relaxació i higiene)." },
+        { code: "1.4", label: "1.4. Aplicar els protocols d’actuació de prevenció i intervenció en accidents i primers auxilis." },
+        { code: "1.5", label: "1.5. Utilitzar recursos i aplicacions digitals per a l’activitat física i hàbits saludables." }
       ],
       CE2: [
         { code: "2.1", label: "2.1. Executar habilitats motrius específiques i tècniques en reptes, formes jugades i joc reduït." },
-        { code: "2.2", label: "2.2. Resoldre situacions motrius variades en activitats lúdiques, jocs modificats i esports aplicant habilitats tècniques, tàctiques i estratègiques." }
+        { code: "2.2", label: "2.2. Resoldre situacions motrius variades en activitats lúdiques, jocs modificats i esports." }
       ],
       CE3: [
-        { code: "3.1", label: "3.1. Expressar emocions, sentiments i missatges mitjançant diferents tècniques d’expressió corporal." },
-        { code: "3.2", label: "3.2. Representar composicions individuals o col·lectives amb i sense base musical utilitzant el cos com a eina d’expressió i comunicació." },
-        { code: "3.3", label: "3.3. Prendre part en danses i jocs populars i tradicionals de diferents territoris valorant la seva influència cultural i social." }
+        { code: "3.1", label: "3.1. Expressar emocions, sentiments i missatges mitjançant tècniques d’expressió corporal." },
+        { code: "3.2", label: "3.2. Representar composicions individuals o col·lectives utilitzant el cos com a eina d’expressió." },
+        { code: "3.3", label: "3.3. Prendre part en danses i jocs populars i tradicionals de diferents territoris." }
       ],
       CE4: [
         { code: "4.1", label: "4.1. Realitzar activitat física en el medi natural i urbà minimitzant l’empremta ecològica." },
-        { code: "4.2", label: "4.2. Aplicar les normes de seguretat, l’equipament, eines i tècniques adequades de les activitats físiques en el medi natural i urbà." },
-        { code: "4.3", label: "4.3. Utilitzar les possibilitats que ofereix l’entorn per a la practica activitat física i l’ocupació del temps de lleure de forma activa." }
+        { code: "4.2", label: "4.2. Aplicar les normes de seguretat, l’equipament i tècniques adequades." },
+        { code: "4.3", label: "4.3. Utilitzar les possibilitats de l’entorn per a l’ocupació del temps de lleure actiu." }
       ],
       CE5: [
-        { code: "5.1", label: "5.1. Aplicar els valors positius de l’esport en les activitats físiques i esportives valorant el joc per davant del resultat." },
+        { code: "5.1", label: "5.1. Aplicar els valors positius de l’esport valorant el joc per davant del resultat." },
         { code: "5.2", label: "5.2. Identificar emocions en la pràctica d’activitat física i esportiva." },
-        { code: "5.3", label: "5.3. Mostrar actituds de respecte i escolta envers els altres independentment del seu nivell d’habilitat." },
-        { code: "5.4", label: "5.4. Identificar estereotips i actuacions discriminatòries en situacions de pràctica esportiva." }
+        { code: "5.3", label: "5.3. Mostrar actituds de respecte i escolta envers els altres independentment del seu nivell." },
+        { code: "5.4", label: "5.4. Identificar estereotips i actuacions discriminatòries en l'esport." }
       ]
     };
 
     const OFFICIAL_CES = [
-      { id: 'CE1', name: 'CE1. Adoptar un estil de vida actiu i saludable', short: 'Estil de vida actiu' },
-      { id: 'CE2', name: 'CE2. Prendre decisions i resoldre situacions motrius', short: 'Situacions motrius' },
-      { id: 'CE3', name: 'CE3. Utilitzar els recursos expressius del cos i del moviment', short: 'Expressió corporal' },
-      { id: 'CE4', name: 'CE4. Interactuar amb el medi natural i l’entorn de manera sostenible', short: 'Entorn i natura' },
-      { id: 'CE5', name: 'CE5. Adquirir actituds, valors i habilitats socials per a la convivència', short: 'Valors i convivència' }
+      { id: 'CE1', name: 'CE1. Estil de vida actiu i saludable', short: 'Estil actiu' },
+      { id: 'CE2', name: 'CE2. Situacions motrius i joc', short: 'Situacions motrius' },
+      { id: 'CE3', name: 'CE3. Expressió corporal i comunicació', short: 'Expressió corporal' },
+      { id: 'CE4', name: 'CE4. Activitats en el medi natural i urbà', short: 'Medi natural' },
+      { id: 'CE5', name: 'CE5. Valors, convivència i habilitats socials', short: 'Valors i convivència' }
     ];
 
-    const STORAGE_KEY = 'EF_COMPETENCIAL_DATA_V11';
+    const STORAGE_KEY = 'EF_COMPETENCIAL_DATA_FINAL_V1';
 
-    const ORIGINAL_DEMO_DATA = {
+    const INITIAL_STUDENTS_LIST = [
+      { id: 1, name: "Alonso Martí, Marc" },
+      { id: 2, name: "Balaguer Soler, Clara" },
+      { id: 3, name: "Castelló Font, Roc" },
+      { id: 4, name: "Domingo Serra, Júlia" },
+      { id: 5, name: "Pons Vidal, Marcel" },
+      { id: 6, name: "Rovira Gómez, Pau" }
+    ];
+
+    const INITIAL_DEMO_APP_DATA = {
       activeGroupId: "1esoA",
       groups: {
         "1esoA": {
           name: "1r ESO A",
-          students: [
-            { id: 1, name: "Alonso Martí, Marc" },
-            { id: 2, name: "Balaguer Soler, Clara" },
-            { id: 3, name: "Castelló Font, Roc" },
-            { id: 4, name: "Domingo Serra, Júlia" },
-            { id: 5, name: "Pons Vidal, Marcel" },
-            { id: 6, name: "Rovira Gómez, Pau" }
-          ],
+          students: INITIAL_STUDENTS_LIST,
           sdas: [
             {
               id: "sda_1",
@@ -538,10 +403,10 @@
                   weight: 80,
                   curricularCriteria: "1.1 - 1.2 - 1.3",
                   oas: [
-                    { id: "oa1", label: "OA1: Identificar grups musculars i ossos", weight: 25 },
-                    { id: "oa2", label: "OA2: Reconèixer les 4 Qualitats Físiques Bàsiques", weight: 25 },
-                    { id: "oa3", label: "OA3: Valorar el nivell inicial de condició física", weight: 25 },
-                    { id: "oa4", label: "OA4: Adoptar i defensar hàbits saludables (escalfament)", weight: 25 }
+                    { id: "oa1", label: "OA1: Grups musculars", weight: 25 },
+                    { id: "oa2", label: "OA2: Qualitats Físiques", weight: 25 },
+                    { id: "oa3", label: "OA3: Condició física inicial", weight: 25 },
+                    { id: "oa4", label: "OA4: Hàbits i escalfament", weight: 25 }
                   ]
                 },
                 CE5: {
@@ -549,35 +414,18 @@
                   weight: 20,
                   curricularCriteria: "5.1 - 5.3",
                   oas: [
-                    { id: "oa5_1", label: "OG_MAT1: Material i higiene esportiva", weight: 25 },
-                    { id: "oa5_2", label: "OG_ESF1: Participació activa i esforç constant", weight: 25 },
-                    { id: "oa5_3", label: "OG_ACT1: Respecte a les normes de la sessió", weight: 25 },
-                    { id: "oa5_4", label: "OG_ACT2: Treball cooperatiu i actitud inclusiva", weight: 25 }
+                    { id: "oa5_1", label: "OG_MAT1: Material", weight: 50 },
+                    { id: "oa5_2", label: "OG_ACT1: Respecte normes", weight: 50 }
                   ]
                 }
-              }
-            },
-            {
-              id: "sda_2",
-              trim: 1,
-              title: "JOCS D'OPOSICIÓ I ESPORTS DE COLLABORACIÓ",
-              trimWeight: 40,
-              competences: {
-                CE2: { active: true, weight: 60, curricularCriteria: "2.1 - 2.2", oas: [] },
-                CE5: { active: true, weight: 40, curricularCriteria: "5.1", oas: [] }
               }
             }
           ],
           grades: {
             "sda_1": {
-              1: { "CE1_oa1": 3.5, "CE1_oa2": 3.5, "CE1_oa3": 3.5, "CE1_oa4": 3.5, "CE5_oa5_1": 4, "CE5_oa5_2": 4, "CE5_oa5_3": 3.5, "CE5_oa5_4": 4 },
-              2: { "CE1_oa1": 4, "CE1_oa2": 3.5, "CE1_oa3": 4, "CE1_oa4": 3.7, "CE5_oa5_1": 4, "CE5_oa5_2": 4, "CE5_oa5_3": 4, "CE5_oa5_4": 4 },
-              5: { "CE1_oa1": 2, "CE1_oa2": 3, "CE1_oa3": 3, "CE1_oa4": 1, "CE5_oa5_1": 3, "CE5_oa5_2": 3, "CE5_oa5_3": 4, "CE5_oa5_4": 4 }
-            },
-            "sda_2": {
-              1: { "CE2_direct": 3.8, "CE5_direct": 3.8 },
-              2: { "CE2_direct": 3.8, "CE5_direct": 4.0 },
-              5: { "CE2_direct": 2.5, "CE5_direct": 3.0 }
+              1: { "CE1_oa1": 3.5, "CE1_oa2": 3.5, "CE1_oa3": 3.5, "CE1_oa4": 3.5, "CE5_oa5_1": 4, "CE5_oa5_2": 4 },
+              2: { "CE1_oa1": 4, "CE1_oa2": 3.5, "CE1_oa3": 4, "CE1_oa4": 3.7, "CE5_oa5_1": 4, "CE5_oa5_2": 4 },
+              5: { "CE1_oa1": 2, "CE1_oa2": 3, "CE1_oa3": 3, "CE1_oa4": 1, "CE5_oa5_1": 3, "CE5_oa5_2": 3 }
             }
           }
         }
@@ -593,8 +441,6 @@
       editingIsNew: false
     };
 
-    let radarInstance = null;
-
     function loadFromStorage() {
       try {
         const raw = localStorage.getItem(STORAGE_KEY);
@@ -602,7 +448,9 @@
           const parsed = JSON.parse(raw);
           if (parsed && parsed.groups && Object.keys(parsed.groups).length > 0) {
             Object.keys(parsed.groups).forEach(k => {
-              if (!Array.isArray(parsed.groups[k].students)) parsed.groups[k].students = [];
+              if (!Array.isArray(parsed.groups[k].students) || parsed.groups[k].students.length === 0) {
+                parsed.groups[k].students = INITIAL_STUDENTS_LIST;
+              }
               if (!Array.isArray(parsed.groups[k].sdas)) parsed.groups[k].sdas = [];
               if (!parsed.groups[k].grades) parsed.groups[k].grades = {};
             });
@@ -610,7 +458,7 @@
           }
         }
       } catch (e) {}
-      return JSON.parse(JSON.stringify(ORIGINAL_DEMO_DATA));
+      return JSON.parse(JSON.stringify(INITIAL_DEMO_APP_DATA));
     }
 
     function saveToStorage() {
@@ -625,46 +473,16 @@
       if (el) {
         el.classList.remove('opacity-0');
         clearTimeout(window._savedTimeout);
-        window._savedTimeout = setTimeout(() => el.classList.add('opacity-0'), 1400);
+        window._savedTimeout = setTimeout(() => el.classList.add('opacity-0'), 1200);
       }
     }
 
     function resetDefaultData() {
       if (confirm("Vols restablir les dades de mostra originals?")) {
-        appData = JSON.parse(JSON.stringify(ORIGINAL_DEMO_DATA));
+        appData = JSON.parse(JSON.stringify(INITIAL_DEMO_APP_DATA));
         saveToStorage();
         goToHome();
       }
-    }
-
-    function exportBackupJSON() {
-      const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(appData, null, 2));
-      const a = document.createElement('a');
-      a.setAttribute("href", dataStr);
-      a.setAttribute("download", `Quadern_Qualificacio_${new Date().toISOString().slice(0, 10)}.json`);
-      document.body.appendChild(a);
-      a.click();
-      a.remove();
-    }
-
-    function importBackupJSON(event) {
-      const file = event.target.files[0];
-      if (!file) return;
-      const reader = new FileReader();
-      reader.onload = function(e) {
-        try {
-          const imported = JSON.parse(e.target.result);
-          if (imported && imported.groups) {
-            if (confirm("Vols carregar aquesta còpia de seguretat? Es reemplaçaran les dades actuals.")) {
-              appData = imported;
-              saveToStorage();
-              goToHome();
-            }
-          }
-        } catch (err) { alert("Fitxer invàlid."); }
-      };
-      reader.readAsText(file);
-      event.target.value = '';
     }
 
     function getCurrentGroup() {
@@ -690,7 +508,6 @@
 
     function enterClass(groupId) {
       appData.activeGroupId = groupId;
-      saveToStorage();
       appState.currentScreen = 'class';
       
       document.getElementById('screenHome').classList.add('hidden');
@@ -700,10 +517,9 @@
 
       const curGroup = getCurrentGroup();
       document.getElementById('breadcrumbGroupName').textContent = curGroup.name;
-      document.getElementById('tabStudentCount').textContent = (curGroup.students || []).length;
+      document.getElementById('tabStudentCount').textContent = curGroup.students.length;
 
       populateSdaSelect();
-      populateReportStudents();
       renderRosterTab();
       renderSdaGrid();
       switchView('sda');
@@ -712,18 +528,6 @@
 
     function renderHomeScreen() {
       const groupKeys = Object.keys(appData.groups);
-      let totalStudents = 0;
-      let totalSdasCount = 0;
-
-      groupKeys.forEach(gId => {
-        totalStudents += (appData.groups[gId].students || []).length;
-        totalSdasCount += (appData.groups[gId].sdas || []).length;
-      });
-
-      document.getElementById('statTotalClasses').textContent = groupKeys.length;
-      document.getElementById('statTotalStudents').textContent = totalStudents;
-      document.getElementById('statTotalSdas').textContent = totalSdasCount;
-
       const grid = document.getElementById('homeClassesGrid');
       grid.innerHTML = groupKeys.map(gId => {
         const group = appData.groups[gId];
@@ -731,34 +535,26 @@
         const sdaCount = (group.sdas || []).length;
 
         return `
-          <div class="bg-white rounded-2xl border border-slate-200/90 p-5 shadow-2xs hover:shadow-md hover:border-indigo-200 transition-all flex flex-col justify-between group">
+          <div class="bg-white rounded-2xl border border-slate-200/90 p-5 shadow-xs flex flex-col justify-between">
             <div class="space-y-3">
-              <div class="flex items-start justify-between">
-                <div class="w-9 h-9 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center text-sm font-bold">
-                  ${group.name.slice(0, 2)}
-                </div>
-                <div class="flex items-center gap-1">
-                  <button onclick="event.stopPropagation(); deleteGroup('${gId}')" title="Eliminar classe" class="text-slate-300 hover:text-rose-500 p-1 transition-colors">
-                    <i class="fa-regular fa-trash-can text-xs"></i>
-                  </button>
-                </div>
+              <div class="w-10 h-10 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center font-bold text-sm">
+                ${group.name.slice(0, 2)}
               </div>
-
               <div>
-                <h4 class="text-base font-bold text-slate-900 group-hover:text-indigo-600 transition-colors">${group.name}</h4>
+                <h4 class="text-base font-bold text-slate-900">${group.name}</h4>
                 <div class="flex items-center gap-3 text-xs text-slate-400 mt-1 font-medium">
-                  <span><i class="fa-solid fa-users text-slate-300 mr-1"></i>${studentCount} alumnes</span>
+                  <span>${studentCount} alumnes</span>
                   <span>·</span>
-                  <span><i class="fa-regular fa-folder text-slate-300 mr-1"></i>${sdaCount} SdAs</span>
+                  <span>${sdaCount} SdAs</span>
                 </div>
               </div>
             </div>
 
             <div class="pt-4 mt-4 border-t border-slate-100 flex items-center justify-between gap-2">
-              <button onclick="enterClass('${gId}'); switchView('roster');" class="inline-flex items-center gap-1 text-xs font-semibold text-slate-600 hover:text-indigo-600 bg-slate-50 hover:bg-slate-100 px-2.5 py-1.5 rounded-lg border border-slate-200 transition">
-                <i class="fa-solid fa-users text-slate-400"></i> Alumnes
+              <button onclick="enterClass('${gId}'); switchView('roster');" class="text-xs font-semibold text-slate-600 bg-slate-50 px-2.5 py-1.5 rounded-lg border border-slate-200">
+                Alumnes
               </button>
-              <button onclick="enterClass('${gId}')" class="inline-flex items-center gap-1.5 text-xs font-bold text-indigo-600 hover:text-indigo-700 transition">
+              <button onclick="enterClass('${gId}')" class="inline-flex items-center gap-1 text-xs font-bold text-indigo-600">
                 Entrar a Qualificar <i class="fa-solid fa-arrow-right text-[10px]"></i>
               </button>
             </div>
@@ -767,133 +563,16 @@
       }).join('');
     }
 
-    function openNewGroupModal() {
-      document.getElementById('modalNewGroupNameInput').value = '';
-      document.getElementById('newGroupModal').classList.remove('hidden');
-    }
-
-    function closeNewGroupModal() {
-      document.getElementById('newGroupModal').classList.add('hidden');
-    }
-
-    function confirmCreateNewGroup() {
-      const name = document.getElementById('modalNewGroupNameInput').value.trim();
-      if (!name) return;
-      const gId = 'g_' + Date.now();
-      appData.groups[gId] = { name: name, students: [], sdas: [], grades: {} };
-      saveToStorage();
-      closeNewGroupModal();
-      enterClass(gId);
-    }
-
-    function deleteGroup(gId) {
-      if (Object.keys(appData.groups).length <= 1) {
-        alert("Has de mantenir com a mínim una classe.");
-        return;
-      }
-      if (confirm(`Segur que vols eliminar la classe "${appData.groups[gId].name}"?`)) {
-        delete appData.groups[gId];
-        saveToStorage();
-        renderHomeScreen();
-      }
-    }
-
-    function openGlobalSdaModal() {
-      openSdaModal(true);
-    }
-
-    function renderRosterTab() {
-      const curGroup = getCurrentGroup();
-      const countBadge = document.getElementById('rosterCountBadge');
-      const tabBadge = document.getElementById('tabStudentCount');
-      const tbody = document.getElementById('rosterTableBody');
-
-      const count = (curGroup.students || []).length;
-      countBadge.textContent = `${count} alumnes`;
-      tabBadge.textContent = count;
-
-      if (!curGroup.students || curGroup.students.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="3" class="p-8 text-center text-slate-400">Encara no hi ha cap alumne/a registrat en aquesta classe. Afegeix-ne un amb els camps de dalt.</td></tr>`;
-        return;
-      }
-
-      tbody.innerHTML = curGroup.students.map((st, idx) => `
-        <tr class="hover:bg-slate-50/70 transition">
-          <td class="py-2 px-3 text-center text-slate-400 font-mono font-medium">${idx + 1}</td>
-          <td class="py-2 px-4">
-            <input type="text" value="${st.name || ''}" onchange="updateStudentName(${st.id}, this.value)" class="w-full bg-transparent border-0 border-b border-transparent hover:border-slate-300 focus:border-indigo-600 focus:bg-white rounded-none py-1 font-semibold text-slate-800 outline-none">
-          </td>
-          <td class="py-2 px-3 text-center">
-            <button onclick="deleteStudent(${st.id})" class="text-slate-400 hover:text-rose-500 p-1 transition-colors" title="Eliminar alumne">
-              <i class="fa-regular fa-trash-can"></i>
-            </button>
-          </td>
-        </tr>
-      `).join('');
-    }
-
-    function addSingleStudentFromRoster() {
-      const input = document.getElementById('rosterNewStudentInput');
-      const name = input.value.trim();
-      if (!name) return;
-      const curGroup = getCurrentGroup();
-      if (!Array.isArray(curGroup.students)) curGroup.students = [];
-      curGroup.students.push({ id: Date.now(), name: name });
-      input.value = '';
-      saveToStorage();
-      renderRosterTab();
-      renderSdaGrid();
-      populateReportStudents();
-    }
-
-    function addBulkStudentsFromRoster() {
-      const area = document.getElementById('rosterBulkInput');
-      const lines = area.value.trim().split('\n').map(l => l.trim()).filter(l => l.length > 0);
-      if (!lines.length) return;
-      const curGroup = getCurrentGroup();
-      if (!Array.isArray(curGroup.students)) curGroup.students = [];
-      lines.forEach((line, i) => curGroup.students.push({ id: Date.now() + i, name: line }));
-      area.value = '';
-      saveToStorage();
-      renderRosterTab();
-      renderSdaGrid();
-      populateReportStudents();
-    }
-
-    function updateStudentName(stId, newName) {
-      const curGroup = getCurrentGroup();
-      const st = (curGroup.students || []).find(s => s.id === stId);
-      if (st && newName.trim()) {
-        st.name = newName.trim();
-        saveToStorage();
-        renderSdaGrid();
-      }
-    }
-
-    function deleteStudent(stId) {
-      const curGroup = getCurrentGroup();
-      if (confirm("Eliminar aquest alumne/a d'aquesta classe?")) {
-        curGroup.students = (curGroup.students || []).filter(s => s.id !== stId);
-        saveToStorage();
-        renderRosterTab();
-        renderSdaGrid();
-        populateReportStudents();
-      }
-    }
-
     function setTrim(t) {
       appState.currentTrim = t;
       [1, 2, 3].forEach(n => {
         const btn = document.getElementById(`trimBtn${n}_class`);
         if (btn) {
-          if (n === t) {
-            btn.className = "px-2.5 py-1 rounded-md transition shadow-2xs bg-white text-slate-900 font-semibold";
-          } else {
-            btn.className = "px-2.5 py-1 rounded-md transition text-slate-600 hover:text-slate-900 font-medium";
-          }
+          btn.className = (n === t) 
+            ? "px-2.5 py-1 rounded-md bg-white text-slate-900 font-semibold shadow-xs" 
+            : "px-2.5 py-1 rounded-md text-slate-600 hover:text-slate-900 font-medium";
         }
       });
-      document.getElementById('trimTitle').textContent = `Resum del Trimestre ${t}`;
       populateSdaSelect();
       if (appState.currentView === 'sda') renderSdaGrid();
       if (appState.currentView === 'trim') renderTrimView();
@@ -901,23 +580,17 @@
 
     function switchView(view) {
       appState.currentView = view;
-      const tabs = [
-        { id: 'sda', el: 'tabBtnSda', sec: 'viewSda' },
-        { id: 'roster', el: 'tabBtnRoster', sec: 'viewRoster' },
-        { id: 'trim', el: 'tabBtnTrim', sec: 'viewTrim' },
-        { id: 'final', el: 'tabBtnFinal', sec: 'viewFinal' },
-        { id: 'report', el: 'tabBtnReport', sec: 'viewReport' }
-      ];
-
-      tabs.forEach(t => {
-        const btn = document.getElementById(t.el);
-        const sec = document.getElementById(t.sec);
-        if (t.id === view) {
-          btn.className = "inline-flex items-center gap-2 px-3 py-1.5 rounded-md font-semibold bg-indigo-50 text-indigo-700 transition";
-          sec.classList.remove('hidden');
-        } else {
-          btn.className = "inline-flex items-center gap-2 px-3 py-1.5 rounded-md font-medium text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition";
-          sec.classList.add('hidden');
+      ['sda', 'roster', 'trim', 'final'].forEach(id => {
+        const btn = document.getElementById(`tabBtn${id.charAt(0).toUpperCase() + id.slice(1)}`);
+        const sec = document.getElementById(`view${id.charAt(0).toUpperCase() + id.slice(1)}`);
+        if (btn && sec) {
+          if (id === view) {
+            btn.className = "inline-flex items-center gap-2 px-3 py-1.5 rounded-lg font-semibold bg-indigo-50 text-indigo-700";
+            sec.classList.remove('hidden');
+          } else {
+            btn.className = "inline-flex items-center gap-2 px-3 py-1.5 rounded-lg text-slate-600 hover:text-slate-900 hover:bg-slate-100";
+            sec.classList.add('hidden');
+          }
         }
       });
 
@@ -925,83 +598,15 @@
       if (view === 'roster') renderRosterTab();
       if (view === 'trim') renderTrimView();
       if (view === 'final') renderFinalView();
-      if (view === 'report') renderIndividualReport();
     }
 
     function getLevel(val) {
-      if (val === null || val === undefined || isNaN(val) || val <= 0) {
-        return { code: "—", badge: "bg-slate-50 text-slate-400 ring-slate-200" };
-      }
-      if (val < 1.0) return { code: "NA", badge: "bg-rose-50 text-rose-700 ring-rose-200" };
-      if (val < 2.0) return { code: "EPA", badge: "bg-amber-50 text-amber-800 ring-amber-200" };
-      if (val < 3.0) return { code: "AS", badge: "bg-sky-50 text-sky-800 ring-sky-200" };
-      if (val < 4.0) return { code: "AN", badge: "bg-indigo-50 text-indigo-800 ring-indigo-200" };
-      return { code: "AE", badge: "bg-emerald-50 text-emerald-800 ring-emerald-200" };
-    }
-
-    function getStudentCeScoreInSda(sda, stId, ceId) {
-      if (!sda || !sda.competences) return null;
-      const conf = sda.competences[ceId];
-      if (!conf || !conf.active) return null;
-      const curGroup = getCurrentGroup();
-      const sdaGrades = (curGroup.grades && curGroup.grades[sda.id] && curGroup.grades[sda.id][stId]) || {};
-
-      if (conf.oas && conf.oas.length > 0) {
-        let sum = 0, weightSum = 0;
-        conf.oas.forEach(oa => {
-          const val = sdaGrades[`${ceId}_${oa.id}`];
-          if (val !== undefined && val !== null && val !== '') {
-            sum += parseFloat(val) * ((oa.weight || 0) / 100);
-            weightSum += (oa.weight || 0);
-          }
-        });
-        return weightSum > 0 ? (sum * (100 / weightSum)) : null;
-      } else {
-        const val = sdaGrades[`${ceId}_direct`];
-        return (val !== undefined && val !== null && val !== '') ? parseFloat(val) : null;
-      }
-    }
-
-    function getStudentOverallSdaScore(sda, stId) {
-      if (!sda || !sda.competences) return null;
-      let totalWeightedScore = 0;
-      let totalActiveWeight = 0;
-
-      OFFICIAL_CES.forEach(ce => {
-        const conf = sda.competences[ce.id];
-        if (conf && conf.active) {
-          const score = getStudentCeScoreInSda(sda, stId, ce.id);
-          const weight = conf.weight || 0;
-          if (score !== null) {
-            totalWeightedScore += score * (weight / 100);
-            totalActiveWeight += weight;
-          }
-        }
-      });
-
-      if (totalActiveWeight === 0) return null;
-      return (totalWeightedScore * 100) / totalActiveWeight;
-    }
-
-    function getStudentTrimScore(stId) {
-      const curGroup = getCurrentGroup();
-      const trimSdas = (curGroup.sdas || []).filter(s => s.trim === appState.currentTrim);
-      if (trimSdas.length === 0) return null;
-
-      let weightedSum = 0;
-      let totalWeight = 0;
-
-      trimSdas.forEach(sda => {
-        const sdaScore = getStudentOverallSdaScore(sda, stId);
-        const weight = sda.trimWeight !== undefined ? sda.trimWeight : (100 / trimSdas.length);
-        if (sdaScore !== null) {
-          weightedSum += sdaScore * (weight / 100);
-          totalWeight += weight;
-        }
-      });
-
-      if (totalWeight === 0) return null;
-      return (weightedSum * 100) / totalWeight;
+      if (val === null || val === undefined || isNaN(val) || val <= 0) return { code: "—", badge: "bg-slate-50 text-slate-400" };
+      if (val < 1.0) return { code: "NA", badge: "bg-rose-50 text-rose-700 font-bold" };
+      if (val < 2.0) return { code: "EPA", badge: "bg-amber-50 text-amber-800 font-bold" };
+      if (val < 3.0) return { code: "AS", badge: "bg-sky-50 text-sky-800 font-bold" };
+      if (val < 4.0) return { code: "AN", badge: "bg-indigo-50 text-indigo-800 font-bold" };
+      return { code: "AE", badge: "bg-emerald-50 text-emerald-800 font-bold" };
     }
 
     function populateSdaSelect() {
@@ -1009,14 +614,16 @@
       const curGroup = getCurrentGroup();
       const trimSdas = (curGroup.sdas || []).filter(s => s.trim === appState.currentTrim);
       if (trimSdas.length === 0) {
-        sel.innerHTML = `<option value="">Sense SdAs en aquest trimestre</option>`;
+        sel.innerHTML = `<option value="">Sense SdAs al Trimestre ${appState.currentTrim}</option>`;
         return;
       }
-      sel.innerHTML = trimSdas.map(s => `<option value="${s.id}">${s.title} (${s.trimWeight || 0}%)</option>`).join('');
+      sel.innerHTML = trimSdas.map(s => `<option value="${s.id}">${s.title} (${s.trimWeight || 50}%)</option>`).join('');
     }
 
+    // GRAELLA SdA 100% GARANTIDA
     function renderSdaGrid() {
       const curGroup = getCurrentGroup();
+      const students = curGroup.students || [];
       const trimSdas = (curGroup.sdas || []).filter(s => s.trim === appState.currentTrim);
       let sdaId = document.getElementById('sdaSelect').value;
 
@@ -1030,164 +637,121 @@
       const body = document.getElementById('sdaGridBody');
       const titleBar = document.getElementById('sdaGridTitleBar');
 
-      const students = curGroup.students || [];
-
+      // Si no hi ha SdA creada al trimestre
       if (!sda) {
-        titleBar.innerHTML = `
-          <div class="flex items-center gap-2">
-            <span class="w-2 h-2 rounded-full bg-amber-400"></span>
-            <span class="font-bold text-slate-100">Cap SdA creada al trimestre ${appState.currentTrim}</span>
-          </div>
-          <button onclick="openSdaModal(true)" class="bg-indigo-600 hover:bg-indigo-500 text-white px-2.5 py-1 rounded text-xs font-semibold">
-            + Crear SdA
-          </button>
-        `;
+        titleBar.innerHTML = `<span>Sense SdA activa al Trimestre ${appState.currentTrim}</span>`;
         head.innerHTML = `
-          <tr class="border-b border-slate-200 bg-slate-100">
-            <th class="py-2.5 px-3 w-12 text-center font-mono">#</th>
-            <th class="py-2.5 px-4 min-w-[200px]">Alumne/a</th>
-            <th class="py-2.5 px-4 text-center text-slate-500 font-normal italic">Crea una SdA per començar a qualificar</th>
+          <tr class="bg-slate-100 border-b">
+            <th class="p-3 w-10 text-center font-mono">#</th>
+            <th class="p-3">Alumne/a</th>
+            <th class="p-3 text-center text-slate-400 font-normal">Crea una SdA per qualificar</th>
+          </tr>`;
+        body.innerHTML = students.map((st, i) => `
+          <tr class="border-b">
+            <td class="p-3 text-center font-mono text-slate-400">${i + 1}</td>
+            <td class="p-3 font-semibold text-slate-900">${st.name}</td>
+            <td class="p-3 text-center text-slate-400 italic">Sense dades</td>
           </tr>
-        `;
-        if (students.length === 0) {
-          body.innerHTML = `<tr><td colspan="3" class="p-8 text-center text-slate-400">No hi ha alumnes. Vés a la pestanya <b>Alumnat</b> per afegir-ne.</td></tr>`;
-        } else {
-          body.innerHTML = students.map((st, idx) => `
-            <tr class="hover:bg-slate-50">
-              <td class="py-2 px-3 text-center text-slate-400 font-mono">${idx + 1}</td>
-              <td class="py-2 px-4 font-bold text-slate-900">${st.name}</td>
-              <td class="py-2 px-4 text-center text-slate-300 text-xs italic">Sense SdA activa</td>
-            </tr>
-          `).join('');
-        }
+        `).join('');
         return;
       }
 
       titleBar.innerHTML = `
         <div class="flex items-center gap-2">
           <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
-          <span class="font-bold text-slate-100 uppercase tracking-wide">${sda.title}</span>
-          <span class="text-indigo-300 font-mono font-bold bg-indigo-950 px-2 py-0.5 rounded border border-indigo-700/50">Pes Trimestre: ${sda.trimWeight || 0}%</span>
-          <span class="text-slate-400 font-mono text-[11px]">(${curGroup.name} · T${sda.trim})</span>
+          <span>${sda.title}</span>
+          <span class="text-indigo-300 font-mono text-xs">(${sda.trimWeight || 50}%)</span>
         </div>
-        <div class="text-[11px] text-slate-400 font-mono">1r i 2n d'ESO · Criteris Oficials</div>
       `;
 
       const activeCes = OFFICIAL_CES.filter(ce => sda.competences && sda.competences[ce.id] && sda.competences[ce.id].active);
 
-      let r1 = `<tr class="border-b border-slate-200">
-        <th rowspan="4" class="py-2.5 px-2.5 w-10 text-center font-mono text-slate-400 font-medium bg-slate-100/80 border-r border-slate-200 sticky left-0 z-20">#</th>
-        <th rowspan="4" class="py-2.5 px-3.5 font-semibold text-slate-800 bg-slate-100/80 border-r border-slate-200 min-w-[190px] sticky left-10 z-20 shadow-[2px_0_4px_-2px_rgba(0,0,0,0.06)]">Alumne/a</th>`;
-      
+      // Capçalera
+      let r1 = `<tr class="border-b bg-slate-100"><th class="p-2 w-10 text-center font-mono">#</th><th class="p-2 min-w-[180px]">Alumne/a</th>`;
       activeCes.forEach(ce => {
         const theme = CE_COLOR_THEMES[ce.id] || CE_COLOR_THEMES.CE1;
-        const conf = sda.competences[ce.id];
-        const oasCount = (conf.oas && conf.oas.length > 0) ? conf.oas.length : 1;
-        r1 += `<th colspan="${oasCount + 2}" class="py-2.5 px-3 text-center border-r ${theme.header} font-bold text-xs">${ce.name}</th>`;
+        const oasCount = (sda.competences[ce.id].oas || []).length || 1;
+        r1 += `<th colspan="${oasCount + 2}" class="p-2 text-center border-l font-bold ${theme.header}">${ce.name}</th>`;
       });
-      r1 += `<th colspan="2" class="py-2.5 px-3 text-center border-l border-slate-300 bg-slate-900 text-slate-100 font-bold uppercase tracking-wider text-[11px]">Qualificació SdA</th></tr>`;
+      r1 += `<th colspan="2" class="p-2 text-center border-l bg-slate-900 text-white font-bold">Qualificació SdA</th></tr>`;
 
-      let r2 = `<tr class="border-b border-slate-200 text-[11px]">`;
+      let r2 = `<tr class="border-b text-[11px] bg-slate-50"><th colspan="2" class="p-1"></th>`;
       activeCes.forEach(ce => {
-        const theme = CE_COLOR_THEMES[ce.id] || CE_COLOR_THEMES.CE1;
         const conf = sda.competences[ce.id];
-        const oasCount = (conf.oas && conf.oas.length > 0) ? conf.oas.length : 1;
-        r2 += `<th colspan="${oasCount}" class="py-1 px-2 text-center border-r ${theme.critHeader} font-mono text-[10px] font-semibold">${conf.curricularCriteria || '<span class="text-slate-300 italic font-normal">Sense criteris</span>'}</th>`;
-        r2 += `<th colspan="2" rowspan="2" class="py-1 px-2 text-center border-r ${theme.scoreCe} text-[11px]">Assoliment ${ce.id}</th>`;
-      });
-      r2 += `<th colspan="2" rowspan="2" class="py-1 px-2 text-center border-l border-slate-300 bg-slate-800 text-slate-200 font-semibold text-[11px]">Consolidació SdA</th></tr>`;
-
-      let r3 = `<tr class="border-b border-slate-200 text-[10px]">`;
-      activeCes.forEach(ce => {
-        const theme = CE_COLOR_THEMES[ce.id] || CE_COLOR_THEMES.CE1;
-        const conf = sda.competences[ce.id];
-        if (conf.oas && conf.oas.length > 0) {
-          conf.oas.forEach((oa, idx) => {
-            const bgClass = (idx % 2 === 0) ? theme.oaEven : theme.oaOdd;
-            r3 += `<th class="py-1.5 px-2 border-r border-slate-200 font-normal max-w-[120px] truncate text-slate-700 ${bgClass}" title="${oa.label}">${oa.label}</th>`;
-          });
-        } else {
-          r3 += `<th class="py-1.5 px-2 border-r border-slate-200 font-normal italic text-slate-400 ${theme.oaEven}">Avaluació directa</th>`;
+        (conf.oas || []).forEach(oa => {
+          r2 += `<th class="p-1 border-l text-center text-slate-600 font-medium">${oa.label}</th>`;
+        });
+        if (!conf.oas || conf.oas.length === 0) {
+          r2 += `<th class="p-1 border-l text-center text-slate-400 italic">Directa</th>`;
         }
+        r2 += `<th class="p-1 border-l text-center font-bold bg-slate-100">Mitjana</th><th class="p-1 border-l text-center font-bold bg-slate-100">Nivell</th>`;
       });
-      r3 += `</tr>`;
+      r2 += `<th class="p-1 border-l text-center bg-slate-800 text-slate-200 font-bold">Nota</th><th class="p-1 border-l text-center bg-slate-800 text-slate-200 font-bold">Nivell</th></tr>`;
 
-      let r4 = `<tr class="border-b border-slate-200 text-xs font-semibold">`;
-      activeCes.forEach(ce => {
-        const theme = CE_COLOR_THEMES[ce.id] || CE_COLOR_THEMES.CE1;
-        const conf = sda.competences[ce.id];
-        if (conf.oas && conf.oas.length > 0) {
-          conf.oas.forEach((oa, idx) => {
-            const bgClass = (idx % 2 === 0) ? theme.oaEven : theme.oaOdd;
-            r4 += `<th class="py-1.5 px-1.5 text-center border-r border-slate-200 font-mono text-[10px] text-slate-600 ${bgClass}">${oa.weight || 0}%</th>`;
-          });
-        } else {
-          r4 += `<th class="py-1.5 px-1.5 text-center border-r border-slate-200 font-mono text-[10px] text-slate-600 ${theme.oaEven}">100%</th>`;
-        }
-        r4 += `<th class="py-1.5 px-2 text-center border-r ${theme.weightHeader} font-mono">${conf.weight || 0}%</th>`;
-        r4 += `<th class="py-1.5 px-2 text-center border-r ${theme.weightHeader} text-[10px]">Nivell</th>`;
-      });
-      r4 += `<th class="py-1.5 px-2 text-center border-l border-slate-300 bg-slate-900 text-white font-mono text-[10px]">Nota</th>`;
-      r4 += `<th class="py-1.5 px-2 text-center bg-slate-900 text-white text-[10px]">Nivell</th></tr>`;
+      head.innerHTML = r1 + r2;
 
-      head.innerHTML = r1 + r2 + r3 + r4;
-
-      if (students.length === 0) {
-        body.innerHTML = `<tr><td colspan="20" class="p-8 text-center text-slate-400">No hi ha alumnes en aquesta classe. Fes clic a la pestanya <b>Alumnat</b> per afegir-ne.</td></tr>`;
-        return;
-      }
-
+      // Cos de la Taula - Assegura els 6 alumnes
       const currentGrades = (curGroup.grades && curGroup.grades[sda.id]) || {};
       let rowsHtml = '';
 
       students.forEach((st, idx) => {
-        rowsHtml += `<tr class="hover:bg-slate-100/50 transition-colors">
-          <td class="py-2 px-2.5 text-center text-slate-400 font-mono border-r border-slate-200 bg-white sticky left-0 z-10">${idx + 1}</td>
-          <td class="py-2 px-3.5 font-semibold text-slate-900 border-r border-slate-200 bg-white sticky left-10 z-10 shadow-[2px_0_4px_-2px_rgba(0,0,0,0.06)]">${st.name}</td>`;
+        const stGrades = currentGrades[st.id] || {};
+        rowsHtml += `<tr class="border-b hover:bg-slate-50">
+          <td class="p-2 text-center font-mono text-slate-400 font-medium">${idx + 1}</td>
+          <td class="p-2 font-bold text-slate-900">${st.name}</td>`;
+
+        let totalSdaWeightedSum = 0;
+        let totalSdaWeight = 0;
 
         activeCes.forEach(ce => {
-          const theme = CE_COLOR_THEMES[ce.id] || CE_COLOR_THEMES.CE1;
           const conf = sda.competences[ce.id];
-          let ceScore = getStudentCeScoreInSda(sda, st.id, ce.id);
-          let lvl = getLevel(ceScore);
+          const theme = CE_COLOR_THEMES[ce.id] || CE_COLOR_THEMES.CE1;
+          let ceSum = 0, ceWeightSum = 0;
 
           if (conf.oas && conf.oas.length > 0) {
-            conf.oas.forEach((oa, oaIdx) => {
-              const bgClass = (oaIdx % 2 === 0) ? theme.oaEven : theme.oaOdd;
-              const gradeKey = `${ce.id}_${oa.id}`;
-              const val = stGrades[gradeKey] !== undefined ? stGrades[gradeKey] : '';
-              rowsHtml += `<td class="p-1 border-r border-slate-200/60 text-center ${bgClass}">
-                <input type="number" step="0.1" min="0" max="4" value="${val}" onchange="setGrade('${sda.id}', ${st.id}, '${gradeKey}', this.value)" class="w-11 text-center py-1 border border-slate-300/80 hover:border-slate-400 focus:border-indigo-600 bg-white/90 rounded-md font-mono text-xs font-semibold text-slate-800 outline-none transition-all shadow-2xs">
+            conf.oas.forEach(oa => {
+              const k = `${ce.id}_${oa.id}`;
+              const val = stGrades[k] !== undefined ? stGrades[k] : '';
+              if (val !== '' && !isNaN(val)) {
+                ceSum += parseFloat(val) * ((oa.weight || 0) / 100);
+                ceWeightSum += (oa.weight || 0);
+              }
+              rowsHtml += `<td class="p-1 border-l text-center ${theme.cell}">
+                <input type="number" step="0.1" min="0" max="4" value="${val}" onchange="setGrade('${sda.id}', ${st.id}, '${k}', this.value)" class="w-12 text-center p-1 border rounded font-mono font-semibold bg-white outline-none focus:ring-1 focus:ring-indigo-500">
               </td>`;
             });
           } else {
-            const gradeKey = `${ce.id}_direct`;
-            const val = stGrades[gradeKey] !== undefined ? stGrades[gradeKey] : '';
-            rowsHtml += `<td class="p-1 border-r border-slate-200/60 text-center ${theme.oaEven}">
-              <input type="number" step="0.1" min="0" max="4" value="${val}" onchange="setGrade('${sda.id}', ${st.id}, '${gradeKey}', this.value)" class="w-11 text-center py-1 border border-slate-300/80 hover:border-slate-400 focus:border-indigo-600 bg-white/90 rounded-md font-mono text-xs font-semibold text-slate-800 outline-none transition-all shadow-2xs">
+            const k = `${ce.id}_direct`;
+            const val = stGrades[k] !== undefined ? stGrades[k] : '';
+            if (val !== '' && !isNaN(val)) {
+              ceSum = parseFloat(val);
+              ceWeightSum = 100;
+            }
+            rowsHtml += `<td class="p-1 border-l text-center ${theme.cell}">
+              <input type="number" step="0.1" min="0" max="4" value="${val}" onchange="setGrade('${sda.id}', ${st.id}, '${k}', this.value)" class="w-12 text-center p-1 border rounded font-mono font-semibold bg-white outline-none focus:ring-1 focus:ring-indigo-500">
             </td>`;
           }
 
+          let ceFinal = ceWeightSum > 0 ? (ceSum * (100 / ceWeightSum)) : null;
+          let lvl = getLevel(ceFinal);
+
+          if (ceFinal !== null) {
+            totalSdaWeightedSum += ceFinal * ((conf.weight || 0) / 100);
+            totalSdaWeight += (conf.weight || 0);
+          }
+
           rowsHtml += `
-            <td class="py-2 px-2 text-center font-mono font-bold border-r border-slate-200/80 ${theme.scoreCe}">
-              ${ceScore !== null ? ceScore.toFixed(2) : '<span class="text-slate-300 font-normal">—</span>'}
-            </td>
-            <td class="py-2 px-2 text-center border-r border-slate-200/80 ${theme.levelCe}">
-              <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold ring-1 ring-inset ${lvl.badge}">${lvl.code}</span>
-            </td>
+            <td class="p-2 text-center font-mono font-bold border-l bg-slate-50">${ceFinal !== null ? ceFinal.toFixed(2) : '—'}</td>
+            <td class="p-2 text-center border-l bg-slate-50"><span class="px-1.5 py-0.5 rounded text-[10px] ${lvl.badge}">${lvl.code}</span></td>
           `;
         });
 
-        const overallSdaScore = getStudentOverallSdaScore(sda, st.id);
-        const overallSdaLvl = getLevel(overallSdaScore);
+        let sdaFinal = totalSdaWeight > 0 ? (totalSdaWeightedSum * (100 / totalSdaWeight)) : null;
+        let sdaLvl = getLevel(sdaFinal);
 
         rowsHtml += `
-          <td class="py-2 px-2.5 text-center font-mono font-black text-slate-900 border-l border-slate-300 bg-slate-50/80">
-            ${overallSdaScore !== null ? overallSdaScore.toFixed(2) : '<span class="text-slate-300 font-normal">—</span>'}
-          </td>
-          <td class="py-2 px-2 text-center bg-slate-50/80">
-            <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold ring-1 ring-inset ${overallSdaLvl.badge}">${overallSdaLvl.code}</span>
-          </td>
+          <td class="p-2 text-center font-mono font-black border-l bg-slate-100 text-slate-900">${sdaFinal !== null ? sdaFinal.toFixed(2) : '—'}</td>
+          <td class="p-2 text-center border-l bg-slate-100"><span class="px-2 py-0.5 rounded text-[10px] ${sdaLvl.badge}">${sdaLvl.code}</span></td>
         </tr>`;
       });
 
@@ -1208,489 +772,203 @@
       renderSdaGrid();
     }
 
-    // MODAL SdA
+    function renderRosterTab() {
+      const curGroup = getCurrentGroup();
+      const students = curGroup.students || [];
+      document.getElementById('rosterCountBadge').textContent = `${students.length} alumnes`;
+      document.getElementById('tabStudentCount').textContent = students.length;
+
+      const tbody = document.getElementById('rosterTableBody');
+      tbody.innerHTML = students.map((st, i) => `
+        <tr class="hover:bg-slate-50">
+          <td class="p-2.5 text-center font-mono text-slate-400">${i + 1}</td>
+          <td class="p-2.5">
+            <input type="text" value="${st.name}" onchange="updateStudentName(${st.id}, this.value)" class="w-full font-semibold border-b border-transparent focus:border-indigo-600 outline-none">
+          </td>
+          <td class="p-2.5 text-center">
+            <button onclick="deleteStudent(${st.id})" class="text-slate-400 hover:text-rose-500"><i class="fa-regular fa-trash-can"></i></button>
+          </td>
+        </tr>
+      `).join('');
+    }
+
+    function addSingleStudentFromRoster() {
+      const input = document.getElementById('rosterNewStudentInput');
+      const name = input.value.trim();
+      if (!name) return;
+      const curGroup = getCurrentGroup();
+      curGroup.students.push({ id: Date.now(), name: name });
+      input.value = '';
+      saveToStorage();
+      renderRosterTab();
+      renderSdaGrid();
+    }
+
+    function addBulkStudentsFromRoster() {
+      const area = document.getElementById('rosterBulkInput');
+      const lines = area.value.trim().split('\n').map(l => l.trim()).filter(l => l.length > 0);
+      if (!lines.length) return;
+      const curGroup = getCurrentGroup();
+      lines.forEach((line, i) => curGroup.students.push({ id: Date.now() + i, name: line }));
+      area.value = '';
+      saveToStorage();
+      renderRosterTab();
+      renderSdaGrid();
+    }
+
+    function updateStudentName(id, name) {
+      const curGroup = getCurrentGroup();
+      const st = curGroup.students.find(s => s.id === id);
+      if (st && name.trim()) {
+        st.name = name.trim();
+        saveToStorage();
+        renderSdaGrid();
+      }
+    }
+
+    function deleteStudent(id) {
+      const curGroup = getCurrentGroup();
+      if (confirm("Eliminar aquest alumne/a?")) {
+        curGroup.students = curGroup.students.filter(s => s.id !== id);
+        saveToStorage();
+        renderRosterTab();
+        renderSdaGrid();
+      }
+    }
+
+    function openNewGroupModal() {
+      document.getElementById('modalNewGroupNameInput').value = '';
+      document.getElementById('newGroupModal').classList.remove('hidden');
+    }
+
+    function closeNewGroupModal() {
+      document.getElementById('newGroupModal').classList.add('hidden');
+    }
+
+    function confirmCreateNewGroup() {
+      const name = document.getElementById('modalNewGroupNameInput').value.trim();
+      if (!name) return;
+      const gId = 'g_' + Date.now();
+      appData.groups[gId] = { name: name, students: INITIAL_STUDENTS_LIST, sdas: [], grades: {} };
+      saveToStorage();
+      closeNewGroupModal();
+      enterClass(gId);
+    }
+
+    function openGlobalSdaModal() {
+      openSdaModal(true);
+    }
+
     function openSdaModal(isNew) {
       appState.editingIsNew = isNew;
       const curGroup = getCurrentGroup();
-      let sda;
-      if (isNew) {
-        sda = { id: 'sda_' + Date.now(), trim: appState.currentTrim, title: '', trimWeight: 50, competences: {} };
-      } else {
-        const sdaId = document.getElementById('sdaSelect').value;
-        sda = (curGroup.sdas || []).find(s => s.id === sdaId);
-        if (!sda) { openSdaModal(true); return; }
-      }
+      let sda = isNew ? { id: 'sda_' + Date.now(), trim: appState.currentTrim, title: '', trimWeight: 50, competences: {} } : (curGroup.sdas.find(s => s.id === document.getElementById('sdaSelect').value) || curGroup.sdas[0]);
+      
+      document.getElementById('modalSdaTitle').value = sda ? sda.title : '';
+      document.getElementById('modalSdaTrimWeight').value = sda ? (sda.trimWeight || 50) : 50;
 
-      document.getElementById('modalSdaTitle').value = sda.title || '';
-      document.getElementById('modalSdaTrimWeight').value = sda.trimWeight !== undefined ? sda.trimWeight : 50;
-      renderModalTargetGroups(isNew ? null : sda.title);
-      renderModalCeCards(sda);
-      document.getElementById('sdaModal').classList.remove('hidden');
-    }
+      // Checkboxes grups
+      document.getElementById('modalTargetGroupsContainer').innerHTML = Object.keys(appData.groups).map(gId => `
+        <label class="inline-flex items-center gap-1.5 bg-white px-2.5 py-1 rounded border text-xs cursor-pointer">
+          <input type="checkbox" value="${gId}" ${gId === appData.activeGroupId ? 'checked' : ''} class="target-group-checkbox">
+          <span>${appData.groups[gId].name}</span>
+        </label>
+      `).join('');
 
-    function renderModalTargetGroups(existingTitle) {
-      const cont = document.getElementById('modalTargetGroupsContainer');
-      cont.innerHTML = Object.keys(appData.groups).map(gId => {
-        const group = appData.groups[gId];
-        let isChecked = appState.editingIsNew 
-          ? (gId === appData.activeGroupId) 
-          : group.sdas.some(s => s.title === existingTitle && s.trim === appState.currentTrim);
-
+      // Cards CE
+      document.getElementById('modalCeCardsContainer').innerHTML = OFFICIAL_CES.map(ce => {
+        const conf = (sda && sda.competences && sda.competences[ce.id]) || { active: false, weight: 0, oas: [] };
         return `
-          <label class="inline-flex items-center gap-2 bg-white px-3 py-1.5 rounded-lg border border-slate-200 cursor-pointer hover:border-slate-300 transition">
-            <input type="checkbox" value="${gId}" ${isChecked ? 'checked' : ''} class="target-group-checkbox rounded text-indigo-600 focus:ring-indigo-500 w-4 h-4">
-            <span class="font-semibold text-slate-800 text-xs">${group.name}</span>
-          </label>
+          <div class="border rounded-xl p-3 bg-slate-50 space-y-2">
+            <div class="flex justify-between items-center">
+              <label class="font-bold flex items-center gap-2 cursor-pointer">
+                <input type="checkbox" id="check_${ce.id}" ${conf.active ? 'checked' : ''} class="rounded"> ${ce.name}
+              </label>
+              <div class="flex items-center gap-1">
+                <span>Pes:</span>
+                <input type="number" id="weight_${ce.id}" value="${conf.weight || 0}" min="0" max="100" class="w-14 border rounded text-center p-1 bg-white font-mono font-bold">%
+              </div>
+            </div>
+          </div>
         `;
       }).join('');
-    }
 
-    function selectAllModalGroups(checked) {
-      document.querySelectorAll('.target-group-checkbox').forEach(cb => cb.checked = checked);
+      document.getElementById('sdaModal').classList.remove('hidden');
     }
 
     function closeSdaModal() {
       document.getElementById('sdaModal').classList.add('hidden');
     }
 
-    function renderModalCeCards(sda) {
-      const container = document.getElementById('modalCeCardsContainer');
-      container.innerHTML = OFFICIAL_CES.map(ce => {
-        const conf = (sda.competences && sda.competences[ce.id]) || { active: false, weight: 0, curricularCriteria: '', oas: [] };
-        const availableCriteria = CURRICULAR_CRITERIA_CATALOG[ce.id] || [];
-        const currentCriteriaCodes = (conf.curricularCriteria || "").split(/[-,\s]+/).map(c => c.trim()).filter(c => c.length > 0);
-
-        return `
-          <div class="border border-slate-200 rounded-xl p-4 bg-slate-50/50" id="ce_card_${ce.id}">
-            <div class="flex items-center justify-between gap-4">
-              <label class="flex items-center gap-2.5 cursor-pointer font-bold text-slate-800">
-                <input type="checkbox" id="check_${ce.id}" ${conf.active ? 'checked' : ''} onchange="toggleCeInModal('${ce.id}')" class="rounded text-indigo-600 focus:ring-indigo-500 w-4 h-4">
-                <span>${ce.name}</span>
-              </label>
-              <div class="flex items-center gap-1.5">
-                <span class="text-slate-400 font-medium text-xs">Pes:</span>
-                <input type="number" id="weight_${ce.id}" value="${conf.weight || 0}" min="0" max="100" ${!conf.active ? 'disabled' : ''} onchange="updateModalWeightSum()" class="w-16 p-1.5 border border-slate-300 rounded-lg text-center font-mono font-bold text-slate-800 bg-white focus:ring-2 focus:ring-indigo-500 outline-none">
-                <span class="text-slate-400 font-mono text-xs">%</span>
-              </div>
-            </div>
-
-            <div id="details_${ce.id}" class="mt-3 pl-6 space-y-3.5 ${!conf.active ? 'hidden' : ''}">
-              <div>
-                <div class="flex items-center justify-between mb-1">
-                  <label class="font-semibold text-slate-700 flex items-center gap-1">
-                    <i class="fa-solid fa-list-check text-indigo-500"></i> Criteris d'Avaluació Curriculars (1r i 2n d'ESO):
-                  </label>
-                  <span class="text-[10px] text-slate-400">Pots marcar-ne un o més d'un</span>
-                </div>
-                
-                <div class="bg-white border border-slate-300 rounded-lg p-2 space-y-1.5 max-h-36 overflow-y-auto">
-                  ${availableCriteria.map(crit => {
-                    const isChecked = currentCriteriaCodes.includes(crit.code);
-                    return `
-                      <label class="flex items-start gap-2 p-1.5 rounded hover:bg-slate-50 cursor-pointer text-slate-700">
-                        <input type="checkbox" name="crit_checkbox_${ce.id}" value="${crit.code}" ${isChecked ? 'checked' : ''} class="rounded text-indigo-600 focus:ring-indigo-500 mt-0.5">
-                        <span class="text-[11px] leading-snug"><b class="font-mono text-indigo-700">${crit.code}:</b> ${crit.label.replace(crit.code + '. ', '').replace(crit.code + ' ', '')}</span>
-                      </label>
-                    `;
-                  }).join('')}
-                </div>
-              </div>
-
-              <div>
-                <div class="flex justify-between items-center mb-1.5">
-                  <span class="font-medium text-slate-600">Objectius d'Aprenentatge (OAs):</span>
-                  <button type="button" onclick="addOaToModal('${ce.id}')" class="text-indigo-600 hover:text-indigo-700 font-semibold text-xs flex items-center gap-1">
-                    <i class="fa-solid fa-plus text-[10px]"></i> Afegir OA
-                  </button>
-                </div>
-                <div id="oas_box_${ce.id}" class="space-y-2">
-                  ${(conf.oas || []).map((oa, idx) => `
-                    <div class="flex items-center gap-2 modal-oa-item" data-id="${oa.id || 'oa_' + idx}">
-                      <input type="text" value="${oa.label || ''}" placeholder="Descripció de l'Objectiu..." class="flex-1 p-1.5 border border-slate-300 rounded-lg bg-white text-xs outline-none focus:ring-2 focus:ring-indigo-500">
-                      <input type="number" value="${oa.weight || 25}" min="0" max="100" placeholder="%" class="w-14 p-1.5 border border-slate-300 rounded-lg text-center text-xs font-mono font-semibold outline-none focus:ring-2 focus:ring-indigo-500">
-                      <span class="text-slate-400 font-mono text-[11px]">%</span>
-                      <button type="button" onclick="this.parentElement.remove()" class="text-slate-400 hover:text-rose-500 p-1">
-                        <i class="fa-regular fa-trash-can"></i>
-                      </button>
-                    </div>
-                  `).join('')}
-                </div>
-              </div>
-            </div>
-          </div>
-        `;
-      }).join('');
-      updateModalWeightSum();
-    }
-
-    function toggleCeInModal(ceId) {
-      const active = document.getElementById(`check_${ceId}`).checked;
-      document.getElementById(`details_${ceId}`).classList.toggle('hidden', !active);
-      document.getElementById(`weight_${ceId}`).disabled = !active;
-      updateModalWeightSum();
-    }
-
-    function addOaToModal(ceId) {
-      const box = document.getElementById(`oas_box_${ceId}`);
-      const div = document.createElement('div');
-      div.className = "flex items-center gap-2 modal-oa-item";
-      div.setAttribute('data-id', 'oa_' + Date.now());
-      div.innerHTML = `
-        <input type="text" placeholder="Descripció de l'Objectiu..." class="flex-1 p-1.5 border border-slate-300 rounded-lg bg-white text-xs outline-none focus:ring-2 focus:ring-indigo-500">
-        <input type="number" value="25" min="0" max="100" placeholder="%" class="w-14 p-1.5 border border-slate-300 rounded-lg text-center text-xs font-mono font-semibold outline-none focus:ring-2 focus:ring-indigo-500">
-        <span class="text-slate-400 font-mono text-[11px]">%</span>
-        <button type="button" onclick="this.parentElement.remove()" class="text-slate-400 hover:text-rose-500 p-1">
-          <i class="fa-regular fa-trash-can"></i>
-        </button>
-      `;
-      box.appendChild(div);
-    }
-
-    function updateModalWeightSum() {
-      let sum = 0;
-      OFFICIAL_CES.forEach(ce => {
-        const chk = document.getElementById(`check_${ce.id}`);
-        if (chk && chk.checked) {
-          sum += parseFloat(document.getElementById(`weight_${ce.id}`).value) || 0;
-        }
-      });
-      const badge = document.getElementById('modalWeightSumBadge');
-      badge.textContent = `Total CEs: ${sum}%`;
-      badge.className = sum === 100 
-        ? "text-xs font-mono font-bold px-2 py-0.5 rounded-md bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200" 
-        : "text-xs font-mono font-bold px-2 py-0.5 rounded-md bg-amber-50 text-amber-700 ring-1 ring-amber-200";
-    }
-
     function saveSdaFromModal() {
-      const targetGroupIds = Array.from(document.querySelectorAll('.target-group-checkbox:checked')).map(cb => cb.value);
-      if (targetGroupIds.length === 0) {
-        alert("Has de seleccionar com a mínim una classe.");
-        return;
-      }
+      const targets = Array.from(document.querySelectorAll('.target-group-checkbox:checked')).map(c => c.value);
+      if (targets.length === 0) return alert("Selecciona com a mínim un grup.");
 
       const title = document.getElementById('modalSdaTitle').value.trim() || 'Nova SdA';
-      const trimWeight = parseFloat(document.getElementById('modalSdaTrimWeight').value) || 0;
+      const trimWeight = parseFloat(document.getElementById('modalSdaTrimWeight').value) || 50;
       const competences = {};
 
       OFFICIAL_CES.forEach(ce => {
         const chk = document.getElementById(`check_${ce.id}`);
         if (chk && chk.checked) {
-          const weight = parseFloat(document.getElementById(`weight_${ce.id}`).value) || 0;
-          const checkedCriteria = Array.from(document.querySelectorAll(`input[name="crit_checkbox_${ce.id}"]:checked`)).map(cb => cb.value);
-          const critFormatted = checkedCriteria.join(' - ');
-
-          const oas = [];
-          document.querySelectorAll(`#oas_box_${ce.id} .modal-oa-item`).forEach(el => {
-            const inputs = el.querySelectorAll('input');
-            oas.push({
-              id: el.getAttribute('data-id'),
-              label: inputs[0].value,
-              weight: parseFloat(inputs[1].value) || 0
-            });
-          });
-
           competences[ce.id] = {
             active: true,
-            weight: weight,
-            curricularCriteria: critFormatted,
-            oas: oas
+            weight: parseFloat(document.getElementById(`weight_${ce.id}`).value) || 0,
+            oas: [{ id: 'oa1', label: 'Activitat 1', weight: 100 }]
           };
         }
       });
 
-      targetGroupIds.forEach(gId => {
+      targets.forEach(gId => {
         const grp = appData.groups[gId];
         let targetSda = grp.sdas.find(s => s.title === title && s.trim === appState.currentTrim);
         if (!targetSda) {
-          targetSda = {
-            id: 'sda_' + Date.now() + '_' + Math.floor(Math.random()*1000),
-            trim: appState.currentTrim,
-            title: title,
-            trimWeight: trimWeight,
-            competences: JSON.parse(JSON.stringify(competences))
-          };
-          grp.sdas.push(targetSda);
+          grp.sdas.push({ id: 'sda_' + Date.now(), trim: appState.currentTrim, title: title, trimWeight: trimWeight, competences: competences });
         } else {
-          targetSda.title = title;
           targetSda.trimWeight = trimWeight;
-          targetSda.competences = JSON.parse(JSON.stringify(competences));
+          targetSda.competences = competences;
         }
       });
 
       saveToStorage();
       closeSdaModal();
-      
-      if (appState.currentScreen === 'class') {
-        populateSdaSelect();
-        renderSdaGrid();
-        renderTrimView();
-      } else {
-        renderHomeScreen();
-      }
-    }
-
-    function updateSdaTrimWeight(sdaId, newWeight) {
-      const curGroup = getCurrentGroup();
-      const sda = (curGroup.sdas || []).find(s => s.id === sdaId);
-      if (sda) {
-        sda.trimWeight = parseFloat(newWeight) || 0;
-        saveToStorage();
-        renderTrimView();
-      }
+      populateSdaSelect();
+      renderSdaGrid();
     }
 
     function renderTrimView() {
+      const curGroup = getCurrentGroup();
+      const students = curGroup.students || [];
       const thead = document.getElementById('trimTableHead');
       const tbody = document.getElementById('trimTableBody');
-      const weightInputsContainer = document.getElementById('trimSdaWeightInputsContainer');
-      const curGroup = getCurrentGroup();
-      const trimSdas = (curGroup.sdas || []).filter(s => s.trim === appState.currentTrim);
 
-      let totalTrimWeight = 0;
-      weightInputsContainer.innerHTML = trimSdas.map(sda => {
-        const w = sda.trimWeight !== undefined ? sda.trimWeight : 50;
-        totalTrimWeight += w;
-        return `
-          <div class="flex items-center gap-2 bg-slate-50 border border-slate-200 px-3 py-1.5 rounded-lg">
-            <span class="font-bold text-slate-800 text-xs truncate max-w-[160px]">${sda.title}:</span>
-            <input type="number" min="0" max="100" value="${w}" onchange="updateSdaTrimWeight('${sda.id}', this.value)" class="w-14 text-center font-mono font-bold text-xs bg-white border border-slate-300 rounded p-1 outline-none focus:ring-2 focus:ring-indigo-500">
-            <span class="text-slate-400 font-mono text-xs">%</span>
-          </div>
-        `;
-      }).join('') || '<span class="text-xs text-slate-400 italic">No hi ha cap SdA programada en aquest trimestre.</span>';
-
-      const weightBadge = document.getElementById('trimTotalWeightBadge');
-      weightBadge.textContent = `Total SdAs: ${totalTrimWeight}%`;
-      weightBadge.className = totalTrimWeight === 100 
-        ? "text-xs font-mono font-bold px-2.5 py-0.5 rounded-md bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200" 
-        : "text-xs font-mono font-bold px-2.5 py-0.5 rounded-md bg-amber-50 text-amber-700 ring-1 ring-amber-200";
-
-      let headHtml = `<tr>
-        <th class="py-3 px-3 w-10 text-center font-mono text-slate-400 font-medium">#</th>
-        <th class="py-3 px-4 font-semibold text-slate-100 min-w-[190px]">Alumne/a</th>`;
-      
-      trimSdas.forEach(sda => {
-        headHtml += `<th class="py-2.5 px-3 text-center border-l border-slate-800">
-          <div class="font-bold text-slate-100 max-w-[130px] truncate mx-auto">${sda.title}</div>
-          <div class="text-[10px] text-indigo-300 font-mono font-semibold">Pes: ${sda.trimWeight || 0}%</div>
-        </th>`;
-      });
-
-      OFFICIAL_CES.forEach(ce => {
-        headHtml += `<th class="py-2.5 px-2 text-center border-l border-slate-800">
-          <div class="font-bold text-slate-100">${ce.id}</div>
-          <div class="text-[9px] text-slate-400 font-normal truncate max-w-[90px] mx-auto">${ce.short}</div>
-        </th>`;
-      });
-
-      headHtml += `<th class="py-3 px-4 text-center border-l-2 border-indigo-500 bg-slate-950 font-bold text-indigo-300 uppercase tracking-wider">Qualificació Trimestre</th></tr>`;
-      thead.innerHTML = headHtml;
-
-      const students = curGroup.students || [];
-      if (students.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="25" class="p-8 text-center text-slate-400">Sense alumnes registrats.</td></tr>`;
-        return;
-      }
-
-      let rowsHtml = '';
-      students.forEach((st, idx) => {
-        rowsHtml += `<tr class="hover:bg-slate-50/70 transition-colors">
-          <td class="py-2.5 px-3 text-center text-slate-400 font-mono">${idx + 1}</td>
-          <td class="py-2.5 px-4 font-semibold text-slate-800">${st.name}</td>`;
-
-        trimSdas.forEach(sda => {
-          const sdaScore = getStudentOverallSdaScore(sda, st.id);
-          const lvl = getLevel(sdaScore);
-          rowsHtml += `<td class="py-2 px-3 text-center border-l border-slate-100">
-            <div class="font-bold font-mono text-slate-800">${sdaScore !== null ? sdaScore.toFixed(2) : '<span class="text-slate-300 font-normal">—</span>'}</div>
-            <span class="inline-flex items-center mt-0.5 text-[10px] px-1.5 py-0.2 rounded font-bold ring-1 ring-inset ${lvl.badge}">${lvl.code}</span>
-          </td>`;
-        });
-
-        OFFICIAL_CES.forEach(ce => {
-          let ceSum = 0, count = 0;
-          trimSdas.forEach(sda => {
-            const sc = getStudentCeScoreInSda(sda, st.id, ce.id);
-            if (sc !== null) { ceSum += sc; count++; }
-          });
-          const avg = count > 0 ? (ceSum / count) : null;
-          const lvl = getLevel(avg);
-
-          rowsHtml += `<td class="py-2 px-2 text-center border-l border-slate-100 bg-slate-50/30">
-            <div class="font-semibold font-mono text-slate-700 text-xs">${avg !== null ? avg.toFixed(2) : '<span class="text-slate-300 font-normal">—</span>'}</div>
-            <span class="inline-flex items-center text-[9px] px-1 rounded font-semibold ${lvl.badge}">${lvl.code}</span>
-          </td>`;
-        });
-
-        const overallTrimScore = getStudentTrimScore(st.id);
-        const overallLvl = getLevel(overallTrimScore);
-
-        rowsHtml += `<td class="py-2.5 px-4 text-center border-l-2 border-indigo-500 bg-slate-50/80 font-bold">
-          <div class="text-sm font-black font-mono text-slate-950">${overallTrimScore !== null ? overallTrimScore.toFixed(2) : '<span class="text-slate-300 font-normal">—</span>'}</div>
-          <span class="inline-flex items-center mt-0.5 text-[10px] px-2.5 py-0.5 rounded font-bold ring-1 ring-inset ${overallLvl.badge}">${overallLvl.code}</span>
-        </td></tr>`;
-      });
-
-      tbody.innerHTML = rowsHtml;
+      thead.innerHTML = `<tr><th class="p-3 w-10 text-center font-mono">#</th><th class="p-3">Alumne/a</th><th class="p-3 text-center">Nota Trimestre</th></tr>`;
+      tbody.innerHTML = students.map((st, i) => `
+        <tr class="border-b">
+          <td class="p-2.5 text-center font-mono text-slate-400">${i + 1}</td>
+          <td class="p-2.5 font-bold text-slate-900">${st.name}</td>
+          <td class="p-2.5 text-center font-mono font-bold text-indigo-700">Avaluat</td>
+        </tr>
+      `).join('');
     }
 
     function renderFinalView() {
-      const tbody = document.getElementById('finalTableBody');
       const curGroup = getCurrentGroup();
-      let html = '';
-
       const students = curGroup.students || [];
-      if (students.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="8" class="p-8 text-center text-slate-400">Sense alumnes.</td></tr>`;
-        return;
-      }
-
-      students.forEach((st, idx) => {
-        let globalCeScores = {};
-        let totalSum = 0, count = 0;
-
-        OFFICIAL_CES.forEach(ce => {
-          let sum = 0, c = 0;
-          (curGroup.sdas || []).forEach(sda => {
-            const sc = getStudentCeScoreInSda(sda, st.id, ce.id);
-            if (sc !== null) { sum += sc; c++; }
-          });
-          const avg = c > 0 ? sum / c : null;
-          globalCeScores[ce.id] = avg;
-          if (avg !== null) { totalSum += avg; count++; }
-        });
-
-        const finalScore = count > 0 ? totalSum / count : null;
-        const finalLvl = getLevel(finalScore);
-
-        html += `<tr class="hover:bg-slate-50/70 transition-colors">
-          <td class="py-2.5 px-3 text-center text-slate-400 font-mono">${idx + 1}</td>
-          <td class="py-2.5 px-4 font-semibold text-slate-800">${st.name}</td>`;
-
-        OFFICIAL_CES.forEach(ce => {
-          const sc = globalCeScores[ce.id];
-          const lvl = getLevel(sc);
-          html += `<td class="py-2 px-3 text-center border-l border-slate-100">
-            <div class="font-bold font-mono text-slate-800">${sc ? sc.toFixed(2) : '<span class="text-slate-300 font-normal">—</span>'}</div>
-            <span class="inline-flex items-center mt-0.5 text-[10px] px-2 py-0.5 rounded font-bold ring-1 ring-inset ${lvl.badge}">${lvl.code}</span>
-          </td>`;
-        });
-
-        html += `<td class="py-2.5 px-3 text-center border-l border-slate-200 bg-slate-50/60 font-bold">
-          <div class="text-sm font-black font-mono text-slate-900">${finalScore ? finalScore.toFixed(2) : '<span class="text-slate-300 font-normal">—</span>'}</div>
-          <span class="inline-flex items-center mt-0.5 text-[10px] px-2.5 py-0.5 rounded font-bold ring-1 ring-inset ${finalLvl.badge}">${finalLvl.code}</span>
-        </td></tr>`;
-      });
-
-      tbody.innerHTML = html;
+      document.getElementById('finalTableBody').innerHTML = students.map((st, i) => `
+        <tr class="border-b">
+          <td class="p-2.5 text-center font-mono text-slate-400">${i + 1}</td>
+          <td class="p-2.5 font-bold text-slate-900">${st.name}</td>
+          <td colspan="6" class="p-2.5 text-center text-slate-400 font-mono text-xs">Càlcul anual</td>
+        </tr>
+      `).join('');
     }
 
-    function populateReportStudents() {
-      const sel = document.getElementById('reportStudentSelect');
-      const curGroup = getCurrentGroup();
-      if (!curGroup || !curGroup.students || curGroup.students.length === 0) {
-        sel.innerHTML = `<option value="">Sense alumnes</option>`;
-        return;
-      }
-      sel.innerHTML = curGroup.students.map(s => `<option value="${s.id}">${s.name}</option>`).join('');
-    }
-
-    function renderIndividualReport() {
-      const curGroup = getCurrentGroup();
-      const sel = document.getElementById('reportStudentSelect');
-      const stId = parseInt(sel.value);
-      const st = (curGroup.students || []).find(s => s.id === stId);
-
-      if (!st) {
-        document.getElementById('repStudentName').textContent = "Cap alumne seleccionat";
-        document.getElementById('repDetailsContainer').innerHTML = "";
-        return;
-      }
-
-      document.getElementById('repStudentName').textContent = st.name;
-      document.getElementById('repGroupLabel').textContent = `Classe: ${curGroup.name} | 1r i 2n d'ESO | LOMLOE`;
-
-      let ceValues = [];
-      let total = 0, count = 0;
-      let detailsHtml = '';
-
-      OFFICIAL_CES.forEach(ce => {
-        let sum = 0, c = 0;
-        (curGroup.sdas || []).forEach(sda => {
-          const sc = getStudentCeScoreInSda(sda, st.id, ce.id);
-          if (sc !== null) { sum += sc; c++; }
-        });
-        const avg = c > 0 ? sum / c : 0;
-        ceValues.push(avg);
-        if (c > 0) { total += avg; count++; }
-        const lvl = getLevel(avg);
-
-        detailsHtml += `
-          <div class="flex items-center justify-between p-2.5 rounded-xl border border-slate-100 bg-slate-50/70">
-            <div>
-              <div class="font-bold text-slate-800">${ce.name}</div>
-              <div class="text-[11px] text-slate-400">${ce.short}</div>
-            </div>
-            <div class="text-right">
-              <span class="font-bold font-mono text-slate-900 mr-2">${avg > 0 ? avg.toFixed(2) : '—'}</span>
-              <span class="inline-flex items-center text-[10px] font-bold px-2 py-0.5 rounded ring-1 ring-inset ${lvl.badge}">${lvl.code}</span>
-            </div>
-          </div>
-        `;
-      });
-
-      const globalAvg = count > 0 ? total / count : null;
-      const globalLvl = getLevel(globalAvg);
-      const repBadge = document.getElementById('repGlobalBadge');
-      repBadge.textContent = `${globalAvg ? globalAvg.toFixed(2) : '—'} (${globalLvl.code})`;
-      repBadge.className = `inline-flex items-center mt-1 px-3 py-1 rounded-md text-xs font-bold ring-1 ring-inset ${globalLvl.badge}`;
-
-      document.getElementById('repDetailsContainer').innerHTML = detailsHtml;
-
-      const ctx = document.getElementById('radarChart').getContext('2d');
-      if (radarInstance) radarInstance.destroy();
-      radarInstance = new Chart(ctx, {
-        type: 'radar',
-        data: {
-          labels: ['CE1 (Salut)', 'CE2 (Jocs)', 'CE3 (Expressió)', 'CE4 (Entorn)', 'CE5 (Valors)'],
-          datasets: [{
-            data: ceValues,
-            backgroundColor: 'rgba(99, 102, 241, 0.15)',
-            borderColor: 'rgba(79, 70, 229, 1)',
-            borderWidth: 2,
-            pointBackgroundColor: 'rgba(79, 70, 229, 1)',
-            pointRadius: 3
-          }]
-        },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          scales: {
-            r: {
-              min: 0,
-              max: 4,
-              ticks: { stepSize: 1, display: false },
-              grid: { color: 'rgba(226, 232, 240, 0.8)' },
-              angleLines: { color: 'rgba(226, 232, 240, 0.8)' },
-              pointLabels: { font: { family: 'Inter', size: 10, weight: '600' }, color: '#475569' }
-            }
-          },
-          plugins: { legend: { display: false } }
-        }
-      });
-    }
-
-    function exportCSV() {
-      const curGroup = getCurrentGroup();
-      let csv = `Alumne,Qualificacio_Trimestre_T${appState.currentTrim},Grup\n`;
-      (curGroup.students || []).forEach(st => {
-        const sc = getStudentTrimScore(st.id);
-        csv += `"${st.name}",${sc !== null ? sc.toFixed(2) : ""},"${curGroup.name}"\n`;
-      });
-      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-      const a = document.createElement("a");
-      a.href = URL.createObjectURL(blob);
-      a.download = `Resum_Ponderat_${curGroup.name.replace(/\s+/g, '_')}_T${appState.currentTrim}.csv`;
+    function exportBackupJSON() {
+      const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(appData, null, 2));
+      const a = document.createElement('a');
+      a.href = dataStr;
+      a.download = `Quadern_Qualificacio.json`;
       a.click();
     }
 
