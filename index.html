@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Quadern de Qualificació Docent · LOMLOE</title>
+  <title>EF Competencial · Quadern LOMLOE</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@500;600;700&display=swap" rel="stylesheet">
@@ -39,7 +39,7 @@
 </head>
 <body class="min-h-full flex flex-col text-slate-800 bg-[#f8fafc] selection:bg-indigo-500 selection:text-white">
 
-  <!-- ================= CAPÇALERA ================= -->
+  <!-- ================= CAPÇALERA SLEEK & MODERNA ================= -->
   <header class="bg-white/80 backdrop-blur-md border-b border-slate-200/70 sticky top-0 z-40 no-print transition-all">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <div class="flex items-center justify-between h-15 gap-4 py-2.5">
@@ -51,7 +51,7 @@
               <i class="fa-solid fa-person-running text-sm"></i>
             </div>
             <div class="flex items-baseline gap-2">
-              <span class="text-sm font-bold tracking-tight text-slate-900 group-hover:text-indigo-600 transition-colors">Quadern de Qualificació Docent</span>
+              <span class="text-sm font-bold tracking-tight text-slate-900 group-hover:text-indigo-600 transition-colors">EF Competencial</span>
               <span class="text-[10px] font-semibold text-indigo-600 bg-indigo-50 px-1.5 py-0.5 rounded border border-indigo-100/60 uppercase">LOMLOE</span>
             </div>
           </button>
@@ -65,16 +65,20 @@
 
         <!-- Accions Ràpides de Capçalera -->
         <div class="flex items-center gap-2">
+          
+          <!-- Indicador de sincronització automàtica -->
           <div id="savedIndicator" class="flex items-center gap-1.5 text-[11px] font-medium text-emerald-600 px-2 py-1 rounded-md opacity-0 transition-opacity duration-300">
             <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
             <span>Desat</span>
           </div>
 
+          <!-- Botó Tornar a l'Inici -->
           <button onclick="goToHome()" id="homeNavBtn" class="inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-lg border border-slate-200 bg-white text-slate-700 hover:bg-slate-50 hover:text-slate-900 shadow-2xs transition">
             <i class="fa-solid fa-house text-slate-400 text-[11px]"></i>
             <span class="hidden sm:inline">Inici</span>
           </button>
 
+          <!-- Eines i Còpia de Seguretat -->
           <div class="flex items-center pl-1 border-l border-slate-200 gap-1">
             <button onclick="resetDefaultData()" title="Restablir dades de mostra" class="p-1.5 text-slate-400 hover:text-indigo-600 hover:bg-slate-100 rounded-lg text-xs transition">
               <i class="fa-solid fa-rotate-left"></i>
@@ -124,7 +128,7 @@
             <span class="w-1.5 h-1.5 rounded-full bg-indigo-400"></span>
             <span>Educació Física · 1r Cicle d'ESO</span>
           </div>
-          <h2 class="text-xl sm:text-2xl font-bold tracking-tight">Quadern de Qualificació Docent</h2>
+          <h2 class="text-xl sm:text-2xl font-bold tracking-tight">Quadern d'Avaluació Docent</h2>
           <div class="pt-2 flex flex-wrap gap-2.5">
             <button onclick="openNewGroupModal()" class="inline-flex items-center gap-1.5 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold px-3.5 py-2 rounded-xl shadow-xs transition">
               <i class="fa-solid fa-plus text-[10px]"></i> Nova Classe
@@ -511,7 +515,7 @@
       { id: 'CE5', name: 'CE5. Adquirir actituds, valors i habilitats socials per a la convivència', short: 'Valors i convivència' }
     ];
 
-    const STORAGE_KEY = 'EF_COMPETENCIAL_DATA_V11';
+    const STORAGE_KEY = 'EF_COMPETENCIAL_DATA_V10';
 
     const ORIGINAL_DEMO_DATA = {
       activeGroupId: "1esoA",
@@ -641,7 +645,7 @@
       const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(appData, null, 2));
       const a = document.createElement('a');
       a.setAttribute("href", dataStr);
-      a.setAttribute("download", `Quadern_Qualificacio_${new Date().toISOString().slice(0, 10)}.json`);
+      a.setAttribute("download", `EF_Competencial_Backup_${new Date().toISOString().slice(0, 10)}.json`);
       document.body.appendChild(a);
       a.click();
       a.remove();
@@ -802,6 +806,7 @@
       openSdaModal(true);
     }
 
+    // GESTIÓ ALUMNES DES DE LA PESTANYA DE CLASSE (ROSTER TAB)
     function renderRosterTab() {
       const curGroup = getCurrentGroup();
       const countBadge = document.getElementById('rosterCountBadge');
@@ -893,7 +898,7 @@
           }
         }
       });
-      document.getElementById('trimTitle').textContent = `Resum del Trimestre ${t}`;
+      document.getElementById('trimTitle').textContent = `Resum i Ponderació del Trimestre ${t}`;
       populateSdaSelect();
       if (appState.currentView === 'sda') renderSdaGrid();
       if (appState.currentView === 'trim') renderTrimView();
@@ -1015,6 +1020,7 @@
       sel.innerHTML = trimSdas.map(s => `<option value="${s.id}">${s.title} (${s.trimWeight || 0}%)</option>`).join('');
     }
 
+    // GRAELLA D'AVALUACIÓ ROBUSTA
     function renderSdaGrid() {
       const curGroup = getCurrentGroup();
       const trimSdas = (curGroup.sdas || []).filter(s => s.trim === appState.currentTrim);
@@ -1032,6 +1038,7 @@
 
       const students = curGroup.students || [];
 
+      // Si no hi ha cap SdA
       if (!sda) {
         titleBar.innerHTML = `
           <div class="flex items-center gap-2">
@@ -1063,6 +1070,7 @@
         return;
       }
 
+      // Si hi ha SdA activa
       titleBar.innerHTML = `
         <div class="flex items-center gap-2">
           <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
@@ -1075,6 +1083,7 @@
 
       const activeCes = OFFICIAL_CES.filter(ce => sda.competences && sda.competences[ce.id] && sda.competences[ce.id].active);
 
+      // Fila 1: CEs
       let r1 = `<tr class="border-b border-slate-200">
         <th rowspan="4" class="py-2.5 px-2.5 w-10 text-center font-mono text-slate-400 font-medium bg-slate-100/80 border-r border-slate-200 sticky left-0 z-20">#</th>
         <th rowspan="4" class="py-2.5 px-3.5 font-semibold text-slate-800 bg-slate-100/80 border-r border-slate-200 min-w-[190px] sticky left-10 z-20 shadow-[2px_0_4px_-2px_rgba(0,0,0,0.06)]">Alumne/a</th>`;
@@ -1087,6 +1096,7 @@
       });
       r1 += `<th colspan="2" class="py-2.5 px-3 text-center border-l border-slate-300 bg-slate-900 text-slate-100 font-bold uppercase tracking-wider text-[11px]">Qualificació SdA</th></tr>`;
 
+      // Fila 2: Criteris Curriculars
       let r2 = `<tr class="border-b border-slate-200 text-[11px]">`;
       activeCes.forEach(ce => {
         const theme = CE_COLOR_THEMES[ce.id] || CE_COLOR_THEMES.CE1;
@@ -1097,6 +1107,7 @@
       });
       r2 += `<th colspan="2" rowspan="2" class="py-1 px-2 text-center border-l border-slate-300 bg-slate-800 text-slate-200 font-semibold text-[11px]">Consolidació SdA</th></tr>`;
 
+      // Fila 3: OAs
       let r3 = `<tr class="border-b border-slate-200 text-[10px]">`;
       activeCes.forEach(ce => {
         const theme = CE_COLOR_THEMES[ce.id] || CE_COLOR_THEMES.CE1;
@@ -1112,6 +1123,7 @@
       });
       r3 += `</tr>`;
 
+      // Fila 4: Ponderacions
       let r4 = `<tr class="border-b border-slate-200 text-xs font-semibold">`;
       activeCes.forEach(ce => {
         const theme = CE_COLOR_THEMES[ce.id] || CE_COLOR_THEMES.CE1;
@@ -1119,16 +1131,16 @@
         if (conf.oas && conf.oas.length > 0) {
           conf.oas.forEach((oa, idx) => {
             const bgClass = (idx % 2 === 0) ? theme.oaEven : theme.oaOdd;
-            r4 += `<th class="py-1.5 px-1.5 text-center border-r border-slate-200 font-mono text-[10px] text-slate-600 ${bgClass}">${oa.weight || 0}%</th>`;
+            r4 += `<th class="py-1 px-1.5 text-center border-r border-slate-200 font-mono text-[10px] text-slate-600 ${bgClass}">${oa.weight || 0}%</th>`;
           });
         } else {
-          r4 += `<th class="py-1.5 px-1.5 text-center border-r border-slate-200 font-mono text-[10px] text-slate-600 ${theme.oaEven}">100%</th>`;
+          r4 += `<th class="py-1 px-1.5 text-center border-r border-slate-200 font-mono text-[10px] text-slate-600 ${theme.oaEven}">100%</th>`;
         }
-        r4 += `<th class="py-1.5 px-2 text-center border-r ${theme.weightHeader} font-mono">${conf.weight || 0}%</th>`;
-        r4 += `<th class="py-1.5 px-2 text-center border-r ${theme.weightHeader} text-[10px]">Nivell</th>`;
+        r4 += `<th class="py-1 px-2 text-center border-r ${theme.weightHeader} font-mono">${conf.weight || 0}%</th>`;
+        r4 += `<th class="py-1 px-2 text-center border-r ${theme.weightHeader} text-[10px]">Nivell</th>`;
       });
-      r4 += `<th class="py-1.5 px-2 text-center border-l border-slate-300 bg-slate-900 text-white font-mono text-[10px]">Nota</th>`;
-      r4 += `<th class="py-1.5 px-2 text-center bg-slate-900 text-white text-[10px]">Nivell</th></tr>`;
+      r4 += `<th class="py-1 px-2 text-center border-l border-slate-300 bg-slate-900 text-white font-mono text-[10px]">Nota</th>`;
+      r4 += `<th class="py-1 px-2 text-center bg-slate-900 text-white text-[10px]">Nivell</th></tr>`;
 
       head.innerHTML = r1 + r2 + r3 + r4;
 
@@ -1141,6 +1153,7 @@
       let rowsHtml = '';
 
       students.forEach((st, idx) => {
+        const stGrades = currentGrades[st.id] || {};
         rowsHtml += `<tr class="hover:bg-slate-100/50 transition-colors">
           <td class="py-2 px-2.5 text-center text-slate-400 font-mono border-r border-slate-200 bg-white sticky left-0 z-10">${idx + 1}</td>
           <td class="py-2 px-3.5 font-semibold text-slate-900 border-r border-slate-200 bg-white sticky left-10 z-10 shadow-[2px_0_4px_-2px_rgba(0,0,0,0.06)]">${st.name}</td>`;
@@ -1439,6 +1452,7 @@
       }
     }
 
+    // RESUM TRIMESTRAL
     function renderTrimView() {
       const thead = document.getElementById('trimTableHead');
       const tbody = document.getElementById('trimTableBody');
@@ -1534,6 +1548,7 @@
       tbody.innerHTML = rowsHtml;
     }
 
+    // FINAL DE CURS
     function renderFinalView() {
       const tbody = document.getElementById('finalTableBody');
       const curGroup = getCurrentGroup();
@@ -1585,6 +1600,7 @@
       tbody.innerHTML = html;
     }
 
+    // BUTLLETÍ
     function populateReportStudents() {
       const sel = document.getElementById('reportStudentSelect');
       const curGroup = getCurrentGroup();
