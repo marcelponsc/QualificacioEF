@@ -27,8 +27,8 @@
   <style>
     body { font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11'; }
     .tabular-nums { font-variant-numeric: tabular-nums; }
-    ::-webkit-scrollbar { width: 5px; height: 5px; }
-    ::-webkit-scrollbar-track { background: #f8fafc; }
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: #f1f5f9; }
     ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 9999px; }
     ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
     @media print {
@@ -40,7 +40,7 @@
 <body class="min-h-full flex flex-col text-slate-800 bg-[#f8fafc] selection:bg-indigo-500 selection:text-white">
 
   <!-- ================= CAPÇALERA SLEEK & MODERNA ================= -->
-  <header class="bg-white/80 backdrop-blur-md border-b border-slate-200/70 sticky top-0 z-40 no-print transition-all">
+  <header class="bg-white/80 backdrop-blur-md border-b border-slate-200/70 sticky top-0 z-50 no-print transition-all">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <div class="flex items-center justify-between h-15 gap-4 py-2.5">
         
@@ -220,17 +220,25 @@
               <i class="fa-solid fa-pen-to-square text-[11px]"></i> Editar SdA
             </button>
           </div>
-          <button onclick="openSdaModal(true)" class="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-semibold text-white bg-indigo-600 hover:bg-indigo-700 shadow-2xs transition">
-            <i class="fa-solid fa-plus text-[11px]"></i> Nova SdA
-          </button>
+          
+          <div class="flex items-center gap-2">
+            <!-- Indicador ràpid de navegació per teclat -->
+            <span class="hidden sm:inline-flex items-center gap-1 text-[11px] font-medium text-slate-400 bg-slate-100 px-2 py-1 rounded-lg border border-slate-200">
+              <i class="fa-regular fa-keyboard text-indigo-500"></i> Fletxes per navegar / Enter
+            </span>
+            <button onclick="openSdaModal(true)" class="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-semibold text-white bg-indigo-600 hover:bg-indigo-700 shadow-2xs transition">
+              <i class="fa-solid fa-plus text-[11px]"></i> Nova SdA
+            </button>
+          </div>
         </div>
 
+        <!-- Graella amb suport Sticky 2D (Vertical i Horitzontal) -->
         <div class="bg-white border border-slate-200 rounded-xl shadow-2xs overflow-hidden">
-          <div id="sdaGridTitleBar" class="bg-slate-900 text-white px-4 py-3 flex items-center justify-between text-xs">
+          <div id="sdaGridTitleBar" class="bg-slate-900 text-white px-4 py-3 flex items-center justify-between text-xs sticky top-0 z-40">
           </div>
-          <div class="overflow-x-auto">
+          <div class="overflow-auto max-h-[72vh] relative" id="sdaTableScrollWrapper">
             <table class="w-full text-left border-collapse text-xs">
-              <thead id="sdaGridHead" class="select-none"></thead>
+              <thead id="sdaGridHead" class="select-none sticky top-0 z-30 shadow-xs"></thead>
               <tbody id="sdaGridBody" class="divide-y divide-slate-100 bg-white tabular-nums"></tbody>
             </table>
           </div>
@@ -470,11 +478,11 @@
 
   <script>
     const CE_COLOR_THEMES = {
-      CE1: { header: 'bg-sky-100/80 text-sky-950 border-sky-200', critHeader: 'bg-sky-50/60 text-sky-800 border-sky-200', weightHeader: 'bg-sky-100/50 text-sky-900 border-sky-200', oaEven: 'bg-sky-50/30', oaOdd: 'bg-sky-50/60', scoreCe: 'bg-sky-100/90 text-sky-950 font-bold border-sky-300', levelCe: 'bg-sky-50/80 border-sky-200' },
-      CE2: { header: 'bg-emerald-100/80 text-emerald-950 border-emerald-200', critHeader: 'bg-emerald-50/60 text-emerald-800 border-emerald-200', weightHeader: 'bg-emerald-100/50 text-emerald-900 border-emerald-200', oaEven: 'bg-emerald-50/30', oaOdd: 'bg-emerald-50/60', scoreCe: 'bg-emerald-100/90 text-emerald-950 font-bold border-emerald-300', levelCe: 'bg-emerald-50/80 border-emerald-200' },
-      CE3: { header: 'bg-purple-100/80 text-purple-950 border-purple-200', critHeader: 'bg-purple-50/60 text-purple-800 border-purple-200', weightHeader: 'bg-purple-100/50 text-purple-900 border-purple-200', oaEven: 'bg-purple-50/30', oaOdd: 'bg-purple-50/60', scoreCe: 'bg-purple-100/90 text-purple-950 font-bold border-purple-300', levelCe: 'bg-purple-50/80 border-purple-200' },
-      CE4: { header: 'bg-amber-100/80 text-amber-950 border-amber-200', critHeader: 'bg-amber-50/60 text-amber-800 border-amber-200', weightHeader: 'bg-amber-100/50 text-amber-900 border-amber-200', oaEven: 'bg-amber-50/30', oaOdd: 'bg-amber-50/60', scoreCe: 'bg-amber-100/90 text-amber-950 font-bold border-amber-300', levelCe: 'bg-amber-50/80 border-amber-200' },
-      CE5: { header: 'bg-rose-100/80 text-rose-950 border-rose-200', critHeader: 'bg-rose-50/60 text-rose-800 border-rose-200', weightHeader: 'bg-rose-100/50 text-rose-900 border-rose-200', oaEven: 'bg-rose-50/30', oaOdd: 'bg-rose-50/60', scoreCe: 'bg-rose-100/90 text-rose-950 font-bold border-rose-300', levelCe: 'bg-rose-50/80 border-rose-200' }
+      CE1: { header: 'bg-sky-100 text-sky-950 border-sky-200', critHeader: 'bg-sky-50 text-sky-800 border-sky-200', weightHeader: 'bg-sky-100/70 text-sky-900 border-sky-200', oaEven: 'bg-sky-50/40', oaOdd: 'bg-sky-50/80', scoreCe: 'bg-sky-100 text-sky-950 font-bold border-sky-300', levelCe: 'bg-sky-50 border-sky-200' },
+      CE2: { header: 'bg-emerald-100 text-emerald-950 border-emerald-200', critHeader: 'bg-emerald-50 text-emerald-800 border-emerald-200', weightHeader: 'bg-emerald-100/70 text-emerald-900 border-emerald-200', oaEven: 'bg-emerald-50/40', oaOdd: 'bg-emerald-50/80', scoreCe: 'bg-emerald-100 text-emerald-950 font-bold border-emerald-300', levelCe: 'bg-emerald-50 border-emerald-200' },
+      CE3: { header: 'bg-purple-100 text-purple-950 border-purple-200', critHeader: 'bg-purple-50 text-purple-800 border-purple-200', weightHeader: 'bg-purple-100/70 text-purple-900 border-purple-200', oaEven: 'bg-purple-50/40', oaOdd: 'bg-purple-50/80', scoreCe: 'bg-purple-100 text-purple-950 font-bold border-purple-300', levelCe: 'bg-purple-50 border-purple-200' },
+      CE4: { header: 'bg-amber-100 text-amber-950 border-amber-200', critHeader: 'bg-amber-50 text-amber-800 border-amber-200', weightHeader: 'bg-amber-100/70 text-amber-900 border-amber-200', oaEven: 'bg-amber-50/40', oaOdd: 'bg-amber-50/80', scoreCe: 'bg-amber-100 text-amber-950 font-bold border-amber-300', levelCe: 'bg-amber-50 border-amber-200' },
+      CE5: { header: 'bg-rose-100 text-rose-950 border-rose-200', critHeader: 'bg-rose-50 text-rose-800 border-rose-200', weightHeader: 'bg-rose-100/70 text-rose-900 border-rose-200', oaEven: 'bg-rose-50/40', oaOdd: 'bg-rose-50/80', scoreCe: 'bg-rose-100 text-rose-950 font-bold border-rose-300', levelCe: 'bg-rose-50 border-rose-200' }
     };
 
     const CURRICULAR_CRITERIA_CATALOG = {
@@ -944,6 +952,19 @@
       return { code: "AE", badge: "bg-emerald-50 text-emerald-800 ring-emerald-200" };
     }
 
+    // FEEDBACK CROMÀTIC CONDICIONAL EN ENTRADA
+    function getScoreColorClass(val) {
+      if (val === '' || val === null || val === undefined || isNaN(val)) {
+        return 'bg-white text-slate-800 border-slate-300/80';
+      }
+      const num = parseFloat(val);
+      if (num < 1.0) return 'bg-rose-50 text-rose-900 border-rose-300 font-bold';
+      if (num < 2.0) return 'bg-amber-50 text-amber-900 border-amber-300 font-bold';
+      if (num < 3.0) return 'bg-sky-50 text-sky-900 border-sky-300 font-bold';
+      if (num < 4.0) return 'bg-indigo-50 text-indigo-900 border-indigo-300 font-bold';
+      return 'bg-emerald-50 text-emerald-900 border-emerald-400 font-black';
+    }
+
     function getStudentCeScoreInSda(sda, stId, ceId) {
       if (!sda || !sda.competences) return null;
       const conf = sda.competences[ceId];
@@ -1020,7 +1041,7 @@
       sel.innerHTML = trimSdas.map(s => `<option value="${s.id}">${s.title} (${s.trimWeight || 0}%)</option>`).join('');
     }
 
-    // GRAELLA D'AVALUACIÓ ROBUSTA
+    // GRAELLA D'AVALUACIÓ AMB STICKY 2D, COLOR CONDICIONAL I TECLAT EXCEL
     function renderSdaGrid() {
       const curGroup = getCurrentGroup();
       const trimSdas = (curGroup.sdas || []).filter(s => s.trim === appState.currentTrim);
@@ -1030,7 +1051,6 @@
 
       let sda = trimSdas.find(s => s.id === sdaId);
       
-      // Si no hi ha cap SdA seleccionada però n'hi ha al trimestre, assignem la primera
       if (!sda && trimSdas.length > 0) {
         sda = trimSdas[0];
         sel.value = sda.id;
@@ -1087,10 +1107,10 @@
 
       const activeCes = OFFICIAL_CES.filter(ce => sda.competences && sda.competences[ce.id] && sda.competences[ce.id].active);
 
-      // Fila 1: CEs
+      // Fila 1: CEs amb Sticky 2D
       let r1 = `<tr class="border-b border-slate-200">
-        <th rowspan="4" class="py-2.5 px-2.5 w-10 text-center font-mono text-slate-400 font-medium bg-slate-100/80 border-r border-slate-200 sticky left-0 z-20">#</th>
-        <th rowspan="4" class="py-2.5 px-3.5 font-semibold text-slate-800 bg-slate-100/80 border-r border-slate-200 min-w-[190px] sticky left-10 z-20 shadow-[2px_0_4px_-2px_rgba(0,0,0,0.06)]">Alumne/a</th>`;
+        <th rowspan="4" class="py-2.5 px-2.5 w-10 text-center font-mono text-slate-600 font-bold bg-slate-200 border-r border-slate-300 sticky left-0 z-30">#</th>
+        <th rowspan="4" class="py-2.5 px-3.5 font-bold text-slate-900 bg-slate-200 border-r border-slate-300 min-w-[200px] sticky left-10 z-30 shadow-[2px_0_4px_-2px_rgba(0,0,0,0.1)]">Alumne/a</th>`;
       
       activeCes.forEach(ce => {
         const theme = CE_COLOR_THEMES[ce.id] || CE_COLOR_THEMES.CE1;
@@ -1149,18 +1169,20 @@
       head.innerHTML = r1 + r2 + r3 + r4;
 
       if (students.length === 0) {
-        body.innerHTML = `<tr><td colspan="20" class="p-8 text-center text-slate-400">No hi ha alumnes en aquesta classe. Fes clic a la pestanya <b>Alumnat</b> per afegir-ne.</td></tr>`;
+        body.innerHTML = `<tr><td colspan="25" class="p-8 text-center text-slate-400">No hi ha alumnes en aquesta classe. Fes clic a la pestanya <b>Alumnat</b> per afegir-ne.</td></tr>`;
         return;
       }
 
       const currentGrades = (curGroup.grades && curGroup.grades[sda.id]) || {};
       let rowsHtml = '';
 
-      students.forEach((st, idx) => {
+      students.forEach((st, rIdx) => {
         const stGrades = currentGrades[st.id] || {};
-        rowsHtml += `<tr class="hover:bg-slate-100/50 transition-colors">
-          <td class="py-2 px-2.5 text-center text-slate-400 font-mono border-r border-slate-200 bg-white sticky left-0 z-10">${idx + 1}</td>
-          <td class="py-2 px-3.5 font-semibold text-slate-900 border-r border-slate-200 bg-white sticky left-10 z-10 shadow-[2px_0_4px_-2px_rgba(0,0,0,0.06)]">${st.name}</td>`;
+        let colCounter = 0; // Índex de columna per navegació de teclat tipus matriu (rIdx, cIdx)
+
+        rowsHtml += `<tr class="hover:bg-slate-50/80 transition-colors">
+          <td class="py-2 px-2.5 text-center text-slate-500 font-mono border-r border-slate-200 bg-white sticky left-0 z-20">${rIdx + 1}</td>
+          <td class="py-2 px-3.5 font-semibold text-slate-900 border-r border-slate-200 bg-white sticky left-10 z-20 shadow-[2px_0_4px_-2px_rgba(0,0,0,0.08)]">${st.name}</td>`;
 
         activeCes.forEach(ce => {
           const theme = CE_COLOR_THEMES[ce.id] || CE_COLOR_THEMES.CE1;
@@ -1173,16 +1195,32 @@
               const bgClass = (oaIdx % 2 === 0) ? theme.oaEven : theme.oaOdd;
               const gradeKey = `${ce.id}_${oa.id}`;
               const val = stGrades[gradeKey] !== undefined ? stGrades[gradeKey] : '';
+              const colorClass = getScoreColorClass(val);
+
               rowsHtml += `<td class="p-1 border-r border-slate-200/60 text-center ${bgClass}">
-                <input type="number" step="0.1" min="0" max="4" value="${val}" onchange="setGrade('${sda.id}', ${st.id}, '${gradeKey}', this.value)" class="w-11 text-center py-1 border border-slate-300/80 hover:border-slate-400 focus:border-indigo-600 bg-white/90 rounded-md font-mono text-xs font-semibold text-slate-800 outline-none transition-all shadow-2xs">
+                <input type="number" step="0.1" min="0" max="4" value="${val}"
+                  data-row="${rIdx}" data-col="${colCounter}"
+                  onkeydown="handleGridKeyboardNavigation(event, ${rIdx}, ${colCounter})"
+                  onfocus="this.select()"
+                  onchange="setGrade('${sda.id}', ${st.id}, '${gradeKey}', this.value, ${rIdx}, ${colCounter})"
+                  class="grade-cell-input w-12 text-center py-1 border rounded-md font-mono text-xs outline-none transition-all shadow-2xs focus:ring-2 focus:ring-indigo-500 focus:border-indigo-600 ${colorClass}">
               </td>`;
+              colCounter++;
             });
           } else {
             const gradeKey = `${ce.id}_direct`;
             const val = stGrades[gradeKey] !== undefined ? stGrades[gradeKey] : '';
+            const colorClass = getScoreColorClass(val);
+
             rowsHtml += `<td class="p-1 border-r border-slate-200/60 text-center ${theme.oaEven}">
-              <input type="number" step="0.1" min="0" max="4" value="${val}" onchange="setGrade('${sda.id}', ${st.id}, '${gradeKey}', this.value)" class="w-11 text-center py-1 border border-slate-300/80 hover:border-slate-400 focus:border-indigo-600 bg-white/90 rounded-md font-mono text-xs font-semibold text-slate-800 outline-none transition-all shadow-2xs">
+              <input type="number" step="0.1" min="0" max="4" value="${val}"
+                data-row="${rIdx}" data-col="${colCounter}"
+                onkeydown="handleGridKeyboardNavigation(event, ${rIdx}, ${colCounter})"
+                onfocus="this.select()"
+                onchange="setGrade('${sda.id}', ${st.id}, '${gradeKey}', this.value, ${rIdx}, ${colCounter})"
+                class="grade-cell-input w-12 text-center py-1 border rounded-md font-mono text-xs outline-none transition-all shadow-2xs focus:ring-2 focus:ring-indigo-500 focus:border-indigo-600 ${colorClass}">
             </td>`;
+            colCounter++;
           }
 
           rowsHtml += `
@@ -1211,11 +1249,40 @@
       body.innerHTML = rowsHtml;
     }
 
-    function setGrade(sdaId, stId, key, val) {
+    // GESTOR DE NAVEGACIÓ AMB TECLAT ESTIL FULL DE CÀLCUL
+    function handleGridKeyboardNavigation(e, row, col) {
+      let targetRow = row;
+      let targetCol = col;
+
+      if (e.key === 'ArrowUp') {
+        targetRow = row - 1;
+        e.preventDefault();
+      } else if (e.key === 'ArrowDown' || e.key === 'Enter') {
+        targetRow = row + 1;
+        e.preventDefault();
+      } else if (e.key === 'ArrowLeft') {
+        targetCol = col - 1;
+        e.preventDefault();
+      } else if (e.key === 'ArrowRight') {
+        targetCol = col + 1;
+        e.preventDefault();
+      } else {
+        return;
+      }
+
+      const nextInput = document.querySelector(`input.grade-cell-input[data-row="${targetRow}"][data-col="${targetCol}"]`);
+      if (nextInput) {
+        nextInput.focus();
+        nextInput.select();
+      }
+    }
+
+    function setGrade(sdaId, stId, key, val, keepRow = null, keepCol = null) {
       const curGroup = getCurrentGroup();
       if (!curGroup.grades) curGroup.grades = {};
       if (!curGroup.grades[sdaId]) curGroup.grades[sdaId] = {};
       if (!curGroup.grades[sdaId][stId]) curGroup.grades[sdaId][stId] = {};
+      
       if (val === '') {
         delete curGroup.grades[sdaId][stId][key];
       } else {
@@ -1223,6 +1290,14 @@
       }
       saveToStorage();
       renderSdaGrid();
+
+      // Manté el focus exactament a la cel·la activa o següent
+      if (keepRow !== null && keepCol !== null) {
+        const activeInput = document.querySelector(`input.grade-cell-input[data-row="${keepRow}"][data-col="${keepCol}"]`);
+        if (activeInput) {
+          activeInput.focus();
+        }
+      }
     }
 
     // MODAL SdA
