@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Avaluació LOMLOE - Educació Física</title>
+  <title>Avaluació LOMLOE - Educació Física (1r i 2n d'ESO)</title>
   <!-- Google Fonts Inter & JetBrains Mono -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -59,7 +59,7 @@
                 <span class="text-sm font-bold text-slate-900 tracking-tight leading-none group-hover:text-indigo-600 transition">EF Competencial</span>
                 <span class="inline-flex items-center rounded-md bg-slate-100 px-1.5 py-0.5 text-[10px] font-semibold text-slate-600 border border-slate-200/80">LOMLOE</span>
               </div>
-              <span class="text-[11px] text-slate-400 font-medium leading-none block mt-1">Secundària · Decret 175/2022</span>
+              <span class="text-[11px] text-slate-400 font-medium leading-none block mt-1">1r i 2n d'ESO · Criteris d'Avaluació Oficials</span>
             </div>
           </button>
 
@@ -114,18 +114,17 @@
     <!-- ================= PANTALLA D'INICI (HOME) ================= -->
     <section id="screenHome" class="space-y-6">
       
-      <!-- Welcome Hero Banner -->
       <div class="bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 rounded-2xl p-6 sm:p-8 text-white shadow-md relative overflow-hidden">
         <div class="absolute -right-8 -bottom-8 opacity-10 text-9xl">
           <i class="fa-solid fa-medal"></i>
         </div>
         <div class="relative z-10 max-w-2xl space-y-2">
           <span class="inline-flex items-center gap-1.5 text-xs font-semibold px-2.5 py-0.5 rounded-full bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">
-            <i class="fa-solid fa-sparkles text-[10px]"></i> Panell Docent d'Educació Física
+            <i class="fa-solid fa-sparkles text-[10px]"></i> 1r i 2n d'ESO · Criteris d'Avaluació Integrats
           </span>
           <h2 class="text-2xl sm:text-3xl font-extrabold tracking-tight">Quadern d'Avaluació LOMLOE</h2>
           <p class="text-xs sm:text-sm text-slate-300 font-normal leading-relaxed">
-            Gestiona les teves classes, pondera les Situacions d'Aprenentatge per trimestre i qualifica segons els nivells oficials d'assoliment de Catalunya (NA, EPA, AS, AN, AE).
+            Pondera Situacions d'Aprenentatge, selecciona els criteris oficials de 1r i 2n d'ESO amb desplegables i qualifica segons el model competencial (NA, EPA, AS, AN, AE).
           </p>
           <div class="pt-3 flex flex-wrap gap-2.5">
             <button onclick="openNewGroupModal()" class="inline-flex items-center gap-2 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold px-4 py-2 rounded-xl shadow-xs transition">
@@ -216,7 +215,7 @@
             <select id="sdaSelect" onchange="renderSdaGrid()" class="bg-slate-50 border border-slate-300 text-xs font-bold text-slate-900 rounded-lg px-3 py-1.5 focus:ring-2 focus:ring-indigo-500 focus:bg-white outline-none cursor-pointer">
             </select>
             <button onclick="openSdaModal(false)" class="inline-flex items-center gap-1.5 text-xs font-semibold text-indigo-600 hover:text-indigo-700 bg-indigo-50/60 hover:bg-indigo-50 px-2.5 py-1.5 rounded-lg border border-indigo-100 transition">
-              <i class="fa-solid fa-pen-to-square text-[11px]"></i> Editar CEs, OAs i Pes Trimestral
+              <i class="fa-solid fa-pen-to-square text-[11px]"></i> Editar CEs, OAs i Criteris
             </button>
           </div>
           <button onclick="openSdaModal(true)" class="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-semibold text-white bg-indigo-600 hover:bg-indigo-700 shadow-xs shadow-indigo-600/30 transition">
@@ -236,7 +235,7 @@
         </div>
       </section>
 
-      <!-- 2. VISTA RESUM TRIMESTRAL (AMB PONDERACIONS DE SdAs) -->
+      <!-- 2. VISTA RESUM TRIMESTRAL -->
       <section id="viewTrim" class="space-y-4 hidden">
         <div class="flex flex-wrap items-end justify-between gap-4 border-b border-slate-200/80 pb-4">
           <div>
@@ -249,7 +248,7 @@
           </button>
         </div>
 
-        <!-- Targeta de Ponderacions Ràpides de SdAs del Trimestre -->
+        <!-- Targeta de Ponderacions Ràpides de SdAs -->
         <div class="bg-white border border-slate-200/90 rounded-xl p-4 shadow-xs space-y-3">
           <div class="flex items-center justify-between">
             <h4 class="text-xs font-bold text-slate-800 uppercase tracking-wider flex items-center gap-2">
@@ -257,18 +256,14 @@
             </h4>
             <span id="trimTotalWeightBadge" class="text-xs font-mono font-bold px-2.5 py-0.5 rounded-md">Total: 0%</span>
           </div>
-          <div id="trimSdaWeightInputsContainer" class="flex flex-wrap gap-3 pt-1">
-            <!-- Inputs ràpids de ponderació generats per JS -->
-          </div>
+          <div id="trimSdaWeightInputsContainer" class="flex flex-wrap gap-3 pt-1"></div>
         </div>
 
         <!-- Taula Consolidada Trimestral -->
         <div class="bg-white border border-slate-200 rounded-xl shadow-xs overflow-hidden">
           <div class="overflow-x-auto">
             <table class="w-full text-left border-collapse text-xs">
-              <thead id="trimTableHead" class="bg-slate-900 text-white">
-                <!-- Generat per JS per mostrar cada SdA ponderada + CEs + Nota Final Trimestre -->
-              </thead>
+              <thead id="trimTableHead" class="bg-slate-900 text-white"></thead>
               <tbody id="trimTableBody" class="divide-y divide-slate-100 bg-white tabular-nums"></tbody>
             </table>
           </div>
@@ -322,7 +317,7 @@
             <div>
               <span class="text-[11px] font-bold text-indigo-600 uppercase tracking-wider">Informe Individual Competencial</span>
               <h3 id="repStudentName" class="text-2xl font-black text-slate-900 tracking-tight mt-0.5">Alumne</h3>
-              <p id="repGroupLabel" class="text-xs text-slate-500 mt-1 font-medium">Curs: 1r d'ESO | Matèria: Educació Física | LOMLOE</p>
+              <p id="repGroupLabel" class="text-xs text-slate-500 mt-1 font-medium">1r i 2n d'ESO | Matèria: Educació Física | LOMLOE</p>
             </div>
             <div class="text-right">
               <span class="text-[11px] font-semibold text-slate-400 block uppercase">Nivell Global</span>
@@ -334,8 +329,7 @@
             <div class="h-64 flex justify-center items-center">
               <canvas id="radarChart"></canvas>
             </div>
-            <div id="repDetailsContainer" class="space-y-2 text-xs">
-            </div>
+            <div id="repDetailsContainer" class="space-y-2 text-xs"></div>
           </div>
         </div>
       </section>
@@ -343,7 +337,7 @@
     </div>
   </main>
 
-  <!-- ================= MODAL NOVA CLASSE (HOME) ================= -->
+  <!-- ================= MODAL NOVA CLASSE ================= -->
   <div id="newGroupModal" class="fixed inset-0 bg-slate-900/40 backdrop-blur-xs z-50 flex items-center justify-center p-4 hidden no-print">
     <div class="bg-white rounded-2xl shadow-xl max-w-md w-full overflow-hidden border border-slate-200">
       <div class="px-6 py-4 bg-slate-900 text-white flex justify-between items-center">
@@ -355,7 +349,7 @@
       <div class="p-6 space-y-4 text-xs">
         <div>
           <label class="block font-semibold text-slate-700 mb-1">Nom de la Classe o Curs</label>
-          <input type="text" id="modalNewGroupNameInput" placeholder="Ex: 2n ESO B, 3r ESO A..." class="w-full text-sm border border-slate-300 rounded-lg p-2.5 focus:ring-2 focus:ring-indigo-500 outline-none font-semibold">
+          <input type="text" id="modalNewGroupNameInput" placeholder="Ex: 1r ESO A, 2n ESO B..." class="w-full text-sm border border-slate-300 rounded-lg p-2.5 focus:ring-2 focus:ring-indigo-500 outline-none font-semibold">
         </div>
       </div>
       <div class="px-6 py-3 bg-slate-50 border-t border-slate-200 flex justify-end gap-2 text-xs">
@@ -365,7 +359,7 @@
     </div>
   </div>
 
-  <!-- ================= MODAL GESTIÓ ALUMNES DE CLASSE ================= -->
+  <!-- ================= MODAL GESTIÓ ALUMNES ================= -->
   <div id="groupStudentModal" class="fixed inset-0 bg-slate-900/40 backdrop-blur-xs z-50 flex items-center justify-center p-4 hidden no-print">
     <div class="bg-white rounded-2xl shadow-xl max-w-3xl w-full max-h-[85vh] flex flex-col overflow-hidden border border-slate-200">
       <div class="px-6 py-4 bg-slate-900 text-white flex justify-between items-center">
@@ -419,7 +413,7 @@
     </div>
   </div>
 
-  <!-- ================= MODAL PROGRAMADOR DE SdA (AMB PONDERACIÓ TRIMESTRAL) ================= -->
+  <!-- ================= MODAL SdA ================= -->
   <div id="sdaModal" class="fixed inset-0 bg-slate-900/40 backdrop-blur-xs z-50 flex items-center justify-center p-4 hidden no-print">
     <div class="bg-white rounded-2xl shadow-xl max-w-3xl w-full max-h-[90vh] flex flex-col overflow-hidden border border-slate-200">
       <div class="px-6 py-4 bg-slate-900 text-white flex justify-between items-center">
@@ -429,7 +423,7 @@
           </div>
           <div>
             <h3 class="text-sm font-bold tracking-tight">Configuració de la Situació d'Aprenentatge (SdA)</h3>
-            <p class="text-[11px] text-slate-400">Ponderació de la SdA al trimestre, CEs implicades i OAs.</p>
+            <p class="text-[11px] text-slate-400">Ponderació de la SdA, Criteris oficials de 1r i 2n d'ESO i OAs.</p>
           </div>
         </div>
         <button onclick="closeSdaModal()" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
@@ -478,7 +472,7 @@
       </div>
 
       <div class="px-6 py-3.5 bg-slate-50 border-t border-slate-200 flex justify-between items-center text-xs">
-        <span class="text-[11px] text-slate-400">Els criteris i OAs no són obligatoris per poder avaluar.</span>
+        <span class="text-[11px] text-slate-400">Els criteris i OAs són opcionals i es poden modificar en qualsevol moment.</span>
         <div class="flex gap-2">
           <button onclick="closeSdaModal()" class="px-3.5 py-1.5 border border-slate-300 rounded-lg font-semibold text-slate-600 hover:bg-slate-100">Cancel·lar</button>
           <button onclick="saveSdaFromModal()" class="px-4 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg font-semibold shadow-xs">Desar SdA</button>
@@ -488,6 +482,37 @@
   </div>
 
   <script>
+    // CATÀLEG EXACTE DEL TEU CURRÍCULUM PER A 1r I 2n D'ESO
+    const CURRICULAR_CRITERIA_CATALOG = {
+      CE1: [
+        { code: "1.1", label: "1.1. Executar activitats i exercicis orientats a l’adquisició d’un estil de vida actiu i saludable." },
+        { code: "1.2", label: "1.2. Identificar els elements d’un pla de treball de la condició física a través de la pràctica motriu." },
+        { code: "1.3", label: "1.3. Incorporar hàbits saludables (alimentació i hidratació, descans, educació postural, relaxació i higiene) valorant la millora integral." },
+        { code: "1.4", label: "1.4. Aplicar els protocols d’actuació de prevenció i intervenció en accidents i mesures bàsiques de primers auxilis." },
+        { code: "1.5", label: "1.5. Utilitzar recursos i aplicacions digitals per a la pràctica d’activitat física i l’adquisició d’hàbits saludables." }
+      ],
+      CE2: [
+        { code: "2.1", label: "2.1. Executar habilitats motrius específiques i tècniques en reptes, formes jugades i joc reduït." },
+        { code: "2.2", label: "2.2. Resoldre situacions motrius variades en activitats lúdiques, jocs modificats i esports aplicant habilitats tècniques, tàctiques i estratègiques." }
+      ],
+      CE3: [
+        { code: "3.1", label: "3.1. Expressar emocions, sentiments i missatges mitjançant diferents tècniques d’expressió corporal." },
+        { code: "3.2", label: "3.2. Representar composicions individuals o col·lectives amb i sense base musical utilitzant el cos com a eina d’expressió i comunicació." },
+        { code: "3.3", label: "3.3. Prendre part en danses i jocs populars i tradicionals de diferents territoris valorant la seva influència cultural i social." }
+      ],
+      CE4: [
+        { code: "4.1", label: "4.1. Realitzar activitat física en el medi natural i urbà minimitzant l’empremta ecològica." },
+        { code: "4.2", label: "4.2. Aplicar les normes de seguretat, l’equipament, eines i tècniques adequades de les activitats físiques en el medi natural i urbà." },
+        { code: "4.3", label: "4.3. Utilitzar les possibilitats que ofereix l’entorn per a la practica activitat física i l’ocupació del temps de lleure de forma activa." }
+      ],
+      CE5: [
+        { code: "5.1", label: "5.1. Aplicar els valors positius de l’esport en les activitats físiques i esportives valorant el joc per davant del resultat." },
+        { code: "5.2", label: "5.2. Identificar emocions en la pràctica d’activitat física i esportiva." },
+        { code: "5.3", label: "5.3. Mostrar actituds de respecte i escolta envers els altres independentment del seu nivell d’habilitat." },
+        { code: "5.4", label: "5.4. Identificar estereotips i actuacions discriminatòries en situacions de pràctica esportiva." }
+      ]
+    };
+
     const OFFICIAL_CES = [
       { id: 'CE1', name: 'CE1. Adoptar un estil de vida actiu i saludable', short: 'Estil de vida actiu' },
       { id: 'CE2', name: 'CE2. Prendre decisions i resoldre situacions motrius', short: 'Situacions motrius' },
@@ -496,7 +521,7 @@
       { id: 'CE5', name: 'CE5. Adquirir actituds, valors i habilitats socials per a la convivència', short: 'Valors i convivència' }
     ];
 
-    const STORAGE_KEY = 'EF_COMPETENCIAL_DATA_V3';
+    const STORAGE_KEY = 'EF_COMPETENCIAL_DATA_V5';
 
     const DEFAULT_APP_DATA = {
       activeGroupId: "1esoA",
@@ -515,7 +540,7 @@
               id: "sda_1",
               trim: 1,
               title: "HÀBITS SALUDABLES I CONDICIÓ FÍSICA",
-              trimWeight: 60, // 60% del trimestre 1
+              trimWeight: 60,
               competences: {
                 CE1: {
                   active: true,
@@ -545,10 +570,10 @@
               id: "sda_2",
               trim: 1,
               title: "JOCS D'OPOSICIÓ I ESPORTS DE COLLABORACIÓ",
-              trimWeight: 40, // 40% del trimestre 1
+              trimWeight: 40,
               competences: {
                 CE2: { active: true, weight: 60, curricularCriteria: "2.1 - 2.2", oas: [] },
-                CE5: { active: true, weight: 40, curricularCriteria: "5.2", oas: [] }
+                CE5: { active: true, weight: 40, curricularCriteria: "5.1", oas: [] }
               }
             }
           ],
@@ -658,7 +683,6 @@
       goToHome();
     }
 
-    // NAVEGACIÓ ENTRE PANTALLA D'INICI I CLASSE
     function goToHome() {
       appState.currentScreen = 'home';
       document.getElementById('screenHome').classList.remove('hidden');
@@ -687,10 +711,8 @@
       setTrim(appState.currentTrim);
     }
 
-    // RENDER PANTALLA D'INICI
     function renderHomeScreen() {
       const groupKeys = Object.keys(appData.groups);
-      
       let totalStudents = 0;
       let totalSdasCount = 0;
 
@@ -743,7 +765,6 @@
       }).join('');
     }
 
-    // MODAL CREAR NOVA CLASSE
     function openNewGroupModal() {
       document.getElementById('modalNewGroupNameInput').value = '';
       document.getElementById('newGroupModal').classList.remove('hidden');
@@ -779,7 +800,6 @@
       openSdaModal(true);
     }
 
-    // GESTIÓ ALUMNES
     function openGroupStudentModal() {
       renderGroupStudentModalContent();
       document.getElementById('groupStudentModal').classList.remove('hidden');
@@ -853,7 +873,6 @@
       }
     }
 
-    // TRIMESTRES & PESTANYES
     function setTrim(t) {
       appState.currentTrim = t;
       [1, 2, 3].forEach(n => {
@@ -952,7 +971,6 @@
       return (totalWeightedScore * 100) / totalActiveWeight;
     }
 
-    // CÀLCUL QUALIFICACIÓ TRIMESTRAL PONDERADA PER SdAs
     function getStudentTrimScore(stId) {
       const curGroup = getCurrentGroup();
       const trimSdas = (curGroup.sdas || []).filter(s => s.trim === appState.currentTrim);
@@ -1017,7 +1035,7 @@
           <span class="text-indigo-300 font-mono font-bold bg-indigo-950 px-2 py-0.5 rounded border border-indigo-700/50">Pes Trimestre: ${sda.trimWeight || 0}%</span>
           <span class="text-slate-400 font-mono text-[11px]">(${curGroup.name} · T${sda.trim})</span>
         </div>
-        <div class="text-[11px] text-slate-400 font-mono">Escala oficial 0.1 a 4.0</div>
+        <div class="text-[11px] text-slate-400 font-mono">1r i 2n d'ESO · Criteris Oficials</div>
       `;
 
       const activeCes = OFFICIAL_CES.filter(ce => sda.competences && sda.competences[ce.id] && sda.competences[ce.id].active);
@@ -1037,7 +1055,7 @@
       activeCes.forEach(ce => {
         const conf = sda.competences[ce.id];
         const oasCount = (conf.oas && conf.oas.length > 0) ? conf.oas.length : 1;
-        r2 += `<th colspan="${oasCount}" class="py-1 px-2 text-center border-r border-slate-200 font-mono text-[10px] text-slate-500">${conf.curricularCriteria || '<span class="text-slate-300 italic">Sense criteris</span>'}</th>`;
+        r2 += `<th colspan="${oasCount}" class="py-1 px-2 text-center border-r border-slate-200 font-mono text-[10px] text-indigo-700 font-semibold bg-indigo-50/30">${conf.curricularCriteria || '<span class="text-slate-300 italic font-normal">Sense criteris</span>'}</th>`;
         r2 += `<th colspan="2" rowspan="2" class="py-1 px-2 text-center border-r border-slate-200 bg-indigo-50/50 font-bold text-indigo-900 text-[11px]">Assoliment ${ce.id}</th>`;
       });
       r2 += `<th colspan="2" rowspan="2" class="py-1 px-2 text-center border-l border-slate-300 bg-slate-800 text-slate-200 font-semibold text-[11px]">Consolidació SdA</th></tr>`;
@@ -1192,10 +1210,15 @@
       document.getElementById('sdaModal').classList.add('hidden');
     }
 
+    // RENDER DE TARGETES CE AMB LA TEVA LLISTA EXACTA DE CRITERIS
     function renderModalCeCards(sda) {
       const container = document.getElementById('modalCeCardsContainer');
       container.innerHTML = OFFICIAL_CES.map(ce => {
         const conf = (sda.competences && sda.competences[ce.id]) || { active: false, weight: 0, curricularCriteria: '', oas: [] };
+        const availableCriteria = CURRICULAR_CRITERIA_CATALOG[ce.id] || [];
+
+        const currentCriteriaCodes = (conf.curricularCriteria || "").split(/[-,\s]+/).map(c => c.trim()).filter(c => c.length > 0);
+
         return `
           <div class="border border-slate-200 rounded-xl p-4 bg-slate-50/50" id="ce_card_${ce.id}">
             <div class="flex items-center justify-between gap-4">
@@ -1210,12 +1233,31 @@
               </div>
             </div>
 
-            <div id="details_${ce.id}" class="mt-3 pl-6 space-y-3 ${!conf.active ? 'hidden' : ''}">
+            <div id="details_${ce.id}" class="mt-3 pl-6 space-y-3.5 ${!conf.active ? 'hidden' : ''}">
+              
+              <!-- Desplegable multiselecció amb els teus criteris oficials -->
               <div>
-                <label class="block text-slate-500 font-medium mb-1">Criteri d'Avaluació Curricular (Opcional):</label>
-                <input type="text" id="crit_${ce.id}" value="${conf.curricularCriteria || ''}" placeholder="Ex: 1.1 - 1.2 - 1.3" class="w-full p-2 border border-slate-300 rounded-lg bg-white text-xs outline-none focus:ring-2 focus:ring-indigo-500">
+                <div class="flex items-center justify-between mb-1">
+                  <label class="font-semibold text-slate-700 flex items-center gap-1">
+                    <i class="fa-solid fa-list-check text-indigo-500"></i> Criteris d'Avaluació Curriculars (1r i 2n d'ESO):
+                  </label>
+                  <span class="text-[10px] text-slate-400">Pots marcar-ne un o més d'un</span>
+                </div>
+                
+                <div class="bg-white border border-slate-300 rounded-lg p-2 space-y-1.5 max-h-36 overflow-y-auto">
+                  ${availableCriteria.map(crit => {
+                    const isChecked = currentCriteriaCodes.includes(crit.code);
+                    return `
+                      <label class="flex items-start gap-2 p-1.5 rounded hover:bg-slate-50 cursor-pointer text-slate-700">
+                        <input type="checkbox" name="crit_checkbox_${ce.id}" value="${crit.code}" ${isChecked ? 'checked' : ''} class="rounded text-indigo-600 focus:ring-indigo-500 mt-0.5">
+                        <span class="text-[11px] leading-snug"><b class="font-mono text-indigo-700">${crit.code}:</b> ${crit.label.replace(crit.code + '. ', '').replace(crit.code + ' ', '')}</span>
+                      </label>
+                    `;
+                  }).join('')}
+                </div>
               </div>
 
+              <!-- Objectius d'Aprenentatge -->
               <div>
                 <div class="flex justify-between items-center mb-1.5">
                   <span class="font-medium text-slate-600">Objectius d'Aprenentatge (OAs):</span>
@@ -1296,7 +1338,10 @@
         const chk = document.getElementById(`check_${ce.id}`);
         if (chk && chk.checked) {
           const weight = parseFloat(document.getElementById(`weight_${ce.id}`).value) || 0;
-          const crit = document.getElementById(`crit_${ce.id}`).value;
+          
+          const checkedCriteria = Array.from(document.querySelectorAll(`input[name="crit_checkbox_${ce.id}"]:checked`)).map(cb => cb.value);
+          const critFormatted = checkedCriteria.join(' - ');
+
           const oas = [];
           document.querySelectorAll(`#oas_box_${ce.id} .modal-oa-item`).forEach(el => {
             const inputs = el.querySelectorAll('input');
@@ -1306,7 +1351,13 @@
               weight: parseFloat(inputs[1].value) || 0
             });
           });
-          competences[ce.id] = { active: true, weight: weight, curricularCriteria: crit, oas: oas };
+
+          competences[ce.id] = {
+            active: true,
+            weight: weight,
+            curricularCriteria: critFormatted,
+            oas: oas
+          };
         }
       });
 
@@ -1341,7 +1392,6 @@
       }
     }
 
-    // ACTUALITZAR PONDERACIÓ DE LA SdA DIRECTAMENT DES DEL RESUM TRIMESTRAL
     function updateSdaTrimWeight(sdaId, newWeight) {
       const curGroup = getCurrentGroup();
       const sda = (curGroup.sdas || []).find(s => s.id === sdaId);
@@ -1352,7 +1402,7 @@
       }
     }
 
-    // RENDER RESUM TRIMESTRAL (AMB SdAs PONDERADES I CEs)
+    // RENDER RESUM TRIMESTRAL
     function renderTrimView() {
       const thead = document.getElementById('trimTableHead');
       const tbody = document.getElementById('trimTableBody');
@@ -1360,7 +1410,6 @@
       const curGroup = getCurrentGroup();
       const trimSdas = (curGroup.sdas || []).filter(s => s.trim === appState.currentTrim);
 
-      // 1. Barra ràpida de configuració de ponderacions de SdAs
       let totalTrimWeight = 0;
       weightInputsContainer.innerHTML = trimSdas.map(sda => {
         const w = sda.trimWeight !== undefined ? sda.trimWeight : 50;
@@ -1380,12 +1429,10 @@
         ? "text-xs font-mono font-bold px-2.5 py-0.5 rounded-md bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200" 
         : "text-xs font-mono font-bold px-2.5 py-0.5 rounded-md bg-amber-50 text-amber-700 ring-1 ring-amber-200";
 
-      // 2. Capçalera de la taula
       let headHtml = `<tr>
         <th class="py-3 px-3 w-10 text-center font-mono text-slate-400 font-medium">#</th>
         <th class="py-3 px-4 font-semibold text-slate-100 min-w-[190px]">Alumne/a</th>`;
       
-      // Columnes de cada SdA del trimestre
       trimSdas.forEach(sda => {
         headHtml += `<th class="py-2.5 px-3 text-center border-l border-slate-800">
           <div class="font-bold text-slate-100 max-w-[130px] truncate mx-auto">${sda.title}</div>
@@ -1393,7 +1440,6 @@
         </th>`;
       });
 
-      // Columnes de les CEs
       OFFICIAL_CES.forEach(ce => {
         headHtml += `<th class="py-2.5 px-2 text-center border-l border-slate-800">
           <div class="font-bold text-slate-100">${ce.id}</div>
@@ -1404,7 +1450,6 @@
       headHtml += `<th class="py-3 px-4 text-center border-l-2 border-indigo-500 bg-slate-950 font-bold text-indigo-300 uppercase tracking-wider">Qualificació Trimestre</th></tr>`;
       thead.innerHTML = headHtml;
 
-      // 3. Cos de la taula
       if (curGroup.students.length === 0) {
         tbody.innerHTML = `<tr><td colspan="25" class="p-8 text-center text-slate-400">Sense alumnes registrats.</td></tr>`;
         return;
@@ -1416,7 +1461,6 @@
           <td class="py-2.5 px-3 text-center text-slate-400 font-mono">${idx + 1}</td>
           <td class="py-2.5 px-4 font-semibold text-slate-800">${st.name}</td>`;
 
-        // Notes de cada SdA
         trimSdas.forEach(sda => {
           const sdaScore = getStudentOverallSdaScore(sda, st.id);
           const lvl = getLevel(sdaScore);
@@ -1426,7 +1470,6 @@
           </td>`;
         });
 
-        // Mitjanes de cada CE en el trimestre
         OFFICIAL_CES.forEach(ce => {
           let ceSum = 0, count = 0;
           trimSdas.forEach(sda => {
@@ -1442,7 +1485,6 @@
           </td>`;
         });
 
-        // Qualificació Final del Trimestre Ponderada per SdAs
         const overallTrimScore = getStudentTrimScore(st.id);
         const overallLvl = getLevel(overallTrimScore);
 
@@ -1530,7 +1572,7 @@
       }
 
       document.getElementById('repStudentName').textContent = st.name;
-      document.getElementById('repGroupLabel').textContent = `Classe: ${curGroup.name} | Matèria: Educació Física | LOMLOE`;
+      document.getElementById('repGroupLabel').textContent = `Classe: ${curGroup.name} | 1r i 2n d'ESO | LOMLOE`;
 
       let ceValues = [];
       let total = 0, count = 0;
