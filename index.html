@@ -287,7 +287,7 @@
           <div>
             <span class="inline-flex items-center rounded-md bg-indigo-50 px-2 py-0.5 text-[11px] font-semibold text-indigo-700 border border-indigo-100">Avaluació Contínua Trimestral</span>
             <h2 id="trimTitle" class="text-xl font-bold text-slate-900 tracking-tight mt-1">Resum del Trimestre 1</h2>
-            <p class="text-xs text-slate-500 mt-0.5">Pondera el pes de cada SdA per calcular automàticament la qualificació trimestral.</p>
+            <p class="text-xs text-slate-500 mt-0.5">Pondera el pes de cada SdA. Fes clic a la icona <i class="fa-solid fa-person-running text-slate-400"></i> per penalitzar la manca de participació (&lt; % pràctica).</p>
           </div>
           <button onclick="exportCSV()" class="inline-flex items-center gap-2 bg-white border border-slate-300 text-slate-700 hover:bg-slate-50 text-xs font-semibold px-3 py-2 rounded-lg shadow-2xs transition">
             <i class="fa-solid fa-file-csv text-slate-400"></i> Exportar a CSV
@@ -324,7 +324,6 @@
           </div>
 
           <div class="flex flex-wrap items-center gap-3">
-            <!-- Selector de Mètode -->
             <div class="flex items-center bg-slate-100 p-1 rounded-xl border border-slate-200 text-xs">
               <button id="finalMethodTrimBtn" onclick="setFinalCalculationMethod('trim')" class="px-3 py-1.5 rounded-lg font-semibold transition">
                 <i class="fa-solid fa-calendar-days mr-1"></i> Per Trimestres (T1, T2, T3)
@@ -340,7 +339,7 @@
           </div>
         </div>
 
-        <!-- Panell de Ponderació Dinàmic (Canvia segons el mètode) -->
+        <!-- Panell de Ponderació Dinàmic -->
         <div class="bg-white border border-slate-200/90 rounded-xl p-4 shadow-2xs space-y-3">
           <div class="flex items-center justify-between">
             <h4 id="finalWeightPanelTitle" class="text-xs font-bold text-slate-800 uppercase tracking-wider flex items-center gap-2">
@@ -783,9 +782,10 @@
       groups: {
         "1esoA": {
           name: "1r ESO A",
-          finalMethod: 'trim', // 'trim' o 'ce'
+          finalMethod: 'trim',
           finalTrimWeights: { t1: 33.33, t2: 33.33, t3: 33.34 },
           finalCeWeights: { CE1: 20, CE2: 20, CE3: 20, CE4: 20, CE5: 20 },
+          attendancePenalty: { 1: {}, 2: {}, 3: {} },
           students: [
             { id: 1, name: "Alonso Martí, Marc" },
             { id: 2, name: "Balaguer Soler, Clara" },
@@ -854,6 +854,7 @@
           finalMethod: 'trim',
           finalTrimWeights: { t1: 33.33, t2: 33.33, t3: 33.34 },
           finalCeWeights: { CE1: 20, CE2: 20, CE3: 20, CE4: 20, CE5: 20 },
+          attendancePenalty: { 1: {}, 2: {}, 3: {} },
           students: [
             { id: 11, name: "Bassa Solà, Jordi" },
             { id: 12, name: "Ferrer Roig, Núria" },
@@ -931,6 +932,7 @@
               if (!parsed.groups[k].finalCeWeights) parsed.groups[k].finalCeWeights = { ...DEFAULT_FINAL_CE_WEIGHTS };
               if (!parsed.groups[k].finalTrimWeights) parsed.groups[k].finalTrimWeights = { ...DEFAULT_FINAL_TRIM_WEIGHTS };
               if (!parsed.groups[k].finalMethod) parsed.groups[k].finalMethod = 'trim';
+              if (!parsed.groups[k].attendancePenalty) parsed.groups[k].attendancePenalty = { 1: {}, 2: {}, 3: {} };
             });
             return parsed;
           }
@@ -1009,6 +1011,7 @@
       if (!grp.finalCeWeights) grp.finalCeWeights = { ...DEFAULT_FINAL_CE_WEIGHTS };
       if (!grp.finalTrimWeights) grp.finalTrimWeights = { ...DEFAULT_FINAL_TRIM_WEIGHTS };
       if (!grp.finalMethod) grp.finalMethod = 'trim';
+      if (!grp.attendancePenalty) grp.attendancePenalty = { 1: {}, 2: {}, 3: {} };
       return grp;
     }
 
@@ -1125,7 +1128,8 @@
         grades: {},
         finalMethod: 'trim',
         finalTrimWeights: { ...DEFAULT_FINAL_TRIM_WEIGHTS },
-        finalCeWeights: { ...DEFAULT_FINAL_CE_WEIGHTS }
+        finalCeWeights: { ...DEFAULT_FINAL_CE_WEIGHTS },
+        attendancePenalty: { 1: {}, 2: {}, 3: {} }
       };
       saveToStorage();
       closeNewGroupModal();
@@ -1344,6 +1348,31 @@
       }
     }
 
+    // ========================================================
+    // GESTIÓ PENALITZACIÓ PER FALTA DE PARTICIPACIÓ PRÀCTICA
+    // ========================================================
+    function toggleAttendancePenalty(stId, trimNum = null) {
+      const t = trimNum || appState.currentTrim;
+      const curGroup = getCurrentGroup();
+      if (!curGroup.attendancePenalty) curGroup.attendancePenalty = { 1: {}, 2: {}, 3: {} };
+      if (!curGroup.attendancePenalty[t]) curGroup.attendancePenalty[t] = {};
+
+      curGroup.attendancePenalty[t][stId] = !curGroup.attendancePenalty[t][stId];
+      saveToStorage();
+
+      if (appState.currentView === 'trim') renderTrimView();
+      if (appState.currentView === 'sda') renderSdaGrid();
+      if (appState.currentView === 'final') renderFinalView();
+      if (appState.currentView === 'report') renderIndividualReport();
+      if (appState.currentView === 'stats') renderStatsView();
+    }
+
+    function hasAttendancePenalty(stId, trimNum = null, group = null) {
+      const t = trimNum || appState.currentTrim;
+      const curGroup = group || getCurrentGroup();
+      return !!(curGroup.attendancePenalty && curGroup.attendancePenalty[t] && curGroup.attendancePenalty[t][stId]);
+    }
+
     function getStudentCeScoreInSda(sda, stId, ceId, customGrades = null) {
       if (!sda || !sda.competences) return null;
       const conf = sda.competences[ceId];
@@ -1388,9 +1417,15 @@
       return (totalWeightedScore * 100) / totalActiveWeight;
     }
 
-    // Retorna la nota del trimestre especificat
+    // Retorna la nota del trimestre amb control de penalització de pràctica
     function getStudentTrimScoreByTrim(stId, trimNum, group = null) {
       const curGroup = group || getCurrentGroup();
+      
+      // Si té penalització de participació pràctica activa, està suspès automàticament (NA = 0.90)
+      if (hasAttendancePenalty(stId, trimNum, curGroup)) {
+        return 0.90;
+      }
+
       const trimSdas = (curGroup.sdas || []).filter(s => s.trim === trimNum);
       if (trimSdas.length === 0) return null;
 
@@ -1414,7 +1449,7 @@
       return getStudentTrimScoreByTrim(stId, appState.currentTrim, group);
     }
 
-    // CÀLCUL FINAL DE CURS UNIFICAT (SEGONS EL MÈTODE ESCOLLIT)
+    // CÀLCUL FINAL DE CURS UNIFICAT
     function getStudentCourseFinalScore(stId, group = null) {
       const curGroup = group || getCurrentGroup();
       const method = curGroup.finalMethod || 'trim';
@@ -1949,7 +1984,7 @@
       }
     }
 
-    // RESUM TRIMESTRAL
+    // RESUM TRIMESTRAL (AMB BOTÓ DE PENALITZACIÓ PRÀCTICA)
     function renderTrimView() {
       const thead = document.getElementById('trimTableHead');
       const tbody = document.getElementById('trimTableBody');
@@ -1978,7 +2013,10 @@
 
       let headHtml = `<tr>
         <th class="py-3 px-3 w-10 text-center font-mono text-slate-400 font-medium">#</th>
-        <th class="py-3 px-4 font-semibold text-slate-100 min-w-[190px]">Alumne/a</th>`;
+        <th class="py-3 px-4 font-semibold text-slate-100 min-w-[190px]">Alumne/a</th>
+        <th class="py-2.5 px-2 text-center border-l border-slate-800 text-[11px]" title="Activa per suspendre l'alumne si no arriba al mínim de sessions pràctiques">
+          <i class="fa-solid fa-person-running text-amber-400"></i> Pràctica
+        </th>`;
       
       trimSdas.forEach(sda => {
         headHtml += `<th class="py-2.5 px-3 text-center border-l border-slate-800">
@@ -2005,9 +2043,20 @@
 
       let rowsHtml = '';
       students.forEach((st, idx) => {
-        rowsHtml += `<tr class="hover:bg-slate-50/70 transition-colors">
+        const isPenalized = hasAttendancePenalty(st.id, appState.currentTrim, curGroup);
+
+        rowsHtml += `<tr class="hover:bg-slate-50/70 transition-colors ${isPenalized ? 'bg-rose-50/20' : ''}">
           <td class="py-2.5 px-3 text-center text-slate-400 font-mono">${idx + 1}</td>
-          <td class="py-2.5 px-4 font-semibold text-slate-800">${st.name}</td>`;
+          <td class="py-2.5 px-4 font-semibold text-slate-800">
+            ${st.name}
+            ${isPenalized ? '<span class="ml-2 text-[10px] font-bold text-rose-600 bg-rose-50 border border-rose-200 px-1.5 py-0.2 rounded">&lt; % pràctica</span>' : ''}
+          </td>
+          <!-- Botó penalització pràctica -->
+          <td class="py-2.5 px-2 text-center border-l border-slate-100">
+            <button onclick="toggleAttendancePenalty(${st.id})" title="${isPenalized ? 'Alumne suspès per no arribar al mínim de pràctica. Fes clic per treure la penalització.' : 'Fes clic per penalitzar i suspendre per manca de sessions pràctiques'}" class="px-2 py-1 rounded-lg text-xs font-bold transition ${isPenalized ? 'bg-rose-600 text-white shadow-xs' : 'bg-slate-100 text-slate-400 hover:text-slate-700 hover:bg-slate-200'}">
+              <i class="fa-solid fa-person-running"></i>
+            </button>
+          </td>`;
 
         trimSdas.forEach(sda => {
           const sdaScore = getStudentOverallSdaScore(sda, st.id);
@@ -2036,18 +2085,17 @@
         const overallTrimScore = getStudentTrimScore(st.id);
         const overallLvl = getLevel(overallTrimScore);
 
-        rowsHtml += `<td class="py-2.5 px-4 text-center border-l-2 border-indigo-500 bg-slate-50/80 font-bold">
-          <div class="text-sm font-black font-mono text-slate-950">${overallTrimScore !== null ? overallTrimScore.toFixed(2) : '<span class="text-slate-300 font-normal">—</span>'}</div>
+        rowsHtml += `<td class="py-2.5 px-4 text-center border-l-2 border-indigo-500 ${isPenalized ? 'bg-rose-100/60' : 'bg-slate-50/80'} font-bold">
+          <div class="text-sm font-black font-mono ${isPenalized ? 'text-rose-700' : 'text-slate-950'}">${overallTrimScore !== null ? overallTrimScore.toFixed(2) : '<span class="text-slate-300 font-normal">—</span>'}</div>
           <span class="inline-flex items-center mt-0.5 text-[10px] px-2.5 py-0.5 rounded font-bold ring-1 ring-inset ${overallLvl.badge}">${overallLvl.code}</span>
+          ${isPenalized ? '<div class="text-[9px] font-bold text-rose-600 uppercase mt-0.5 tracking-tighter">No pràctica</div>' : ''}
         </td></tr>`;
       });
 
       tbody.innerHTML = rowsHtml;
     }
 
-    // ========================================================
     // FINAL DE CURS (SELECTOR TRIMESTRES VS COMPETÈNCIES)
-    // ========================================================
     function setFinalCalculationMethod(method) {
       const curGroup = getCurrentGroup();
       curGroup.finalMethod = method;
@@ -2075,7 +2123,6 @@
       const curGroup = getCurrentGroup();
       const method = curGroup.finalMethod || 'trim';
 
-      // 1. Botons de commutació
       const btnTrim = document.getElementById('finalMethodTrimBtn');
       const btnCe = document.getElementById('finalMethodCeBtn');
       if (method === 'trim') {
@@ -2086,7 +2133,6 @@
         btnTrim.className = "px-3 py-1.5 rounded-lg font-medium text-slate-600 hover:text-slate-900 transition";
       }
 
-      // 2. Panell de Ponderació Dinàmic
       const weightsContainer = document.getElementById('finalWeightsContainer');
       const badge = document.getElementById('finalWeightSumBadge');
       const panelTitle = document.getElementById('finalWeightPanelTitle');
@@ -2133,7 +2179,6 @@
         ? "text-xs font-mono font-bold px-2.5 py-0.5 rounded-md bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200" 
         : "text-xs font-mono font-bold px-2.5 py-0.5 rounded-md bg-amber-50 text-amber-700 ring-1 ring-amber-200";
 
-      // 3. Capçalera de la Taula
       const thead = document.getElementById('finalTableHead');
       let headHtml = `<tr class="bg-slate-900 text-white">
         <th class="py-3 px-3 w-10 text-center font-mono text-slate-400 font-medium">#</th>
@@ -2169,7 +2214,6 @@
       headHtml += `<th class="py-3 px-4 text-center border-l-2 border-emerald-500 bg-slate-950 font-bold text-emerald-300 uppercase tracking-wider">Qualificació Final</th></tr>`;
       thead.innerHTML = headHtml;
 
-      // 4. Cos de la Taula
       const tbody = document.getElementById('finalTableBody');
       const students = curGroup.students || [];
       if (students.length === 0) {
@@ -2190,9 +2234,12 @@
           [1, 2, 3].forEach(tNum => {
             const sc = getStudentTrimScoreByTrim(st.id, tNum, curGroup);
             const lvl = getLevel(sc);
-            html += `<td class="py-2 px-3 text-center border-l border-slate-100">
-              <div class="font-bold font-mono text-slate-800">${sc !== null ? sc.toFixed(2) : '<span class="text-slate-300 font-normal">—</span>'}</div>
+            const isPen = hasAttendancePenalty(st.id, tNum, curGroup);
+
+            html += `<td class="py-2 px-3 text-center border-l border-slate-100 ${isPen ? 'bg-rose-50/30' : ''}">
+              <div class="font-bold font-mono ${isPen ? 'text-rose-700' : 'text-slate-800'}">${sc !== null ? sc.toFixed(2) : '<span class="text-slate-300 font-normal">—</span>'}</div>
               <span class="inline-flex items-center mt-0.5 text-[10px] px-2 py-0.5 rounded font-bold ring-1 ring-inset ${lvl.badge}">${lvl.code}</span>
+              ${isPen ? '<div class="text-[8px] font-bold text-rose-600 uppercase mt-0.5">No pràctica</div>' : ''}
             </td>`;
           });
         } else {
@@ -2274,7 +2321,6 @@
         `;
       });
 
-      // Nota final de curs calculada segons el mètode seleccionat (Trimestres o CEs)
       const globalScore = getStudentCourseFinalScore(st.id, curGroup);
       const globalLvl = getLevel(globalScore);
       const repBadge = document.getElementById('repGlobalBadge');
