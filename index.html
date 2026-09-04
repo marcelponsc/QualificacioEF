@@ -73,7 +73,6 @@
           </button>
 
           <div class="flex items-center pl-1 border-l border-slate-200 gap-1">
-            <!-- Botó configuració d'escala -->
             <button onclick="openThresholdsModal()" title="Personalitzar Escala de Qualificació" class="inline-flex items-center gap-1 px-2.5 py-1.5 text-slate-600 hover:text-indigo-600 hover:bg-slate-100 rounded-lg text-xs font-semibold transition border border-slate-200 bg-white">
               <i class="fa-solid fa-sliders text-slate-400"></i>
               <span class="hidden md:inline">Escala LOMLOE</span>
@@ -315,29 +314,34 @@
         </div>
       </section>
 
-      <!-- VISTA 4: FINAL DE CURS -->
+      <!-- VISTA 4: FINAL DE CURS (AMB PONDERACIÓ DE CEs) -->
       <section id="viewFinal" class="space-y-4 hidden">
-        <div class="border-b border-slate-200/80 pb-4">
-          <span class="inline-flex items-center rounded-md bg-emerald-50 px-2 py-0.5 text-[11px] font-semibold text-emerald-700 border border-emerald-100">Convocatòria Ordinària</span>
-          <h2 class="text-xl font-bold text-slate-900 tracking-tight mt-1">Avaluació Final de Curs</h2>
-          <p class="text-xs text-slate-500 mt-0.5">Qualificació consolidada de les Competències Específiques durant tot el curs.</p>
+        <div class="flex flex-wrap items-end justify-between gap-4 border-b border-slate-200/80 pb-4">
+          <div>
+            <span class="inline-flex items-center rounded-md bg-emerald-50 px-2 py-0.5 text-[11px] font-semibold text-emerald-700 border border-emerald-100">Convocatòria Ordinària</span>
+            <h2 class="text-xl font-bold text-slate-900 tracking-tight mt-1">Avaluació Final de Curs</h2>
+            <p class="text-xs text-slate-500 mt-0.5">Defineix el pes ponderat de cada Competència Específica per calcular la qualificació de final de curs.</p>
+          </div>
+          <button onclick="exportCSV()" class="inline-flex items-center gap-2 bg-white border border-slate-300 text-slate-700 hover:bg-slate-50 text-xs font-semibold px-3 py-2 rounded-lg shadow-2xs transition">
+            <i class="fa-solid fa-file-csv text-slate-400"></i> Exportar a CSV
+          </button>
+        </div>
+
+        <!-- Panell de Ponderació de CEs -->
+        <div class="bg-white border border-slate-200/90 rounded-xl p-4 shadow-2xs space-y-3">
+          <div class="flex items-center justify-between">
+            <h4 class="text-xs font-bold text-slate-800 uppercase tracking-wider flex items-center gap-2">
+              <i class="fa-solid fa-scale-balanced text-indigo-600"></i> Ponderació de les Competències Específiques
+            </h4>
+            <span id="finalCeWeightSumBadge" class="text-xs font-mono font-bold px-2.5 py-0.5 rounded-md">Total CEs: 100%</span>
+          </div>
+          <div id="finalCeWeightsContainer" class="flex flex-wrap gap-3 pt-1"></div>
         </div>
 
         <div class="bg-white border border-slate-200 rounded-xl shadow-2xs overflow-hidden">
           <div class="overflow-x-auto">
             <table class="w-full text-left border-collapse text-xs">
-              <thead>
-                <tr class="bg-slate-900 text-white">
-                  <th class="py-3 px-3 w-10 text-center font-mono text-slate-400 font-medium">#</th>
-                  <th class="py-3 px-4 font-semibold text-slate-100 min-w-[200px]">Alumne/a</th>
-                  <th class="py-3 px-3 text-center border-l border-slate-800">CE1 (Salut)</th>
-                  <th class="py-3 px-3 text-center border-l border-slate-800">CE2 (Motricitat)</th>
-                  <th class="py-3 px-3 text-center border-l border-slate-800">CE3 (Expressió)</th>
-                  <th class="py-3 px-3 text-center border-l border-slate-800">CE4 (Entorn)</th>
-                  <th class="py-3 px-3 text-center border-l border-slate-800">CE5 (Valors)</th>
-                  <th class="py-3 px-3 text-center border-l border-slate-800 bg-slate-950 font-bold text-emerald-300">Qualificació Final</th>
-                </tr>
-              </thead>
+              <thead id="finalTableHead" class="bg-slate-900 text-white"></thead>
               <tbody id="finalTableBody" class="divide-y divide-slate-100 bg-white tabular-nums"></tbody>
             </table>
           </div>
@@ -511,11 +515,10 @@
 
       <div class="p-6 space-y-4 text-xs">
         <p class="text-slate-500 text-[11px] leading-relaxed">
-          Defineix la nota mínima per assolir cada tram (en una escala estàndard de 0 a 4). El sistema recalcularà automàticament colors, nivells i estadístiques.
+          Defineix la nota mínima per assolir cada tram (en una escala de 0 a 4). El sistema recalcularà automàticament colors, nivells i estadístiques.
         </p>
 
         <div class="space-y-3 pt-1">
-          <!-- NA -->
           <div class="flex items-center gap-3 bg-rose-50/60 border border-rose-100 p-3 rounded-xl">
             <div class="w-14 font-black font-mono text-sm text-rose-700">NA</div>
             <div class="flex-1">
@@ -527,7 +530,6 @@
             </div>
           </div>
 
-          <!-- EPA -->
           <div class="flex items-center gap-3 bg-amber-50/60 border border-amber-100 p-3 rounded-xl">
             <div class="w-14 font-black font-mono text-sm text-amber-700">EPA</div>
             <div class="flex-1">
@@ -540,7 +542,6 @@
             </div>
           </div>
 
-          <!-- AS -->
           <div class="flex items-center gap-3 bg-sky-50/60 border border-sky-100 p-3 rounded-xl">
             <div class="w-14 font-black font-mono text-sm text-sky-700">AS</div>
             <div class="flex-1">
@@ -553,7 +554,6 @@
             </div>
           </div>
 
-          <!-- AN -->
           <div class="flex items-center gap-3 bg-indigo-50/60 border border-indigo-100 p-3 rounded-xl">
             <div class="w-14 font-black font-mono text-sm text-indigo-700">AN</div>
             <div class="flex-1">
@@ -566,7 +566,6 @@
             </div>
           </div>
 
-          <!-- AE -->
           <div class="flex items-center gap-3 bg-emerald-50/60 border border-emerald-100 p-3 rounded-xl">
             <div class="w-14 font-black font-mono text-sm text-emerald-700">AE</div>
             <div class="flex-1">
@@ -727,12 +726,19 @@
     const STORAGE_KEY = 'EF_COMPETENCIAL_DATA_V10';
     const THRESHOLDS_STORAGE_KEY = 'EF_COMPETENCIAL_THRESHOLDS_V1';
 
-    // Llindars per defecte configurables
     const DEFAULT_THRESHOLDS = {
       epa: 1.0,
       as: 2.0,
       an: 3.0,
       ae: 4.0
+    };
+
+    const DEFAULT_FINAL_CE_WEIGHTS = {
+      CE1: 20,
+      CE2: 20,
+      CE3: 20,
+      CE4: 20,
+      CE5: 20
     };
 
     let gradeThresholds = loadThresholds();
@@ -758,6 +764,7 @@
       groups: {
         "1esoA": {
           name: "1r ESO A",
+          finalCeWeights: { CE1: 20, CE2: 20, CE3: 20, CE4: 20, CE5: 20 },
           students: [
             { id: 1, name: "Alonso Martí, Marc" },
             { id: 2, name: "Balaguer Soler, Clara" },
@@ -823,6 +830,7 @@
         },
         "1esoB": {
           name: "1r ESO B",
+          finalCeWeights: { CE1: 20, CE2: 20, CE3: 20, CE4: 20, CE5: 20 },
           students: [
             { id: 11, name: "Bassa Solà, Jordi" },
             { id: 12, name: "Ferrer Roig, Núria" },
@@ -897,6 +905,7 @@
               if (!Array.isArray(parsed.groups[k].students)) parsed.groups[k].students = [];
               if (!Array.isArray(parsed.groups[k].sdas)) parsed.groups[k].sdas = [];
               if (!parsed.groups[k].grades) parsed.groups[k].grades = {};
+              if (!parsed.groups[k].finalCeWeights) parsed.groups[k].finalCeWeights = { ...DEFAULT_FINAL_CE_WEIGHTS };
             });
             return parsed;
           }
@@ -971,7 +980,9 @@
       if (!appData.groups[appData.activeGroupId]) {
         appData.activeGroupId = Object.keys(appData.groups)[0];
       }
-      return appData.groups[appData.activeGroupId];
+      const grp = appData.groups[appData.activeGroupId];
+      if (!grp.finalCeWeights) grp.finalCeWeights = { ...DEFAULT_FINAL_CE_WEIGHTS };
+      return grp;
     }
 
     function init() {
@@ -1080,7 +1091,13 @@
       const name = document.getElementById('modalNewGroupNameInput').value.trim();
       if (!name) return;
       const gId = 'g_' + Date.now();
-      appData.groups[gId] = { name: name, students: [], sdas: [], grades: {} };
+      appData.groups[gId] = { 
+        name: name, 
+        students: [], 
+        sdas: [], 
+        grades: {},
+        finalCeWeights: { ...DEFAULT_FINAL_CE_WEIGHTS }
+      };
       saveToStorage();
       closeNewGroupModal();
       enterClass(gId);
@@ -1102,7 +1119,6 @@
       openSdaModal(true);
     }
 
-    // GESTIÓ ALUMNES DES DE LA PESTANYA DE CLASSE (ROSTER TAB)
     function renderRosterTab() {
       const curGroup = getCurrentGroup();
       const countBadge = document.getElementById('rosterCountBadge');
@@ -1232,9 +1248,6 @@
       if (view === 'stats') initStatsView();
     }
 
-    // ==========================================
-    // CÀLCUL DINÀMIC SEGONS ESCALA PERSONALITZADA
-    // ==========================================
     function getLevel(val) {
       if (val === null || val === undefined || isNaN(val) || val <= 0) {
         return { code: "—", badge: "bg-slate-50 text-slate-400 ring-slate-200" };
@@ -1260,7 +1273,6 @@
       return 'bg-emerald-50 text-emerald-900 border-emerald-400 font-black';
     }
 
-    // GESTIÓ MODAL THRESHOLDS
     function openThresholdsModal() {
       document.getElementById('th_epa').value = gradeThresholds.epa;
       document.getElementById('th_as').value = gradeThresholds.as;
@@ -1294,7 +1306,6 @@
       saveThresholdsToStorage({ epa, as, an, ae });
       closeThresholdsModal();
 
-      // Refresca la vista que estigui oberta
       if (appState.currentScreen === 'class') {
         if (appState.currentView === 'sda') renderSdaGrid();
         if (appState.currentView === 'trim') renderTrimView();
@@ -1846,6 +1857,7 @@
         populateSdaSelect();
         renderSdaGrid();
         renderTrimView();
+        if (appState.currentView === 'final') renderFinalView();
         if (appState.currentView === 'stats') renderStatsView();
       } else {
         renderHomeScreen();
@@ -1958,21 +1970,72 @@
       tbody.innerHTML = rowsHtml;
     }
 
-    // FINAL DE CURS
-    function renderFinalView() {
-      const tbody = document.getElementById('finalTableBody');
+    // ========================================================
+    // FINAL DE CURS (GESTIÓ I PONDERACIÓ DE LES CEs)
+    // ========================================================
+    function updateFinalCeWeight(ceId, newWeight) {
       const curGroup = getCurrentGroup();
-      let html = '';
+      if (!curGroup.finalCeWeights) curGroup.finalCeWeights = { ...DEFAULT_FINAL_CE_WEIGHTS };
+      curGroup.finalCeWeights[ceId] = parseFloat(newWeight) || 0;
+      saveToStorage();
+      renderFinalView();
+    }
 
+    function renderFinalView() {
+      const curGroup = getCurrentGroup();
+      if (!curGroup.finalCeWeights) curGroup.finalCeWeights = { ...DEFAULT_FINAL_CE_WEIGHTS };
+
+      // 1. Panell de Ponderació
+      const weightsContainer = document.getElementById('finalCeWeightsContainer');
+      let sumWeights = 0;
+      weightsContainer.innerHTML = OFFICIAL_CES.map(ce => {
+        const w = curGroup.finalCeWeights[ce.id] !== undefined ? curGroup.finalCeWeights[ce.id] : 20;
+        sumWeights += w;
+        return `
+          <div class="flex items-center gap-2 bg-slate-50 border border-slate-200 px-3 py-1.5 rounded-lg">
+            <span class="font-bold text-slate-800 text-xs">${ce.id}:</span>
+            <input type="number" min="0" max="100" value="${w}" onchange="updateFinalCeWeight('${ce.id}', this.value)" class="w-14 text-center font-mono font-bold text-xs bg-white border border-slate-300 rounded p-1 outline-none focus:ring-2 focus:ring-indigo-500">
+            <span class="text-slate-400 font-mono text-xs">%</span>
+          </div>
+        `;
+      }).join('');
+
+      const badge = document.getElementById('finalCeWeightSumBadge');
+      badge.textContent = `Total CEs: ${sumWeights}%`;
+      badge.className = sumWeights === 100 
+        ? "text-xs font-mono font-bold px-2.5 py-0.5 rounded-md bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200" 
+        : "text-xs font-mono font-bold px-2.5 py-0.5 rounded-md bg-amber-50 text-amber-700 ring-1 ring-amber-200";
+
+      // 2. Capçalera de la taula
+      const thead = document.getElementById('finalTableHead');
+      let headHtml = `<tr class="bg-slate-900 text-white">
+        <th class="py-3 px-3 w-10 text-center font-mono text-slate-400 font-medium">#</th>
+        <th class="py-3 px-4 font-semibold text-slate-100 min-w-[200px]">Alumne/a</th>`;
+
+      OFFICIAL_CES.forEach(ce => {
+        const w = curGroup.finalCeWeights[ce.id] !== undefined ? curGroup.finalCeWeights[ce.id] : 20;
+        headHtml += `<th class="py-2 px-3 text-center border-l border-slate-800">
+          <div>${ce.id} (${ce.short})</div>
+          <div class="text-[10px] text-indigo-300 font-mono font-semibold">Pes: ${w}%</div>
+        </th>`;
+      });
+
+      headHtml += `<th class="py-3 px-3 text-center border-l border-slate-800 bg-slate-950 font-bold text-emerald-300">Qualificació Final</th></tr>`;
+      thead.innerHTML = headHtml;
+
+      // 3. Cos de la taula
+      const tbody = document.getElementById('finalTableBody');
       const students = curGroup.students || [];
       if (students.length === 0) {
         tbody.innerHTML = `<tr><td colspan="8" class="p-8 text-center text-slate-400">Sense alumnes.</td></tr>`;
         return;
       }
 
+      let html = '';
       students.forEach((st, idx) => {
         let globalCeScores = {};
-        let totalSum = 0, count = 0;
+        let totalWeightedSum = 0;
+        let activeWeightSum = 0;
 
         OFFICIAL_CES.forEach(ce => {
           let sum = 0, c = 0;
@@ -1982,10 +2045,16 @@
           });
           const avg = c > 0 ? sum / c : null;
           globalCeScores[ce.id] = avg;
-          if (avg !== null) { totalSum += avg; count++; }
+
+          const ceWeight = curGroup.finalCeWeights[ce.id] !== undefined ? curGroup.finalCeWeights[ce.id] : 20;
+          if (avg !== null) {
+            totalWeightedSum += avg * (ceWeight / 100);
+            activeWeightSum += ceWeight;
+          }
         });
 
-        const finalScore = count > 0 ? totalSum / count : null;
+        // Càlcul de la nota final ponderada
+        const finalScore = activeWeightSum > 0 ? (totalWeightedSum * 100) / activeWeightSum : null;
         const finalLvl = getLevel(finalScore);
 
         html += `<tr class="hover:bg-slate-50/70 transition-colors">
@@ -2037,7 +2106,7 @@
       document.getElementById('repGroupLabel').textContent = `Classe: ${curGroup.name} | 1r i 2n d'ESO | LOMLOE`;
 
       let ceValues = [];
-      let total = 0, count = 0;
+      let totalWeighted = 0, totalWeight = 0;
       let detailsHtml = '';
 
       OFFICIAL_CES.forEach(ce => {
@@ -2048,14 +2117,20 @@
         });
         const avg = c > 0 ? sum / c : 0;
         ceValues.push(avg);
-        if (c > 0) { total += avg; count++; }
+
+        const ceWeight = curGroup.finalCeWeights[ce.id] !== undefined ? curGroup.finalCeWeights[ce.id] : 20;
+        if (c > 0) {
+          totalWeighted += avg * (ceWeight / 100);
+          totalWeight += ceWeight;
+        }
+
         const lvl = getLevel(avg);
 
         detailsHtml += `
           <div class="flex items-center justify-between p-2.5 rounded-xl border border-slate-100 bg-slate-50/70">
             <div>
               <div class="font-bold text-slate-800">${ce.name}</div>
-              <div class="text-[11px] text-slate-400">${ce.short}</div>
+              <div class="text-[11px] text-slate-400">${ce.short} · Pes Curs: ${ceWeight}%</div>
             </div>
             <div class="text-right">
               <span class="font-bold font-mono text-slate-900 mr-2">${avg > 0 ? avg.toFixed(2) : '—'}</span>
@@ -2065,7 +2140,7 @@
         `;
       });
 
-      const globalAvg = count > 0 ? total / count : null;
+      const globalAvg = totalWeight > 0 ? (totalWeighted * 100) / totalWeight : null;
       const globalLvl = getLevel(globalAvg);
       const repBadge = document.getElementById('repGlobalBadge');
       repBadge.textContent = `${globalAvg ? globalAvg.toFixed(2) : '—'} (${globalLvl.code})`;
@@ -2106,9 +2181,7 @@
       });
     }
 
-    // ==========================================
-    // MÒDUL D'ANALÍTICA I ESTADÍSTIQUES AVANÇADES
-    // ==========================================
+    // ANALÍTICA & ESTADÍSTIQUES
     function setStatsScope(scope) {
       appState.statsScope = scope;
       const btnClass = document.getElementById('statsScopeClass');
@@ -2202,7 +2275,9 @@
               if (count > 0) ceScoresAgg[ce.id].push(ceSum / count);
             });
           } else if (scopeType === 'course') {
-            let total = 0, count = 0;
+            let totalWeighted = 0, activeWeight = 0;
+            const weights = grp.finalCeWeights || DEFAULT_FINAL_CE_WEIGHTS;
+
             OFFICIAL_CES.forEach(ce => {
               let sum = 0, c = 0;
               (grp.sdas || []).forEach(sda => {
@@ -2212,11 +2287,12 @@
               if (c > 0) {
                 const avg = sum / c;
                 ceScoresAgg[ce.id].push(avg);
-                total += avg;
-                count++;
+                const w = weights[ce.id] !== undefined ? weights[ce.id] : 20;
+                totalWeighted += avg * (w / 100);
+                activeWeight += w;
               }
             });
-            if (count > 0) score = total / count;
+            if (activeWeight > 0) score = (totalWeighted * 100) / activeWeight;
           }
 
           if (score !== null && !isNaN(score)) {
@@ -2228,7 +2304,6 @@
       const totalStudents = studentScores.length;
       const globalAvg = totalStudents > 0 ? (studentScores.reduce((a, b) => a + b, 0) / totalStudents) : 0;
       
-      // La taxa d'èxit es calcula segons el llindar AS configurat per l'usuari
       const successStudents = studentScores.filter(s => s >= gradeThresholds.as).length;
       const successRate = totalStudents > 0 ? ((successStudents / totalStudents) * 100).toFixed(1) : "0.0";
       const globalLvl = getLevel(globalAvg);
