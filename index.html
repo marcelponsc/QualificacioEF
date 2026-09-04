@@ -65,20 +65,16 @@
 
         <!-- Accions Ràpides de Capçalera -->
         <div class="flex items-center gap-2">
-          
-          <!-- Indicador de sincronització automàtica -->
           <div id="savedIndicator" class="flex items-center gap-1.5 text-[11px] font-medium text-emerald-600 px-2 py-1 rounded-md opacity-0 transition-opacity duration-300">
             <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
             <span>Desat</span>
           </div>
 
-          <!-- Botó Tornar a l'Inici -->
           <button onclick="goToHome()" id="homeNavBtn" class="inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-lg border border-slate-200 bg-white text-slate-700 hover:bg-slate-50 hover:text-slate-900 shadow-2xs transition">
             <i class="fa-solid fa-house text-slate-400 text-[11px]"></i>
             <span class="hidden sm:inline">Inici</span>
           </button>
 
-          <!-- Eines i Còpia de Seguretat -->
           <div class="flex items-center pl-1 border-l border-slate-200 gap-1">
             <button onclick="resetDefaultData()" title="Restablir dades de mostra" class="p-1.5 text-slate-400 hover:text-indigo-600 hover:bg-slate-100 rounded-lg text-xs transition">
               <i class="fa-solid fa-rotate-left"></i>
@@ -111,6 +107,9 @@
         <button id="tabBtnReport" onclick="switchView('report')" class="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition">
           <i class="fa-regular fa-address-card text-slate-400"></i> Butlletí Individual
         </button>
+        <button id="tabBtnStats" onclick="switchView('stats')" class="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition">
+          <i class="fa-solid fa-chart-pie text-slate-400"></i> Analítica
+        </button>
       </nav>
     </div>
   </header>
@@ -120,8 +119,6 @@
 
     <!-- ================= PANTALLA D'INICI (HOME) ================= -->
     <section id="screenHome" class="space-y-6">
-      
-      <!-- Banner Principal Net i Elegant -->
       <div class="bg-gradient-to-r from-slate-900 via-slate-800 to-indigo-950 rounded-2xl p-6 sm:p-7 text-white shadow-sm border border-slate-800/80 relative overflow-hidden">
         <div class="relative z-10 max-w-2xl space-y-2">
           <div class="inline-flex items-center gap-2 text-[11px] font-medium text-indigo-300">
@@ -140,7 +137,6 @@
         </div>
       </div>
 
-      <!-- Mètriques Ràpides -->
       <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <div class="bg-white border border-slate-200/80 rounded-xl p-4 shadow-2xs flex items-center gap-3.5">
           <div class="w-9 h-9 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center text-base">
@@ -173,7 +169,6 @@
         </div>
       </div>
 
-      <!-- Targetes de Classes -->
       <div class="space-y-3 pt-1">
         <div class="flex justify-between items-center">
           <h3 class="text-xs font-bold text-slate-900 uppercase tracking-wider flex items-center gap-2">
@@ -222,9 +217,8 @@
           </div>
           
           <div class="flex items-center gap-2">
-            <!-- Indicador ràpid de navegació per teclat -->
             <span class="hidden sm:inline-flex items-center gap-1 text-[11px] font-medium text-slate-400 bg-slate-100 px-2 py-1 rounded-lg border border-slate-200">
-              <i class="fa-regular fa-keyboard text-indigo-500"></i> Fletxes per navegar / Enter
+              <i class="fa-regular fa-keyboard text-indigo-500"></i> Fletxes / Enter per navegar
             </span>
             <button onclick="openSdaModal(true)" class="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-semibold text-white bg-indigo-600 hover:bg-indigo-700 shadow-2xs transition">
               <i class="fa-solid fa-plus text-[11px]"></i> Nova SdA
@@ -232,7 +226,6 @@
           </div>
         </div>
 
-        <!-- Graella amb suport Sticky 2D (Vertical i Horitzontal) -->
         <div class="bg-white border border-slate-200 rounded-xl shadow-2xs overflow-hidden">
           <div id="sdaGridTitleBar" class="bg-slate-900 text-white px-4 py-3 flex items-center justify-between text-xs sticky top-0 z-40">
           </div>
@@ -383,6 +376,121 @@
               <canvas id="radarChart"></canvas>
             </div>
             <div id="repDetailsContainer" class="space-y-2 text-xs"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- VISTA 6: ANALÍTICA & ESTADÍSTIQUES -->
+      <section id="viewStats" class="space-y-5 hidden">
+        <div class="bg-white border border-slate-200/90 rounded-2xl p-4 shadow-2xs flex flex-wrap items-center justify-between gap-4">
+          <div>
+            <span class="inline-flex items-center gap-1 text-[11px] font-bold text-indigo-600 uppercase tracking-wider">
+              <i class="fa-solid fa-chart-simple"></i> Dashboard Analític
+            </span>
+            <h3 class="text-lg font-bold text-slate-900 tracking-tight">Rendiment Competencial &amp; Anàlisi de Dades</h3>
+          </div>
+
+          <!-- Controls de Filtre Analític -->
+          <div class="flex flex-wrap items-center gap-2.5 text-xs">
+            <div class="flex items-center gap-1.5 bg-slate-100 p-1 rounded-xl border border-slate-200">
+              <button id="statsScopeClass" onclick="setStatsScope('class')" class="px-2.5 py-1 rounded-lg font-semibold bg-white text-slate-900 shadow-2xs transition">Aquesta Classe</button>
+              <button id="statsScopeLevel" onclick="setStatsScope('level')" class="px-2.5 py-1 rounded-lg font-medium text-slate-600 hover:text-slate-900 transition">Tots els grups del Nivell</button>
+            </div>
+
+            <div class="flex items-center gap-2 bg-slate-50 border border-slate-300 rounded-xl px-2.5 py-1">
+              <span class="text-slate-400 font-medium">Àmbit:</span>
+              <select id="statsTypeSelect" onchange="onStatsTypeChange()" class="bg-transparent font-bold text-slate-800 outline-none cursor-pointer">
+                <option value="sda">Situació d'Aprenentatge (SdA)</option>
+                <option value="trim">Trimestral (T1, T2 o T3)</option>
+                <option value="course">Global de Curs</option>
+              </select>
+            </div>
+
+            <select id="statsSdaSelector" onchange="renderStatsView()" class="bg-slate-50 border border-slate-300 font-bold text-slate-800 rounded-xl px-2.5 py-1.5 outline-none cursor-pointer">
+            </select>
+          </div>
+        </div>
+
+        <!-- Targetes KPI Principals -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div class="bg-white border border-slate-200/90 rounded-2xl p-4 shadow-2xs">
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-semibold text-slate-400">Mitjana Global</span>
+              <span id="kpiAvgLvl" class="text-[10px] font-bold px-1.5 py-0.5 rounded ring-1 ring-inset bg-slate-50 text-slate-600 ring-slate-200">--</span>
+            </div>
+            <div id="kpiAvgVal" class="text-2xl font-black font-mono text-slate-900 mt-1">0.00</div>
+            <p class="text-[11px] text-slate-400 mt-1">Escala competencial 0 a 4</p>
+          </div>
+
+          <div class="bg-white border border-slate-200/90 rounded-2xl p-4 shadow-2xs">
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-semibold text-slate-400">Taxa d'Èxit (&ge; AS)</span>
+              <i class="fa-solid fa-circle-check text-emerald-500"></i>
+            </div>
+            <div id="kpiSuccessRate" class="text-2xl font-black font-mono text-emerald-600 mt-1">0%</div>
+            <p class="text-[11px] text-slate-400 mt-1">Alumnat que assoleix el nivell</p>
+          </div>
+
+          <div class="bg-white border border-slate-200/90 rounded-2xl p-4 shadow-2xs">
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-semibold text-slate-400">CE Més Forta</span>
+              <i class="fa-solid fa-arrow-trend-up text-indigo-500"></i>
+            </div>
+            <div id="kpiBestCe" class="text-lg font-bold text-indigo-700 mt-1 truncate">--</div>
+            <p id="kpiBestCeVal" class="text-[11px] text-slate-400 mt-1 font-mono">Mitjana: --</p>
+          </div>
+
+          <div class="bg-white border border-slate-200/90 rounded-2xl p-4 shadow-2xs">
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-semibold text-slate-400">Àrea de Millora</span>
+              <i class="fa-solid fa-triangle-exclamation text-amber-500"></i>
+            </div>
+            <div id="kpiWorstCe" class="text-lg font-bold text-amber-700 mt-1 truncate">--</div>
+            <p id="kpiWorstCeVal" class="text-[11px] text-slate-400 mt-1 font-mono">Mitjana: --</p>
+          </div>
+        </div>
+
+        <!-- Gràfics Analítics -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-5">
+          <div class="bg-white border border-slate-200 rounded-2xl p-5 shadow-2xs space-y-3">
+            <h4 class="text-xs font-bold text-slate-800 uppercase tracking-wider flex items-center gap-2">
+              <i class="fa-solid fa-chart-column text-indigo-600"></i> Distribució de Nivells LOMLOE
+            </h4>
+            <div class="h-64">
+              <canvas id="chartStatsLevels"></canvas>
+            </div>
+          </div>
+
+          <div class="bg-white border border-slate-200 rounded-2xl p-5 shadow-2xs space-y-3">
+            <h4 class="text-xs font-bold text-slate-800 uppercase tracking-wider flex items-center gap-2">
+              <i class="fa-solid fa-chart-bar text-indigo-600"></i> Comparativa de Competències Específiques
+            </h4>
+            <div class="h-64">
+              <canvas id="chartStatsCes"></canvas>
+            </div>
+          </div>
+        </div>
+
+        <!-- Taula Resum de Rendiment de Criteris / OAs -->
+        <div class="bg-white border border-slate-200 rounded-2xl shadow-2xs overflow-hidden">
+          <div class="bg-slate-900 text-white px-5 py-3.5 flex justify-between items-center text-xs font-bold">
+            <span>Diagnosi Detallada per Competències</span>
+            <span class="text-slate-400 font-mono text-[11px]">Detecció d'aprenentatges i colls d'ampolla</span>
+          </div>
+          <div class="overflow-x-auto">
+            <table class="w-full text-left text-xs">
+              <thead class="bg-slate-50 text-slate-600 font-semibold border-b">
+                <tr>
+                  <th class="py-2.5 px-4 w-24 font-mono">Codi</th>
+                  <th class="py-2.5 px-4">Competència Específica</th>
+                  <th class="py-2.5 px-3 text-center">Mitjana</th>
+                  <th class="py-2.5 px-3 text-center">Nivell</th>
+                  <th class="py-2.5 px-4 text-center">% &ge; Assolit (AS, AN, AE)</th>
+                  <th class="py-2.5 px-4 text-center">Estat Pedagògic</th>
+                </tr>
+              </thead>
+              <tbody id="statsTableBody" class="divide-y divide-slate-100 bg-white tabular-nums"></tbody>
+            </table>
           </div>
         </div>
       </section>
@@ -592,6 +700,54 @@
               5: { "CE2_direct": 2.5, "CE5_direct": 3.0 }
             }
           }
+        },
+        "1esoB": {
+          name: "1r ESO B",
+          students: [
+            { id: 11, name: "Bassa Solà, Jordi" },
+            { id: 12, name: "Ferrer Roig, Núria" },
+            { id: 13, name: "García Puyol, Eric" },
+            { id: 14, name: "Mendoza Valls, Paula" }
+          ],
+          sdas: [
+            {
+              id: "sda_1_b",
+              trim: 1,
+              title: "HÀBITS SALUDABLES I CONDICIÓ FÍSICA",
+              trimWeight: 60,
+              competences: {
+                CE1: {
+                  active: true,
+                  weight: 80,
+                  curricularCriteria: "1.1 - 1.2 - 1.3",
+                  oas: [
+                    { id: "oa1", label: "OA1: Identificar grups musculars i ossos", weight: 25 },
+                    { id: "oa2", label: "OA2: Reconèixer les 4 Qualitats Físiques Bàsiques", weight: 25 },
+                    { id: "oa3", label: "OA3: Valorar el nivell inicial de condició física", weight: 25 },
+                    { id: "oa4", label: "OA4: Adoptar i defensar hàbits saludables (escalfament)", weight: 25 }
+                  ]
+                },
+                CE5: {
+                  active: true,
+                  weight: 20,
+                  curricularCriteria: "5.1 - 5.3",
+                  oas: [
+                    { id: "oa5_1", label: "OG_MAT1: Material i higiene esportiva", weight: 25 },
+                    { id: "oa5_2", label: "OG_ESF1: Participació activa i esforç constant", weight: 25 },
+                    { id: "oa5_3", label: "OG_ACT1: Respecte a les normes de la sessió", weight: 25 },
+                    { id: "oa5_4", label: "OG_ACT2: Treball cooperatiu i actitud inclusiva", weight: 25 }
+                  ]
+                }
+              }
+            }
+          ],
+          grades: {
+            "sda_1_b": {
+              11: { "CE1_oa1": 3.0, "CE1_oa2": 3.0, "CE1_oa3": 2.5, "CE1_oa4": 3.0, "CE5_oa5_1": 3.5, "CE5_oa5_2": 3.5, "CE5_oa5_3": 3.5, "CE5_oa5_4": 3.5 },
+              12: { "CE1_oa1": 4.0, "CE1_oa2": 4.0, "CE1_oa3": 4.0, "CE1_oa4": 4.0, "CE5_oa5_1": 4.0, "CE5_oa5_2": 4.0, "CE5_oa5_3": 4.0, "CE5_oa5_4": 4.0 },
+              13: { "CE1_oa1": 1.5, "CE1_oa2": 2.0, "CE1_oa3": 2.0, "CE1_oa4": 1.5, "CE5_oa5_1": 2.5, "CE5_oa5_2": 3.0, "CE5_oa5_3": 3.0, "CE5_oa5_4": 2.5 }
+            }
+          }
         }
       }
     };
@@ -602,10 +758,14 @@
       currentScreen: 'home',
       currentTrim: 1,
       currentView: 'sda',
-      editingIsNew: false
+      editingIsNew: false,
+      statsScope: 'class', // 'class' o 'level'
+      statsType: 'sda'     // 'sda', 'trim', 'course'
     };
 
     let radarInstance = null;
+    let chartStatsLevelsInstance = null;
+    let chartStatsCesInstance = null;
 
     function loadFromStorage() {
       try {
@@ -910,6 +1070,7 @@
       populateSdaSelect();
       if (appState.currentView === 'sda') renderSdaGrid();
       if (appState.currentView === 'trim') renderTrimView();
+      if (appState.currentView === 'stats') renderStatsView();
     }
 
     function switchView(view) {
@@ -919,7 +1080,8 @@
         { id: 'roster', el: 'tabBtnRoster', sec: 'viewRoster' },
         { id: 'trim', el: 'tabBtnTrim', sec: 'viewTrim' },
         { id: 'final', el: 'tabBtnFinal', sec: 'viewFinal' },
-        { id: 'report', el: 'tabBtnReport', sec: 'viewReport' }
+        { id: 'report', el: 'tabBtnReport', sec: 'viewReport' },
+        { id: 'stats', el: 'tabBtnStats', sec: 'viewStats' }
       ];
 
       tabs.forEach(t => {
@@ -939,6 +1101,7 @@
       if (view === 'trim') renderTrimView();
       if (view === 'final') renderFinalView();
       if (view === 'report') renderIndividualReport();
+      if (view === 'stats') initStatsView();
     }
 
     function getLevel(val) {
@@ -952,7 +1115,6 @@
       return { code: "AE", badge: "bg-emerald-50 text-emerald-800 ring-emerald-200" };
     }
 
-    // FEEDBACK CROMÀTIC CONDICIONAL EN ENTRADA
     function getScoreColorClass(val) {
       if (val === '' || val === null || val === undefined || isNaN(val)) {
         return 'bg-white text-slate-800 border-slate-300/80';
@@ -965,12 +1127,12 @@
       return 'bg-emerald-50 text-emerald-900 border-emerald-400 font-black';
     }
 
-    function getStudentCeScoreInSda(sda, stId, ceId) {
+    function getStudentCeScoreInSda(sda, stId, ceId, customGrades = null) {
       if (!sda || !sda.competences) return null;
       const conf = sda.competences[ceId];
       if (!conf || !conf.active) return null;
       const curGroup = getCurrentGroup();
-      const sdaGrades = (curGroup.grades && curGroup.grades[sda.id] && curGroup.grades[sda.id][stId]) || {};
+      const sdaGrades = customGrades ? (customGrades[sda.id] && customGrades[sda.id][stId]) || {} : ((curGroup.grades && curGroup.grades[sda.id] && curGroup.grades[sda.id][stId]) || {});
 
       if (conf.oas && conf.oas.length > 0) {
         let sum = 0, weightSum = 0;
@@ -988,7 +1150,7 @@
       }
     }
 
-    function getStudentOverallSdaScore(sda, stId) {
+    function getStudentOverallSdaScore(sda, stId, customGrades = null) {
       if (!sda || !sda.competences) return null;
       let totalWeightedScore = 0;
       let totalActiveWeight = 0;
@@ -996,7 +1158,7 @@
       OFFICIAL_CES.forEach(ce => {
         const conf = sda.competences[ce.id];
         if (conf && conf.active) {
-          const score = getStudentCeScoreInSda(sda, stId, ce.id);
+          const score = getStudentCeScoreInSda(sda, stId, ce.id, customGrades);
           const weight = conf.weight || 0;
           if (score !== null) {
             totalWeightedScore += score * (weight / 100);
@@ -1009,8 +1171,8 @@
       return (totalWeightedScore * 100) / totalActiveWeight;
     }
 
-    function getStudentTrimScore(stId) {
-      const curGroup = getCurrentGroup();
+    function getStudentTrimScore(stId, group = null) {
+      const curGroup = group || getCurrentGroup();
       const trimSdas = (curGroup.sdas || []).filter(s => s.trim === appState.currentTrim);
       if (trimSdas.length === 0) return null;
 
@@ -1018,7 +1180,7 @@
       let totalWeight = 0;
 
       trimSdas.forEach(sda => {
-        const sdaScore = getStudentOverallSdaScore(sda, stId);
+        const sdaScore = getStudentOverallSdaScore(sda, stId, curGroup.grades);
         const weight = sda.trimWeight !== undefined ? sda.trimWeight : (100 / trimSdas.length);
         if (sdaScore !== null) {
           weightedSum += sdaScore * (weight / 100);
@@ -1062,7 +1224,6 @@
 
       const students = curGroup.students || [];
 
-      // Si no hi ha cap SdA
       if (!sda) {
         titleBar.innerHTML = `
           <div class="flex items-center gap-2">
@@ -1094,7 +1255,6 @@
         return;
       }
 
-      // Si hi ha SdA activa
       titleBar.innerHTML = `
         <div class="flex items-center gap-2">
           <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
@@ -1107,7 +1267,6 @@
 
       const activeCes = OFFICIAL_CES.filter(ce => sda.competences && sda.competences[ce.id] && sda.competences[ce.id].active);
 
-      // Fila 1: CEs amb Sticky 2D
       let r1 = `<tr class="border-b border-slate-200">
         <th rowspan="4" class="py-2.5 px-2.5 w-10 text-center font-mono text-slate-600 font-bold bg-slate-200 border-r border-slate-300 sticky left-0 z-30">#</th>
         <th rowspan="4" class="py-2.5 px-3.5 font-bold text-slate-900 bg-slate-200 border-r border-slate-300 min-w-[200px] sticky left-10 z-30 shadow-[2px_0_4px_-2px_rgba(0,0,0,0.1)]">Alumne/a</th>`;
@@ -1120,7 +1279,6 @@
       });
       r1 += `<th colspan="2" class="py-2.5 px-3 text-center border-l border-slate-300 bg-slate-900 text-slate-100 font-bold uppercase tracking-wider text-[11px]">Qualificació SdA</th></tr>`;
 
-      // Fila 2: Criteris Curriculars
       let r2 = `<tr class="border-b border-slate-200 text-[11px]">`;
       activeCes.forEach(ce => {
         const theme = CE_COLOR_THEMES[ce.id] || CE_COLOR_THEMES.CE1;
@@ -1131,7 +1289,6 @@
       });
       r2 += `<th colspan="2" rowspan="2" class="py-1 px-2 text-center border-l border-slate-300 bg-slate-800 text-slate-200 font-semibold text-[11px]">Consolidació SdA</th></tr>`;
 
-      // Fila 3: OAs
       let r3 = `<tr class="border-b border-slate-200 text-[10px]">`;
       activeCes.forEach(ce => {
         const theme = CE_COLOR_THEMES[ce.id] || CE_COLOR_THEMES.CE1;
@@ -1147,7 +1304,6 @@
       });
       r3 += `</tr>`;
 
-      // Fila 4: Ponderacions
       let r4 = `<tr class="border-b border-slate-200 text-xs font-semibold">`;
       activeCes.forEach(ce => {
         const theme = CE_COLOR_THEMES[ce.id] || CE_COLOR_THEMES.CE1;
@@ -1178,7 +1334,7 @@
 
       students.forEach((st, rIdx) => {
         const stGrades = currentGrades[st.id] || {};
-        let colCounter = 0; // Índex de columna per navegació de teclat tipus matriu (rIdx, cIdx)
+        let colCounter = 0;
 
         rowsHtml += `<tr class="hover:bg-slate-50/80 transition-colors">
           <td class="py-2 px-2.5 text-center text-slate-500 font-mono border-r border-slate-200 bg-white sticky left-0 z-20">${rIdx + 1}</td>
@@ -1249,7 +1405,6 @@
       body.innerHTML = rowsHtml;
     }
 
-    // GESTOR DE NAVEGACIÓ AMB TECLAT ESTIL FULL DE CÀLCUL
     function handleGridKeyboardNavigation(e, row, col) {
       let targetRow = row;
       let targetCol = col;
@@ -1291,7 +1446,6 @@
       saveToStorage();
       renderSdaGrid();
 
-      // Manté el focus exactament a la cel·la activa o següent
       if (keepRow !== null && keepCol !== null) {
         const activeInput = document.querySelector(`input.grade-cell-input[data-row="${keepRow}"][data-col="${keepCol}"]`);
         if (activeInput) {
@@ -1516,6 +1670,7 @@
         populateSdaSelect();
         renderSdaGrid();
         renderTrimView();
+        if (appState.currentView === 'stats') renderStatsView();
       } else {
         renderHomeScreen();
       }
@@ -1773,6 +1928,275 @@
           plugins: { legend: { display: false } }
         }
       });
+    }
+
+    // ==========================================
+    // MÒDUL D'ANALÍTICA I ESTADÍSTIQUES AVANÇADES
+    // ==========================================
+    function setStatsScope(scope) {
+      appState.statsScope = scope;
+      const btnClass = document.getElementById('statsScopeClass');
+      const btnLevel = document.getElementById('statsScopeLevel');
+      if (scope === 'class') {
+        btnClass.className = "px-2.5 py-1 rounded-lg font-semibold bg-white text-slate-900 shadow-2xs transition";
+        btnLevel.className = "px-2.5 py-1 rounded-lg font-medium text-slate-600 hover:text-slate-900 transition";
+      } else {
+        btnLevel.className = "px-2.5 py-1 rounded-lg font-semibold bg-white text-slate-900 shadow-2xs transition";
+        btnClass.className = "px-2.5 py-1 rounded-lg font-medium text-slate-600 hover:text-slate-900 transition";
+      }
+      populateStatsSdaSelector();
+      renderStatsView();
+    }
+
+    function onStatsTypeChange() {
+      appState.statsType = document.getElementById('statsTypeSelect').value;
+      const sdaSel = document.getElementById('statsSdaSelector');
+      sdaSel.classList.toggle('hidden', appState.statsType !== 'sda');
+      populateStatsSdaSelector();
+      renderStatsView();
+    }
+
+    function initStatsView() {
+      document.getElementById('statsTypeSelect').value = appState.statsType;
+      populateStatsSdaSelector();
+      renderStatsView();
+    }
+
+    function getTargetGroupsForStats() {
+      const curGroup = getCurrentGroup();
+      if (appState.statsScope === 'class') {
+        return [curGroup];
+      }
+      // Detecció intel·ligent de nivell (ex: '1r ESO' o '2n ESO')
+      const match = curGroup.name.match(/^(1r|2n)\s*d?'?ESO/i);
+      const levelPrefix = match ? match[1].toLowerCase() : curGroup.name.slice(0, 2).toLowerCase();
+
+      const matchedGroups = Object.keys(appData.groups)
+        .map(k => appData.groups[k])
+        .filter(g => g.name.toLowerCase().includes(levelPrefix));
+
+      return matchedGroups.length > 0 ? matchedGroups : [curGroup];
+    }
+
+    function populateStatsSdaSelector() {
+      const sel = document.getElementById('statsSdaSelector');
+      const targetGroups = getTargetGroupsForStats();
+      
+      // Recull títols de SdAs únics entre els grups objectiu
+      const sdaTitles = new Set();
+      targetGroups.forEach(g => {
+        (g.sdas || []).filter(s => s.trim === appState.currentTrim).forEach(s => sdaTitles.add(s.title));
+      });
+
+      if (sdaTitles.size === 0) {
+        sel.innerHTML = `<option value="">Sense SdAs al T${appState.currentTrim}</option>`;
+        return;
+      }
+      sel.innerHTML = Array.from(sdaTitles).map(t => `<option value="${t}">${t}</option>`).join('');
+    }
+
+    function renderStatsView() {
+      const targetGroups = getTargetGroupsForStats();
+      const scopeType = appState.statsType;
+      const selectedSdaTitle = document.getElementById('statsSdaSelector').value;
+
+      let studentScores = [];
+      let ceScoresAgg = { CE1: [], CE2: [], CE3: [], CE4: [], CE5: [] };
+
+      targetGroups.forEach(grp => {
+        const students = grp.students || [];
+        students.forEach(st => {
+          let score = null;
+          if (scopeType === 'sda') {
+            const sda = (grp.sdas || []).find(s => s.title === selectedSdaTitle && s.trim === appState.currentTrim);
+            if (sda) {
+              score = getStudentOverallSdaScore(sda, st.id, grp.grades);
+              OFFICIAL_CES.forEach(ce => {
+                const scCe = getStudentCeScoreInSda(sda, st.id, ce.id, grp.grades);
+                if (scCe !== null) ceScoresAgg[ce.id].push(scCe);
+              });
+            }
+          } else if (scopeType === 'trim') {
+            score = getStudentTrimScore(st.id, grp);
+            const trimSdas = (grp.sdas || []).filter(s => s.trim === appState.currentTrim);
+            OFFICIAL_CES.forEach(ce => {
+              let ceSum = 0, count = 0;
+              trimSdas.forEach(sda => {
+                const sc = getStudentCeScoreInSda(sda, st.id, ce.id, grp.grades);
+                if (sc !== null) { ceSum += sc; count++; }
+              });
+              if (count > 0) ceScoresAgg[ce.id].push(ceSum / count);
+            });
+          } else if (scopeType === 'course') {
+            let total = 0, count = 0;
+            OFFICIAL_CES.forEach(ce => {
+              let sum = 0, c = 0;
+              (grp.sdas || []).forEach(sda => {
+                const sc = getStudentCeScoreInSda(sda, st.id, ce.id, grp.grades);
+                if (sc !== null) { sum += sc; c++; }
+              });
+              if (c > 0) {
+                const avg = sum / c;
+                ceScoresAgg[ce.id].push(avg);
+                total += avg;
+                count++;
+              }
+            });
+            if (count > 0) score = total / count;
+          }
+
+          if (score !== null && !isNaN(score)) {
+            studentScores.push(score);
+          }
+        });
+      });
+
+      // 1. Càlcul de KPIs
+      const totalStudents = studentScores.length;
+      const globalAvg = totalStudents > 0 ? (studentScores.reduce((a, b) => a + b, 0) / totalStudents) : 0;
+      const successStudents = studentScores.filter(s => s >= 2.0).length;
+      const successRate = totalStudents > 0 ? ((successStudents / totalStudents) * 100).toFixed(1) : "0.0";
+      const globalLvl = getLevel(globalAvg);
+
+      document.getElementById('kpiAvgVal').textContent = globalAvg > 0 ? globalAvg.toFixed(2) : "—";
+      document.getElementById('kpiAvgLvl').textContent = globalLvl.code;
+      document.getElementById('kpiAvgLvl').className = `text-[10px] font-bold px-1.5 py-0.5 rounded ring-1 ring-inset ${globalLvl.badge}`;
+      document.getElementById('kpiSuccessRate').textContent = `${successRate}%`;
+
+      // Càlcul de CE millor i pitjor
+      let ceAvgs = [];
+      OFFICIAL_CES.forEach(ce => {
+        const arr = ceScoresAgg[ce.id];
+        const avg = arr.length > 0 ? (arr.reduce((a, b) => a + b, 0) / arr.length) : null;
+        ceAvgs.push({ id: ce.id, short: ce.short, avg: avg, count: arr.length });
+      });
+
+      const validCeAvgs = ceAvgs.filter(c => c.avg !== null);
+      if (validCeAvgs.length > 0) {
+        validCeAvgs.sort((a, b) => b.avg - a.avg);
+        const best = validCeAvgs[0];
+        const worst = validCeAvgs[validCeAvgs.length - 1];
+        document.getElementById('kpiBestCe').textContent = `${best.id} · ${best.short}`;
+        document.getElementById('kpiBestCeVal').textContent = `Mitjana: ${best.avg.toFixed(2)}`;
+        document.getElementById('kpiWorstCe').textContent = `${worst.id} · ${worst.short}`;
+        document.getElementById('kpiWorstCeVal').textContent = `Mitjana: ${worst.avg.toFixed(2)}`;
+      } else {
+        document.getElementById('kpiBestCe').textContent = "--";
+        document.getElementById('kpiBestCeVal').textContent = "Mitjana: --";
+        document.getElementById('kpiWorstCe').textContent = "--";
+        document.getElementById('kpiWorstCeVal').textContent = "Mitjana: --";
+      }
+
+      // 2. Distribució de Nivells LOMLOE (Barres Apilades/Gruixudes)
+      let counts = { NA: 0, EPA: 0, AS: 0, AN: 0, AE: 0 };
+      studentScores.forEach(s => {
+        const lvl = getLevel(s).code;
+        if (counts[lvl] !== undefined) counts[lvl]++;
+      });
+
+      const ctxLevels = document.getElementById('chartStatsLevels').getContext('2d');
+      if (chartStatsLevelsInstance) chartStatsLevelsInstance.destroy();
+      chartStatsLevelsInstance = new Chart(ctxLevels, {
+        type: 'bar',
+        data: {
+          labels: ['NA (<1.0)', 'EPA (1.0-1.9)', 'AS (2.0-2.9)', 'AN (3.0-3.9)', 'AE (4.0)'],
+          datasets: [{
+            data: [counts.NA, counts.EPA, counts.AS, counts.AN, counts.AE],
+            backgroundColor: [
+              'rgba(244, 63, 94, 0.75)',   // Rose
+              'rgba(245, 158, 11, 0.75)',  // Amber
+              'rgba(14, 165, 233, 0.75)',  // Sky
+              'rgba(99, 102, 241, 0.75)',  // Indigo
+              'rgba(16, 185, 129, 0.75)'   // Emerald
+            ],
+            borderRadius: 8,
+            borderWidth: 1
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: { legend: { display: false } },
+          scales: {
+            y: {
+              beginAtZero: true,
+              ticks: { stepSize: 1, font: { family: 'Inter', size: 10 } },
+              grid: { color: 'rgba(226, 232, 240, 0.6)' }
+            },
+            x: {
+              ticks: { font: { family: 'Inter', size: 10, weight: '600' } },
+              grid: { display: false }
+            }
+          }
+        }
+      });
+
+      // 3. Comparativa de CEs (Barres Horitzontals amb escala 0 a 4)
+      const ctxCes = document.getElementById('chartStatsCes').getContext('2d');
+      if (chartStatsCesInstance) chartStatsCesInstance.destroy();
+      chartStatsCesInstance = new Chart(ctxCes, {
+        type: 'bar',
+        data: {
+          labels: OFFICIAL_CES.map(c => c.id),
+          datasets: [{
+            data: ceAvgs.map(c => c.avg ? c.avg.toFixed(2) : 0),
+            backgroundColor: 'rgba(79, 70, 229, 0.8)',
+            borderRadius: 6
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: { legend: { display: false } },
+          scales: {
+            y: {
+              min: 0,
+              max: 4,
+              ticks: { stepSize: 1, font: { family: 'Inter', size: 10 } },
+              grid: { color: 'rgba(226, 232, 240, 0.6)' }
+            },
+            x: {
+              ticks: { font: { family: 'Inter', size: 10, weight: '600' } },
+              grid: { display: false }
+            }
+          }
+        }
+      });
+
+      // 4. Taula de Diagnosi de les CEs
+      const tbody = document.getElementById('statsTableBody');
+      tbody.innerHTML = OFFICIAL_CES.map(ce => {
+        const item = ceAvgs.find(c => c.id === ce.id);
+        const avg = item && item.avg !== null ? item.avg : null;
+        const lvl = getLevel(avg);
+        const scoresArr = ceScoresAgg[ce.id];
+        const succCount = scoresArr.filter(s => s >= 2.0).length;
+        const succPct = scoresArr.length > 0 ? ((succCount / scoresArr.length) * 100).toFixed(0) : "—";
+
+        let statusBadge = `<span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-slate-100 text-slate-500">Sense dades</span>`;
+        if (avg !== null) {
+          if (avg >= 3.0) {
+            statusBadge = `<span class="inline-flex items-center gap-1 text-[10px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200"><i class="fa-solid fa-check"></i> Consolidat</span>`;
+          } else if (avg >= 2.0) {
+            statusBadge = `<span class="inline-flex items-center gap-1 text-[10px] font-bold text-sky-700 bg-sky-50 px-2 py-0.5 rounded border border-sky-200"><i class="fa-solid fa-arrows-spin"></i> En progrés adequat</span>`;
+          } else {
+            statusBadge = `<span class="inline-flex items-center gap-1 text-[10px] font-bold text-rose-700 bg-rose-50 px-2 py-0.5 rounded border border-rose-200"><i class="fa-solid fa-triangle-exclamation"></i> Cal reforç pedagògic</span>`;
+          }
+        }
+
+        return `
+          <tr class="hover:bg-slate-50 transition">
+            <td class="py-2.5 px-4 font-mono font-bold text-slate-700">${ce.id}</td>
+            <td class="py-2.5 px-4 font-semibold text-slate-900">${ce.name}</td>
+            <td class="py-2.5 px-3 text-center font-mono font-black">${avg !== null ? avg.toFixed(2) : "—"}</td>
+            <td class="py-2.5 px-3 text-center">
+              <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold ring-1 ring-inset ${lvl.badge}">${lvl.code}</span>
+            </td>
+            <td class="py-2.5 px-4 text-center font-mono font-semibold">${succPct !== '—' ? succPct + '%' : '—'}</td>
+            <td class="py-2.5 px-4 text-center">${statusBadge}</td>
+          </tr>
+        `;
+      }).join('');
     }
 
     function exportCSV() {
