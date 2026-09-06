@@ -287,7 +287,7 @@
           <div>
             <span class="inline-flex items-center rounded-md bg-indigo-50 px-2 py-0.5 text-[11px] font-semibold text-indigo-700 border border-indigo-100">Avaluació Contínua Trimestral</span>
             <h2 id="trimTitle" class="text-xl font-bold text-slate-900 tracking-tight mt-1">Resum del Trimestre 1</h2>
-            <p class="text-xs text-slate-500 mt-0.5">Pondera el pes de cada SdA. Fes clic a la icona <i class="fa-solid fa-person-running text-slate-400"></i> per penalitzar la manca de participació (&lt; % pràctica).</p>
+            <p class="text-xs text-slate-500 mt-0.5">Controla la ponderació de les SdAs i marca la manca de participació pràctica quan un alumne no arribi al mínim.</p>
           </div>
           <button onclick="exportCSV()" class="inline-flex items-center gap-2 bg-white border border-slate-300 text-slate-700 hover:bg-slate-50 text-xs font-semibold px-3 py-2 rounded-lg shadow-2xs transition">
             <i class="fa-solid fa-file-csv text-slate-400"></i> Exportar a CSV
@@ -314,7 +314,7 @@
         </div>
       </section>
 
-      <!-- VISTA 4: FINAL DE CURS (SELECTOR DE MÈTODE: TRIMESTRES O CEs) -->
+      <!-- VISTA 4: FINAL DE CURS -->
       <section id="viewFinal" class="space-y-4 hidden">
         <div class="flex flex-wrap items-end justify-between gap-4 border-b border-slate-200/80 pb-4">
           <div>
@@ -339,7 +339,6 @@
           </div>
         </div>
 
-        <!-- Panell de Ponderació Dinàmic -->
         <div class="bg-white border border-slate-200/90 rounded-xl p-4 shadow-2xs space-y-3">
           <div class="flex items-center justify-between">
             <h4 id="finalWeightPanelTitle" class="text-xs font-bold text-slate-800 uppercase tracking-wider flex items-center gap-2">
@@ -1348,9 +1347,7 @@
       }
     }
 
-    // ========================================================
     // GESTIÓ PENALITZACIÓ PER FALTA DE PARTICIPACIÓ PRÀCTICA
-    // ========================================================
     function toggleAttendancePenalty(stId, trimNum = null) {
       const t = trimNum || appState.currentTrim;
       const curGroup = getCurrentGroup();
@@ -1417,11 +1414,9 @@
       return (totalWeightedScore * 100) / totalActiveWeight;
     }
 
-    // Retorna la nota del trimestre amb control de penalització de pràctica
     function getStudentTrimScoreByTrim(stId, trimNum, group = null) {
       const curGroup = group || getCurrentGroup();
       
-      // Si té penalització de participació pràctica activa, està suspès automàticament (NA = 0.90)
       if (hasAttendancePenalty(stId, trimNum, curGroup)) {
         return 0.90;
       }
@@ -1449,7 +1444,6 @@
       return getStudentTrimScoreByTrim(stId, appState.currentTrim, group);
     }
 
-    // CÀLCUL FINAL DE CURS UNIFICAT
     function getStudentCourseFinalScore(stId, group = null) {
       const curGroup = group || getCurrentGroup();
       const method = curGroup.finalMethod || 'trim';
@@ -1502,6 +1496,7 @@
       sel.innerHTML = trimSdas.map(s => `<option value="${s.id}">${s.title} (${s.trimWeight || 0}%)</option>`).join('');
     }
 
+    // GRAELLA DE SdA NETEJA (AMB PUNT DISCRET SI TÉ PENALITZACIÓ)
     function renderSdaGrid() {
       const curGroup = getCurrentGroup();
       const trimSdas = (curGroup.sdas || []).filter(s => s.trim === appState.currentTrim);
@@ -1535,7 +1530,7 @@
         head.innerHTML = `
           <tr class="border-b border-slate-200 bg-slate-100">
             <th class="py-2.5 px-3 w-12 text-center font-mono">#</th>
-            <th class="py-2.5 px-4 min-w-[208px]">Alumne/a</th>
+            <th class="py-2.5 px-4 min-w-[224px]">Alumne/a</th>
             <th class="py-2.5 px-4 text-center text-slate-500 font-normal italic">Crea una SdA per començar a qualificar</th>
           </tr>
         `;
@@ -1567,7 +1562,7 @@
 
       let r1 = `<tr class="border-b border-slate-300">
         <th rowspan="4" class="py-2.5 px-2.5 w-12 min-w-[48px] max-w-[48px] text-center font-mono text-slate-700 font-bold bg-slate-200 border-r border-slate-300 sticky top-0 left-0 z-40">#</th>
-        <th rowspan="4" class="py-2.5 px-3.5 w-52 min-w-[208px] max-w-[208px] font-bold text-slate-900 bg-slate-200 border-r border-slate-300 sticky top-0 left-12 z-40 shadow-[4px_0_6px_-2px_rgba(0,0,0,0.15)]">Alumne/a</th>`;
+        <th rowspan="4" class="py-2.5 px-3.5 w-56 min-w-[224px] max-w-[224px] font-bold text-slate-900 bg-slate-200 border-r border-slate-300 sticky top-0 left-12 z-40 shadow-[4px_0_6px_-2px_rgba(0,0,0,0.15)]">Alumne/a</th>`;
       
       activeCes.forEach(ce => {
         const theme = CE_COLOR_THEMES[ce.id] || CE_COLOR_THEMES.CE1;
@@ -1633,10 +1628,16 @@
       students.forEach((st, rIdx) => {
         const stGrades = currentGrades[st.id] || {};
         let colCounter = 0;
+        const isPenalized = hasAttendancePenalty(st.id, appState.currentTrim, curGroup);
 
         rowsHtml += `<tr class="hover:bg-slate-50/80 transition-colors">
           <td class="py-2 px-2.5 w-12 min-w-[48px] max-w-[48px] text-center text-slate-600 font-mono font-medium border-r border-slate-200 bg-white sticky left-0 z-20">${rIdx + 1}</td>
-          <td class="py-2 px-3.5 w-52 min-w-[208px] max-w-[208px] font-semibold text-slate-900 truncate border-r border-slate-200 bg-white sticky left-12 z-20 shadow-[4px_0_6px_-2px_rgba(0,0,0,0.1)]" title="${st.name}">${st.name}</td>`;
+          <td class="py-2 px-3.5 w-56 min-w-[224px] max-w-[224px] font-semibold text-slate-900 border-r border-slate-200 bg-white sticky left-12 z-20 shadow-[4px_0_6px_-2px_rgba(0,0,0,0.1)]">
+            <div class="flex items-center justify-between gap-1.5">
+              <span class="truncate" title="${st.name}">${st.name}</span>
+              ${isPenalized ? '<span class="inline-flex items-center gap-1 text-[9px] font-bold text-rose-700 bg-rose-50 border border-rose-200 px-1 py-0.2 rounded shrink-0" title="Penalització activa per manca de pràctica al trimestre"><i class="fa-solid fa-person-running text-rose-500"></i> &lt;%</span>' : ''}
+            </div>
+          </td>`;
 
         activeCes.forEach(ce => {
           const theme = CE_COLOR_THEMES[ce.id] || CE_COLOR_THEMES.CE1;
@@ -1984,7 +1985,7 @@
       }
     }
 
-    // RESUM TRIMESTRAL (AMB BOTÓ DE PENALITZACIÓ PRÀCTICA)
+    // RESUM TRIMESTRAL
     function renderTrimView() {
       const thead = document.getElementById('trimTableHead');
       const tbody = document.getElementById('trimTableBody');
@@ -2014,8 +2015,8 @@
       let headHtml = `<tr>
         <th class="py-3 px-3 w-10 text-center font-mono text-slate-400 font-medium">#</th>
         <th class="py-3 px-4 font-semibold text-slate-100 min-w-[190px]">Alumne/a</th>
-        <th class="py-2.5 px-2 text-center border-l border-slate-800 text-[11px]" title="Activa per suspendre l'alumne si no arriba al mínim de sessions pràctiques">
-          <i class="fa-solid fa-person-running text-amber-400"></i> Pràctica
+        <th class="py-2.5 px-3 text-center border-l border-slate-800 text-[11px] w-28" title="Penalització per no assistir al % mínim de sessions pràctiques">
+          <i class="fa-solid fa-person-running text-amber-400 mr-1"></i> % Pràctica
         </th>`;
       
       trimSdas.forEach(sda => {
@@ -2047,14 +2048,11 @@
 
         rowsHtml += `<tr class="hover:bg-slate-50/70 transition-colors ${isPenalized ? 'bg-rose-50/20' : ''}">
           <td class="py-2.5 px-3 text-center text-slate-400 font-mono">${idx + 1}</td>
-          <td class="py-2.5 px-4 font-semibold text-slate-800">
-            ${st.name}
-            ${isPenalized ? '<span class="ml-2 text-[10px] font-bold text-rose-600 bg-rose-50 border border-rose-200 px-1.5 py-0.2 rounded">&lt; % pràctica</span>' : ''}
-          </td>
-          <!-- Botó penalització pràctica -->
+          <td class="py-2.5 px-4 font-semibold text-slate-800">${st.name}</td>
           <td class="py-2.5 px-2 text-center border-l border-slate-100">
-            <button onclick="toggleAttendancePenalty(${st.id})" title="${isPenalized ? 'Alumne suspès per no arribar al mínim de pràctica. Fes clic per treure la penalització.' : 'Fes clic per penalitzar i suspendre per manca de sessions pràctiques'}" class="px-2 py-1 rounded-lg text-xs font-bold transition ${isPenalized ? 'bg-rose-600 text-white shadow-xs' : 'bg-slate-100 text-slate-400 hover:text-slate-700 hover:bg-slate-200'}">
-              <i class="fa-solid fa-person-running"></i>
+            <button onclick="toggleAttendancePenalty(${st.id})" class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold transition border ${isPenalized ? 'bg-rose-600 hover:bg-rose-700 text-white border-rose-600 shadow-xs' : 'bg-slate-100 hover:bg-slate-200 text-slate-500 border-slate-200'}" title="${isPenalized ? 'Alumne penalitzat per pràctica insuficient. Fes clic per desactivar.' : 'Fes clic per penalitzar si no arriba al mínim de pràctica.'}">
+              <i class="fa-solid fa-person-running ${isPenalized ? 'text-white' : 'text-slate-400'}"></i>
+              <span>${isPenalized ? '&lt; % Mínim' : 'Correcte'}</span>
             </button>
           </td>`;
 
@@ -2095,7 +2093,7 @@
       tbody.innerHTML = rowsHtml;
     }
 
-    // FINAL DE CURS (SELECTOR TRIMESTRES VS COMPETÈNCIES)
+    // FINAL DE CURS
     function setFinalCalculationMethod(method) {
       const curGroup = getCurrentGroup();
       curGroup.finalMethod = method;
