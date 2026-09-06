@@ -1,12 +1,14 @@
 <!DOCTYPE html>
-<html lang="ca" class="h-full bg-slate-50 antialiased">
+<html lang="ca" class="h-full bg-zinc-50/60 antialiased selection:bg-zinc-900 selection:text-white">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>EF Competencial · Quadern LOMLOE</title>
+  
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -16,8 +18,13 @@
       theme: {
         extend: {
           fontFamily: {
-            sans: ['Inter', 'system-ui', 'sans-serif'],
+            sans: ['"Plus Jakarta Sans"', 'system-ui', 'sans-serif'],
             mono: ['"JetBrains Mono"', 'monospace'],
+          },
+          boxShadow: {
+            'subtle': '0 1px 2px 0 rgba(0, 0, 0, 0.03)',
+            'card': '0 1px 3px 0 rgba(0, 0, 0, 0.04), 0 1px 2px -1px rgba(0, 0, 0, 0.03)',
+            'float': '0 4px 14px 0 rgba(0, 0, 0, 0.05)',
           }
         }
       }
@@ -27,63 +34,77 @@
   <style>
     body { font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11'; }
     .tabular-nums { font-variant-numeric: tabular-nums; }
-    ::-webkit-scrollbar { width: 6px; height: 6px; }
-    ::-webkit-scrollbar-track { background: #f1f5f9; }
-    ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 9999px; }
-    ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+    
+    /* Scrollbar invisible tipus MacOS */
+    ::-webkit-scrollbar { width: 5px; height: 5px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: #e4e4e7; border-radius: 9999px; }
+    ::-webkit-scrollbar-thumb:hover { background: #d4d4d8; }
+
+    /* Eliminar controls per defecte dels inputs numèrics */
+    input[type=number]::-webkit-inner-spin-button, 
+    input[type=number]::-webkit-outer-spin-button { 
+      -webkit-appearance: none; 
+      margin: 0; 
+    }
+    input[type=number] { -moz-appearance: textfield; }
+
     @media print {
       .no-print { display: none !important; }
       body { background: white !important; }
     }
   </style>
 </head>
-<body class="min-h-full flex flex-col text-slate-800 bg-[#f8fafc] selection:bg-indigo-500 selection:text-white">
+<body class="min-h-full flex flex-col text-zinc-900 bg-[#fafafa]">
 
-  <!-- ================= CAPÇALERA SLEEK & MODERNA ================= -->
-  <header class="bg-white/80 backdrop-blur-md border-b border-slate-200/70 sticky top-0 z-50 no-print transition-all">
+  <!-- ================= CAPÇALERA MINIMALISTA (LINEAR STYLE) ================= -->
+  <header class="bg-white/90 backdrop-blur-md border-b border-zinc-200/80 sticky top-0 z-50 no-print">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      <div class="flex items-center justify-between h-15 gap-4 py-2.5">
+      <div class="flex items-center justify-between h-14 gap-4">
         
+        <!-- Identitat Visual Subtil -->
         <div class="flex items-center gap-3">
           <button onclick="goToHome()" class="flex items-center gap-2.5 text-left group">
-            <div class="w-8 h-8 rounded-lg bg-gradient-to-tr from-indigo-600 to-indigo-500 text-white flex items-center justify-center shadow-xs shadow-indigo-500/20 group-hover:shadow-md group-hover:scale-105 transition-all">
-              <i class="fa-solid fa-person-running text-sm"></i>
+            <div class="w-7 h-7 rounded-lg bg-zinc-900 text-white flex items-center justify-center text-xs shadow-subtle group-hover:scale-105 transition">
+              <i class="fa-solid fa-person-running"></i>
             </div>
             <div class="flex items-baseline gap-2">
-              <span class="text-sm font-bold tracking-tight text-slate-900 group-hover:text-indigo-600 transition-colors">EF Competencial</span>
-              <span class="text-[10px] font-semibold text-indigo-600 bg-indigo-50 px-1.5 py-0.5 rounded border border-indigo-100/60 uppercase">LOMLOE</span>
+              <span class="text-xs font-bold tracking-tight text-zinc-900 group-hover:text-zinc-600 transition">EF Competencial</span>
+              <span class="text-[9px] font-bold text-zinc-500 bg-zinc-100 px-1.5 py-0.5 rounded tracking-wider uppercase">LOMLOE</span>
             </div>
           </button>
 
-          <div id="headerBreadcrumb" class="hidden items-center gap-2 ml-2 pl-3 border-l border-slate-200 text-xs">
-            <span class="text-slate-400 font-medium">Classe:</span>
-            <span id="breadcrumbGroupName" class="font-semibold text-slate-800 bg-slate-100 px-2 py-0.5 rounded-md border border-slate-200/80">--</span>
+          <!-- Breadcrumb de classe activa -->
+          <div id="headerBreadcrumb" class="hidden items-center gap-1.5 ml-2 pl-3 border-l border-zinc-200 text-xs">
+            <span class="text-zinc-400 font-medium">Grup:</span>
+            <span id="breadcrumbGroupName" class="font-semibold text-zinc-800 bg-zinc-100/80 px-2 py-0.5 rounded text-[11px]">--</span>
           </div>
         </div>
 
+        <!-- Accions Ràpides de Capçalera -->
         <div class="flex items-center gap-2">
-          <div id="savedIndicator" class="flex items-center gap-1.5 text-[11px] font-medium text-emerald-600 px-2 py-1 rounded-md opacity-0 transition-opacity duration-300">
+          
+          <div id="savedIndicator" class="flex items-center gap-1.5 text-[11px] font-medium text-emerald-600 px-2 py-0.5 opacity-0 transition-opacity duration-300">
             <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
             <span>Desat</span>
           </div>
 
-          <button onclick="goToHome()" id="homeNavBtn" class="inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-lg border border-slate-200 bg-white text-slate-700 hover:bg-slate-50 hover:text-slate-900 shadow-2xs transition">
-            <i class="fa-solid fa-house text-slate-400 text-[11px]"></i>
+          <button onclick="goToHome()" id="homeNavBtn" class="inline-flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1.5 rounded-lg border border-zinc-200/80 bg-white text-zinc-700 hover:bg-zinc-50 shadow-subtle transition">
+            <i class="fa-solid fa-house text-zinc-400 text-[10px]"></i>
             <span class="hidden sm:inline">Inici</span>
           </button>
 
-          <div class="flex items-center pl-1 border-l border-slate-200 gap-1">
-            <button onclick="openThresholdsModal()" title="Personalitzar Escala de Qualificació" class="inline-flex items-center gap-1 px-2.5 py-1.5 text-slate-600 hover:text-indigo-600 hover:bg-slate-100 rounded-lg text-xs font-semibold transition border border-slate-200 bg-white">
-              <i class="fa-solid fa-sliders text-slate-400"></i>
-              <span class="hidden md:inline">Escala LOMLOE</span>
+          <div class="flex items-center pl-1 border-l border-zinc-200 gap-1">
+            <button onclick="openThresholdsModal()" title="Configurar Escala LOMLOE" class="p-1.5 text-zinc-500 hover:text-zinc-900 hover:bg-zinc-100 rounded-lg text-xs transition">
+              <i class="fa-solid fa-sliders"></i>
             </button>
-            <button onclick="resetDefaultData()" title="Restablir dades de mostra" class="p-1.5 text-slate-400 hover:text-indigo-600 hover:bg-slate-100 rounded-lg text-xs transition">
+            <button onclick="resetDefaultData()" title="Restablir dades originals" class="p-1.5 text-zinc-400 hover:text-zinc-900 hover:bg-zinc-100 rounded-lg text-xs transition">
               <i class="fa-solid fa-rotate-left"></i>
             </button>
-            <button onclick="exportBackupJSON()" title="Descarregar Còpia de Seguretat (JSON)" class="p-1.5 text-slate-400 hover:text-slate-800 hover:bg-slate-100 rounded-lg text-xs transition">
+            <button onclick="exportBackupJSON()" title="Còpia de Seguretat (JSON)" class="p-1.5 text-zinc-400 hover:text-zinc-900 hover:bg-zinc-100 rounded-lg text-xs transition">
               <i class="fa-solid fa-arrow-down-to-line"></i>
             </button>
-            <label title="Restaurar Còpia de Seguretat" class="p-1.5 text-slate-400 hover:text-slate-800 hover:bg-slate-100 rounded-lg text-xs transition cursor-pointer">
+            <label title="Restaurar fitxer JSON" class="p-1.5 text-zinc-400 hover:text-zinc-900 hover:bg-zinc-100 rounded-lg text-xs transition cursor-pointer">
               <i class="fa-solid fa-arrow-up-from-line"></i>
               <input type="file" id="backupFileInput" accept=".json" onchange="importBackupJSON(event)" class="hidden">
             </label>
@@ -91,24 +112,25 @@
         </div>
       </div>
 
-      <nav id="classSubNav" class="hidden flex space-x-1 -mb-px overflow-x-auto border-t border-slate-100 py-1.5 text-xs font-medium">
-        <button id="tabBtnSda" onclick="switchView('sda')" class="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg font-semibold bg-indigo-50 text-indigo-700 transition">
-          <i class="fa-regular fa-folder-open text-indigo-500"></i> Qualificació SdA
+      <!-- Segmented Control de Navegació de Classe -->
+      <nav id="classSubNav" class="hidden flex items-center space-x-1 border-t border-zinc-100 py-1.5 overflow-x-auto text-[11px] font-semibold">
+        <button id="tabBtnSda" onclick="switchView('sda')" class="px-3 py-1 rounded-md text-zinc-900 bg-zinc-100 transition">
+          <i class="fa-regular fa-folder-open text-zinc-500 mr-1.5"></i> Qualificació SdA
         </button>
-        <button id="tabBtnRoster" onclick="switchView('roster')" class="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition">
-          <i class="fa-solid fa-users text-slate-400"></i> Alumnat (<span id="tabStudentCount">0</span>)
+        <button id="tabBtnRoster" onclick="switchView('roster')" class="px-3 py-1 rounded-md text-zinc-500 hover:text-zinc-900 hover:bg-zinc-50 transition">
+          <i class="fa-solid fa-users text-zinc-400 mr-1.5"></i> Alumnat (<span id="tabStudentCount">0</span>)
         </button>
-        <button id="tabBtnTrim" onclick="switchView('trim')" class="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition">
-          <i class="fa-solid fa-table-cells text-slate-400"></i> Resum Trimestral
+        <button id="tabBtnTrim" onclick="switchView('trim')" class="px-3 py-1 rounded-md text-zinc-500 hover:text-zinc-900 hover:bg-zinc-50 transition">
+          <i class="fa-solid fa-table-cells text-zinc-400 mr-1.5"></i> Resum Trimestral
         </button>
-        <button id="tabBtnFinal" onclick="switchView('final')" class="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition">
-          <i class="fa-regular fa-calendar-check text-slate-400"></i> Final de Curs
+        <button id="tabBtnFinal" onclick="switchView('final')" class="px-3 py-1 rounded-md text-zinc-500 hover:text-zinc-900 hover:bg-zinc-50 transition">
+          <i class="fa-regular fa-calendar-check text-zinc-400 mr-1.5"></i> Final de Curs
         </button>
-        <button id="tabBtnReport" onclick="switchView('report')" class="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition">
-          <i class="fa-regular fa-address-card text-slate-400"></i> Butlletí Individual
+        <button id="tabBtnReport" onclick="switchView('report')" class="px-3 py-1 rounded-md text-zinc-500 hover:text-zinc-900 hover:bg-zinc-50 transition">
+          <i class="fa-regular fa-address-card text-zinc-400 mr-1.5"></i> Butlletí
         </button>
-        <button id="tabBtnStats" onclick="switchView('stats')" class="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition">
-          <i class="fa-solid fa-chart-pie text-slate-400"></i> Analítica
+        <button id="tabBtnStats" onclick="switchView('stats')" class="px-3 py-1 rounded-md text-zinc-500 hover:text-zinc-900 hover:bg-zinc-50 transition">
+          <i class="fa-solid fa-chart-pie text-zinc-400 mr-1.5"></i> Analítica
         </button>
       </nav>
     </div>
@@ -117,120 +139,123 @@
   <!-- BODY CONTENT -->
   <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6">
 
-    <!-- PANTALLA D'INICI (HOME) -->
+    <!-- ================= PANTALLA D'INICI (HOME) ================= -->
     <section id="screenHome" class="space-y-6">
-      <div class="bg-gradient-to-r from-slate-900 via-slate-800 to-indigo-950 rounded-2xl p-6 sm:p-7 text-white shadow-sm border border-slate-800/80 relative overflow-hidden">
-        <div class="relative z-10 max-w-2xl space-y-2">
-          <div class="inline-flex items-center gap-2 text-[11px] font-medium text-indigo-300">
-            <span class="w-1.5 h-1.5 rounded-full bg-indigo-400"></span>
+      <div class="bg-white rounded-2xl p-7 border border-zinc-200/80 shadow-card flex flex-col sm:flex-row sm:items-center justify-between gap-6">
+        <div class="space-y-1.5">
+          <div class="inline-flex items-center gap-1.5 text-[11px] font-semibold text-zinc-500">
+            <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
             <span>Educació Física · 1r Cicle d'ESO</span>
           </div>
-          <h2 class="text-xl sm:text-2xl font-bold tracking-tight">Quadern d'Avaluació Docent</h2>
-          <div class="pt-2 flex flex-wrap gap-2.5">
-            <button onclick="openNewGroupModal()" class="inline-flex items-center gap-1.5 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold px-3.5 py-2 rounded-xl shadow-xs transition">
-              <i class="fa-solid fa-plus text-[10px]"></i> Nova Classe
-            </button>
-            <button onclick="openGlobalSdaModal()" class="inline-flex items-center gap-1.5 bg-white/10 hover:bg-white/15 text-white text-xs font-semibold px-3.5 py-2 rounded-xl border border-white/10 transition">
-              <i class="fa-solid fa-sliders text-[10px]"></i> Programar SdA
-            </button>
-          </div>
+          <h2 class="text-2xl font-bold tracking-tight text-zinc-900">Quadern d'Avaluació Docent</h2>
+          <p class="text-xs text-zinc-500">Gestió competencial d'alumnes, situacions d'aprenentatge i memòria pedagògica.</p>
+        </div>
+        <div class="flex items-center gap-2 shrink-0">
+          <button onclick="openNewGroupModal()" class="inline-flex items-center gap-1.5 bg-zinc-900 hover:bg-zinc-800 text-white text-xs font-semibold px-4 py-2.5 rounded-xl shadow-subtle transition">
+            <i class="fa-solid fa-plus text-[10px]"></i> Nova Classe
+          </button>
+          <button onclick="openGlobalSdaModal()" class="inline-flex items-center gap-1.5 bg-zinc-100 hover:bg-zinc-200/70 text-zinc-800 text-xs font-semibold px-3.5 py-2.5 rounded-xl transition">
+            <i class="fa-solid fa-sliders text-[10px]"></i> Programar SdA
+          </button>
         </div>
       </div>
 
+      <!-- Mètriques Ràpides d'Inici -->
       <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <div class="bg-white border border-slate-200/80 rounded-xl p-4 shadow-2xs flex items-center gap-3.5">
-          <div class="w-9 h-9 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center text-base">
+        <div class="bg-white border border-zinc-200/80 rounded-2xl p-4 shadow-subtle flex items-center gap-3.5">
+          <div class="w-9 h-9 rounded-xl bg-zinc-100 text-zinc-800 flex items-center justify-center text-sm font-semibold">
             <i class="fa-solid fa-graduation-cap"></i>
           </div>
           <div>
-            <div id="statTotalClasses" class="text-lg font-bold font-mono text-slate-900">0</div>
-            <div class="text-[11px] font-medium text-slate-400">Classes Actives</div>
+            <div id="statTotalClasses" class="text-xl font-bold font-mono text-zinc-900">0</div>
+            <div class="text-[11px] font-medium text-zinc-500">Classes Actives</div>
           </div>
         </div>
 
-        <div class="bg-white border border-slate-200/80 rounded-xl p-4 shadow-2xs flex items-center gap-3.5">
-          <div class="w-9 h-9 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center text-base">
+        <div class="bg-white border border-zinc-200/80 rounded-2xl p-4 shadow-subtle flex items-center gap-3.5">
+          <div class="w-9 h-9 rounded-xl bg-zinc-100 text-zinc-800 flex items-center justify-center text-sm font-semibold">
             <i class="fa-solid fa-users"></i>
           </div>
           <div>
-            <div id="statTotalStudents" class="text-lg font-bold font-mono text-slate-900">0</div>
-            <div class="text-[11px] font-medium text-slate-400">Alumnes Registrats</div>
+            <div id="statTotalStudents" class="text-xl font-bold font-mono text-zinc-900">0</div>
+            <div class="text-[11px] font-medium text-zinc-500">Alumnes Registrats</div>
           </div>
         </div>
 
-        <div class="bg-white border border-slate-200/80 rounded-xl p-4 shadow-2xs flex items-center gap-3.5">
-          <div class="w-9 h-9 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center text-base">
+        <div class="bg-white border border-zinc-200/80 rounded-2xl p-4 shadow-subtle flex items-center gap-3.5">
+          <div class="w-9 h-9 rounded-xl bg-zinc-100 text-zinc-800 flex items-center justify-center text-sm font-semibold">
             <i class="fa-solid fa-clipboard-list"></i>
           </div>
           <div>
-            <div id="statTotalSdas" class="text-lg font-bold font-mono text-slate-900">0</div>
-            <div class="text-[11px] font-medium text-slate-400">SdAs Creades</div>
+            <div id="statTotalSdas" class="text-xl font-bold font-mono text-zinc-900">0</div>
+            <div class="text-[11px] font-medium text-zinc-500">SdAs Creades</div>
           </div>
         </div>
       </div>
 
-      <div class="space-y-3 pt-1">
+      <div class="space-y-3 pt-2">
         <div class="flex justify-between items-center">
-          <h3 class="text-xs font-bold text-slate-900 uppercase tracking-wider flex items-center gap-2">
-            <i class="fa-solid fa-chalkboard-user text-indigo-600"></i> Classes Registrades
-          </h3>
-          <span class="text-xs text-slate-400">Selecciona un grup per qualificar o gestionar alumnes</span>
+          <h3 class="text-xs font-bold text-zinc-500 uppercase tracking-wider">Classes Registrades</h3>
+          <span class="text-xs text-zinc-400">Selecciona un grup per començar a qualificar</span>
         </div>
         <div id="homeClassesGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4"></div>
       </div>
     </section>
 
-    <!-- PANTALLA DE TREBALL DE LA CLASSE -->
+    <!-- ================= PANTALLA DE TREBALL DE LA CLASSE ================= -->
     <div id="screenClassWorkspace" class="hidden space-y-5">
-      <div class="flex flex-wrap items-center justify-between gap-3 bg-white border border-slate-200/80 p-3 rounded-xl shadow-2xs no-print">
+
+      <!-- Barra de Trimestre i Controls de la Classe -->
+      <div class="flex flex-wrap items-center justify-between gap-3 bg-white border border-zinc-200/80 px-3.5 py-2.5 rounded-2xl shadow-subtle no-print">
         <div class="flex items-center gap-3">
-          <button onclick="goToHome()" class="text-slate-500 hover:text-slate-900 text-xs font-semibold flex items-center gap-1.5 transition pr-3 border-r border-slate-200">
-            <i class="fa-solid fa-arrow-left text-[11px]"></i> Tornar
+          <button onclick="goToHome()" class="text-zinc-500 hover:text-zinc-900 text-xs font-semibold flex items-center gap-1.5 transition pr-3 border-r border-zinc-200">
+            <i class="fa-solid fa-arrow-left text-[10px]"></i> Sortir
           </button>
-          <span class="text-xs font-semibold text-slate-500">Trimestre:</span>
-          <div class="inline-flex rounded-lg bg-slate-100 p-0.5 border border-slate-200/70 text-xs font-semibold">
-            <button id="trimBtn1_class" onclick="setTrim(1)" class="px-2.5 py-1 rounded-md transition shadow-2xs bg-white text-slate-900 font-semibold">1r Trim</button>
-            <button id="trimBtn2_class" onclick="setTrim(2)" class="px-2.5 py-1 rounded-md transition text-slate-600 hover:text-slate-900">2n Trim</button>
-            <button id="trimBtn3_class" onclick="setTrim(3)" class="px-2.5 py-1 rounded-md transition text-slate-600 hover:text-slate-900">3r Trim</button>
+          
+          <div class="inline-flex rounded-xl bg-zinc-100 p-0.5 text-xs font-semibold">
+            <button id="trimBtn1_class" onclick="setTrim(1)" class="px-3 py-1 rounded-lg transition bg-white text-zinc-900 shadow-subtle">1r Trim</button>
+            <button id="trimBtn2_class" onclick="setTrim(2)" class="px-3 py-1 rounded-lg transition text-zinc-500 hover:text-zinc-900">2n Trim</button>
+            <button id="trimBtn3_class" onclick="setTrim(3)" class="px-3 py-1 rounded-lg transition text-zinc-500 hover:text-zinc-900">3r Trim</button>
           </div>
         </div>
 
         <div class="flex items-center gap-2">
-          <button onclick="switchView('roster')" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-700 bg-white border border-slate-300 hover:bg-slate-50 shadow-2xs transition">
-            <i class="fa-solid fa-user-gear text-slate-400"></i> Gestionar Alumnes
+          <button onclick="switchView('roster')" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold text-zinc-700 bg-zinc-50 hover:bg-zinc-100 border border-zinc-200/80 transition">
+            <i class="fa-solid fa-user-gear text-zinc-400 text-[11px]"></i> Gestionar Alumnes
           </button>
         </div>
       </div>
 
-      <!-- VISTA 1: GRAELLA SdA -->
+      <!-- VISTA 1: GRAELLA SdA (REFINADA LINEAR STYLE) -->
       <section id="viewSda" class="space-y-4">
-        <div class="bg-white border border-slate-200/90 rounded-xl p-3 shadow-2xs flex flex-wrap items-center justify-between gap-3">
-          <div class="flex items-center gap-3">
-            <span class="text-[11px] font-bold text-slate-400 uppercase tracking-wider">SdA Activa:</span>
-            <select id="sdaSelect" onchange="renderSdaGrid()" class="bg-slate-50 border border-slate-300 text-xs font-bold text-slate-900 rounded-lg px-3 py-1.5 focus:ring-2 focus:ring-indigo-500 focus:bg-white outline-none cursor-pointer">
+        <div class="bg-white border border-zinc-200/80 rounded-2xl p-3 shadow-subtle flex flex-wrap items-center justify-between gap-3">
+          <div class="flex items-center gap-2.5">
+            <span class="text-[11px] font-bold text-zinc-400 uppercase tracking-wider">SdA:</span>
+            <select id="sdaSelect" onchange="renderSdaGrid()" class="bg-zinc-50 border border-zinc-200 text-xs font-semibold text-zinc-900 rounded-xl px-3 py-1.5 focus:ring-2 focus:ring-zinc-900 outline-none cursor-pointer">
             </select>
-            <button onclick="openSdaModal(false)" class="inline-flex items-center gap-1.5 text-xs font-semibold text-indigo-600 hover:text-indigo-700 bg-indigo-50/60 hover:bg-indigo-50 px-2.5 py-1.5 rounded-lg border border-indigo-100 transition">
-              <i class="fa-solid fa-pen-to-square text-[11px]"></i> Editar SdA
+            <button onclick="openSdaModal(false)" class="inline-flex items-center gap-1 text-xs font-semibold text-zinc-600 hover:text-zinc-900 bg-zinc-100 hover:bg-zinc-200/70 px-2.5 py-1.5 rounded-xl transition">
+              <i class="fa-solid fa-pen text-[10px]"></i> Editar
             </button>
           </div>
           
           <div class="flex items-center gap-2">
-            <span class="hidden sm:inline-flex items-center gap-1 text-[11px] font-medium text-slate-400 bg-slate-100 px-2 py-1 rounded-lg border border-slate-200">
-              <i class="fa-regular fa-keyboard text-indigo-500"></i> Fletxes / Enter per navegar
+            <span class="hidden sm:inline-flex items-center gap-1 text-[11px] font-medium text-zinc-400 bg-zinc-50 px-2.5 py-1 rounded-lg border border-zinc-200/60">
+              <i class="fa-regular fa-keyboard text-zinc-500"></i> Fletxes o Enter
             </span>
-            <button onclick="openSdaModal(true)" class="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-semibold text-white bg-indigo-600 hover:bg-indigo-700 shadow-2xs transition">
-              <i class="fa-solid fa-plus text-[11px]"></i> Nova SdA
+            <button onclick="openSdaModal(true)" class="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs font-semibold text-white bg-zinc-900 hover:bg-zinc-800 shadow-subtle transition">
+              <i class="fa-solid fa-plus text-[10px]"></i> Nova SdA
             </button>
           </div>
         </div>
 
-        <div class="bg-white border border-slate-200 rounded-xl shadow-2xs overflow-hidden">
-          <div id="sdaGridTitleBar" class="bg-slate-900 text-white px-4 py-3 flex items-center justify-between text-xs sticky top-0 z-40">
-          </div>
+        <!-- Canvas de la Taula amb congelat 2D i estètica neta -->
+        <div class="bg-white border border-zinc-200/90 rounded-2xl shadow-card overflow-hidden">
+          <div id="sdaGridTitleBar" class="bg-zinc-900 text-white px-4 py-3 flex items-center justify-between text-xs sticky top-0 z-40"></div>
+          
           <div class="overflow-auto max-h-[72vh] relative" id="sdaTableScrollWrapper">
             <table class="w-full text-left border-collapse text-xs">
-              <thead id="sdaGridHead" class="select-none sticky top-0 z-30 shadow-xs"></thead>
-              <tbody id="sdaGridBody" class="divide-y divide-slate-100 bg-white tabular-nums"></tbody>
+              <thead id="sdaGridHead" class="select-none sticky top-0 z-30 shadow-subtle"></thead>
+              <tbody id="sdaGridBody" class="divide-y divide-zinc-100 bg-white tabular-nums"></tbody>
             </table>
           </div>
         </div>
@@ -238,44 +263,44 @@
 
       <!-- VISTA 2: LLISTA D'ALUMNAT -->
       <section id="viewRoster" class="space-y-4 hidden">
-        <div class="bg-white border border-slate-200 rounded-xl p-5 shadow-2xs space-y-4">
-          <div class="flex items-center justify-between border-b pb-3">
+        <div class="bg-white border border-zinc-200 rounded-2xl p-6 shadow-card space-y-4">
+          <div class="flex items-center justify-between border-b border-zinc-100 pb-4">
             <div>
-              <h3 class="text-base font-bold text-slate-900 flex items-center gap-2">
-                <i class="fa-solid fa-user-graduate text-indigo-600"></i> Llista d'Alumnat Registrat
+              <h3 class="text-base font-bold text-zinc-900 flex items-center gap-2">
+                <i class="fa-solid fa-user-graduate text-zinc-600"></i> Llista d'Alumnat Registrat
               </h3>
-              <p class="text-xs text-slate-500 mt-0.5">Edita els noms directament sobre la taula o importa llistats nous.</p>
+              <p class="text-xs text-zinc-500 mt-0.5">Edita els noms directament sobre la taula o importa llistats complets.</p>
             </div>
-            <span id="rosterCountBadge" class="text-xs font-mono font-bold bg-indigo-50 text-indigo-700 px-3 py-1 rounded-full border border-indigo-100">0 alumnes</span>
+            <span id="rosterCountBadge" class="text-xs font-mono font-bold bg-zinc-100 text-zinc-800 px-3 py-1 rounded-full border border-zinc-200">0 alumnes</span>
           </div>
 
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-3 bg-slate-50 border border-slate-200/80 p-3 rounded-xl">
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-3 bg-zinc-50/70 border border-zinc-200/80 p-3.5 rounded-2xl">
             <div>
-              <label class="block font-medium text-slate-600 mb-1">Afegir Alumne/a individual:</label>
+              <label class="block font-medium text-zinc-600 text-xs mb-1">Afegir Alumne/a:</label>
               <div class="flex gap-2">
-                <input type="text" id="rosterNewStudentInput" placeholder="Cognoms, Nom" class="flex-1 bg-white border border-slate-300 rounded-lg px-3 py-1.5 text-xs focus:ring-2 focus:ring-indigo-500 outline-none">
-                <button onclick="addSingleStudentFromRoster()" class="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold px-3 py-1.5 rounded-lg text-xs">Afegir</button>
+                <input type="text" id="rosterNewStudentInput" placeholder="Cognoms, Nom" class="flex-1 bg-white border border-zinc-200 rounded-xl px-3 py-1.5 text-xs focus:ring-2 focus:ring-zinc-900 outline-none">
+                <button onclick="addSingleStudentFromRoster()" class="bg-zinc-900 hover:bg-zinc-800 text-white font-semibold px-3.5 py-1.5 rounded-xl text-xs transition">Afegir</button>
               </div>
             </div>
             <div>
-              <label class="block font-medium text-slate-600 mb-1">Importació ràpida (un per línia d'Esfera/Excel):</label>
+              <label class="block font-medium text-zinc-600 text-xs mb-1">Còpia d'Esfera / Excel (un per línia):</label>
               <div class="flex gap-2">
-                <textarea id="rosterBulkInput" rows="1" placeholder="Enganxa llista d'alumnes..." class="flex-1 bg-white border border-slate-300 rounded-lg p-1.5 text-xs focus:ring-2 focus:ring-indigo-500 outline-none resize-none"></textarea>
-                <button onclick="addBulkStudentsFromRoster()" class="bg-slate-800 hover:bg-slate-700 text-white font-semibold px-3 py-1.5 rounded-lg text-xs">Carregar</button>
+                <textarea id="rosterBulkInput" rows="1" placeholder="Enganxa llista d'alumnes..." class="flex-1 bg-white border border-zinc-200 rounded-xl p-1.5 text-xs focus:ring-2 focus:ring-zinc-900 outline-none resize-none"></textarea>
+                <button onclick="addBulkStudentsFromRoster()" class="bg-zinc-800 hover:bg-zinc-700 text-white font-semibold px-3.5 py-1.5 rounded-xl text-xs transition">Carregar</button>
               </div>
             </div>
           </div>
 
-          <div class="border border-slate-200 rounded-xl overflow-hidden">
+          <div class="border border-zinc-200 rounded-xl overflow-hidden">
             <table class="w-full text-left text-xs">
-              <thead class="bg-slate-50 text-slate-600 font-semibold border-b">
+              <thead class="bg-zinc-50/70 text-zinc-600 font-semibold border-b border-zinc-200">
                 <tr>
                   <th class="py-2.5 px-3 w-12 text-center font-mono">#</th>
-                  <th class="py-2.5 px-4">Nom i Cognoms (Editable)</th>
+                  <th class="py-2.5 px-4">Nom i Cognoms (Fes clic per editar)</th>
                   <th class="py-2.5 px-3 w-20 text-center">Acció</th>
                 </tr>
               </thead>
-              <tbody id="rosterTableBody" class="divide-y divide-slate-100 bg-white"></tbody>
+              <tbody id="rosterTableBody" class="divide-y divide-zinc-100 bg-white"></tbody>
             </table>
           </div>
         </div>
@@ -283,32 +308,32 @@
 
       <!-- VISTA 3: RESUM TRIMESTRAL -->
       <section id="viewTrim" class="space-y-4 hidden">
-        <div class="flex flex-wrap items-end justify-between gap-4 border-b border-slate-200/80 pb-4">
+        <div class="flex flex-wrap items-end justify-between gap-4 border-b border-zinc-200/70 pb-4">
           <div>
-            <span class="inline-flex items-center rounded-md bg-indigo-50 px-2 py-0.5 text-[11px] font-semibold text-indigo-700 border border-indigo-100">Avaluació Contínua Trimestral</span>
-            <h2 id="trimTitle" class="text-xl font-bold text-slate-900 tracking-tight mt-1">Resum del Trimestre 1</h2>
-            <p class="text-xs text-slate-500 mt-0.5">Controla la ponderació de les SdAs i marca la manca de participació pràctica quan un alumne no arribi al mínim.</p>
+            <span class="inline-flex items-center rounded-md bg-zinc-100 px-2 py-0.5 text-[11px] font-bold text-zinc-600">Avaluació Contínua</span>
+            <h2 id="trimTitle" class="text-xl font-bold text-zinc-900 tracking-tight mt-1">Resum del Trimestre 1</h2>
+            <p class="text-xs text-zinc-500 mt-0.5">Controla la ponderació de les SdAs i marca la manca de participació pràctica quan calgui.</p>
           </div>
-          <button onclick="exportCSV()" class="inline-flex items-center gap-2 bg-white border border-slate-300 text-slate-700 hover:bg-slate-50 text-xs font-semibold px-3 py-2 rounded-lg shadow-2xs transition">
-            <i class="fa-solid fa-file-csv text-slate-400"></i> Exportar a CSV
+          <button onclick="exportCSV()" class="inline-flex items-center gap-1.5 bg-white border border-zinc-200 text-zinc-700 hover:bg-zinc-50 text-xs font-semibold px-3 py-2 rounded-xl shadow-subtle transition">
+            <i class="fa-solid fa-file-csv text-zinc-400"></i> Exportar a CSV
           </button>
         </div>
 
-        <div class="bg-white border border-slate-200/90 rounded-xl p-4 shadow-2xs space-y-3">
+        <div class="bg-white border border-zinc-200/90 rounded-2xl p-4 shadow-subtle space-y-3">
           <div class="flex items-center justify-between">
-            <h4 class="text-xs font-bold text-slate-800 uppercase tracking-wider flex items-center gap-2">
-              <i class="fa-solid fa-weight-scale text-indigo-600"></i> Ponderació de les SdAs en aquest Trimestre
+            <h4 class="text-xs font-bold text-zinc-800 uppercase tracking-wider flex items-center gap-2">
+              <i class="fa-solid fa-weight-scale text-zinc-500"></i> Ponderació de les SdAs en aquest Trimestre
             </h4>
             <span id="trimTotalWeightBadge" class="text-xs font-mono font-bold px-2.5 py-0.5 rounded-md">Total: 0%</span>
           </div>
-          <div id="trimSdaWeightInputsContainer" class="flex flex-wrap gap-3 pt-1"></div>
+          <div id="trimSdaWeightInputsContainer" class="flex flex-wrap gap-2.5 pt-1"></div>
         </div>
 
-        <div class="bg-white border border-slate-200 rounded-xl shadow-2xs overflow-hidden">
+        <div class="bg-white border border-zinc-200 rounded-2xl shadow-card overflow-hidden">
           <div class="overflow-x-auto">
             <table class="w-full text-left border-collapse text-xs">
-              <thead id="trimTableHead" class="bg-slate-900 text-white"></thead>
-              <tbody id="trimTableBody" class="divide-y divide-slate-100 bg-white tabular-nums"></tbody>
+              <thead id="trimTableHead" class="bg-zinc-900 text-white"></thead>
+              <tbody id="trimTableBody" class="divide-y divide-zinc-100 bg-white tabular-nums"></tbody>
             </table>
           </div>
         </div>
@@ -316,44 +341,44 @@
 
       <!-- VISTA 4: FINAL DE CURS -->
       <section id="viewFinal" class="space-y-4 hidden">
-        <div class="flex flex-wrap items-end justify-between gap-4 border-b border-slate-200/80 pb-4">
+        <div class="flex flex-wrap items-end justify-between gap-4 border-b border-zinc-200/70 pb-4">
           <div>
-            <span class="inline-flex items-center rounded-md bg-emerald-50 px-2 py-0.5 text-[11px] font-semibold text-emerald-700 border border-emerald-100">Convocatòria Ordinària</span>
-            <h2 class="text-xl font-bold text-slate-900 tracking-tight mt-1">Avaluació Final de Curs</h2>
-            <p class="text-xs text-slate-500 mt-0.5">Tria el mètode de càlcul de final de curs i pondera els percentatges.</p>
+            <span class="inline-flex items-center rounded-md bg-zinc-100 px-2 py-0.5 text-[11px] font-bold text-zinc-600">Convocatòria Ordinària</span>
+            <h2 class="text-xl font-bold text-zinc-900 tracking-tight mt-1">Avaluació Final de Curs</h2>
+            <p class="text-xs text-zinc-500 mt-0.5">Tria el mètode de càlcul de final de curs i pondera els percentatges.</p>
           </div>
 
           <div class="flex flex-wrap items-center gap-3">
-            <div class="flex items-center bg-slate-100 p-1 rounded-xl border border-slate-200 text-xs">
+            <div class="flex items-center bg-zinc-100 p-1 rounded-xl border border-zinc-200 text-xs">
               <button id="finalMethodTrimBtn" onclick="setFinalCalculationMethod('trim')" class="px-3 py-1.5 rounded-lg font-semibold transition">
-                <i class="fa-solid fa-calendar-days mr-1"></i> Per Trimestres (T1, T2, T3)
+                <i class="fa-solid fa-calendar-days mr-1 text-zinc-400"></i> Per Trimestres
               </button>
               <button id="finalMethodCeBtn" onclick="setFinalCalculationMethod('ce')" class="px-3 py-1.5 rounded-lg font-semibold transition">
-                <i class="fa-solid fa-scale-balanced mr-1"></i> Per Competències (CE1-CE5)
+                <i class="fa-solid fa-scale-balanced mr-1 text-zinc-400"></i> Per Competències
               </button>
             </div>
 
-            <button onclick="exportCSV()" class="inline-flex items-center gap-2 bg-white border border-slate-300 text-slate-700 hover:bg-slate-50 text-xs font-semibold px-3 py-2 rounded-lg shadow-2xs transition">
-              <i class="fa-solid fa-file-csv text-slate-400"></i> Exportar a CSV
+            <button onclick="exportCSV()" class="inline-flex items-center gap-1.5 bg-white border border-zinc-200 text-zinc-700 hover:bg-zinc-50 text-xs font-semibold px-3 py-2 rounded-xl shadow-subtle transition">
+              <i class="fa-solid fa-file-csv text-zinc-400"></i> Exportar
             </button>
           </div>
         </div>
 
-        <div class="bg-white border border-slate-200/90 rounded-xl p-4 shadow-2xs space-y-3">
+        <div class="bg-white border border-zinc-200/90 rounded-2xl p-4 shadow-subtle space-y-3">
           <div class="flex items-center justify-between">
-            <h4 id="finalWeightPanelTitle" class="text-xs font-bold text-slate-800 uppercase tracking-wider flex items-center gap-2">
-              <i class="fa-solid fa-sliders text-indigo-600"></i> Ponderació del Càlcul Final
+            <h4 id="finalWeightPanelTitle" class="text-xs font-bold text-zinc-800 uppercase tracking-wider flex items-center gap-2">
+              <i class="fa-solid fa-sliders text-zinc-500"></i> Ponderació del Càlcul Final
             </h4>
             <span id="finalWeightSumBadge" class="text-xs font-mono font-bold px-2.5 py-0.5 rounded-md">Total: 100%</span>
           </div>
-          <div id="finalWeightsContainer" class="flex flex-wrap gap-3 pt-1"></div>
+          <div id="finalWeightsContainer" class="flex flex-wrap gap-2.5 pt-1"></div>
         </div>
 
-        <div class="bg-white border border-slate-200 rounded-xl shadow-2xs overflow-hidden">
+        <div class="bg-white border border-zinc-200 rounded-2xl shadow-card overflow-hidden">
           <div class="overflow-x-auto">
             <table class="w-full text-left border-collapse text-xs">
-              <thead id="finalTableHead" class="bg-slate-900 text-white"></thead>
-              <tbody id="finalTableBody" class="divide-y divide-slate-100 bg-white tabular-nums"></tbody>
+              <thead id="finalTableHead" class="bg-zinc-900 text-white"></thead>
+              <tbody id="finalTableBody" class="divide-y divide-zinc-100 bg-white tabular-nums"></tbody>
             </table>
           </div>
         </div>
@@ -361,26 +386,26 @@
 
       <!-- VISTA 5: BUTLLETÍ INDIVIDUAL -->
       <section id="viewReport" class="space-y-4 hidden">
-        <div class="flex items-center justify-between bg-white p-3 rounded-xl border border-slate-200 shadow-2xs no-print">
+        <div class="flex items-center justify-between bg-white p-3.5 rounded-2xl border border-zinc-200 shadow-subtle no-print">
           <div class="flex items-center gap-3">
-            <label for="reportStudentSelect" class="text-xs font-semibold text-slate-500">Selecciona Alumne/a:</label>
-            <select id="reportStudentSelect" onchange="renderIndividualReport()" class="bg-slate-50 border border-slate-300 text-xs rounded-lg px-3 py-1.5 font-bold text-slate-800 outline-none focus:ring-2 focus:ring-indigo-500">
+            <label for="reportStudentSelect" class="text-xs font-semibold text-zinc-500">Alumne/a:</label>
+            <select id="reportStudentSelect" onchange="renderIndividualReport()" class="bg-zinc-50 border border-zinc-200 text-xs rounded-xl px-3 py-1.5 font-bold text-zinc-800 outline-none focus:ring-2 focus:ring-zinc-900">
             </select>
           </div>
-          <button onclick="window.print()" class="inline-flex items-center gap-2 bg-slate-900 hover:bg-slate-800 text-white text-xs font-semibold px-4 py-2 rounded-lg shadow-2xs transition">
+          <button onclick="window.print()" class="inline-flex items-center gap-2 bg-zinc-900 hover:bg-zinc-800 text-white text-xs font-semibold px-4 py-2 rounded-xl shadow-subtle transition">
             <i class="fa-solid fa-print"></i> Imprimir Informe
           </button>
         </div>
 
-        <div class="bg-white border border-slate-200 rounded-2xl p-8 shadow-sm max-w-4xl mx-auto space-y-6">
-          <div class="flex justify-between items-start border-b border-slate-200 pb-5">
+        <div class="bg-white border border-zinc-200 rounded-3xl p-8 shadow-card max-w-4xl mx-auto space-y-6">
+          <div class="flex justify-between items-start border-b border-zinc-200 pb-5">
             <div>
-              <span class="text-[11px] font-bold text-indigo-600 uppercase tracking-wider">Informe Individual Competencial</span>
-              <h3 id="repStudentName" class="text-2xl font-black text-slate-900 tracking-tight mt-0.5">Alumne</h3>
-              <p id="repGroupLabel" class="text-xs text-slate-500 mt-1 font-medium">1r i 2n d'ESO | Matèria: Educació Física | LOMLOE</p>
+              <span class="text-[11px] font-bold text-zinc-400 uppercase tracking-wider">Informe Individual Competencial</span>
+              <h3 id="repStudentName" class="text-2xl font-black text-zinc-900 tracking-tight mt-0.5">Alumne</h3>
+              <p id="repGroupLabel" class="text-xs text-zinc-500 mt-1 font-medium">1r i 2n d'ESO | Matèria: Educació Física | LOMLOE</p>
             </div>
             <div class="text-right">
-              <span class="text-[11px] font-semibold text-slate-400 block uppercase">Nivell Global</span>
+              <span class="text-[11px] font-semibold text-zinc-400 block uppercase">Nivell Global</span>
               <span id="repGlobalBadge" class="inline-flex items-center mt-1 px-3 py-1 rounded-md text-xs font-bold ring-1 ring-inset">--</span>
             </div>
           </div>
@@ -396,85 +421,85 @@
 
       <!-- VISTA 6: ANALÍTICA & ESTADÍSTIQUES -->
       <section id="viewStats" class="space-y-5 hidden">
-        <div class="bg-white border border-slate-200/90 rounded-2xl p-4 shadow-2xs flex flex-wrap items-center justify-between gap-4">
+        <div class="bg-white border border-zinc-200/90 rounded-2xl p-4 shadow-subtle flex flex-wrap items-center justify-between gap-4">
           <div>
-            <span class="inline-flex items-center gap-1 text-[11px] font-bold text-indigo-600 uppercase tracking-wider">
+            <span class="inline-flex items-center gap-1 text-[11px] font-bold text-zinc-400 uppercase tracking-wider">
               <i class="fa-solid fa-chart-simple"></i> Dashboard Analític
             </span>
-            <h3 class="text-lg font-bold text-slate-900 tracking-tight">Rendiment Competencial &amp; Anàlisi de Dades</h3>
+            <h3 class="text-lg font-bold text-zinc-900 tracking-tight">Rendiment Competencial de Curs</h3>
           </div>
 
           <div class="flex flex-wrap items-center gap-2.5 text-xs">
-            <div class="flex items-center gap-1.5 bg-slate-100 p-1 rounded-xl border border-slate-200">
-              <button id="statsScopeClass" onclick="setStatsScope('class')" class="px-2.5 py-1 rounded-lg font-semibold bg-white text-slate-900 shadow-2xs transition">Aquesta Classe</button>
-              <button id="statsScopeLevel" onclick="setStatsScope('level')" class="px-2.5 py-1 rounded-lg font-medium text-slate-600 hover:text-slate-900 transition">Tots els grups del Nivell</button>
+            <div class="flex items-center gap-1 bg-zinc-100 p-1 rounded-xl border border-zinc-200">
+              <button id="statsScopeClass" onclick="setStatsScope('class')" class="px-2.5 py-1 rounded-lg font-semibold bg-white text-zinc-900 shadow-subtle transition">Aquesta Classe</button>
+              <button id="statsScopeLevel" onclick="setStatsScope('level')" class="px-2.5 py-1 rounded-lg font-medium text-zinc-600 hover:text-zinc-900 transition">Tots els grups</button>
             </div>
 
-            <div class="flex items-center gap-2 bg-slate-50 border border-slate-300 rounded-xl px-2.5 py-1">
-              <span class="text-slate-400 font-medium">Àmbit:</span>
-              <select id="statsTypeSelect" onchange="onStatsTypeChange()" class="bg-transparent font-bold text-slate-800 outline-none cursor-pointer">
-                <option value="sda">Situació d'Aprenentatge (SdA)</option>
-                <option value="trim">Trimestral (T1, T2 o T3)</option>
+            <div class="flex items-center gap-2 bg-zinc-50 border border-zinc-200 rounded-xl px-2.5 py-1">
+              <span class="text-zinc-400 font-medium">Àmbit:</span>
+              <select id="statsTypeSelect" onchange="onStatsTypeChange()" class="bg-transparent font-semibold text-zinc-800 outline-none cursor-pointer">
+                <option value="sda">Per SdA</option>
+                <option value="trim">Per Trimestre</option>
                 <option value="course">Global de Curs</option>
               </select>
             </div>
 
-            <select id="statsSdaSelector" onchange="renderStatsView()" class="bg-slate-50 border border-slate-300 font-bold text-slate-800 rounded-xl px-2.5 py-1.5 outline-none cursor-pointer">
+            <select id="statsSdaSelector" onchange="renderStatsView()" class="bg-zinc-50 border border-zinc-200 font-semibold text-zinc-800 rounded-xl px-2.5 py-1.5 outline-none cursor-pointer">
             </select>
           </div>
         </div>
 
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          <div class="bg-white border border-slate-200/90 rounded-2xl p-4 shadow-2xs">
+          <div class="bg-white border border-zinc-200/90 rounded-2xl p-4 shadow-subtle">
             <div class="flex items-center justify-between">
-              <span class="text-xs font-semibold text-slate-400">Mitjana Global</span>
-              <span id="kpiAvgLvl" class="text-[10px] font-bold px-1.5 py-0.5 rounded ring-1 ring-inset bg-slate-50 text-slate-600 ring-slate-200">--</span>
+              <span class="text-xs font-semibold text-zinc-400">Mitjana Global</span>
+              <span id="kpiAvgLvl" class="text-[10px] font-bold px-1.5 py-0.5 rounded ring-1 ring-inset bg-zinc-50 text-zinc-600 ring-zinc-200">--</span>
             </div>
-            <div id="kpiAvgVal" class="text-2xl font-black font-mono text-slate-900 mt-1">0.00</div>
-            <p class="text-[11px] text-slate-400 mt-1">Escala competencial 0 a 4</p>
+            <div id="kpiAvgVal" class="text-2xl font-black font-mono text-zinc-900 mt-1">0.00</div>
+            <p class="text-[11px] text-zinc-400 mt-1">Escala competencial 0 a 4</p>
           </div>
 
-          <div class="bg-white border border-slate-200/90 rounded-2xl p-4 shadow-2xs">
+          <div class="bg-white border border-zinc-200/90 rounded-2xl p-4 shadow-subtle">
             <div class="flex items-center justify-between">
-              <span class="text-xs font-semibold text-slate-400" id="kpiSuccessTitle">Taxa d'Èxit (&ge; AS)</span>
+              <span class="text-xs font-semibold text-zinc-400" id="kpiSuccessTitle">Taxa d'Èxit</span>
               <i class="fa-solid fa-circle-check text-emerald-500"></i>
             </div>
             <div id="kpiSuccessRate" class="text-2xl font-black font-mono text-emerald-600 mt-1">0%</div>
-            <p class="text-[11px] text-slate-400 mt-1">Alumnat que assoleix el nivell</p>
+            <p class="text-[11px] text-zinc-400 mt-1">Alumnat que assoleix el nivell</p>
           </div>
 
-          <div class="bg-white border border-slate-200/90 rounded-2xl p-4 shadow-2xs">
+          <div class="bg-white border border-zinc-200/90 rounded-2xl p-4 shadow-subtle">
             <div class="flex items-center justify-between">
-              <span class="text-xs font-semibold text-slate-400">CE Més Forta</span>
-              <i class="fa-solid fa-arrow-trend-up text-indigo-500"></i>
+              <span class="text-xs font-semibold text-zinc-400">CE Més Forta</span>
+              <i class="fa-solid fa-arrow-trend-up text-zinc-400"></i>
             </div>
-            <div id="kpiBestCe" class="text-lg font-bold text-indigo-700 mt-1 truncate">--</div>
-            <p id="kpiBestCeVal" class="text-[11px] text-slate-400 mt-1 font-mono">Mitjana: --</p>
+            <div id="kpiBestCe" class="text-sm font-bold text-zinc-900 mt-1 truncate">--</div>
+            <p id="kpiBestCeVal" class="text-[11px] text-zinc-400 mt-1 font-mono">Mitjana: --</p>
           </div>
 
-          <div class="bg-white border border-slate-200/90 rounded-2xl p-4 shadow-2xs">
+          <div class="bg-white border border-zinc-200/90 rounded-2xl p-4 shadow-subtle">
             <div class="flex items-center justify-between">
-              <span class="text-xs font-semibold text-slate-400">Àrea de Millora</span>
+              <span class="text-xs font-semibold text-zinc-400">Àrea de Millora</span>
               <i class="fa-solid fa-triangle-exclamation text-amber-500"></i>
             </div>
-            <div id="kpiWorstCe" class="text-lg font-bold text-amber-700 mt-1 truncate">--</div>
-            <p id="kpiWorstCeVal" class="text-[11px] text-slate-400 mt-1 font-mono">Mitjana: --</p>
+            <div id="kpiWorstCe" class="text-sm font-bold text-zinc-900 mt-1 truncate">--</div>
+            <p id="kpiWorstCeVal" class="text-[11px] text-zinc-400 mt-1 font-mono">Mitjana: --</p>
           </div>
         </div>
 
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-5">
-          <div class="bg-white border border-slate-200 rounded-2xl p-5 shadow-2xs space-y-3">
-            <h4 class="text-xs font-bold text-slate-800 uppercase tracking-wider flex items-center gap-2">
-              <i class="fa-solid fa-chart-column text-indigo-600"></i> Distribució de Nivells LOMLOE
+          <div class="bg-white border border-zinc-200 rounded-2xl p-5 shadow-subtle space-y-3">
+            <h4 class="text-xs font-bold text-zinc-800 uppercase tracking-wider flex items-center gap-2">
+              <i class="fa-solid fa-chart-column text-zinc-400"></i> Distribució de Nivells LOMLOE
             </h4>
             <div class="h-64">
               <canvas id="chartStatsLevels"></canvas>
             </div>
           </div>
 
-          <div class="bg-white border border-slate-200 rounded-2xl p-5 shadow-2xs space-y-3">
-            <h4 class="text-xs font-bold text-slate-800 uppercase tracking-wider flex items-center gap-2">
-              <i class="fa-solid fa-chart-bar text-indigo-600"></i> Comparativa de Competències Específiques
+          <div class="bg-white border border-zinc-200 rounded-2xl p-5 shadow-subtle space-y-3">
+            <h4 class="text-xs font-bold text-zinc-800 uppercase tracking-wider flex items-center gap-2">
+              <i class="fa-solid fa-chart-bar text-zinc-400"></i> Comparativa de Competències
             </h4>
             <div class="h-64">
               <canvas id="chartStatsCes"></canvas>
@@ -482,24 +507,24 @@
           </div>
         </div>
 
-        <div class="bg-white border border-slate-200 rounded-2xl shadow-2xs overflow-hidden">
-          <div class="bg-slate-900 text-white px-5 py-3.5 flex justify-between items-center text-xs font-bold">
+        <div class="bg-white border border-zinc-200 rounded-2xl shadow-card overflow-hidden">
+          <div class="bg-zinc-900 text-white px-5 py-3.5 flex justify-between items-center text-xs font-bold">
             <span>Diagnosi Detallada per Competències</span>
-            <span class="text-slate-400 font-mono text-[11px]">Detecció d'aprenentatges i colls d'ampolla</span>
+            <span class="text-zinc-400 font-mono text-[11px]">Detecció de colls d'ampolla</span>
           </div>
           <div class="overflow-x-auto">
             <table class="w-full text-left text-xs">
-              <thead class="bg-slate-50 text-slate-600 font-semibold border-b">
+              <thead class="bg-zinc-50 text-zinc-600 font-semibold border-b border-zinc-200">
                 <tr>
                   <th class="py-2.5 px-4 w-24 font-mono">Codi</th>
                   <th class="py-2.5 px-4">Competència Específica</th>
                   <th class="py-2.5 px-3 text-center">Mitjana</th>
                   <th class="py-2.5 px-3 text-center">Nivell</th>
                   <th class="py-2.5 px-4 text-center" id="thAssolitRate">% &ge; Assolit</th>
-                  <th class="py-2.5 px-4 text-center">Estat Pedagògic</th>
+                  <th class="py-2.5 px-4 text-center">Estat</th>
                 </tr>
               </thead>
-              <tbody id="statsTableBody" class="divide-y divide-slate-100 bg-white tabular-nums"></tbody>
+              <tbody id="statsTableBody" class="divide-y divide-zinc-100 bg-white tabular-nums"></tbody>
             </table>
           </div>
         </div>
@@ -509,191 +534,190 @@
   </main>
 
   <!-- MODAL CONFIGURACIÓ ESCALA / THRESHOLDS -->
-  <div id="thresholdsModal" class="fixed inset-0 bg-slate-900/40 backdrop-blur-xs z-50 flex items-center justify-center p-4 hidden no-print">
-    <div class="bg-white rounded-2xl shadow-xl max-w-xl w-full overflow-hidden border border-slate-200">
-      <div class="px-6 py-4 bg-slate-900 text-white flex justify-between items-center">
+  <div id="thresholdsModal" class="fixed inset-0 bg-zinc-950/40 backdrop-blur-xs z-50 flex items-center justify-center p-4 hidden no-print">
+    <div class="bg-white rounded-3xl shadow-card max-w-xl w-full overflow-hidden border border-zinc-200">
+      <div class="px-6 py-4 bg-zinc-900 text-white flex justify-between items-center">
         <div class="flex items-center gap-2.5">
-          <div class="w-8 h-8 rounded-lg bg-indigo-500/20 text-indigo-400 flex items-center justify-center">
-            <i class="fa-solid fa-sliders text-sm"></i>
+          <div class="w-8 h-8 rounded-xl bg-zinc-800 text-zinc-200 flex items-center justify-center text-xs">
+            <i class="fa-solid fa-sliders"></i>
           </div>
           <div>
             <h3 class="text-sm font-bold tracking-tight">Definició de l'Escala de Qualificació</h3>
-            <p class="text-[11px] text-slate-400">Configura els talls numèrics i sigles de l'avaluació LOMLOE</p>
+            <p class="text-[11px] text-zinc-400">Ajusta els llindars mínims dels nivells LOMLOE</p>
           </div>
         </div>
-        <button onclick="closeThresholdsModal()" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
+        <button onclick="closeThresholdsModal()" class="text-zinc-400 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
       </div>
 
       <div class="p-6 space-y-4 text-xs">
-        <p class="text-slate-500 text-[11px] leading-relaxed">
-          Defineix la nota mínima per assolir cada tram (en una escala de 0 a 4). El sistema recalcularà automàticament colors, nivells i estadístiques.
+        <p class="text-zinc-500 text-[11px] leading-relaxed">
+          Defineix la nota mínima per assolir cada tram (en escala 0 a 4). El sistema recalcularà automàticament colors, nivells i estadístiques.
         </p>
 
-        <div class="space-y-3 pt-1">
-          <div class="flex items-center gap-3 bg-rose-50/60 border border-rose-100 p-3 rounded-xl">
-            <div class="w-14 font-black font-mono text-sm text-rose-700">NA</div>
+        <div class="space-y-2.5 pt-1">
+          <div class="flex items-center gap-3 bg-zinc-50 border border-zinc-200/80 p-3 rounded-xl">
+            <div class="w-12 font-black font-mono text-sm text-rose-600">NA</div>
             <div class="flex-1">
-              <span class="block font-semibold text-slate-800">No Assolit</span>
-              <span class="text-[11px] text-slate-400">Qualsevol qualificació per sota de EPA</span>
+              <span class="block font-semibold text-zinc-800">No Assolit</span>
+              <span class="text-[11px] text-zinc-400">Qualsevol nota inferior a EPA</span>
             </div>
             <div class="text-right">
-              <span class="font-mono text-xs font-bold text-slate-500 bg-white px-2.5 py-1 rounded border border-rose-200">Menys de EPA</span>
+              <span class="font-mono text-xs text-zinc-400">&lt; EPA</span>
             </div>
           </div>
 
-          <div class="flex items-center gap-3 bg-amber-50/60 border border-amber-100 p-3 rounded-xl">
-            <div class="w-14 font-black font-mono text-sm text-amber-700">EPA</div>
+          <div class="flex items-center gap-3 bg-zinc-50 border border-zinc-200/80 p-3 rounded-xl">
+            <div class="w-12 font-black font-mono text-sm text-amber-600">EPA</div>
             <div class="flex-1">
-              <span class="block font-semibold text-slate-800">En Procés d'Assoliment</span>
-              <span class="text-[11px] text-slate-400">Nota mínima a partir de la qual és EPA</span>
+              <span class="block font-semibold text-zinc-800">En Procés d'Assoliment</span>
+              <span class="text-[11px] text-zinc-400">Nota mínima a partir de la qual és EPA</span>
             </div>
             <div class="flex items-center gap-1.5">
-              <span class="text-slate-400 font-medium text-[11px]">&ge;</span>
-              <input type="number" id="th_epa" step="0.05" min="0" max="4" class="w-20 text-center font-mono font-bold text-sm bg-white border border-amber-300 rounded-lg p-1.5 outline-none focus:ring-2 focus:ring-amber-500">
+              <span class="text-zinc-400 font-medium text-[11px]">&ge;</span>
+              <input type="number" id="th_epa" step="0.05" min="0" max="4" class="w-20 text-center font-mono font-bold text-sm bg-white border border-zinc-300 rounded-lg p-1.5 outline-none focus:ring-2 focus:ring-zinc-900">
             </div>
           </div>
 
-          <div class="flex items-center gap-3 bg-sky-50/60 border border-sky-100 p-3 rounded-xl">
-            <div class="w-14 font-black font-mono text-sm text-sky-700">AS</div>
+          <div class="flex items-center gap-3 bg-zinc-50 border border-zinc-200/80 p-3 rounded-xl">
+            <div class="w-12 font-black font-mono text-sm text-sky-600">AS</div>
             <div class="flex-1">
-              <span class="block font-semibold text-slate-800">Assolit (Aprovat competencial)</span>
-              <span class="text-[11px] text-slate-400">Llindar mínim d'assoliment del criteri</span>
+              <span class="block font-semibold text-zinc-800">Assolit (Aprovat)</span>
+              <span class="text-[11px] text-zinc-400">Llindar mínim d'assoliment</span>
             </div>
             <div class="flex items-center gap-1.5">
-              <span class="text-slate-400 font-medium text-[11px]">&ge;</span>
-              <input type="number" id="th_as" step="0.05" min="0" max="4" class="w-20 text-center font-mono font-bold text-sm bg-white border border-sky-300 rounded-lg p-1.5 outline-none focus:ring-2 focus:ring-sky-500">
+              <span class="text-zinc-400 font-medium text-[11px]">&ge;</span>
+              <input type="number" id="th_as" step="0.05" min="0" max="4" class="w-20 text-center font-mono font-bold text-sm bg-white border border-zinc-300 rounded-lg p-1.5 outline-none focus:ring-2 focus:ring-zinc-900">
             </div>
           </div>
 
-          <div class="flex items-center gap-3 bg-indigo-50/60 border border-indigo-100 p-3 rounded-xl">
-            <div class="w-14 font-black font-mono text-sm text-indigo-700">AN</div>
+          <div class="flex items-center gap-3 bg-zinc-50 border border-zinc-200/80 p-3 rounded-xl">
+            <div class="w-12 font-black font-mono text-sm text-indigo-600">AN</div>
             <div class="flex-1">
-              <span class="block font-semibold text-slate-800">Assoliment Notable</span>
-              <span class="text-[11px] text-slate-400">Nota mínima per a notable</span>
+              <span class="block font-semibold text-zinc-800">Assoliment Notable</span>
+              <span class="text-[11px] text-zinc-400">Nota mínima per a notable</span>
             </div>
             <div class="flex items-center gap-1.5">
-              <span class="text-slate-400 font-medium text-[11px]">&ge;</span>
-              <input type="number" id="th_an" step="0.05" min="0" max="4" class="w-20 text-center font-mono font-bold text-sm bg-white border border-indigo-300 rounded-lg p-1.5 outline-none focus:ring-2 focus:ring-indigo-500">
+              <span class="text-zinc-400 font-medium text-[11px]">&ge;</span>
+              <input type="number" id="th_an" step="0.05" min="0" max="4" class="w-20 text-center font-mono font-bold text-sm bg-white border border-zinc-300 rounded-lg p-1.5 outline-none focus:ring-2 focus:ring-zinc-900">
             </div>
           </div>
 
-          <div class="flex items-center gap-3 bg-emerald-50/60 border border-emerald-100 p-3 rounded-xl">
-            <div class="w-14 font-black font-mono text-sm text-emerald-700">AE</div>
+          <div class="flex items-center gap-3 bg-zinc-50 border border-zinc-200/80 p-3 rounded-xl">
+            <div class="w-12 font-black font-mono text-sm text-emerald-600">AE</div>
             <div class="flex-1">
-              <span class="block font-semibold text-slate-800">Assoliment Excel·lent</span>
-              <span class="text-[11px] text-slate-400">Nota mínima per a l'excel·lència</span>
+              <span class="block font-semibold text-zinc-800">Assoliment Excel·lent</span>
+              <span class="text-[11px] text-zinc-400">Nota mínima per a excel·lència</span>
             </div>
             <div class="flex items-center gap-1.5">
-              <span class="text-slate-400 font-medium text-[11px]">&ge;</span>
-              <input type="number" id="th_ae" step="0.05" min="0" max="4" class="w-20 text-center font-mono font-bold text-sm bg-white border border-emerald-300 rounded-lg p-1.5 outline-none focus:ring-2 focus:ring-emerald-500">
+              <span class="text-zinc-400 font-medium text-[11px]">&ge;</span>
+              <input type="number" id="th_ae" step="0.05" min="0" max="4" class="w-20 text-center font-mono font-bold text-sm bg-white border border-zinc-300 rounded-lg p-1.5 outline-none focus:ring-2 focus:ring-zinc-900">
             </div>
           </div>
         </div>
       </div>
 
-      <div class="px-6 py-3.5 bg-slate-50 border-t border-slate-200 flex justify-between items-center text-xs">
-        <button onclick="resetDefaultThresholds()" class="text-slate-500 hover:text-indigo-600 font-semibold underline">Restablir per defecte (1.0, 2.0, 3.0, 4.0)</button>
+      <div class="px-6 py-3.5 bg-zinc-50 border-t border-zinc-200 flex justify-between items-center text-xs">
+        <button onclick="resetDefaultThresholds()" class="text-zinc-500 hover:text-zinc-900 font-semibold underline">Restablir (1.0, 2.0, 3.0, 4.0)</button>
         <div class="flex gap-2">
-          <button onclick="closeThresholdsModal()" class="px-3.5 py-1.5 border border-slate-300 rounded-lg font-semibold text-slate-600 hover:bg-slate-100">Cancel·lar</button>
-          <button onclick="saveThresholdsModal()" class="px-4 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg font-semibold shadow-xs">Desar Escala</button>
+          <button onclick="closeThresholdsModal()" class="px-3.5 py-1.5 border border-zinc-300 rounded-xl font-semibold text-zinc-600 hover:bg-zinc-100">Cancel·lar</button>
+          <button onclick="saveThresholdsModal()" class="px-4 py-1.5 bg-zinc-900 hover:bg-zinc-800 text-white rounded-xl font-semibold shadow-subtle">Desar</button>
         </div>
       </div>
     </div>
   </div>
 
   <!-- MODAL NOVA CLASSE -->
-  <div id="newGroupModal" class="fixed inset-0 bg-slate-900/40 backdrop-blur-xs z-50 flex items-center justify-center p-4 hidden no-print">
-    <div class="bg-white rounded-2xl shadow-xl max-w-md w-full overflow-hidden border border-slate-200">
-      <div class="px-6 py-4 bg-slate-900 text-white flex justify-between items-center">
+  <div id="newGroupModal" class="fixed inset-0 bg-zinc-950/40 backdrop-blur-xs z-50 flex items-center justify-center p-4 hidden no-print">
+    <div class="bg-white rounded-3xl shadow-card max-w-md w-full overflow-hidden border border-zinc-200">
+      <div class="px-6 py-4 bg-zinc-900 text-white flex justify-between items-center">
         <h3 class="text-sm font-bold flex items-center gap-2">
-          <i class="fa-solid fa-graduation-cap text-indigo-400"></i> Crear Nova Classe
+          <i class="fa-solid fa-graduation-cap text-zinc-400"></i> Crear Nova Classe
         </h3>
-        <button onclick="closeNewGroupModal()" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
+        <button onclick="closeNewGroupModal()" class="text-zinc-400 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
       </div>
       <div class="p-6 space-y-4 text-xs">
         <div>
-          <label class="block font-semibold text-slate-700 mb-1">Nom de la Classe o Curs</label>
-          <input type="text" id="modalNewGroupNameInput" placeholder="Ex: 1r ESO A, 2n ESO B..." class="w-full text-sm border border-slate-300 rounded-lg p-2.5 focus:ring-2 focus:ring-indigo-500 outline-none font-semibold">
+          <label class="block font-semibold text-zinc-700 mb-1">Nom del Grup o Curs</label>
+          <input type="text" id="modalNewGroupNameInput" placeholder="Ex: 1r ESO A, 2n ESO B..." class="w-full text-sm border border-zinc-200 rounded-xl p-2.5 focus:ring-2 focus:ring-zinc-900 outline-none font-semibold">
         </div>
       </div>
-      <div class="px-6 py-3 bg-slate-50 border-t border-slate-200 flex justify-end gap-2 text-xs">
-        <button onclick="closeNewGroupModal()" class="px-4 py-2 border border-slate-300 rounded-lg font-semibold text-slate-600 hover:bg-slate-100">Cancel·lar</button>
-        <button onclick="confirmCreateNewGroup()" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg font-semibold shadow-xs">Crear Classe</button>
+      <div class="px-6 py-3 bg-zinc-50 border-t border-zinc-200 flex justify-end gap-2 text-xs">
+        <button onclick="closeNewGroupModal()" class="px-4 py-2 border border-zinc-300 rounded-xl font-semibold text-zinc-600 hover:bg-zinc-100">Cancel·lar</button>
+        <button onclick="confirmCreateNewGroup()" class="px-4 py-2 bg-zinc-900 hover:bg-zinc-800 text-white rounded-xl font-semibold shadow-subtle">Crear Classe</button>
       </div>
     </div>
   </div>
 
   <!-- MODAL SdA -->
-  <div id="sdaModal" class="fixed inset-0 bg-slate-900/40 backdrop-blur-xs z-50 flex items-center justify-center p-4 hidden no-print">
-    <div class="bg-white rounded-2xl shadow-xl max-w-3xl w-full max-h-[90vh] flex flex-col overflow-hidden border border-slate-200">
-      <div class="px-6 py-4 bg-slate-900 text-white flex justify-between items-center">
-        <div class="flex items-center gap-3">
-          <div class="w-8 h-8 rounded-lg bg-indigo-500/20 text-indigo-400 flex items-center justify-center">
-            <i class="fa-solid fa-sliders text-sm"></i>
+  <div id="sdaModal" class="fixed inset-0 bg-zinc-950/40 backdrop-blur-xs z-50 flex items-center justify-center p-4 hidden no-print">
+    <div class="bg-white rounded-3xl shadow-card max-w-3xl w-full max-h-[90vh] flex flex-col overflow-hidden border border-zinc-200">
+      <div class="px-6 py-4 bg-zinc-900 text-white flex justify-between items-center">
+        <div class="flex items-center gap-2.5">
+          <div class="w-8 h-8 rounded-xl bg-zinc-800 text-zinc-200 flex items-center justify-center text-xs">
+            <i class="fa-solid fa-sliders"></i>
           </div>
           <div>
             <h3 class="text-sm font-bold tracking-tight">Configuració de la Situació d'Aprenentatge (SdA)</h3>
-            <p class="text-[11px] text-slate-400">Ponderació de la SdA, Criteris oficials de 1r i 2n d'ESO i OAs.</p>
+            <p class="text-[11px] text-zinc-400">Ponderació de la SdA, Criteris oficials de 1r i 2n d'ESO i OAs.</p>
           </div>
         </div>
-        <button onclick="closeSdaModal()" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
+        <button onclick="closeSdaModal()" class="text-zinc-400 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
       </div>
 
       <div class="p-6 overflow-y-auto space-y-5 flex-1 text-xs">
         <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
           <div class="sm:col-span-2">
-            <label class="block font-semibold text-slate-700 mb-1">Títol de la Situació d'Aprenentatge</label>
-            <input type="text" id="modalSdaTitle" placeholder="Ex: Hàbits saludables i condició física" class="w-full text-sm border border-slate-300 rounded-lg p-2.5 focus:ring-2 focus:ring-indigo-500 outline-none font-semibold text-slate-900">
+            <label class="block font-semibold text-zinc-700 mb-1">Títol de la Situació d'Aprenentatge</label>
+            <input type="text" id="modalSdaTitle" placeholder="Ex: Hàbits saludables i condició física" class="w-full text-sm border border-zinc-200 rounded-xl p-2.5 focus:ring-2 focus:ring-zinc-900 outline-none font-semibold text-zinc-900">
           </div>
           <div>
-            <label class="block font-semibold text-indigo-700 mb-1">Pes al Trimestre (%)</label>
+            <label class="block font-semibold text-zinc-800 mb-1">Pes al Trimestre (%)</label>
             <div class="flex items-center gap-1.5">
-              <input type="number" id="modalSdaTrimWeight" value="50" min="0" max="100" class="w-full text-sm border border-indigo-200 bg-indigo-50/50 rounded-lg p-2.5 focus:ring-2 focus:ring-indigo-500 outline-none font-mono font-bold text-indigo-900 text-center">
-              <span class="text-slate-400 font-mono font-bold text-sm">%</span>
+              <input type="number" id="modalSdaTrimWeight" value="50" min="0" max="100" class="w-full text-sm border border-zinc-200 bg-zinc-50 rounded-xl p-2.5 focus:ring-2 focus:ring-zinc-900 outline-none font-mono font-bold text-zinc-900 text-center">
+              <span class="text-zinc-400 font-mono font-bold text-sm">%</span>
             </div>
           </div>
         </div>
 
-        <div class="bg-slate-50 border border-slate-200/80 p-3.5 rounded-xl space-y-2">
+        <div class="bg-zinc-50 border border-zinc-200/80 p-3.5 rounded-2xl space-y-2">
           <div class="flex justify-between items-center">
-            <span class="font-bold text-slate-700 text-[11px] uppercase tracking-wider flex items-center gap-1.5">
-              <i class="fa-solid fa-layer-group text-indigo-600"></i> A quines classes s'aplica?
-            </span>
+            <span class="font-bold text-zinc-700 text-[11px] uppercase tracking-wider">A quins grups s'aplica?</span>
             <div class="flex gap-2 text-[11px]">
-              <button type="button" onclick="selectAllModalGroups(true)" class="font-semibold text-indigo-600 hover:underline">Marcar totes</button>
-              <span class="text-slate-300">|</span>
-              <button type="button" onclick="selectAllModalGroups(false)" class="font-semibold text-slate-500 hover:underline">Desmarcar</button>
+              <button type="button" onclick="selectAllModalGroups(true)" class="font-semibold text-zinc-900 hover:underline">Totes</button>
+              <span class="text-zinc-300">|</span>
+              <button type="button" onclick="selectAllModalGroups(false)" class="font-semibold text-zinc-400 hover:underline">Cap</button>
             </div>
           </div>
           <div id="modalTargetGroupsContainer" class="flex flex-wrap gap-2 pt-1"></div>
         </div>
 
-        <div class="border-t border-slate-200 pt-4 space-y-3">
+        <div class="border-t border-zinc-200 pt-4 space-y-3">
           <div class="flex items-center justify-between">
-            <span class="font-bold text-slate-800 text-[11px] uppercase tracking-wider">Competències Específiques &amp; OAs dins la SdA</span>
-            <span id="modalWeightSumBadge" class="text-xs font-mono font-bold px-2 py-0.5 rounded-md">Total CEs: 0%</span>
+            <span class="font-bold text-zinc-800 text-[11px] uppercase tracking-wider">Competències Específiques &amp; OAs</span>
+            <span id="modalWeightSumBadge" class="text-xs font-mono font-bold px-2 py-0.5 rounded-md">Total: 0%</span>
           </div>
           <div id="modalCeCardsContainer" class="space-y-3.5"></div>
         </div>
       </div>
 
-      <div class="px-6 py-3.5 bg-slate-50 border-t border-slate-200 flex justify-between items-center text-xs">
-        <span class="text-[11px] text-slate-400">Els criteris i OAs són opcionals i es poden modificar en qualsevol moment.</span>
+      <div class="px-6 py-3.5 bg-zinc-50 border-t border-zinc-200 flex justify-between items-center text-xs">
+        <span class="text-[11px] text-zinc-400">Els criteris i OAs es poden ajustar en qualsevol moment.</span>
         <div class="flex gap-2">
-          <button onclick="closeSdaModal()" class="px-3.5 py-1.5 border border-slate-300 rounded-lg font-semibold text-slate-600 hover:bg-slate-100">Cancel·lar</button>
-          <button onclick="saveSdaFromModal()" class="px-4 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg font-semibold shadow-xs">Desar SdA</button>
+          <button onclick="closeSdaModal()" class="px-3.5 py-1.5 border border-zinc-300 rounded-xl font-semibold text-zinc-600 hover:bg-zinc-100">Cancel·lar</button>
+          <button onclick="saveSdaFromModal()" class="px-4 py-1.5 bg-zinc-900 hover:bg-zinc-800 text-white rounded-xl font-semibold shadow-subtle">Desar SdA</button>
         </div>
       </div>
     </div>
   </div>
 
   <script>
+    // Paleta cromàtica editorial refinada (estil Notion / Linear)
     const CE_COLOR_THEMES = {
-      CE1: { header: 'bg-sky-100 text-sky-950 border-sky-200', critHeader: 'bg-sky-50 text-sky-800 border-sky-200', weightHeader: 'bg-sky-100/70 text-sky-900 border-sky-200', oaEven: 'bg-sky-50/40', oaOdd: 'bg-sky-50/80', scoreCe: 'bg-sky-100 text-sky-950 font-bold border-sky-300', levelCe: 'bg-sky-50 border-sky-200' },
-      CE2: { header: 'bg-emerald-100 text-emerald-950 border-emerald-200', critHeader: 'bg-emerald-50 text-emerald-800 border-emerald-200', weightHeader: 'bg-emerald-100/70 text-emerald-900 border-emerald-200', oaEven: 'bg-emerald-50/40', oaOdd: 'bg-emerald-50/80', scoreCe: 'bg-emerald-100 text-emerald-950 font-bold border-emerald-300', levelCe: 'bg-emerald-50 border-emerald-200' },
-      CE3: { header: 'bg-purple-100 text-purple-950 border-purple-200', critHeader: 'bg-purple-50 text-purple-800 border-purple-200', weightHeader: 'bg-purple-100/70 text-purple-900 border-purple-200', oaEven: 'bg-purple-50/40', oaOdd: 'bg-purple-50/80', scoreCe: 'bg-purple-100 text-purple-950 font-bold border-purple-300', levelCe: 'bg-purple-50 border-purple-200' },
-      CE4: { header: 'bg-amber-100 text-amber-950 border-amber-200', critHeader: 'bg-amber-50 text-amber-800 border-amber-200', weightHeader: 'bg-amber-100/70 text-amber-900 border-amber-200', oaEven: 'bg-amber-50/40', oaOdd: 'bg-amber-50/80', scoreCe: 'bg-amber-100 text-amber-950 font-bold border-amber-300', levelCe: 'bg-amber-50 border-amber-200' },
-      CE5: { header: 'bg-rose-100 text-rose-950 border-rose-200', critHeader: 'bg-rose-50 text-rose-800 border-rose-200', weightHeader: 'bg-rose-100/70 text-rose-900 border-rose-200', oaEven: 'bg-rose-50/40', oaOdd: 'bg-rose-50/80', scoreCe: 'bg-rose-100 text-rose-950 font-bold border-rose-300', levelCe: 'bg-rose-50 border-rose-200' }
+      CE1: { header: 'bg-zinc-50 text-zinc-900', critHeader: 'text-zinc-600', scoreCe: 'font-semibold text-zinc-900' },
+      CE2: { header: 'bg-zinc-50 text-zinc-900', critHeader: 'text-zinc-600', scoreCe: 'font-semibold text-zinc-900' },
+      CE3: { header: 'bg-zinc-50 text-zinc-900', critHeader: 'text-zinc-600', scoreCe: 'font-semibold text-zinc-900' },
+      CE4: { header: 'bg-zinc-50 text-zinc-900', critHeader: 'text-zinc-600', scoreCe: 'font-semibold text-zinc-900' },
+      CE5: { header: 'bg-zinc-50 text-zinc-900', critHeader: 'text-zinc-600', scoreCe: 'font-semibold text-zinc-900' }
     };
 
     const CURRICULAR_CRITERIA_CATALOG = {
@@ -727,36 +751,19 @@
     };
 
     const OFFICIAL_CES = [
-      { id: 'CE1', name: 'CE1. Adoptar un estil de vida actiu i saludable', short: 'Estil de vida actiu' },
-      { id: 'CE2', name: 'CE2. Prendre decisions i resoldre situacions motrius', short: 'Situacions motrius' },
-      { id: 'CE3', name: 'CE3. Utilitzar els recursos expressius del cos i del moviment', short: 'Expressió corporal' },
-      { id: 'CE4', name: 'CE4. Interactuar amb el medi natural i l’entorn de manera sostenible', short: 'Entorn i natura' },
-      { id: 'CE5', name: 'CE5. Adquirir actituds, valors i habilitats socials per a la convivència', short: 'Valors i convivència' }
+      { id: 'CE1', name: 'CE1. Estil de vida actiu i saludable', short: 'Estil de vida' },
+      { id: 'CE2', name: 'CE2. Situacions motrius i joc', short: 'Motricitat' },
+      { id: 'CE3', name: 'CE3. Expressió corporal i dansa', short: 'Expressió' },
+      { id: 'CE4', name: 'CE4. Medi natural i entorn', short: 'Entorn' },
+      { id: 'CE5', name: 'CE5. Valors, inclusió i convivència', short: 'Valors' }
     ];
 
     const STORAGE_KEY = 'EF_COMPETENCIAL_DATA_V10';
     const THRESHOLDS_STORAGE_KEY = 'EF_COMPETENCIAL_THRESHOLDS_V1';
 
-    const DEFAULT_THRESHOLDS = {
-      epa: 1.0,
-      as: 2.0,
-      an: 3.0,
-      ae: 4.0
-    };
-
-    const DEFAULT_FINAL_CE_WEIGHTS = {
-      CE1: 20,
-      CE2: 20,
-      CE3: 20,
-      CE4: 20,
-      CE5: 20
-    };
-
-    const DEFAULT_FINAL_TRIM_WEIGHTS = {
-      t1: 33.33,
-      t2: 33.33,
-      t3: 33.34
-    };
+    const DEFAULT_THRESHOLDS = { epa: 1.0, as: 2.0, an: 3.0, ae: 4.0 };
+    const DEFAULT_FINAL_CE_WEIGHTS = { CE1: 20, CE2: 20, CE3: 20, CE4: 20, CE5: 20 };
+    const DEFAULT_FINAL_TRIM_WEIGHTS = { t1: 33.33, t2: 33.33, t3: 33.34 };
 
     let gradeThresholds = loadThresholds();
 
@@ -965,10 +972,7 @@
     }
 
     function exportBackupJSON() {
-      const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify({
-        appData,
-        gradeThresholds
-      }, null, 2));
+      const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify({ appData, gradeThresholds }, null, 2));
       const a = document.createElement('a');
       a.setAttribute("href", dataStr);
       a.setAttribute("download", `EF_Competencial_Backup_${new Date().toISOString().slice(0, 10)}.json`);
@@ -1071,35 +1075,33 @@
         const sdaCount = (group.sdas || []).length;
 
         return `
-          <div class="bg-white rounded-2xl border border-slate-200/90 p-5 shadow-2xs hover:shadow-md hover:border-indigo-200 transition-all flex flex-col justify-between group">
+          <div class="bg-white rounded-2xl border border-zinc-200/80 p-5 shadow-card hover:border-zinc-300 transition-all flex flex-col justify-between group">
             <div class="space-y-3">
               <div class="flex items-start justify-between">
-                <div class="w-9 h-9 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center text-sm font-bold">
+                <div class="w-8 h-8 rounded-xl bg-zinc-100 text-zinc-800 flex items-center justify-center text-xs font-bold font-mono">
                   ${group.name.slice(0, 2)}
                 </div>
-                <div class="flex items-center gap-1">
-                  <button onclick="event.stopPropagation(); deleteGroup('${gId}')" title="Eliminar classe" class="text-slate-300 hover:text-rose-500 p-1 transition-colors">
-                    <i class="fa-regular fa-trash-can text-xs"></i>
-                  </button>
-                </div>
+                <button onclick="event.stopPropagation(); deleteGroup('${gId}')" title="Eliminar classe" class="text-zinc-300 hover:text-rose-500 p-1 transition">
+                  <i class="fa-regular fa-trash-can text-xs"></i>
+                </button>
               </div>
 
               <div>
-                <h4 class="text-base font-bold text-slate-900 group-hover:text-indigo-600 transition-colors">${group.name}</h4>
-                <div class="flex items-center gap-3 text-xs text-slate-400 mt-1 font-medium">
-                  <span><i class="fa-solid fa-users text-slate-300 mr-1"></i>${studentCount} alumnes</span>
+                <h4 class="text-base font-bold text-zinc-900">${group.name}</h4>
+                <div class="flex items-center gap-2 text-xs text-zinc-400 mt-1 font-medium">
+                  <span>${studentCount} alumnes</span>
                   <span>·</span>
-                  <span><i class="fa-regular fa-folder text-slate-300 mr-1"></i>${sdaCount} SdAs</span>
+                  <span>${sdaCount} SdAs</span>
                 </div>
               </div>
             </div>
 
-            <div class="pt-4 mt-4 border-t border-slate-100 flex items-center justify-between gap-2">
-              <button onclick="enterClass('${gId}'); switchView('roster');" class="inline-flex items-center gap-1 text-xs font-semibold text-slate-600 hover:text-indigo-600 bg-slate-50 hover:bg-slate-100 px-2.5 py-1.5 rounded-lg border border-slate-200 transition">
-                <i class="fa-solid fa-users text-slate-400"></i> Alumnes
+            <div class="pt-4 mt-4 border-t border-zinc-100 flex items-center justify-between gap-2">
+              <button onclick="enterClass('${gId}'); switchView('roster');" class="inline-flex items-center gap-1 text-xs font-semibold text-zinc-600 hover:text-zinc-900 bg-zinc-50 hover:bg-zinc-100 px-3 py-1.5 rounded-lg transition">
+                Alumnes
               </button>
-              <button onclick="enterClass('${gId}')" class="inline-flex items-center gap-1.5 text-xs font-bold text-indigo-600 hover:text-indigo-700 transition">
-                Entrar a Qualificar <i class="fa-solid fa-arrow-right text-[10px]"></i>
+              <button onclick="enterClass('${gId}')" class="inline-flex items-center gap-1 text-xs font-bold text-zinc-900 hover:text-zinc-600 transition">
+                Qualificar <i class="fa-solid fa-arrow-right text-[10px] ml-0.5"></i>
               </button>
             </div>
           </div>
@@ -1162,19 +1164,19 @@
       tabBadge.textContent = count;
 
       if (!curGroup.students || curGroup.students.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="3" class="p-8 text-center text-slate-400">Encara no hi ha cap alumne/a registrat en aquesta classe. Afegeix-ne un amb els camps de dalt.</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="3" class="p-8 text-center text-zinc-400 text-xs">Cap alumne registrat. Afegeix-ne un des del formulari superior.</td></tr>`;
         return;
       }
 
       tbody.innerHTML = curGroup.students.map((st, idx) => `
-        <tr class="hover:bg-slate-50/70 transition">
-          <td class="py-2 px-3 text-center text-slate-400 font-mono font-medium">${idx + 1}</td>
+        <tr class="hover:bg-zinc-50/60 transition">
+          <td class="py-2 px-3 text-center text-zinc-400 font-mono text-xs">${idx + 1}</td>
           <td class="py-2 px-4">
-            <input type="text" value="${st.name || ''}" onchange="updateStudentName(${st.id}, this.value)" class="w-full bg-transparent border-0 border-b border-transparent hover:border-slate-300 focus:border-indigo-600 focus:bg-white rounded-none py-1 font-semibold text-slate-800 outline-none">
+            <input type="text" value="${st.name || ''}" onchange="updateStudentName(${st.id}, this.value)" class="w-full bg-transparent border-0 border-b border-transparent hover:border-zinc-300 focus:border-zinc-900 rounded-none py-1 font-semibold text-zinc-800 outline-none text-xs">
           </td>
           <td class="py-2 px-3 text-center">
-            <button onclick="deleteStudent(${st.id})" class="text-slate-400 hover:text-rose-500 p-1 transition-colors" title="Eliminar alumne">
-              <i class="fa-regular fa-trash-can"></i>
+            <button onclick="deleteStudent(${st.id})" class="text-zinc-400 hover:text-rose-500 p-1 transition" title="Eliminar alumne">
+              <i class="fa-regular fa-trash-can text-xs"></i>
             </button>
           </td>
         </tr>
@@ -1236,13 +1238,13 @@
         const btn = document.getElementById(`trimBtn${n}_class`);
         if (btn) {
           if (n === t) {
-            btn.className = "px-2.5 py-1 rounded-md transition shadow-2xs bg-white text-slate-900 font-semibold";
+            btn.className = "px-3 py-1 rounded-lg transition bg-white text-zinc-900 shadow-subtle font-semibold";
           } else {
-            btn.className = "px-2.5 py-1 rounded-md transition text-slate-600 hover:text-slate-900 font-medium";
+            btn.className = "px-3 py-1 rounded-lg transition text-zinc-500 hover:text-zinc-900 font-medium";
           }
         }
       });
-      document.getElementById('trimTitle').textContent = `Resum i Ponderació del Trimestre ${t}`;
+      document.getElementById('trimTitle').textContent = `Resum del Trimestre ${t}`;
       populateSdaSelect();
       if (appState.currentView === 'sda') renderSdaGrid();
       if (appState.currentView === 'trim') renderTrimView();
@@ -1264,10 +1266,10 @@
         const btn = document.getElementById(t.el);
         const sec = document.getElementById(t.sec);
         if (t.id === view) {
-          btn.className = "inline-flex items-center gap-2 px-3 py-1.5 rounded-md font-semibold bg-indigo-50 text-indigo-700 transition";
+          btn.className = "px-3 py-1 rounded-md text-zinc-900 bg-zinc-100 transition";
           sec.classList.remove('hidden');
         } else {
-          btn.className = "inline-flex items-center gap-2 px-3 py-1.5 rounded-md font-medium text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition";
+          btn.className = "px-3 py-1 rounded-md text-zinc-500 hover:text-zinc-900 hover:bg-zinc-50 transition";
           sec.classList.add('hidden');
         }
       });
@@ -1280,29 +1282,31 @@
       if (view === 'stats') initStatsView();
     }
 
+    // Píndoles de nivell estil Notion (discretes i d'alta resolució)
     function getLevel(val) {
       if (val === null || val === undefined || isNaN(val) || val <= 0) {
-        return { code: "—", badge: "bg-slate-50 text-slate-400 ring-slate-200" };
+        return { code: "—", badge: "bg-zinc-100 text-zinc-400 ring-zinc-200/60" };
       }
       const th = gradeThresholds;
-      if (val < th.epa) return { code: "NA", badge: "bg-rose-50 text-rose-700 ring-rose-200" };
-      if (val < th.as) return { code: "EPA", badge: "bg-amber-50 text-amber-800 ring-amber-200" };
-      if (val < th.an) return { code: "AS", badge: "bg-sky-50 text-sky-800 ring-sky-200" };
-      if (val < th.ae) return { code: "AN", badge: "bg-indigo-50 text-indigo-800 ring-indigo-200" };
-      return { code: "AE", badge: "bg-emerald-50 text-emerald-800 ring-emerald-200" };
+      if (val < th.epa) return { code: "NA", badge: "bg-rose-50 text-rose-700 ring-rose-200/80 font-bold" };
+      if (val < th.as) return { code: "EPA", badge: "bg-amber-50 text-amber-800 ring-amber-200/80 font-bold" };
+      if (val < th.an) return { code: "AS", badge: "bg-sky-50 text-sky-800 ring-sky-200/80 font-bold" };
+      if (val < th.ae) return { code: "AN", badge: "bg-indigo-50 text-indigo-800 ring-indigo-200/80 font-bold" };
+      return { code: "AE", badge: "bg-emerald-50 text-emerald-800 ring-emerald-200/80 font-bold" };
     }
 
+    // Cel·les d'entrada Zero-Border amb glow ring en focus
     function getScoreColorClass(val) {
       if (val === '' || val === null || val === undefined || isNaN(val)) {
-        return 'bg-white text-slate-800 border-slate-300/80';
+        return 'bg-transparent text-zinc-800 hover:bg-zinc-100/50';
       }
       const num = parseFloat(val);
       const th = gradeThresholds;
-      if (num < th.epa) return 'bg-rose-50 text-rose-900 border-rose-300 font-bold';
-      if (num < th.as) return 'bg-amber-50 text-amber-900 border-amber-300 font-bold';
-      if (num < th.an) return 'bg-sky-50 text-sky-900 border-sky-300 font-bold';
-      if (num < th.ae) return 'bg-indigo-50 text-indigo-900 border-indigo-300 font-bold';
-      return 'bg-emerald-50 text-emerald-900 border-emerald-400 font-black';
+      if (num < th.epa) return 'bg-rose-50/50 text-rose-800 font-bold';
+      if (num < th.as) return 'bg-amber-50/50 text-amber-900 font-bold';
+      if (num < th.an) return 'bg-sky-50/50 text-sky-900 font-bold';
+      if (num < th.ae) return 'bg-indigo-50/50 text-indigo-900 font-bold';
+      return 'bg-emerald-50/50 text-emerald-900 font-bold';
     }
 
     function openThresholdsModal() {
@@ -1347,7 +1351,6 @@
       }
     }
 
-    // GESTIÓ PENALITZACIÓ PER FALTA DE PARTICIPACIÓ PRÀCTICA
     function toggleAttendancePenalty(stId, trimNum = null) {
       const t = trimNum || appState.currentTrim;
       const curGroup = getCurrentGroup();
@@ -1416,7 +1419,6 @@
 
     function getStudentTrimScoreByTrim(stId, trimNum, group = null) {
       const curGroup = group || getCurrentGroup();
-      
       if (hasAttendancePenalty(stId, trimNum, curGroup)) {
         return 0.90;
       }
@@ -1490,13 +1492,15 @@
       const curGroup = getCurrentGroup();
       const trimSdas = (curGroup.sdas || []).filter(s => s.trim === appState.currentTrim);
       if (trimSdas.length === 0) {
-        sel.innerHTML = `<option value="">Sense SdAs en aquest trimestre</option>`;
+        sel.innerHTML = `<option value="">Sense SdAs al trimestre ${appState.currentTrim}</option>`;
         return;
       }
       sel.innerHTML = trimSdas.map(s => `<option value="${s.id}">${s.title} (${s.trimWeight || 0}%)</option>`).join('');
     }
 
-    // GRAELLA DE SdA NETEJA (AMB PUNT DISCRET SI TÉ PENALITZACIÓ)
+    // ==========================================
+    // GRAELLA DE QUALIFICACIÓ (LINEAR / CRAFT STYLE)
+    // ==========================================
     function renderSdaGrid() {
       const curGroup = getCurrentGroup();
       const trimSdas = (curGroup.sdas || []).filter(s => s.trim === appState.currentTrim);
@@ -1521,27 +1525,27 @@
         titleBar.innerHTML = `
           <div class="flex items-center gap-2">
             <span class="w-2 h-2 rounded-full bg-amber-400"></span>
-            <span class="font-bold text-slate-100">Cap SdA creada al trimestre ${appState.currentTrim}</span>
+            <span class="font-bold text-zinc-100">Cap SdA creada al trimestre ${appState.currentTrim}</span>
           </div>
-          <button onclick="openSdaModal(true)" class="bg-indigo-600 hover:bg-indigo-500 text-white px-2.5 py-1 rounded text-xs font-semibold">
+          <button onclick="openSdaModal(true)" class="bg-zinc-800 hover:bg-zinc-700 text-white px-2.5 py-1 rounded-lg text-xs font-semibold">
             + Crear SdA
           </button>
         `;
         head.innerHTML = `
-          <tr class="border-b border-slate-200 bg-slate-100">
+          <tr class="border-b border-zinc-200 bg-zinc-50/70 text-zinc-500">
             <th class="py-2.5 px-3 w-12 text-center font-mono">#</th>
             <th class="py-2.5 px-4 min-w-[224px]">Alumne/a</th>
-            <th class="py-2.5 px-4 text-center text-slate-500 font-normal italic">Crea una SdA per començar a qualificar</th>
+            <th class="py-2.5 px-4 text-center text-zinc-400 font-normal italic">Crea una SdA per començar a qualificar</th>
           </tr>
         `;
         if (students.length === 0) {
-          body.innerHTML = `<tr><td colspan="3" class="p-8 text-center text-slate-400">No hi ha alumnes. Vés a la pestanya <b>Alumnat</b> per afegir-ne.</td></tr>`;
+          body.innerHTML = `<tr><td colspan="3" class="p-8 text-center text-zinc-400 text-xs">No hi ha alumnes en aquest grup.</td></tr>`;
         } else {
           body.innerHTML = students.map((st, idx) => `
-            <tr class="hover:bg-slate-50">
-              <td class="py-2 px-3 text-center text-slate-400 font-mono">${idx + 1}</td>
-              <td class="py-2 px-4 font-bold text-slate-900">${st.name}</td>
-              <td class="py-2 px-4 text-center text-slate-300 text-xs italic">Sense SdA activa</td>
+            <tr class="hover:bg-zinc-50/50">
+              <td class="py-2 px-3 text-center text-zinc-400 font-mono text-xs">${idx + 1}</td>
+              <td class="py-2 px-4 font-semibold text-zinc-900 text-xs">${st.name}</td>
+              <td class="py-2 px-4 text-center text-zinc-300 text-xs italic">Sense SdA activa</td>
             </tr>
           `).join('');
         }
@@ -1549,76 +1553,73 @@
       }
 
       titleBar.innerHTML = `
-        <div class="flex items-center gap-2">
+        <div class="flex items-center gap-2.5">
           <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
-          <span class="font-bold text-slate-100 uppercase tracking-wide">${sda.title}</span>
-          <span class="text-indigo-300 font-mono font-bold bg-indigo-950 px-2 py-0.5 rounded border border-indigo-700/50">Pes Trimestre: ${sda.trimWeight || 0}%</span>
-          <span class="text-slate-400 font-mono text-[11px]">(${curGroup.name} · T${sda.trim})</span>
+          <span class="font-bold text-zinc-100 tracking-tight uppercase">${sda.title}</span>
+          <span class="text-zinc-400 font-mono text-[11px] bg-zinc-800 px-2 py-0.5 rounded border border-zinc-700/50">Pes: ${sda.trimWeight || 0}%</span>
         </div>
-        <div class="text-[11px] text-slate-400 font-mono">1r i 2n d'ESO · Criteris Oficials</div>
+        <div class="text-[11px] text-zinc-400 font-mono">${curGroup.name} · Trimestre ${sda.trim}</div>
       `;
 
       const activeCes = OFFICIAL_CES.filter(ce => sda.competences && sda.competences[ce.id] && sda.competences[ce.id].active);
 
-      let r1 = `<tr class="border-b border-slate-300">
-        <th rowspan="4" class="py-2.5 px-2.5 w-12 min-w-[48px] max-w-[48px] text-center font-mono text-slate-700 font-bold bg-slate-200 border-r border-slate-300 sticky top-0 left-0 z-40">#</th>
-        <th rowspan="4" class="py-2.5 px-3.5 w-56 min-w-[224px] max-w-[224px] font-bold text-slate-900 bg-slate-200 border-r border-slate-300 sticky top-0 left-12 z-40 shadow-[4px_0_6px_-2px_rgba(0,0,0,0.15)]">Alumne/a</th>`;
+      // Fila 1: CEs amb disseny clar i delimitat
+      let r1 = `<tr class="border-b border-zinc-200 bg-zinc-50/90 text-zinc-800">
+        <th rowspan="4" class="py-2.5 px-2.5 w-12 min-w-[48px] max-w-[48px] text-center font-mono text-zinc-500 font-bold bg-zinc-100 border-r border-zinc-200 sticky top-0 left-0 z-40">#</th>
+        <th rowspan="4" class="py-2.5 px-3.5 w-56 min-w-[224px] max-w-[224px] font-bold text-zinc-900 bg-zinc-100 border-r border-zinc-200 sticky top-0 left-12 z-40 shadow-[4px_0_8px_-4px_rgba(0,0,0,0.06)]">Alumne/a</th>`;
       
       activeCes.forEach(ce => {
-        const theme = CE_COLOR_THEMES[ce.id] || CE_COLOR_THEMES.CE1;
         const conf = sda.competences[ce.id];
         const oasCount = (conf.oas && conf.oas.length > 0) ? conf.oas.length : 1;
-        r1 += `<th colspan="${oasCount + 2}" class="py-2.5 px-3 text-center border-r ${theme.header} font-bold text-xs">${ce.name}</th>`;
+        r1 += `<th colspan="${oasCount + 2}" class="py-2.5 px-3 text-center border-r border-zinc-200 font-bold text-xs text-zinc-900">${ce.name}</th>`;
       });
-      r1 += `<th colspan="2" class="py-2.5 px-3 text-center border-l border-slate-300 bg-slate-900 text-slate-100 font-bold uppercase tracking-wider text-[11px]">Qualificació SdA</th></tr>`;
+      r1 += `<th colspan="2" class="py-2.5 px-3 text-center border-l border-zinc-300 bg-zinc-900 text-white font-bold uppercase tracking-wider text-[11px]">Qualificació SdA</th></tr>`;
 
-      let r2 = `<tr class="border-b border-slate-200 text-[11px]">`;
+      // Fila 2: Criteris Curriculars
+      let r2 = `<tr class="border-b border-zinc-200/80 bg-zinc-50/40 text-[11px]">`;
       activeCes.forEach(ce => {
-        const theme = CE_COLOR_THEMES[ce.id] || CE_COLOR_THEMES.CE1;
         const conf = sda.competences[ce.id];
         const oasCount = (conf.oas && conf.oas.length > 0) ? conf.oas.length : 1;
-        r2 += `<th colspan="${oasCount}" class="py-1 px-2 text-center border-r ${theme.critHeader} font-mono text-[10px] font-semibold">${conf.curricularCriteria || '<span class="text-slate-300 italic font-normal">Sense criteris</span>'}</th>`;
-        r2 += `<th colspan="2" rowspan="2" class="py-1 px-2 text-center border-r ${theme.scoreCe} text-[11px]">Assoliment ${ce.id}</th>`;
+        r2 += `<th colspan="${oasCount}" class="py-1 px-2 text-center border-r border-zinc-200 font-mono text-[10px] text-zinc-500 font-medium">${conf.curricularCriteria || '<span class="text-zinc-300 italic">Sense criteris</span>'}</th>`;
+        r2 += `<th colspan="2" rowspan="2" class="py-1 px-2 text-center border-r border-zinc-200 bg-zinc-100/50 text-[11px] font-bold text-zinc-900">Assoliment ${ce.id}</th>`;
       });
-      r2 += `<th colspan="2" rowspan="2" class="py-1 px-2 text-center border-l border-slate-300 bg-slate-800 text-slate-200 font-semibold text-[11px]">Consolidació SdA</th></tr>`;
+      r2 += `<th colspan="2" rowspan="2" class="py-1 px-2 text-center border-l border-zinc-300 bg-zinc-800 text-zinc-200 font-semibold text-[11px]">Consolidació SdA</th></tr>`;
 
-      let r3 = `<tr class="border-b border-slate-200 text-[10px]">`;
+      // Fila 3: OAs
+      let r3 = `<tr class="border-b border-zinc-200 text-[10px] bg-white">`;
       activeCes.forEach(ce => {
-        const theme = CE_COLOR_THEMES[ce.id] || CE_COLOR_THEMES.CE1;
         const conf = sda.competences[ce.id];
         if (conf.oas && conf.oas.length > 0) {
-          conf.oas.forEach((oa, idx) => {
-            const bgClass = (idx % 2 === 0) ? theme.oaEven : theme.oaOdd;
-            r3 += `<th class="py-1.5 px-2 border-r border-slate-200 font-normal max-w-[120px] truncate text-slate-700 ${bgClass}" title="${oa.label}">${oa.label}</th>`;
+          conf.oas.forEach((oa) => {
+            r3 += `<th class="py-1.5 px-2 border-r border-zinc-200/70 font-medium max-w-[120px] truncate text-zinc-600" title="${oa.label}">${oa.label}</th>`;
           });
         } else {
-          r3 += `<th class="py-1.5 px-2 border-r border-slate-200 font-normal italic text-slate-400 ${theme.oaEven}">Avaluació directa</th>`;
+          r3 += `<th class="py-1.5 px-2 border-r border-zinc-200/70 font-normal italic text-zinc-400">Avaluació directa</th>`;
         }
       });
       r3 += `</tr>`;
 
-      let r4 = `<tr class="border-b border-slate-300 text-xs font-semibold">`;
+      // Fila 4: Ponderacions
+      let r4 = `<tr class="border-b border-zinc-200 text-xs font-semibold bg-zinc-50/60">`;
       activeCes.forEach(ce => {
-        const theme = CE_COLOR_THEMES[ce.id] || CE_COLOR_THEMES.CE1;
         const conf = sda.competences[ce.id];
         if (conf.oas && conf.oas.length > 0) {
-          conf.oas.forEach((oa, idx) => {
-            const bgClass = (idx % 2 === 0) ? theme.oaEven : theme.oaOdd;
-            r4 += `<th class="py-1 px-1.5 text-center border-r border-slate-200 font-mono text-[10px] text-slate-600 ${bgClass}">${oa.weight || 0}%</th>`;
+          conf.oas.forEach((oa) => {
+            r4 += `<th class="py-1 px-1.5 text-center border-r border-zinc-200 font-mono text-[10px] text-zinc-500">${oa.weight || 0}%</th>`;
           });
         } else {
-          r4 += `<th class="py-1 px-1.5 text-center border-r border-slate-200 font-mono text-[10px] text-slate-600 ${theme.oaEven}">100%</th>`;
+          r4 += `<th class="py-1 px-1.5 text-center border-r border-zinc-200 font-mono text-[10px] text-zinc-500">100%</th>`;
         }
-        r4 += `<th class="py-1 px-2 text-center border-r ${theme.weightHeader} font-mono">${conf.weight || 0}%</th>`;
-        r4 += `<th class="py-1 px-2 text-center border-r ${theme.weightHeader} text-[10px]">Nivell</th>`;
+        r4 += `<th class="py-1 px-2 text-center border-r border-zinc-200 font-mono text-zinc-700 bg-zinc-100/40">${conf.weight || 0}%</th>`;
+        r4 += `<th class="py-1 px-2 text-center border-r border-zinc-200 text-[10px] text-zinc-500 bg-zinc-100/40">Nivell</th>`;
       });
-      r4 += `<th class="py-1 px-2 text-center border-l border-slate-300 bg-slate-900 text-white font-mono text-[10px]">Nota</th>`;
-      r4 += `<th class="py-1 px-2 text-center bg-slate-900 text-white text-[10px]">Nivell</th></tr>`;
+      r4 += `<th class="py-1 px-2 text-center border-l border-zinc-300 bg-zinc-900 text-white font-mono text-[10px]">Nota</th>`;
+      r4 += `<th class="py-1 px-2 text-center bg-zinc-900 text-white text-[10px]">Nivell</th></tr>`;
 
       head.innerHTML = r1 + r2 + r3 + r4;
 
       if (students.length === 0) {
-        body.innerHTML = `<tr><td colspan="25" class="p-8 text-center text-slate-400">No hi ha alumnes en aquesta classe. Fes clic a la pestanya <b>Alumnat</b> per afegir-ne.</td></tr>`;
+        body.innerHTML = `<tr><td colspan="25" class="p-8 text-center text-zinc-400 text-xs">Sense alumnes registrats.</td></tr>`;
         return;
       }
 
@@ -1630,35 +1631,33 @@
         let colCounter = 0;
         const isPenalized = hasAttendancePenalty(st.id, appState.currentTrim, curGroup);
 
-        rowsHtml += `<tr class="hover:bg-slate-50/80 transition-colors">
-          <td class="py-2 px-2.5 w-12 min-w-[48px] max-w-[48px] text-center text-slate-600 font-mono font-medium border-r border-slate-200 bg-white sticky left-0 z-20">${rIdx + 1}</td>
-          <td class="py-2 px-3.5 w-56 min-w-[224px] max-w-[224px] font-semibold text-slate-900 border-r border-slate-200 bg-white sticky left-12 z-20 shadow-[4px_0_6px_-2px_rgba(0,0,0,0.1)]">
+        rowsHtml += `<tr class="hover:bg-zinc-50/70 transition-colors group">
+          <td class="py-1.5 px-2.5 w-12 min-w-[48px] max-w-[48px] text-center text-zinc-400 font-mono text-xs border-r border-zinc-200/80 bg-white sticky left-0 z-20">${rIdx + 1}</td>
+          <td class="py-1.5 px-3.5 w-56 min-w-[224px] max-w-[224px] font-semibold text-zinc-900 border-r border-zinc-200/80 bg-white sticky left-12 z-20 shadow-[4px_0_8px_-4px_rgba(0,0,0,0.06)]">
             <div class="flex items-center justify-between gap-1.5">
-              <span class="truncate" title="${st.name}">${st.name}</span>
-              ${isPenalized ? '<span class="inline-flex items-center gap-1 text-[9px] font-bold text-rose-700 bg-rose-50 border border-rose-200 px-1 py-0.2 rounded shrink-0" title="Penalització activa per manca de pràctica al trimestre"><i class="fa-solid fa-person-running text-rose-500"></i> &lt;%</span>' : ''}
+              <span class="truncate text-xs" title="${st.name}">${st.name}</span>
+              ${isPenalized ? '<span class="inline-flex items-center text-[9px] font-bold text-rose-700 bg-rose-50 border border-rose-200 px-1 rounded shrink-0" title="Penalització activa per manca de pràctica"><i class="fa-solid fa-person-running mr-0.5"></i>&lt;%</span>' : ''}
             </div>
           </td>`;
 
         activeCes.forEach(ce => {
-          const theme = CE_COLOR_THEMES[ce.id] || CE_COLOR_THEMES.CE1;
           const conf = sda.competences[ce.id];
           let ceScore = getStudentCeScoreInSda(sda, st.id, ce.id);
           let lvl = getLevel(ceScore);
 
           if (conf.oas && conf.oas.length > 0) {
-            conf.oas.forEach((oa, oaIdx) => {
-              const bgClass = (oaIdx % 2 === 0) ? theme.oaEven : theme.oaOdd;
+            conf.oas.forEach((oa) => {
               const gradeKey = `${ce.id}_${oa.id}`;
               const val = stGrades[gradeKey] !== undefined ? stGrades[gradeKey] : '';
               const colorClass = getScoreColorClass(val);
 
-              rowsHtml += `<td class="p-1 border-r border-slate-200/60 text-center ${bgClass}">
+              rowsHtml += `<td class="p-0.5 border-r border-zinc-200/60 text-center">
                 <input type="number" step="0.1" min="0" max="4" value="${val}"
                   data-row="${rIdx}" data-col="${colCounter}"
                   onkeydown="handleGridKeyboardNavigation(event, ${rIdx}, ${colCounter})"
                   onfocus="this.select()"
                   onchange="setGrade('${sda.id}', ${st.id}, '${gradeKey}', this.value, ${rIdx}, ${colCounter})"
-                  class="grade-cell-input w-12 text-center py-1 border rounded-md font-mono text-xs outline-none transition-all shadow-2xs focus:ring-2 focus:ring-indigo-500 focus:border-indigo-600 ${colorClass}">
+                  class="grade-cell-input w-full h-8 text-center rounded-lg font-mono text-xs outline-none transition focus:ring-1 focus:ring-zinc-900 focus:bg-white ${colorClass}">
               </td>`;
               colCounter++;
             });
@@ -1667,23 +1666,23 @@
             const val = stGrades[gradeKey] !== undefined ? stGrades[gradeKey] : '';
             const colorClass = getScoreColorClass(val);
 
-            rowsHtml += `<td class="p-1 border-r border-slate-200/60 text-center ${theme.oaEven}">
+            rowsHtml += `<td class="p-0.5 border-r border-zinc-200/60 text-center">
               <input type="number" step="0.1" min="0" max="4" value="${val}"
                 data-row="${rIdx}" data-col="${colCounter}"
                 onkeydown="handleGridKeyboardNavigation(event, ${rIdx}, ${colCounter})"
                 onfocus="this.select()"
                 onchange="setGrade('${sda.id}', ${st.id}, '${gradeKey}', this.value, ${rIdx}, ${colCounter})"
-                class="grade-cell-input w-12 text-center py-1 border rounded-md font-mono text-xs outline-none transition-all shadow-2xs focus:ring-2 focus:ring-indigo-500 focus:border-indigo-600 ${colorClass}">
+                class="grade-cell-input w-full h-8 text-center rounded-lg font-mono text-xs outline-none transition focus:ring-1 focus:ring-zinc-900 focus:bg-white ${colorClass}">
             </td>`;
             colCounter++;
           }
 
           rowsHtml += `
-            <td class="py-2 px-2 text-center font-mono font-bold border-r border-slate-200/80 ${theme.scoreCe}">
-              ${ceScore !== null ? ceScore.toFixed(2) : '<span class="text-slate-300 font-normal">—</span>'}
+            <td class="py-1.5 px-2 text-center font-mono font-bold border-r border-zinc-200/80 bg-zinc-50/40 text-xs">
+              ${ceScore !== null ? ceScore.toFixed(2) : '<span class="text-zinc-300 font-normal">—</span>'}
             </td>
-            <td class="py-2 px-2 text-center border-r border-slate-200/80 ${theme.levelCe}">
-              <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold ring-1 ring-inset ${lvl.badge}">${lvl.code}</span>
+            <td class="py-1.5 px-2 text-center border-r border-zinc-200/80 bg-zinc-50/40">
+              <span class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-bold ring-1 ring-inset ${lvl.badge}">${lvl.code}</span>
             </td>
           `;
         });
@@ -1692,10 +1691,10 @@
         const overallSdaLvl = getLevel(overallSdaScore);
 
         rowsHtml += `
-          <td class="py-2 px-2.5 text-center font-mono font-black text-slate-900 border-l border-slate-300 bg-slate-50/80">
-            ${overallSdaScore !== null ? overallSdaScore.toFixed(2) : '<span class="text-slate-300 font-normal">—</span>'}
+          <td class="py-1.5 px-2.5 text-center font-mono font-black text-zinc-900 border-l border-zinc-300 bg-zinc-50/70 text-xs">
+            ${overallSdaScore !== null ? overallSdaScore.toFixed(2) : '<span class="text-zinc-300 font-normal">—</span>'}
           </td>
-          <td class="py-2 px-2 text-center bg-slate-50/80">
+          <td class="py-1.5 px-2 text-center bg-zinc-50/70">
             <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold ring-1 ring-inset ${overallSdaLvl.badge}">${overallSdaLvl.code}</span>
           </td>
         </tr>`;
@@ -1781,9 +1780,9 @@
           : group.sdas.some(s => s.title === existingTitle && s.trim === appState.currentTrim);
 
         return `
-          <label class="inline-flex items-center gap-2 bg-white px-3 py-1.5 rounded-lg border border-slate-200 cursor-pointer hover:border-slate-300 transition">
-            <input type="checkbox" value="${gId}" ${isChecked ? 'checked' : ''} class="target-group-checkbox rounded text-indigo-600 focus:ring-indigo-500 w-4 h-4">
-            <span class="font-semibold text-slate-800 text-xs">${group.name}</span>
+          <label class="inline-flex items-center gap-2 bg-white px-3 py-1.5 rounded-xl border border-zinc-200 cursor-pointer hover:border-zinc-300 transition">
+            <input type="checkbox" value="${gId}" ${isChecked ? 'checked' : ''} class="target-group-checkbox rounded text-zinc-900 focus:ring-zinc-900 w-3.5 h-3.5">
+            <span class="font-semibold text-zinc-800 text-xs">${group.name}</span>
           </label>
         `;
       }).join('');
@@ -1805,35 +1804,33 @@
         const currentCriteriaCodes = (conf.curricularCriteria || "").split(/[-,\s]+/).map(c => c.trim()).filter(c => c.length > 0);
 
         return `
-          <div class="border border-slate-200 rounded-xl p-4 bg-slate-50/50" id="ce_card_${ce.id}">
+          <div class="border border-zinc-200/80 rounded-2xl p-4 bg-zinc-50/50" id="ce_card_${ce.id}">
             <div class="flex items-center justify-between gap-4">
-              <label class="flex items-center gap-2.5 cursor-pointer font-bold text-slate-800">
-                <input type="checkbox" id="check_${ce.id}" ${conf.active ? 'checked' : ''} onchange="toggleCeInModal('${ce.id}')" class="rounded text-indigo-600 focus:ring-indigo-500 w-4 h-4">
+              <label class="flex items-center gap-2.5 cursor-pointer font-bold text-zinc-900">
+                <input type="checkbox" id="check_${ce.id}" ${conf.active ? 'checked' : ''} onchange="toggleCeInModal('${ce.id}')" class="rounded text-zinc-900 focus:ring-zinc-900 w-4 h-4">
                 <span>${ce.name}</span>
               </label>
               <div class="flex items-center gap-1.5">
-                <span class="text-slate-400 font-medium text-xs">Pes:</span>
-                <input type="number" id="weight_${ce.id}" value="${conf.weight || 0}" min="0" max="100" ${!conf.active ? 'disabled' : ''} onchange="updateModalWeightSum()" class="w-16 p-1.5 border border-slate-300 rounded-lg text-center font-mono font-bold text-slate-800 bg-white focus:ring-2 focus:ring-indigo-500 outline-none">
-                <span class="text-slate-400 font-mono text-xs">%</span>
+                <span class="text-zinc-400 font-medium text-xs">Pes:</span>
+                <input type="number" id="weight_${ce.id}" value="${conf.weight || 0}" min="0" max="100" ${!conf.active ? 'disabled' : ''} onchange="updateModalWeightSum()" class="w-16 p-1.5 border border-zinc-300 rounded-xl text-center font-mono font-bold text-zinc-900 bg-white focus:ring-2 focus:ring-zinc-900 outline-none text-xs">
+                <span class="text-zinc-400 font-mono text-xs">%</span>
               </div>
             </div>
 
             <div id="details_${ce.id}" class="mt-3 pl-6 space-y-3.5 ${!conf.active ? 'hidden' : ''}">
               <div>
                 <div class="flex items-center justify-between mb-1">
-                  <label class="font-semibold text-slate-700 flex items-center gap-1">
-                    <i class="fa-solid fa-list-check text-indigo-500"></i> Criteris d'Avaluació Curriculars (1r i 2n d'ESO):
-                  </label>
-                  <span class="text-[10px] text-slate-400">Pots marcar-ne un o més d'un</span>
+                  <label class="font-semibold text-zinc-700 text-xs">Criteris Oficials:</label>
+                  <span class="text-[10px] text-zinc-400">Pots seleccionar-ne diversos</span>
                 </div>
                 
-                <div class="bg-white border border-slate-300 rounded-lg p-2 space-y-1.5 max-h-36 overflow-y-auto">
+                <div class="bg-white border border-zinc-200 rounded-xl p-2 space-y-1 max-h-32 overflow-y-auto">
                   ${availableCriteria.map(crit => {
                     const isChecked = currentCriteriaCodes.includes(crit.code);
                     return `
-                      <label class="flex items-start gap-2 p-1.5 rounded hover:bg-slate-50 cursor-pointer text-slate-700">
-                        <input type="checkbox" name="crit_checkbox_${ce.id}" value="${crit.code}" ${isChecked ? 'checked' : ''} class="rounded text-indigo-600 focus:ring-indigo-500 mt-0.5">
-                        <span class="text-[11px] leading-snug"><b class="font-mono text-indigo-700">${crit.code}:</b> ${crit.label.replace(crit.code + '. ', '').replace(crit.code + ' ', '')}</span>
+                      <label class="flex items-start gap-2 p-1.5 rounded-lg hover:bg-zinc-50 cursor-pointer text-zinc-700">
+                        <input type="checkbox" name="crit_checkbox_${ce.id}" value="${crit.code}" ${isChecked ? 'checked' : ''} class="rounded text-zinc-900 focus:ring-zinc-900 mt-0.5">
+                        <span class="text-[11px] leading-snug"><b class="font-mono text-zinc-900">${crit.code}:</b> ${crit.label.replace(crit.code + '. ', '').replace(crit.code + ' ', '')}</span>
                       </label>
                     `;
                   }).join('')}
@@ -1842,18 +1839,18 @@
 
               <div>
                 <div class="flex justify-between items-center mb-1.5">
-                  <span class="font-medium text-slate-600">Objectius d'Aprenentatge (OAs):</span>
-                  <button type="button" onclick="addOaToModal('${ce.id}')" class="text-indigo-600 hover:text-indigo-700 font-semibold text-xs flex items-center gap-1">
+                  <span class="font-medium text-zinc-600 text-xs">Objectius d'Aprenentatge (OAs):</span>
+                  <button type="button" onclick="addOaToModal('${ce.id}')" class="text-zinc-900 hover:text-zinc-600 font-semibold text-xs flex items-center gap-1">
                     <i class="fa-solid fa-plus text-[10px]"></i> Afegir OA
                   </button>
                 </div>
                 <div id="oas_box_${ce.id}" class="space-y-2">
                   ${(conf.oas || []).map((oa, idx) => `
                     <div class="flex items-center gap-2 modal-oa-item" data-id="${oa.id || 'oa_' + idx}">
-                      <input type="text" value="${oa.label || ''}" placeholder="Descripció de l'Objectiu..." class="flex-1 p-1.5 border border-slate-300 rounded-lg bg-white text-xs outline-none focus:ring-2 focus:ring-indigo-500">
-                      <input type="number" value="${oa.weight || 25}" min="0" max="100" placeholder="%" class="w-14 p-1.5 border border-slate-300 rounded-lg text-center text-xs font-mono font-semibold outline-none focus:ring-2 focus:ring-indigo-500">
-                      <span class="text-slate-400 font-mono text-[11px]">%</span>
-                      <button type="button" onclick="this.parentElement.remove()" class="text-slate-400 hover:text-rose-500 p-1">
+                      <input type="text" value="${oa.label || ''}" placeholder="Descripció de l'Objectiu..." class="flex-1 p-1.5 border border-zinc-200 rounded-xl bg-white text-xs outline-none focus:ring-2 focus:ring-zinc-900">
+                      <input type="number" value="${oa.weight || 25}" min="0" max="100" placeholder="%" class="w-14 p-1.5 border border-zinc-200 rounded-xl text-center text-xs font-mono font-semibold outline-none focus:ring-2 focus:ring-zinc-900">
+                      <span class="text-zinc-400 font-mono text-[11px]">%</span>
+                      <button type="button" onclick="this.parentElement.remove()" class="text-zinc-400 hover:text-rose-500 p-1">
                         <i class="fa-regular fa-trash-can"></i>
                       </button>
                     </div>
@@ -1880,10 +1877,10 @@
       div.className = "flex items-center gap-2 modal-oa-item";
       div.setAttribute('data-id', 'oa_' + Date.now());
       div.innerHTML = `
-        <input type="text" placeholder="Descripció de l'Objectiu..." class="flex-1 p-1.5 border border-slate-300 rounded-lg bg-white text-xs outline-none focus:ring-2 focus:ring-indigo-500">
-        <input type="number" value="25" min="0" max="100" placeholder="%" class="w-14 p-1.5 border border-slate-300 rounded-lg text-center text-xs font-mono font-semibold outline-none focus:ring-2 focus:ring-indigo-500">
-        <span class="text-slate-400 font-mono text-[11px]">%</span>
-        <button type="button" onclick="this.parentElement.remove()" class="text-slate-400 hover:text-rose-500 p-1">
+        <input type="text" placeholder="Descripció de l'Objectiu..." class="flex-1 p-1.5 border border-zinc-200 rounded-xl bg-white text-xs outline-none focus:ring-2 focus:ring-zinc-900">
+        <input type="number" value="25" min="0" max="100" placeholder="%" class="w-14 p-1.5 border border-zinc-200 rounded-xl text-center text-xs font-mono font-semibold outline-none focus:ring-2 focus:ring-zinc-900">
+        <span class="text-zinc-400 font-mono text-[11px]">%</span>
+        <button type="button" onclick="this.parentElement.remove()" class="text-zinc-400 hover:text-rose-500 p-1">
           <i class="fa-regular fa-trash-can"></i>
         </button>
       `;
@@ -1899,7 +1896,7 @@
         }
       });
       const badge = document.getElementById('modalWeightSumBadge');
-      badge.textContent = `Total CEs: ${sum}%`;
+      badge.textContent = `Total: ${sum}%`;
       badge.className = sum === 100 
         ? "text-xs font-mono font-bold px-2 py-0.5 rounded-md bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200" 
         : "text-xs font-mono font-bold px-2 py-0.5 rounded-md bg-amber-50 text-amber-700 ring-1 ring-amber-200";
@@ -1908,7 +1905,7 @@
     function saveSdaFromModal() {
       const targetGroupIds = Array.from(document.querySelectorAll('.target-group-checkbox:checked')).map(cb => cb.value);
       if (targetGroupIds.length === 0) {
-        alert("Has de seleccionar com a mínim una classe.");
+        alert("Has de seleccionar com a mínim un grup.");
         return;
       }
 
@@ -1985,7 +1982,7 @@
       }
     }
 
-    // RESUM TRIMESTRAL
+    // RESUM TRIMESTRAL (AMB CONTROL SWITCH DE PARTICIPACIÓ PRÀCTICA)
     function renderTrimView() {
       const thead = document.getElementById('trimTableHead');
       const tbody = document.getElementById('trimTableBody');
@@ -1998,47 +1995,47 @@
         const w = sda.trimWeight !== undefined ? sda.trimWeight : 50;
         totalTrimWeight += w;
         return `
-          <div class="flex items-center gap-2 bg-slate-50 border border-slate-200 px-3 py-1.5 rounded-lg">
-            <span class="font-bold text-slate-800 text-xs truncate max-w-[160px]">${sda.title}:</span>
-            <input type="number" min="0" max="100" value="${w}" onchange="updateSdaTrimWeight('${sda.id}', this.value)" class="w-14 text-center font-mono font-bold text-xs bg-white border border-slate-300 rounded p-1 outline-none focus:ring-2 focus:ring-indigo-500">
-            <span class="text-slate-400 font-mono text-xs">%</span>
+          <div class="flex items-center gap-2 bg-zinc-50 border border-zinc-200/80 px-3 py-1.5 rounded-xl">
+            <span class="font-semibold text-zinc-800 text-xs truncate max-w-[160px]">${sda.title}:</span>
+            <input type="number" min="0" max="100" value="${w}" onchange="updateSdaTrimWeight('${sda.id}', this.value)" class="w-14 text-center font-mono font-bold text-xs bg-white border border-zinc-300 rounded-lg p-1 outline-none focus:ring-2 focus:ring-zinc-900">
+            <span class="text-zinc-400 font-mono text-xs">%</span>
           </div>
         `;
-      }).join('') || '<span class="text-xs text-slate-400 italic">No hi ha cap SdA programada en aquest trimestre.</span>';
+      }).join('') || '<span class="text-xs text-zinc-400 italic">No hi ha cap SdA programada en aquest trimestre.</span>';
 
       const weightBadge = document.getElementById('trimTotalWeightBadge');
-      weightBadge.textContent = `Total SdAs: ${totalTrimWeight}%`;
+      weightBadge.textContent = `Total: ${totalTrimWeight}%`;
       weightBadge.className = totalTrimWeight === 100 
         ? "text-xs font-mono font-bold px-2.5 py-0.5 rounded-md bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200" 
         : "text-xs font-mono font-bold px-2.5 py-0.5 rounded-md bg-amber-50 text-amber-700 ring-1 ring-amber-200";
 
       let headHtml = `<tr>
-        <th class="py-3 px-3 w-10 text-center font-mono text-slate-400 font-medium">#</th>
-        <th class="py-3 px-4 font-semibold text-slate-100 min-w-[190px]">Alumne/a</th>
-        <th class="py-2.5 px-3 text-center border-l border-slate-800 text-[11px] w-28" title="Penalització per no assistir al % mínim de sessions pràctiques">
-          <i class="fa-solid fa-person-running text-amber-400 mr-1"></i> % Pràctica
+        <th class="py-3 px-3 w-12 text-center font-mono text-zinc-400 font-medium">#</th>
+        <th class="py-3 px-4 font-semibold text-zinc-100 min-w-[200px]">Alumne/a</th>
+        <th class="py-2.5 px-3 text-center border-l border-zinc-800 text-[11px] w-28" title="Penalització per no assistir al % mínim de sessions pràctiques">
+          <i class="fa-solid fa-person-running text-zinc-400 mr-1"></i> Mín. Pràctica
         </th>`;
       
       trimSdas.forEach(sda => {
-        headHtml += `<th class="py-2.5 px-3 text-center border-l border-slate-800">
-          <div class="font-bold text-slate-100 max-w-[130px] truncate mx-auto">${sda.title}</div>
-          <div class="text-[10px] text-indigo-300 font-mono font-semibold">Pes: ${sda.trimWeight || 0}%</div>
+        headHtml += `<th class="py-2.5 px-3 text-center border-l border-zinc-800">
+          <div class="font-semibold text-zinc-100 max-w-[130px] truncate mx-auto">${sda.title}</div>
+          <div class="text-[10px] text-zinc-400 font-mono">Pes: ${sda.trimWeight || 0}%</div>
         </th>`;
       });
 
       OFFICIAL_CES.forEach(ce => {
-        headHtml += `<th class="py-2.5 px-2 text-center border-l border-slate-800">
-          <div class="font-bold text-slate-100">${ce.id}</div>
-          <div class="text-[9px] text-slate-400 font-normal truncate max-w-[90px] mx-auto">${ce.short}</div>
+        headHtml += `<th class="py-2.5 px-2 text-center border-l border-zinc-800">
+          <div class="font-bold text-zinc-100">${ce.id}</div>
+          <div class="text-[9px] text-zinc-400 font-normal truncate max-w-[90px] mx-auto">${ce.short}</div>
         </th>`;
       });
 
-      headHtml += `<th class="py-3 px-4 text-center border-l-2 border-indigo-500 bg-slate-950 font-bold text-indigo-300 uppercase tracking-wider">Qualificació Trimestre</th></tr>`;
+      headHtml += `<th class="py-3 px-4 text-center border-l-2 border-zinc-700 bg-zinc-950 font-bold text-white uppercase tracking-wider text-xs">Qualificació Trimestre</th></tr>`;
       thead.innerHTML = headHtml;
 
       const students = curGroup.students || [];
       if (students.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="25" class="p-8 text-center text-slate-400">Sense alumnes registrats.</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="25" class="p-8 text-center text-zinc-400 text-xs">Sense alumnes registrats.</td></tr>`;
         return;
       }
 
@@ -2046,22 +2043,22 @@
       students.forEach((st, idx) => {
         const isPenalized = hasAttendancePenalty(st.id, appState.currentTrim, curGroup);
 
-        rowsHtml += `<tr class="hover:bg-slate-50/70 transition-colors ${isPenalized ? 'bg-rose-50/20' : ''}">
-          <td class="py-2.5 px-3 text-center text-slate-400 font-mono">${idx + 1}</td>
-          <td class="py-2.5 px-4 font-semibold text-slate-800">${st.name}</td>
-          <td class="py-2.5 px-2 text-center border-l border-slate-100">
-            <button onclick="toggleAttendancePenalty(${st.id})" class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold transition border ${isPenalized ? 'bg-rose-600 hover:bg-rose-700 text-white border-rose-600 shadow-xs' : 'bg-slate-100 hover:bg-slate-200 text-slate-500 border-slate-200'}" title="${isPenalized ? 'Alumne penalitzat per pràctica insuficient. Fes clic per desactivar.' : 'Fes clic per penalitzar si no arriba al mínim de pràctica.'}">
-              <i class="fa-solid fa-person-running ${isPenalized ? 'text-white' : 'text-slate-400'}"></i>
-              <span>${isPenalized ? '&lt; % Mínim' : 'Correcte'}</span>
+        rowsHtml += `<tr class="hover:bg-zinc-50/70 transition-colors ${isPenalized ? 'bg-rose-50/25' : ''}">
+          <td class="py-2 px-3 text-center text-zinc-400 font-mono text-xs">${idx + 1}</td>
+          <td class="py-2 px-4 font-semibold text-zinc-800 text-xs">${st.name}</td>
+          <td class="py-2 px-2 text-center border-l border-zinc-100">
+            <button onclick="toggleAttendancePenalty(${st.id})" class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold transition ${isPenalized ? 'bg-rose-600 hover:bg-rose-700 text-white shadow-subtle' : 'bg-zinc-100 hover:bg-zinc-200/70 text-zinc-600'}" title="${isPenalized ? 'Alumne suspès per no arribar al mínim de pràctica. Clica per treure.' : 'Clica per suspendre si no arriba al mínim de pràctica.'}">
+              <i class="fa-solid fa-person-running text-[10px]"></i>
+              <span>${isPenalized ? '&lt; Mínim' : 'Assolit'}</span>
             </button>
           </td>`;
 
         trimSdas.forEach(sda => {
           const sdaScore = getStudentOverallSdaScore(sda, st.id);
           const lvl = getLevel(sdaScore);
-          rowsHtml += `<td class="py-2 px-3 text-center border-l border-slate-100">
-            <div class="font-bold font-mono text-slate-800">${sdaScore !== null ? sdaScore.toFixed(2) : '<span class="text-slate-300 font-normal">—</span>'}</div>
-            <span class="inline-flex items-center mt-0.5 text-[10px] px-1.5 py-0.2 rounded font-bold ring-1 ring-inset ${lvl.badge}">${lvl.code}</span>
+          rowsHtml += `<td class="py-2 px-3 text-center border-l border-zinc-100">
+            <div class="font-bold font-mono text-zinc-800 text-xs">${sdaScore !== null ? sdaScore.toFixed(2) : '<span class="text-zinc-300 font-normal">—</span>'}</div>
+            <span class="inline-flex items-center mt-0.5 text-[9px] px-1.5 py-0.2 rounded font-bold ring-1 ring-inset ${lvl.badge}">${lvl.code}</span>
           </td>`;
         });
 
@@ -2074,8 +2071,8 @@
           const avg = count > 0 ? (ceSum / count) : null;
           const lvl = getLevel(avg);
 
-          rowsHtml += `<td class="py-2 px-2 text-center border-l border-slate-100 bg-slate-50/30">
-            <div class="font-semibold font-mono text-slate-700 text-xs">${avg !== null ? avg.toFixed(2) : '<span class="text-slate-300 font-normal">—</span>'}</div>
+          rowsHtml += `<td class="py-2 px-2 text-center border-l border-zinc-100 bg-zinc-50/30">
+            <div class="font-semibold font-mono text-zinc-700 text-xs">${avg !== null ? avg.toFixed(2) : '<span class="text-zinc-300 font-normal">—</span>'}</div>
             <span class="inline-flex items-center text-[9px] px-1 rounded font-semibold ${lvl.badge}">${lvl.code}</span>
           </td>`;
         });
@@ -2083,9 +2080,9 @@
         const overallTrimScore = getStudentTrimScore(st.id);
         const overallLvl = getLevel(overallTrimScore);
 
-        rowsHtml += `<td class="py-2.5 px-4 text-center border-l-2 border-indigo-500 ${isPenalized ? 'bg-rose-100/60' : 'bg-slate-50/80'} font-bold">
-          <div class="text-sm font-black font-mono ${isPenalized ? 'text-rose-700' : 'text-slate-950'}">${overallTrimScore !== null ? overallTrimScore.toFixed(2) : '<span class="text-slate-300 font-normal">—</span>'}</div>
-          <span class="inline-flex items-center mt-0.5 text-[10px] px-2.5 py-0.5 rounded font-bold ring-1 ring-inset ${overallLvl.badge}">${overallLvl.code}</span>
+        rowsHtml += `<td class="py-2 px-4 text-center border-l-2 border-zinc-800 ${isPenalized ? 'bg-rose-100/50' : 'bg-zinc-50/70'} font-bold">
+          <div class="text-sm font-black font-mono ${isPenalized ? 'text-rose-700' : 'text-zinc-950'}">${overallTrimScore !== null ? overallTrimScore.toFixed(2) : '<span class="text-zinc-300 font-normal">—</span>'}</div>
+          <span class="inline-flex items-center mt-0.5 text-[10px] px-2 py-0.5 rounded font-bold ring-1 ring-inset ${overallLvl.badge}">${overallLvl.code}</span>
           ${isPenalized ? '<div class="text-[9px] font-bold text-rose-600 uppercase mt-0.5 tracking-tighter">No pràctica</div>' : ''}
         </td></tr>`;
       });
@@ -2124,11 +2121,11 @@
       const btnTrim = document.getElementById('finalMethodTrimBtn');
       const btnCe = document.getElementById('finalMethodCeBtn');
       if (method === 'trim') {
-        btnTrim.className = "px-3 py-1.5 rounded-lg font-semibold bg-white text-slate-900 shadow-2xs transition";
-        btnCe.className = "px-3 py-1.5 rounded-lg font-medium text-slate-600 hover:text-slate-900 transition";
+        btnTrim.className = "px-3 py-1.5 rounded-lg font-semibold bg-white text-zinc-900 shadow-subtle transition";
+        btnCe.className = "px-3 py-1.5 rounded-lg font-medium text-zinc-500 hover:text-zinc-900 transition";
       } else {
-        btnCe.className = "px-3 py-1.5 rounded-lg font-semibold bg-white text-slate-900 shadow-2xs transition";
-        btnTrim.className = "px-3 py-1.5 rounded-lg font-medium text-slate-600 hover:text-slate-900 transition";
+        btnCe.className = "px-3 py-1.5 rounded-lg font-semibold bg-white text-zinc-900 shadow-subtle transition";
+        btnTrim.className = "px-3 py-1.5 rounded-lg font-medium text-zinc-500 hover:text-zinc-900 transition";
       }
 
       const weightsContainer = document.getElementById('finalWeightsContainer');
@@ -2138,34 +2135,34 @@
       let sumWeights = 0;
 
       if (method === 'trim') {
-        panelTitle.innerHTML = `<i class="fa-solid fa-calendar-days text-indigo-600"></i> Ponderació dels Trimestres (T1, T2, T3) al Curs`;
+        panelTitle.innerHTML = `<i class="fa-solid fa-calendar-days text-zinc-500"></i> Ponderació dels Trimestres (T1, T2, T3)`;
         const tw = curGroup.finalTrimWeights || DEFAULT_FINAL_TRIM_WEIGHTS;
         sumWeights = (tw.t1 || 0) + (tw.t2 || 0) + (tw.t3 || 0);
 
         weightsContainer.innerHTML = [
-          { key: 't1', label: '1r Trimestre (T1)', val: tw.t1 },
-          { key: 't2', label: '2n Trimestre (T2)', val: tw.t2 },
-          { key: 't3', label: '3r Trimestre (T3)', val: tw.t3 }
+          { key: 't1', label: '1r Trimestre', val: tw.t1 },
+          { key: 't2', label: '2n Trimestre', val: tw.t2 },
+          { key: 't3', label: '3r Trimestre', val: tw.t3 }
         ].map(item => `
-          <div class="flex items-center gap-2 bg-slate-50 border border-slate-200 px-3 py-1.5 rounded-lg">
-            <span class="font-bold text-slate-800 text-xs">${item.label}:</span>
-            <input type="number" step="0.1" min="0" max="100" value="${item.val}" onchange="updateFinalTrimWeight('${item.key}', this.value)" class="w-16 text-center font-mono font-bold text-xs bg-white border border-slate-300 rounded p-1 outline-none focus:ring-2 focus:ring-indigo-500">
-            <span class="text-slate-400 font-mono text-xs">%</span>
+          <div class="flex items-center gap-2 bg-zinc-50 border border-zinc-200/80 px-3 py-1.5 rounded-xl">
+            <span class="font-semibold text-zinc-800 text-xs">${item.label}:</span>
+            <input type="number" step="0.1" min="0" max="100" value="${item.val}" onchange="updateFinalTrimWeight('${item.key}', this.value)" class="w-16 text-center font-mono font-bold text-xs bg-white border border-zinc-300 rounded-lg p-1 outline-none focus:ring-2 focus:ring-zinc-900">
+            <span class="text-zinc-400 font-mono text-xs">%</span>
           </div>
         `).join('');
 
       } else {
-        panelTitle.innerHTML = `<i class="fa-solid fa-scale-balanced text-indigo-600"></i> Ponderació de les Competències Específiques (CEs)`;
+        panelTitle.innerHTML = `<i class="fa-solid fa-scale-balanced text-zinc-500"></i> Ponderació de les Competències Específiques (CEs)`;
         const cw = curGroup.finalCeWeights || DEFAULT_FINAL_CE_WEIGHTS;
         OFFICIAL_CES.forEach(ce => sumWeights += (cw[ce.id] !== undefined ? cw[ce.id] : 20));
 
         weightsContainer.innerHTML = OFFICIAL_CES.map(ce => {
           const w = cw[ce.id] !== undefined ? cw[ce.id] : 20;
           return `
-            <div class="flex items-center gap-2 bg-slate-50 border border-slate-200 px-3 py-1.5 rounded-lg">
-              <span class="font-bold text-slate-800 text-xs">${ce.id}:</span>
-              <input type="number" min="0" max="100" value="${w}" onchange="updateFinalCeWeight('${ce.id}', this.value)" class="w-14 text-center font-mono font-bold text-xs bg-white border border-slate-300 rounded p-1 outline-none focus:ring-2 focus:ring-indigo-500">
-              <span class="text-slate-400 font-mono text-xs">%</span>
+            <div class="flex items-center gap-2 bg-zinc-50 border border-zinc-200/80 px-3 py-1.5 rounded-xl">
+              <span class="font-semibold text-zinc-800 text-xs">${ce.id}:</span>
+              <input type="number" min="0" max="100" value="${w}" onchange="updateFinalCeWeight('${ce.id}', this.value)" class="w-14 text-center font-mono font-bold text-xs bg-white border border-zinc-300 rounded-lg p-1 outline-none focus:ring-2 focus:ring-zinc-900">
+              <span class="text-zinc-400 font-mono text-xs">%</span>
             </div>
           `;
         }).join('');
@@ -2178,44 +2175,44 @@
         : "text-xs font-mono font-bold px-2.5 py-0.5 rounded-md bg-amber-50 text-amber-700 ring-1 ring-amber-200";
 
       const thead = document.getElementById('finalTableHead');
-      let headHtml = `<tr class="bg-slate-900 text-white">
-        <th class="py-3 px-3 w-10 text-center font-mono text-slate-400 font-medium">#</th>
-        <th class="py-3 px-4 font-semibold text-slate-100 min-w-[200px]">Alumne/a</th>`;
+      let headHtml = `<tr class="bg-zinc-900 text-white">
+        <th class="py-3 px-3 w-12 text-center font-mono text-zinc-400 font-medium">#</th>
+        <th class="py-3 px-4 font-semibold text-zinc-100 min-w-[200px]">Alumne/a</th>`;
 
       if (method === 'trim') {
         const tw = curGroup.finalTrimWeights || DEFAULT_FINAL_TRIM_WEIGHTS;
         headHtml += `
-          <th class="py-2.5 px-3 text-center border-l border-slate-800">
+          <th class="py-2.5 px-3 text-center border-l border-zinc-800">
             <div>1r Trimestre</div>
-            <div class="text-[10px] text-indigo-300 font-mono font-semibold">Pes: ${tw.t1}%</div>
+            <div class="text-[10px] text-zinc-400 font-mono">Pes: ${tw.t1}%</div>
           </th>
-          <th class="py-2.5 px-3 text-center border-l border-slate-800">
+          <th class="py-2.5 px-3 text-center border-l border-zinc-800">
             <div>2n Trimestre</div>
-            <div class="text-[10px] text-indigo-300 font-mono font-semibold">Pes: ${tw.t2}%</div>
+            <div class="text-[10px] text-zinc-400 font-mono">Pes: ${tw.t2}%</div>
           </th>
-          <th class="py-2.5 px-3 text-center border-l border-slate-800">
+          <th class="py-2.5 px-3 text-center border-l border-zinc-800">
             <div>3r Trimestre</div>
-            <div class="text-[10px] text-indigo-300 font-mono font-semibold">Pes: ${tw.t3}%</div>
+            <div class="text-[10px] text-zinc-400 font-mono">Pes: ${tw.t3}%</div>
           </th>
         `;
       } else {
         const cw = curGroup.finalCeWeights || DEFAULT_FINAL_CE_WEIGHTS;
         OFFICIAL_CES.forEach(ce => {
           const w = cw[ce.id] !== undefined ? cw[ce.id] : 20;
-          headHtml += `<th class="py-2 px-3 text-center border-l border-slate-800">
+          headHtml += `<th class="py-2 px-3 text-center border-l border-zinc-800">
             <div>${ce.id} (${ce.short})</div>
-            <div class="text-[10px] text-indigo-300 font-mono font-semibold">Pes: ${w}%</div>
+            <div class="text-[10px] text-zinc-400 font-mono">Pes: ${w}%</div>
           </th>`;
         });
       }
 
-      headHtml += `<th class="py-3 px-4 text-center border-l-2 border-emerald-500 bg-slate-950 font-bold text-emerald-300 uppercase tracking-wider">Qualificació Final</th></tr>`;
+      headHtml += `<th class="py-3 px-4 text-center border-l-2 border-zinc-800 bg-zinc-950 font-bold text-white uppercase tracking-wider text-xs">Qualificació Final</th></tr>`;
       thead.innerHTML = headHtml;
 
       const tbody = document.getElementById('finalTableBody');
       const students = curGroup.students || [];
       if (students.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="10" class="p-8 text-center text-slate-400">Sense alumnes.</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="10" class="p-8 text-center text-zinc-400 text-xs">Sense alumnes.</td></tr>`;
         return;
       }
 
@@ -2224,9 +2221,9 @@
         const finalScore = getStudentCourseFinalScore(st.id, curGroup);
         const finalLvl = getLevel(finalScore);
 
-        html += `<tr class="hover:bg-slate-50/70 transition-colors">
-          <td class="py-2.5 px-3 text-center text-slate-400 font-mono">${idx + 1}</td>
-          <td class="py-2.5 px-4 font-semibold text-slate-800">${st.name}</td>`;
+        html += `<tr class="hover:bg-zinc-50/70 transition-colors">
+          <td class="py-2 px-3 text-center text-zinc-400 font-mono text-xs">${idx + 1}</td>
+          <td class="py-2 px-4 font-semibold text-zinc-800 text-xs">${st.name}</td>`;
 
         if (method === 'trim') {
           [1, 2, 3].forEach(tNum => {
@@ -2234,9 +2231,9 @@
             const lvl = getLevel(sc);
             const isPen = hasAttendancePenalty(st.id, tNum, curGroup);
 
-            html += `<td class="py-2 px-3 text-center border-l border-slate-100 ${isPen ? 'bg-rose-50/30' : ''}">
-              <div class="font-bold font-mono ${isPen ? 'text-rose-700' : 'text-slate-800'}">${sc !== null ? sc.toFixed(2) : '<span class="text-slate-300 font-normal">—</span>'}</div>
-              <span class="inline-flex items-center mt-0.5 text-[10px] px-2 py-0.5 rounded font-bold ring-1 ring-inset ${lvl.badge}">${lvl.code}</span>
+            html += `<td class="py-2 px-3 text-center border-l border-zinc-100 ${isPen ? 'bg-rose-50/30' : ''}">
+              <div class="font-bold font-mono ${isPen ? 'text-rose-700' : 'text-zinc-800'} text-xs">${sc !== null ? sc.toFixed(2) : '<span class="text-zinc-300 font-normal">—</span>'}</div>
+              <span class="inline-flex items-center mt-0.5 text-[9px] px-1.5 py-0.2 rounded font-bold ring-1 ring-inset ${lvl.badge}">${lvl.code}</span>
               ${isPen ? '<div class="text-[8px] font-bold text-rose-600 uppercase mt-0.5">No pràctica</div>' : ''}
             </td>`;
           });
@@ -2250,16 +2247,16 @@
             const avg = c > 0 ? sum / c : null;
             const lvl = getLevel(avg);
 
-            html += `<td class="py-2 px-3 text-center border-l border-slate-100">
-              <div class="font-bold font-mono text-slate-800">${avg !== null ? avg.toFixed(2) : '<span class="text-slate-300 font-normal">—</span>'}</div>
-              <span class="inline-flex items-center mt-0.5 text-[10px] px-2 py-0.5 rounded font-bold ring-1 ring-inset ${lvl.badge}">${lvl.code}</span>
+            html += `<td class="py-2 px-3 text-center border-l border-zinc-100">
+              <div class="font-bold font-mono text-zinc-800 text-xs">${avg !== null ? avg.toFixed(2) : '<span class="text-zinc-300 font-normal">—</span>'}</div>
+              <span class="inline-flex items-center mt-0.5 text-[9px] px-1.5 py-0.2 rounded font-bold ring-1 ring-inset ${lvl.badge}">${lvl.code}</span>
             </td>`;
           });
         }
 
-        html += `<td class="py-2.5 px-4 text-center border-l-2 border-emerald-500 bg-slate-50/70 font-bold">
-          <div class="text-sm font-black font-mono text-slate-900">${finalScore !== null ? finalScore.toFixed(2) : '<span class="text-slate-300 font-normal">—</span>'}</div>
-          <span class="inline-flex items-center mt-0.5 text-[10px] px-2.5 py-0.5 rounded font-bold ring-1 ring-inset ${finalLvl.badge}">${finalLvl.code}</span>
+        html += `<td class="py-2 px-4 text-center border-l-2 border-zinc-800 bg-zinc-50/70 font-bold">
+          <div class="text-sm font-black font-mono text-zinc-950">${finalScore !== null ? finalScore.toFixed(2) : '<span class="text-zinc-300 font-normal">—</span>'}</div>
+          <span class="inline-flex items-center mt-0.5 text-[10px] px-2 py-0.5 rounded font-bold ring-1 ring-inset ${finalLvl.badge}">${finalLvl.code}</span>
         </td></tr>`;
       });
 
@@ -2306,13 +2303,13 @@
         const lvl = getLevel(avg);
 
         detailsHtml += `
-          <div class="flex items-center justify-between p-2.5 rounded-xl border border-slate-100 bg-slate-50/70">
+          <div class="flex items-center justify-between p-2.5 rounded-xl border border-zinc-100 bg-zinc-50/70">
             <div>
-              <div class="font-bold text-slate-800">${ce.name}</div>
-              <div class="text-[11px] text-slate-400">${ce.short}</div>
+              <div class="font-bold text-zinc-800 text-xs">${ce.name}</div>
+              <div class="text-[11px] text-zinc-400">${ce.short}</div>
             </div>
             <div class="text-right">
-              <span class="font-bold font-mono text-slate-900 mr-2">${avg > 0 ? avg.toFixed(2) : '—'}</span>
+              <span class="font-bold font-mono text-zinc-900 mr-2 text-xs">${avg > 0 ? avg.toFixed(2) : '—'}</span>
               <span class="inline-flex items-center text-[10px] font-bold px-2 py-0.5 rounded ring-1 ring-inset ${lvl.badge}">${lvl.code}</span>
             </div>
           </div>
@@ -2335,10 +2332,10 @@
           labels: ['CE1 (Salut)', 'CE2 (Jocs)', 'CE3 (Expressió)', 'CE4 (Entorn)', 'CE5 (Valors)'],
           datasets: [{
             data: ceValues,
-            backgroundColor: 'rgba(99, 102, 241, 0.15)',
-            borderColor: 'rgba(79, 70, 229, 1)',
-            borderWidth: 2,
-            pointBackgroundColor: 'rgba(79, 70, 229, 1)',
+            backgroundColor: 'rgba(24, 24, 27, 0.05)',
+            borderColor: 'rgba(24, 24, 27, 0.8)',
+            borderWidth: 1.5,
+            pointBackgroundColor: 'rgba(24, 24, 27, 1)',
             pointRadius: 3
           }]
         },
@@ -2350,9 +2347,9 @@
               min: 0,
               max: 4,
               ticks: { stepSize: 1, display: false },
-              grid: { color: 'rgba(226, 232, 240, 0.8)' },
-              angleLines: { color: 'rgba(226, 232, 240, 0.8)' },
-              pointLabels: { font: { family: 'Inter', size: 10, weight: '600' }, color: '#475569' }
+              grid: { color: 'rgba(228, 228, 231, 0.8)' },
+              angleLines: { color: 'rgba(228, 228, 231, 0.8)' },
+              pointLabels: { font: { family: 'Plus Jakarta Sans', size: 10, weight: '600' }, color: '#52525b' }
             }
           },
           plugins: { legend: { display: false } }
@@ -2366,11 +2363,11 @@
       const btnClass = document.getElementById('statsScopeClass');
       const btnLevel = document.getElementById('statsScopeLevel');
       if (scope === 'class') {
-        btnClass.className = "px-2.5 py-1 rounded-lg font-semibold bg-white text-slate-900 shadow-2xs transition";
-        btnLevel.className = "px-2.5 py-1 rounded-lg font-medium text-slate-600 hover:text-slate-900 transition";
+        btnClass.className = "px-2.5 py-1 rounded-lg font-semibold bg-white text-zinc-900 shadow-subtle transition";
+        btnLevel.className = "px-2.5 py-1 rounded-lg font-medium text-zinc-500 hover:text-zinc-900 transition";
       } else {
-        btnLevel.className = "px-2.5 py-1 rounded-lg font-semibold bg-white text-slate-900 shadow-2xs transition";
-        btnClass.className = "px-2.5 py-1 rounded-lg font-medium text-slate-600 hover:text-slate-900 transition";
+        btnLevel.className = "px-2.5 py-1 rounded-lg font-semibold bg-white text-zinc-900 shadow-subtle transition";
+        btnClass.className = "px-2.5 py-1 rounded-lg font-medium text-zinc-500 hover:text-zinc-900 transition";
       }
       populateStatsSdaSelector();
       renderStatsView();
@@ -2530,14 +2527,13 @@
           datasets: [{
             data: [counts.NA, counts.EPA, counts.AS, counts.AN, counts.AE],
             backgroundColor: [
-              'rgba(244, 63, 94, 0.75)',
-              'rgba(245, 158, 11, 0.75)',
-              'rgba(14, 165, 233, 0.75)',
-              'rgba(99, 102, 241, 0.75)',
-              'rgba(16, 185, 129, 0.75)'
+              'rgba(244, 63, 94, 0.7)',
+              'rgba(245, 158, 11, 0.7)',
+              'rgba(14, 165, 233, 0.7)',
+              'rgba(99, 102, 241, 0.7)',
+              'rgba(16, 185, 129, 0.7)'
             ],
-            borderRadius: 8,
-            borderWidth: 1
+            borderRadius: 6
           }]
         },
         options: {
@@ -2547,11 +2543,11 @@
           scales: {
             y: {
               beginAtZero: true,
-              ticks: { stepSize: 1, font: { family: 'Inter', size: 10 } },
-              grid: { color: 'rgba(226, 232, 240, 0.6)' }
+              ticks: { stepSize: 1, font: { family: 'Plus Jakarta Sans', size: 10 } },
+              grid: { color: 'rgba(244, 244, 245, 0.9)' }
             },
             x: {
-              ticks: { font: { family: 'Inter', size: 10, weight: '600' } },
+              ticks: { font: { family: 'Plus Jakarta Sans', size: 10, weight: '600' } },
               grid: { display: false }
             }
           }
@@ -2566,7 +2562,7 @@
           labels: OFFICIAL_CES.map(c => c.id),
           datasets: [{
             data: ceAvgs.map(c => c.avg ? c.avg.toFixed(2) : 0),
-            backgroundColor: 'rgba(79, 70, 229, 0.8)',
+            backgroundColor: 'rgba(24, 24, 27, 0.8)',
             borderRadius: 6
           }]
         },
@@ -2578,11 +2574,11 @@
             y: {
               min: 0,
               max: 4,
-              ticks: { stepSize: 1, font: { family: 'Inter', size: 10 } },
-              grid: { color: 'rgba(226, 232, 240, 0.6)' }
+              ticks: { stepSize: 1, font: { family: 'Plus Jakarta Sans', size: 10 } },
+              grid: { color: 'rgba(244, 244, 245, 0.9)' }
             },
             x: {
-              ticks: { font: { family: 'Inter', size: 10, weight: '600' } },
+              ticks: { font: { family: 'Plus Jakarta Sans', size: 10, weight: '600' } },
               grid: { display: false }
             }
           }
@@ -2598,27 +2594,27 @@
         const succCount = scoresArr.filter(s => s >= gradeThresholds.as).length;
         const succPct = scoresArr.length > 0 ? ((succCount / scoresArr.length) * 100).toFixed(0) : "—";
 
-        let statusBadge = `<span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-slate-100 text-slate-500">Sense dades</span>`;
+        let statusBadge = `<span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-zinc-100 text-zinc-500">Sense dades</span>`;
         if (avg !== null) {
           if (avg >= gradeThresholds.an) {
-            statusBadge = `<span class="inline-flex items-center gap-1 text-[10px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200"><i class="fa-solid fa-check"></i> Consolidat</span>`;
+            statusBadge = `<span class="inline-flex items-center gap-1 text-[10px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded"><i class="fa-solid fa-check"></i> Consolidat</span>`;
           } else if (avg >= gradeThresholds.as) {
-            statusBadge = `<span class="inline-flex items-center gap-1 text-[10px] font-bold text-sky-700 bg-sky-50 px-2 py-0.5 rounded border border-sky-200"><i class="fa-solid fa-arrows-spin"></i> En progrés adequat</span>`;
+            statusBadge = `<span class="inline-flex items-center gap-1 text-[10px] font-bold text-sky-700 bg-sky-50 px-2 py-0.5 rounded"><i class="fa-solid fa-arrows-spin"></i> En progrés</span>`;
           } else {
-            statusBadge = `<span class="inline-flex items-center gap-1 text-[10px] font-bold text-rose-700 bg-rose-50 px-2 py-0.5 rounded border border-rose-200"><i class="fa-solid fa-triangle-exclamation"></i> Cal reforç pedagògic</span>`;
+            statusBadge = `<span class="inline-flex items-center gap-1 text-[10px] font-bold text-rose-700 bg-rose-50 px-2 py-0.5 rounded"><i class="fa-solid fa-triangle-exclamation"></i> Cal reforç</span>`;
           }
         }
 
         return `
-          <tr class="hover:bg-slate-50 transition">
-            <td class="py-2.5 px-4 font-mono font-bold text-slate-700">${ce.id}</td>
-            <td class="py-2.5 px-4 font-semibold text-slate-900">${ce.name}</td>
-            <td class="py-2.5 px-3 text-center font-mono font-black">${avg !== null ? avg.toFixed(2) : "—"}</td>
-            <td class="py-2.5 px-3 text-center">
+          <tr class="hover:bg-zinc-50/50 transition">
+            <td class="py-2 px-4 font-mono font-bold text-zinc-700">${ce.id}</td>
+            <td class="py-2 px-4 font-semibold text-zinc-900">${ce.name}</td>
+            <td class="py-2 px-3 text-center font-mono font-black">${avg !== null ? avg.toFixed(2) : "—"}</td>
+            <td class="py-2 px-3 text-center">
               <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold ring-1 ring-inset ${lvl.badge}">${lvl.code}</span>
             </td>
-            <td class="py-2.5 px-4 text-center font-mono font-semibold">${succPct !== '—' ? succPct + '%' : '—'}</td>
-            <td class="py-2.5 px-4 text-center">${statusBadge}</td>
+            <td class="py-2 px-4 text-center font-mono font-semibold">${succPct !== '—' ? succPct + '%' : '—'}</td>
+            <td class="py-2 px-4 text-center">${statusBadge}</td>
           </tr>
         `;
       }).join('');
