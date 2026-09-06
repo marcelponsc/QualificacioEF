@@ -7,7 +7,7 @@
   
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
@@ -34,13 +34,19 @@
   <style>
     body { font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11'; }
     .tabular-nums { font-variant-numeric: tabular-nums; }
+    
     ::-webkit-scrollbar { width: 5px; height: 5px; }
     ::-webkit-scrollbar-track { background: transparent; }
     ::-webkit-scrollbar-thumb { background: #e4e4e7; border-radius: 9999px; }
     ::-webkit-scrollbar-thumb:hover { background: #d4d4d8; }
+
     input[type=number]::-webkit-inner-spin-button, 
-    input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+    input[type=number]::-webkit-outer-spin-button { 
+      -webkit-appearance: none; 
+      margin: 0; 
+    }
     input[type=number] { -moz-appearance: textfield; }
+
     @media print {
       .no-print { display: none !important; }
       body { background: white !important; }
@@ -49,35 +55,44 @@
 </head>
 <body class="min-h-full flex flex-col text-zinc-900 bg-[#fafafa]">
 
-  <!-- CAPÇALERA -->
+  <!-- ================= CAPÇALERA AMB IDENTITAT CORPORAL ================= -->
   <header class="bg-white/90 backdrop-blur-md border-b border-zinc-200/80 sticky top-0 z-50 no-print">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <div class="flex items-center justify-between h-14 gap-4">
         
+        <!-- Identitat i Marca Visual (Isotip Vectorial Dinàmic) -->
         <div class="flex items-center gap-3">
           <button onclick="goToHome()" class="flex items-center gap-2.5 text-left group">
-            <div class="w-7 h-7 rounded-lg bg-zinc-900 text-white flex items-center justify-center text-xs shadow-subtle group-hover:scale-105 transition">
-              <i class="fa-solid fa-person-running"></i>
+            <div class="w-8 h-8 rounded-xl bg-zinc-900 text-white flex items-center justify-center p-1.5 shadow-subtle group-hover:bg-zinc-800 transition">
+              <svg viewBox="0 0 24 24" fill="none" class="w-full h-full stroke-current stroke-[2.2] stroke-linecap-round stroke-linejoin-round">
+                <circle cx="16" cy="5" r="2.2" fill="currentColor" stroke="none" />
+                <path d="M5 19l4-3 3 2 4-5-2-4-4 1-2 4" />
+                <path d="M12 11l2-3 4 1" />
+              </svg>
             </div>
-            <div class="flex items-baseline gap-2">
-              <span class="text-xs font-bold tracking-tight text-zinc-900 group-hover:text-zinc-600 transition">EF Competencial</span>
-              <span class="text-[9px] font-bold text-zinc-500 bg-zinc-100 px-1.5 py-0.5 rounded tracking-wider uppercase">LOMLOE</span>
+            <div class="flex flex-col">
+              <div class="flex items-center gap-1.5">
+                <span class="text-xs font-black tracking-tight text-zinc-900 group-hover:text-zinc-600 transition">EF COMPETENCIAL</span>
+                <span class="text-[9px] font-bold text-zinc-600 bg-zinc-100 px-1.5 py-0.5 rounded tracking-wider uppercase border border-zinc-200/60">LOMLOE</span>
+              </div>
+              <span class="text-[9px] font-medium text-zinc-400 -mt-0.5">Avaluació Educació Física</span>
             </div>
           </button>
 
           <div id="headerBreadcrumb" class="hidden items-center gap-1.5 ml-2 pl-3 border-l border-zinc-200 text-xs">
             <span class="text-zinc-400 font-medium">Grup:</span>
-            <span id="breadcrumbGroupName" class="font-semibold text-zinc-800 bg-zinc-100/80 px-2 py-0.5 rounded text-[11px]">--</span>
+            <span id="breadcrumbGroupName" class="font-bold text-zinc-900 bg-zinc-100/90 px-2 py-0.5 rounded-md text-[11px] border border-zinc-200/70 font-mono">--</span>
           </div>
         </div>
 
+        <!-- Accions Ràpides de Capçalera -->
         <div class="flex items-center gap-2">
           <div id="savedIndicator" class="flex items-center gap-1.5 text-[11px] font-medium text-emerald-600 px-2 py-0.5 opacity-0 transition-opacity duration-300">
             <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
-            <span>Desat</span>
+            <span class="font-semibold text-[10px]">Desat</span>
           </div>
 
-          <button onclick="goToHome()" id="homeNavBtn" class="inline-flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1.5 rounded-lg border border-zinc-200/80 bg-white text-zinc-700 hover:bg-zinc-50 shadow-subtle transition">
+          <button onclick="goToHome()" id="homeNavBtn" class="inline-flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1.5 rounded-xl border border-zinc-200/80 bg-white text-zinc-700 hover:bg-zinc-50 shadow-subtle transition">
             <i class="fa-solid fa-house text-zinc-400 text-[10px]"></i>
             <span class="hidden sm:inline">Inici</span>
           </button>
@@ -129,8 +144,6 @@
 
     <!-- ================= PANTALLA D'INICI (HUB DOCENT OPERATIU) ================= -->
     <section id="screenHome" class="space-y-6">
-      
-      <!-- Barra Superior Operativa i Neta -->
       <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-zinc-200/70 pb-4">
         <div>
           <div class="flex items-center gap-2 text-xs font-semibold text-zinc-400">
@@ -150,7 +163,6 @@
         </div>
       </div>
 
-      <!-- Graella de Classes Enriquida Pedagògicament -->
       <div id="homeClassesGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"></div>
     </section>
 
@@ -162,7 +174,7 @@
             <i class="fa-solid fa-arrow-left text-[10px]"></i> Sortir
           </button>
           <div class="inline-flex rounded-xl bg-zinc-100 p-0.5 text-xs font-semibold">
-            <button id="trimBtn1_class" onclick="setTrim(1)" class="px-3 py-1 rounded-lg transition bg-white text-zinc-900 shadow-subtle">1r Trim</button>
+            <button id="trimBtn1_class" onclick="setTrim(1)" class="px-3 py-1 rounded-lg transition bg-white text-zinc-900 shadow-subtle font-bold">1r Trim</button>
             <button id="trimBtn2_class" onclick="setTrim(2)" class="px-3 py-1 rounded-lg transition text-zinc-500 hover:text-zinc-900">2n Trim</button>
             <button id="trimBtn3_class" onclick="setTrim(3)" class="px-3 py-1 rounded-lg transition text-zinc-500 hover:text-zinc-900">3r Trim</button>
           </div>
@@ -179,14 +191,14 @@
         <div class="bg-white border border-zinc-200/80 rounded-2xl p-3 shadow-subtle flex flex-wrap items-center justify-between gap-3">
           <div class="flex items-center gap-2.5">
             <span class="text-[11px] font-bold text-zinc-400 uppercase tracking-wider">SdA:</span>
-            <select id="sdaSelect" onchange="renderSdaGrid()" class="bg-zinc-50 border border-zinc-200 text-xs font-semibold text-zinc-900 rounded-xl px-3 py-1.5 focus:ring-2 focus:ring-zinc-900 outline-none cursor-pointer">
+            <select id="sdaSelect" onchange="renderSdaGrid()" class="bg-zinc-50 border border-zinc-200 text-xs font-bold text-zinc-900 rounded-xl px-3 py-1.5 focus:ring-2 focus:ring-zinc-900 outline-none cursor-pointer">
             </select>
             <button onclick="openSdaModal(false)" class="inline-flex items-center gap-1 text-xs font-semibold text-zinc-600 hover:text-zinc-900 bg-zinc-100 hover:bg-zinc-200/70 px-2.5 py-1.5 rounded-xl transition">
               <i class="fa-solid fa-pen text-[10px]"></i> Editar
             </button>
           </div>
           <div class="flex items-center gap-2">
-            <span class="hidden sm:inline-flex items-center gap-1 text-[11px] font-medium text-zinc-400 bg-zinc-50 px-2.5 py-1 rounded-lg border border-zinc-200/60">
+            <span class="hidden sm:inline-flex items-center gap-1 text-[11px] font-medium text-zinc-400 bg-zinc-50 px-2.5 py-1 rounded-lg border border-zinc-200/60 font-mono">
               <i class="fa-regular fa-keyboard text-zinc-500"></i> Fletxes o Enter
             </span>
             <button onclick="openSdaModal(true)" class="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs font-semibold text-white bg-zinc-900 hover:bg-zinc-800 shadow-subtle transition">
@@ -223,14 +235,14 @@
             <div>
               <label class="block font-medium text-zinc-600 text-xs mb-1">Afegir Alumne/a:</label>
               <div class="flex gap-2">
-                <input type="text" id="rosterNewStudentInput" placeholder="Cognoms, Nom" class="flex-1 bg-white border border-zinc-200 rounded-xl px-3 py-1.5 text-xs focus:ring-2 focus:ring-zinc-900 outline-none">
+                <input type="text" id="rosterNewStudentInput" placeholder="Cognoms, Nom" class="flex-1 bg-white border border-zinc-200 rounded-xl px-3 py-1.5 text-xs focus:ring-2 focus:ring-zinc-900 outline-none font-medium">
                 <button onclick="addSingleStudentFromRoster()" class="bg-zinc-900 hover:bg-zinc-800 text-white font-semibold px-3.5 py-1.5 rounded-xl text-xs transition">Afegir</button>
               </div>
             </div>
             <div>
               <label class="block font-medium text-zinc-600 text-xs mb-1">Còpia d'Esfera / Excel (un per línia):</label>
               <div class="flex gap-2">
-                <textarea id="rosterBulkInput" rows="1" placeholder="Enganxa llista d'alumnes..." class="flex-1 bg-white border border-zinc-200 rounded-xl p-1.5 text-xs focus:ring-2 focus:ring-zinc-900 outline-none resize-none"></textarea>
+                <textarea id="rosterBulkInput" rows="1" placeholder="Enganxa llista d'alumnes..." class="flex-1 bg-white border border-zinc-200 rounded-xl p-1.5 text-xs focus:ring-2 focus:ring-zinc-900 outline-none resize-none font-medium"></textarea>
                 <button onclick="addBulkStudentsFromRoster()" class="bg-zinc-800 hover:bg-zinc-700 text-white font-semibold px-3.5 py-1.5 rounded-xl text-xs transition">Carregar</button>
               </div>
             </div>
@@ -478,7 +490,7 @@
     </div>
   </main>
 
-  <!-- MODALS -->
+  <!-- MODAL CONFIGURACIÓ ESCALA -->
   <div id="thresholdsModal" class="fixed inset-0 bg-zinc-950/40 backdrop-blur-xs z-50 flex items-center justify-center p-4 hidden no-print">
     <div class="bg-white rounded-3xl shadow-card max-w-xl w-full overflow-hidden border border-zinc-200">
       <div class="px-6 py-4 bg-zinc-900 text-white flex justify-between items-center">
@@ -507,7 +519,7 @@
               <span class="text-[11px] text-zinc-400">Qualsevol nota inferior a EPA</span>
             </div>
             <div class="text-right">
-              <span class="font-mono text-xs text-zinc-400">&lt; EPA</span>
+              <span class="font-mono text-xs text-zinc-400 font-bold">&lt; EPA</span>
             </div>
           </div>
 
@@ -571,6 +583,7 @@
     </div>
   </div>
 
+  <!-- MODAL CREAR CLASSE -->
   <div id="newGroupModal" class="fixed inset-0 bg-zinc-950/40 backdrop-blur-xs z-50 flex items-center justify-center p-4 hidden no-print">
     <div class="bg-white rounded-3xl shadow-card max-w-md w-full overflow-hidden border border-zinc-200">
       <div class="px-6 py-4 bg-zinc-900 text-white flex justify-between items-center">
@@ -592,6 +605,7 @@
     </div>
   </div>
 
+  <!-- MODAL CONFIGURAR SdA -->
   <div id="sdaModal" class="fixed inset-0 bg-zinc-950/40 backdrop-blur-xs z-50 flex items-center justify-center p-4 hidden no-print">
     <div class="bg-white rounded-3xl shadow-card max-w-3xl w-full max-h-[90vh] flex flex-col overflow-hidden border border-zinc-200">
       <div class="px-6 py-4 bg-zinc-900 text-white flex justify-between items-center">
@@ -653,7 +667,9 @@
     </div>
   </div>
 
+  <!-- ================= LÒGICA JAVASCRIPT COMPLETA ================= -->
   <script>
+    // Paletes pastel calibrades segons accessibilitat WCAG AA
     const CE_COLOR_THEMES = {
       CE1: { 
         header: 'bg-sky-100 text-sky-950 border-sky-200', 
@@ -662,10 +678,10 @@
         scoreCe: 'bg-sky-100 text-sky-950 font-bold border-sky-300', 
         levelCe: 'bg-sky-50 border-sky-200',
         oaTints: [
-          { header: 'bg-sky-50/70 text-sky-900', cell: 'bg-sky-50/20' },
+          { header: 'bg-sky-50/80 text-sky-900', cell: 'bg-sky-50/25' },
           { header: 'bg-sky-100/70 text-sky-900', cell: 'bg-sky-100/30' },
-          { header: 'bg-blue-50/70 text-blue-900', cell: 'bg-blue-50/25' },
-          { header: 'bg-cyan-50/70 text-cyan-900', cell: 'bg-cyan-50/25' }
+          { header: 'bg-blue-50/80 text-blue-900', cell: 'bg-blue-50/25' },
+          { header: 'bg-cyan-50/80 text-cyan-900', cell: 'bg-cyan-50/25' }
         ]
       },
       CE2: { 
@@ -675,10 +691,10 @@
         scoreCe: 'bg-emerald-100 text-emerald-950 font-bold border-emerald-300', 
         levelCe: 'bg-emerald-50 border-emerald-200',
         oaTints: [
-          { header: 'bg-emerald-50/70 text-emerald-900', cell: 'bg-emerald-50/20' },
+          { header: 'bg-emerald-50/80 text-emerald-900', cell: 'bg-emerald-50/25' },
           { header: 'bg-emerald-100/70 text-emerald-900', cell: 'bg-emerald-100/30' },
-          { header: 'bg-teal-50/70 text-teal-900', cell: 'bg-teal-50/25' },
-          { header: 'bg-green-50/70 text-green-900', cell: 'bg-green-50/25' }
+          { header: 'bg-teal-50/80 text-teal-900', cell: 'bg-teal-50/25' },
+          { header: 'bg-green-50/80 text-green-900', cell: 'bg-green-50/25' }
         ]
       },
       CE3: { 
@@ -688,10 +704,10 @@
         scoreCe: 'bg-purple-100 text-purple-950 font-bold border-purple-300', 
         levelCe: 'bg-purple-50 border-purple-200',
         oaTints: [
-          { header: 'bg-purple-50/70 text-purple-900', cell: 'bg-purple-50/20' },
+          { header: 'bg-purple-50/80 text-purple-900', cell: 'bg-purple-50/25' },
           { header: 'bg-purple-100/70 text-purple-900', cell: 'bg-purple-100/30' },
-          { header: 'bg-fuchsia-50/70 text-fuchsia-900', cell: 'bg-fuchsia-50/25' },
-          { header: 'bg-violet-50/70 text-violet-900', cell: 'bg-violet-50/25' }
+          { header: 'bg-fuchsia-50/80 text-fuchsia-900', cell: 'bg-fuchsia-50/25' },
+          { header: 'bg-violet-50/80 text-violet-900', cell: 'bg-violet-50/25' }
         ]
       },
       CE4: { 
@@ -701,10 +717,10 @@
         scoreCe: 'bg-amber-100 text-amber-950 font-bold border-amber-300', 
         levelCe: 'bg-amber-50 border-amber-200',
         oaTints: [
-          { header: 'bg-amber-50/70 text-amber-900', cell: 'bg-amber-50/20' },
+          { header: 'bg-amber-50/80 text-amber-900', cell: 'bg-amber-50/25' },
           { header: 'bg-amber-100/70 text-amber-900', cell: 'bg-amber-100/30' },
-          { header: 'bg-orange-50/70 text-orange-900', cell: 'bg-orange-50/25' },
-          { header: 'bg-yellow-50/70 text-yellow-900', cell: 'bg-yellow-50/25' }
+          { header: 'bg-orange-50/80 text-orange-900', cell: 'bg-orange-50/25' },
+          { header: 'bg-yellow-50/80 text-yellow-900', cell: 'bg-yellow-50/25' }
         ]
       },
       CE5: { 
@@ -714,10 +730,10 @@
         scoreCe: 'bg-rose-100 text-rose-950 font-bold border-rose-300', 
         levelCe: 'bg-rose-50 border-rose-200',
         oaTints: [
-          { header: 'bg-rose-50/70 text-rose-900', cell: 'bg-rose-50/20' },
+          { header: 'bg-rose-50/80 text-rose-900', cell: 'bg-rose-50/25' },
           { header: 'bg-rose-100/70 text-rose-900', cell: 'bg-rose-100/30' },
-          { header: 'bg-pink-50/70 text-pink-900', cell: 'bg-pink-50/25' },
-          { header: 'bg-red-50/70 text-red-900', cell: 'bg-red-50/25' }
+          { header: 'bg-pink-50/80 text-pink-900', cell: 'bg-pink-50/25' },
+          { header: 'bg-red-50/80 text-red-900', cell: 'bg-red-50/25' }
         ]
       }
     };
@@ -1062,9 +1078,6 @@
       setTrim(appState.currentTrim);
     }
 
-    // =========================================================================
-    // PANTALLA D'INICI: HUB DOCENT OPERATIU AMB METÀDADES PEDAGÒGIQUES EN DIRECTE
-    // =========================================================================
     function renderHomeScreen() {
       const groupKeys = Object.keys(appData.groups);
       const grid = document.getElementById('homeClassesGrid');
@@ -1075,7 +1088,6 @@
         const currentTrimSdas = (group.sdas || []).filter(s => s.trim === appState.currentTrim);
         const activeSda = currentTrimSdas[0] || null;
 
-        // Càlcul del progrés d'avaluació de la classe en el trimestre actual
         let totalPossibleScores = 0;
         let enteredScores = 0;
         let sumTrimScores = 0;
@@ -1111,15 +1123,12 @@
         const avgScore = scoredStudentsCount > 0 ? (sumTrimScores / scoredStudentsCount) : null;
         const avgLvl = getLevel(avgScore);
 
-        // Recompte d'alumnes amb penalització activa de participació
         const penalizedCount = Object.keys(group.attendancePenalty?.[appState.currentTrim] || {})
           .filter(stId => group.attendancePenalty[appState.currentTrim][stId]).length;
 
         return `
           <div class="bg-white rounded-2xl border border-zinc-200/90 p-5 shadow-card hover:border-zinc-300 transition-all flex flex-col justify-between">
             <div class="space-y-3.5">
-              
-              <!-- Capçalera de la Targeta de Classe -->
               <div class="flex items-start justify-between">
                 <div class="flex items-center gap-2.5">
                   <div class="w-9 h-9 rounded-xl bg-zinc-900 text-white flex items-center justify-center text-xs font-bold font-mono">
@@ -1136,10 +1145,9 @@
                 </button>
               </div>
 
-              <!-- Bloc Contextual Pedagògic -->
               <div class="bg-zinc-50/80 rounded-xl p-3 border border-zinc-100 space-y-2">
                 <div class="flex items-center justify-between text-xs">
-                  <span class="text-zinc-500 font-medium truncate max-w-[160px]">
+                  <span class="text-zinc-600 font-medium truncate max-w-[160px]">
                     <i class="fa-regular fa-folder text-zinc-400 mr-1"></i> ${activeSda ? activeSda.title : 'Sense SdA activa'}
                   </span>
                   <span class="font-mono text-[10px] font-bold ${progressPct === 100 ? 'text-emerald-700' : 'text-zinc-500'}">
@@ -1147,7 +1155,6 @@
                   </span>
                 </div>
 
-                <!-- Barra de Progrés Subtil -->
                 <div class="w-full bg-zinc-200/60 rounded-full h-1.5 overflow-hidden">
                   <div class="bg-zinc-900 h-1.5 rounded-full transition-all duration-500" style="width: ${progressPct}%"></div>
                 </div>
@@ -1170,7 +1177,6 @@
               </div>
             </div>
 
-            <!-- Accions Operatives Directes -->
             <div class="pt-4 mt-3 border-t border-zinc-100 flex items-center justify-between gap-2">
               <button onclick="enterClass('${gId}'); switchView('roster');" class="inline-flex items-center gap-1 text-xs font-semibold text-zinc-600 hover:text-zinc-900 bg-zinc-50 hover:bg-zinc-100 px-3 py-1.5 rounded-xl transition">
                 <i class="fa-solid fa-users text-zinc-400 text-[10px]"></i> Llista
@@ -1313,7 +1319,7 @@
         const btn = document.getElementById(`trimBtn${n}_class`);
         if (btn) {
           if (n === t) {
-            btn.className = "px-3 py-1 rounded-lg transition bg-white text-zinc-900 shadow-subtle font-semibold";
+            btn.className = "px-3 py-1 rounded-lg transition bg-white text-zinc-900 shadow-subtle font-bold";
           } else {
             btn.className = "px-3 py-1 rounded-lg transition text-zinc-500 hover:text-zinc-900 font-medium";
           }
@@ -1571,7 +1577,6 @@
       sel.innerHTML = trimSdas.map(s => `<option value="${s.id}">${s.title} (${s.trimWeight || 0}%)</option>`).join('');
     }
 
-    // GRAELLA DE QUALIFICACIÓ (COLORS PASTEL PER CE I OAs DIFERENCIATS)
     function renderSdaGrid() {
       const curGroup = getCurrentGroup();
       const trimSdas = (curGroup.sdas || []).filter(s => s.trim === appState.currentTrim);
@@ -1634,7 +1639,6 @@
 
       const activeCes = OFFICIAL_CES.filter(ce => sda.competences && sda.competences[ce.id] && sda.competences[ce.id].active);
 
-      // Fila 1: CEs amb fons pastel dedicat
       let r1 = `<tr class="border-b border-zinc-200">
         <th rowspan="4" class="py-2.5 px-2.5 w-12 min-w-[48px] max-w-[48px] text-center font-mono text-zinc-500 font-bold bg-zinc-100 border-r border-zinc-200 sticky top-0 left-0 z-40">#</th>
         <th rowspan="4" class="py-2.5 px-3.5 w-56 min-w-[224px] max-w-[224px] font-bold text-zinc-900 bg-zinc-100 border-r border-zinc-200 sticky top-0 left-12 z-40 shadow-[4px_0_8px_-4px_rgba(0,0,0,0.06)]">Alumne/a</th>`;
@@ -1647,7 +1651,6 @@
       });
       r1 += `<th colspan="2" class="py-2.5 px-3 text-center border-l border-zinc-300 bg-zinc-900 text-white font-bold uppercase tracking-wider text-[11px]">Qualificació SdA</th></tr>`;
 
-      // Fila 2: Criteris Curriculars
       let r2 = `<tr class="border-b border-zinc-200 text-[11px]">`;
       activeCes.forEach(ce => {
         const theme = CE_COLOR_THEMES[ce.id] || CE_COLOR_THEMES.CE1;
@@ -1658,7 +1661,6 @@
       });
       r2 += `<th colspan="2" rowspan="2" class="py-1 px-2 text-center border-l border-zinc-300 bg-zinc-800 text-zinc-200 font-semibold text-[11px]">Consolidació SdA</th></tr>`;
 
-      // Fila 3: OAs amb tons diferenciats
       let r3 = `<tr class="border-b border-zinc-200 text-[10px]">`;
       activeCes.forEach(ce => {
         const conf = sda.competences[ce.id];
@@ -1674,7 +1676,6 @@
       });
       r3 += `</tr>`;
 
-      // Fila 4: Ponderacions
       let r4 = `<tr class="border-b border-zinc-200 text-xs font-semibold">`;
       activeCes.forEach(ce => {
         const theme = CE_COLOR_THEMES[ce.id] || CE_COLOR_THEMES.CE1;
@@ -2063,7 +2064,113 @@
       }
     }
 
-    // FINAL DE CURS
+    function renderTrimView() {
+      const thead = document.getElementById('trimTableHead');
+      const tbody = document.getElementById('trimTableBody');
+      const weightInputsContainer = document.getElementById('trimSdaWeightInputsContainer');
+      const curGroup = getCurrentGroup();
+      const trimSdas = (curGroup.sdas || []).filter(s => s.trim === appState.currentTrim);
+
+      let totalTrimWeight = 0;
+      weightInputsContainer.innerHTML = trimSdas.map(sda => {
+        const w = sda.trimWeight !== undefined ? sda.trimWeight : 50;
+        totalTrimWeight += w;
+        return `
+          <div class="flex items-center gap-2 bg-zinc-50 border border-zinc-200/80 px-3 py-1.5 rounded-xl">
+            <span class="font-semibold text-zinc-800 text-xs truncate max-w-[160px]">${sda.title}:</span>
+            <input type="number" min="0" max="100" value="${w}" onchange="updateSdaTrimWeight('${sda.id}', this.value)" class="w-14 text-center font-mono font-bold text-xs bg-white border border-zinc-300 rounded-lg p-1 outline-none focus:ring-2 focus:ring-zinc-900">
+            <span class="text-zinc-400 font-mono text-xs">%</span>
+          </div>
+        `;
+      }).join('') || '<span class="text-xs text-zinc-400 italic">No hi ha cap SdA programada en aquest trimestre.</span>';
+
+      const weightBadge = document.getElementById('trimTotalWeightBadge');
+      weightBadge.textContent = `Total: ${totalTrimWeight}%`;
+      weightBadge.className = totalTrimWeight === 100 
+        ? "text-xs font-mono font-bold px-2.5 py-0.5 rounded-md bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200" 
+        : "text-xs font-mono font-bold px-2.5 py-0.5 rounded-md bg-amber-50 text-amber-700 ring-1 ring-amber-200";
+
+      let headHtml = `<tr>
+        <th class="py-3 px-3 w-12 text-center font-mono text-zinc-400 font-medium">#</th>
+        <th class="py-3 px-4 font-semibold text-zinc-100 min-w-[200px]">Alumne/a</th>
+        <th class="py-2.5 px-3 text-center border-l border-zinc-800 text-[11px] w-28" title="Penalització per no assistir al % mínim de sessions pràctiques">
+          <i class="fa-solid fa-person-running text-zinc-400 mr-1"></i> Mín. Pràctica
+        </th>`;
+      
+      trimSdas.forEach(sda => {
+        headHtml += `<th class="py-2.5 px-3 text-center border-l border-zinc-800">
+          <div class="font-semibold text-zinc-100 max-w-[130px] truncate mx-auto">${sda.title}</div>
+          <div class="text-[10px] text-zinc-400 font-mono">Pes: ${sda.trimWeight || 0}%</div>
+        </th>`;
+      });
+
+      OFFICIAL_CES.forEach(ce => {
+        headHtml += `<th class="py-2.5 px-2 text-center border-l border-zinc-800">
+          <div class="font-bold text-zinc-100">${ce.id}</div>
+          <div class="text-[9px] text-zinc-400 font-normal truncate max-w-[90px] mx-auto">${ce.short}</div>
+        </th>`;
+      });
+
+      headHtml += `<th class="py-3 px-4 text-center border-l-2 border-zinc-700 bg-zinc-950 font-bold text-white uppercase tracking-wider text-xs">Qualificació Trimestre</th></tr>`;
+      thead.innerHTML = headHtml;
+
+      const students = curGroup.students || [];
+      if (students.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="25" class="p-8 text-center text-zinc-400 text-xs">Sense alumnes registrats.</td></tr>`;
+        return;
+      }
+
+      let rowsHtml = '';
+      students.forEach((st, idx) => {
+        const isPenalized = hasAttendancePenalty(st.id, appState.currentTrim, curGroup);
+
+        rowsHtml += `<tr class="hover:bg-zinc-50/70 transition-colors ${isPenalized ? 'bg-rose-50/25' : ''}">
+          <td class="py-2 px-3 text-center text-zinc-400 font-mono text-xs">${idx + 1}</td>
+          <td class="py-2 px-4 font-semibold text-zinc-800 text-xs">${st.name}</td>
+          <td class="py-2 px-2 text-center border-l border-zinc-100">
+            <button onclick="toggleAttendancePenalty(${st.id})" class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold transition ${isPenalized ? 'bg-rose-600 hover:bg-rose-700 text-white shadow-subtle' : 'bg-zinc-100 hover:bg-zinc-200/70 text-zinc-600'}" title="${isPenalized ? 'Alumne suspès per no arribar al mínim de pràctica. Clica per treure.' : 'Clica per suspendre si no arriba al mínim de pràctica.'}">
+              <i class="fa-solid fa-person-running text-[10px]"></i>
+              <span>${isPenalized ? '&lt; Mínim' : 'Assolit'}</span>
+            </button>
+          </td>`;
+
+        trimSdas.forEach(sda => {
+          const sdaScore = getStudentOverallSdaScore(sda, st.id);
+          const lvl = getLevel(sdaScore);
+          rowsHtml += `<td class="py-2 px-3 text-center border-l border-zinc-100">
+            <div class="font-bold font-mono text-zinc-800 text-xs">${sdaScore !== null ? sdaScore.toFixed(2) : '<span class="text-zinc-300 font-normal">—</span>'}</div>
+            <span class="inline-flex items-center mt-0.5 text-[9px] px-1.5 py-0.2 rounded font-bold ring-1 ring-inset ${lvl.badge}">${lvl.code}</span>
+          </td>`;
+        });
+
+        OFFICIAL_CES.forEach(ce => {
+          let ceSum = 0, count = 0;
+          trimSdas.forEach(sda => {
+            const sc = getStudentCeScoreInSda(sda, st.id, ce.id);
+            if (sc !== null) { ceSum += sc; count++; }
+          });
+          const avg = count > 0 ? (ceSum / count) : null;
+          const lvl = getLevel(avg);
+
+          rowsHtml += `<td class="py-2 px-2 text-center border-l border-zinc-100 bg-zinc-50/30">
+            <div class="font-semibold font-mono text-zinc-700 text-xs">${avg !== null ? avg.toFixed(2) : '<span class="text-zinc-300 font-normal">—</span>'}</div>
+            <span class="inline-flex items-center text-[9px] px-1 rounded font-semibold ${lvl.badge}">${lvl.code}</span>
+          </td>`;
+        });
+
+        const overallTrimScore = getStudentTrimScore(st.id);
+        const overallLvl = getLevel(overallTrimScore);
+
+        rowsHtml += `<td class="py-2 px-4 text-center border-l-2 border-zinc-800 ${isPenalized ? 'bg-rose-100/50' : 'bg-zinc-50/70'} font-bold">
+          <div class="text-sm font-black font-mono ${isPenalized ? 'text-rose-700' : 'text-zinc-950'}">${overallTrimScore !== null ? overallTrimScore.toFixed(2) : '<span class="text-zinc-300 font-normal">—</span>'}</div>
+          <span class="inline-flex items-center mt-0.5 text-[10px] px-2.5 py-0.5 rounded font-bold ring-1 ring-inset ${overallLvl.badge}">${overallLvl.code}</span>
+          ${isPenalized ? '<div class="text-[9px] font-bold text-rose-600 uppercase mt-0.5 tracking-tighter">No pràctica</div>' : ''}
+        </td></tr>`;
+      });
+
+      tbody.innerHTML = rowsHtml;
+    }
+
     function setFinalCalculationMethod(method) {
       const curGroup = getCurrentGroup();
       curGroup.finalMethod = method;
@@ -2236,7 +2343,6 @@
       tbody.innerHTML = html;
     }
 
-    // BUTLLETÍ
     function populateReportStudents() {
       const sel = document.getElementById('reportStudentSelect');
       const curGroup = getCurrentGroup();
@@ -2330,7 +2436,6 @@
       });
     }
 
-    // ANALÍTICA & ESTADÍSTIQUES
     function setStatsScope(scope) {
       appState.statsScope = scope;
       const btnClass = document.getElementById('statsScopeClass');
@@ -2574,7 +2679,7 @@
           } else if (avg >= gradeThresholds.as) {
             statusBadge = `<span class="inline-flex items-center gap-1 text-[10px] font-bold text-sky-700 bg-sky-50 px-2 py-0.5 rounded"><i class="fa-solid fa-arrows-spin"></i> En progrés</span>`;
           } else {
-            statusBadge = `<span class="inline-flex items-center gap-1 text-[10px] font-bold text-rose-700 bg-rose-50 px-2 py-0.5 rounded"><i class="fa-solid fa-triangle-exclamation"></i> Cal reforç</span>`;
+            statusBadge = `<span class="inline-flex items-center gap-1 text-[10px] font-bold text-rose-700 bg-rose-50 px-2 py-0.5 rounded border border-rose-200"><i class="fa-solid fa-triangle-exclamation"></i> Cal reforç</span>`;
           }
         }
 
