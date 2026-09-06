@@ -34,19 +34,13 @@
   <style>
     body { font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11'; }
     .tabular-nums { font-variant-numeric: tabular-nums; }
-    
     ::-webkit-scrollbar { width: 5px; height: 5px; }
     ::-webkit-scrollbar-track { background: transparent; }
     ::-webkit-scrollbar-thumb { background: #e4e4e7; border-radius: 9999px; }
     ::-webkit-scrollbar-thumb:hover { background: #d4d4d8; }
-
     input[type=number]::-webkit-inner-spin-button, 
-    input[type=number]::-webkit-outer-spin-button { 
-      -webkit-appearance: none; 
-      margin: 0; 
-    }
+    input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
     input[type=number] { -moz-appearance: textfield; }
-
     @media print {
       .no-print { display: none !important; }
       body { background: white !important; }
@@ -55,7 +49,7 @@
 </head>
 <body class="min-h-full flex flex-col text-zinc-900 bg-[#fafafa]">
 
-  <!-- ================= CAPÇALERA SLEEK ================= -->
+  <!-- CAPÇALERA -->
   <header class="bg-white/90 backdrop-blur-md border-b border-zinc-200/80 sticky top-0 z-50 no-print">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <div class="flex items-center justify-between h-14 gap-4">
@@ -106,6 +100,7 @@
         </div>
       </div>
 
+      <!-- Segmented Control de Navegació de Classe -->
       <nav id="classSubNav" class="hidden flex items-center space-x-1 border-t border-zinc-100 py-1.5 overflow-x-auto text-[11px] font-semibold">
         <button id="tabBtnSda" onclick="switchView('sda')" class="px-3 py-1 rounded-md text-zinc-900 bg-zinc-100 transition">
           <i class="fa-regular fa-folder-open text-zinc-500 mr-1.5"></i> Qualificació SdA
@@ -130,86 +125,48 @@
   </header>
 
   <!-- BODY CONTENT -->
-  <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6">
+  <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-5">
 
-    <!-- ================= PANTALLA D'INICI (HOME) ================= -->
+    <!-- ================= PANTALLA D'INICI (HUB DOCENT OPERATIU) ================= -->
     <section id="screenHome" class="space-y-6">
-      <div class="bg-white rounded-2xl p-7 border border-zinc-200/80 shadow-card flex flex-col sm:flex-row sm:items-center justify-between gap-6">
-        <div class="space-y-1.5">
-          <div class="inline-flex items-center gap-1.5 text-[11px] font-semibold text-zinc-500">
-            <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
-            <span>Educació Física · 1r Cicle d'ESO</span>
+      
+      <!-- Barra Superior Operativa i Neta -->
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-zinc-200/70 pb-4">
+        <div>
+          <div class="flex items-center gap-2 text-xs font-semibold text-zinc-400">
+            <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+            <span>Curs Actiu · 1r Cicle d'ESO</span>
           </div>
-          <h2 class="text-2xl font-bold tracking-tight text-zinc-900">Quadern d'Avaluació Docent</h2>
-          <p class="text-xs text-zinc-500">Gestió competencial d'alumnes, situacions d'aprenentatge i memòria pedagògica.</p>
+          <h2 class="text-xl font-extrabold tracking-tight text-zinc-900 mt-0.5">Tauler de Classes</h2>
         </div>
-        <div class="flex items-center gap-2 shrink-0">
-          <button onclick="openNewGroupModal()" class="inline-flex items-center gap-1.5 bg-zinc-900 hover:bg-zinc-800 text-white text-xs font-semibold px-4 py-2.5 rounded-xl shadow-subtle transition">
+
+        <div class="flex items-center gap-2">
+          <button onclick="openGlobalSdaModal()" class="inline-flex items-center gap-1.5 bg-white hover:bg-zinc-50 border border-zinc-200/90 text-zinc-700 text-xs font-semibold px-3 py-2 rounded-xl shadow-subtle transition">
+            <i class="fa-solid fa-sliders text-zinc-400 text-[10px]"></i> Programar SdA
+          </button>
+          <button onclick="openNewGroupModal()" class="inline-flex items-center gap-1.5 bg-zinc-900 hover:bg-zinc-800 text-white text-xs font-semibold px-3.5 py-2 rounded-xl shadow-subtle transition">
             <i class="fa-solid fa-plus text-[10px]"></i> Nova Classe
           </button>
-          <button onclick="openGlobalSdaModal()" class="inline-flex items-center gap-1.5 bg-zinc-100 hover:bg-zinc-200/70 text-zinc-800 text-xs font-semibold px-3.5 py-2.5 rounded-xl transition">
-            <i class="fa-solid fa-sliders text-[10px]"></i> Programar SdA
-          </button>
         </div>
       </div>
 
-      <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <div class="bg-white border border-zinc-200/80 rounded-2xl p-4 shadow-subtle flex items-center gap-3.5">
-          <div class="w-9 h-9 rounded-xl bg-zinc-100 text-zinc-800 flex items-center justify-center text-sm font-semibold">
-            <i class="fa-solid fa-graduation-cap"></i>
-          </div>
-          <div>
-            <div id="statTotalClasses" class="text-xl font-bold font-mono text-zinc-900">0</div>
-            <div class="text-[11px] font-medium text-zinc-500">Classes Actives</div>
-          </div>
-        </div>
-
-        <div class="bg-white border border-zinc-200/80 rounded-2xl p-4 shadow-subtle flex items-center gap-3.5">
-          <div class="w-9 h-9 rounded-xl bg-zinc-100 text-zinc-800 flex items-center justify-center text-sm font-semibold">
-            <i class="fa-solid fa-users"></i>
-          </div>
-          <div>
-            <div id="statTotalStudents" class="text-xl font-bold font-mono text-zinc-900">0</div>
-            <div class="text-[11px] font-medium text-zinc-500">Alumnes Registrats</div>
-          </div>
-        </div>
-
-        <div class="bg-white border border-zinc-200/80 rounded-2xl p-4 shadow-subtle flex items-center gap-3.5">
-          <div class="w-9 h-9 rounded-xl bg-zinc-100 text-zinc-800 flex items-center justify-center text-sm font-semibold">
-            <i class="fa-solid fa-clipboard-list"></i>
-          </div>
-          <div>
-            <div id="statTotalSdas" class="text-xl font-bold font-mono text-zinc-900">0</div>
-            <div class="text-[11px] font-medium text-zinc-500">SdAs Creades</div>
-          </div>
-        </div>
-      </div>
-
-      <div class="space-y-3 pt-2">
-        <div class="flex justify-between items-center">
-          <h3 class="text-xs font-bold text-zinc-500 uppercase tracking-wider">Classes Registrades</h3>
-          <span class="text-xs text-zinc-400">Selecciona un grup per començar a qualificar</span>
-        </div>
-        <div id="homeClassesGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4"></div>
-      </div>
+      <!-- Graella de Classes Enriquida Pedagògicament -->
+      <div id="homeClassesGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"></div>
     </section>
 
-    <!-- ================= PANTALLA DE TREBALL DE LA CLASSE ================= -->
+    <!-- PANTALLA DE TREBALL DE LA CLASSE -->
     <div id="screenClassWorkspace" class="hidden space-y-5">
-
       <div class="flex flex-wrap items-center justify-between gap-3 bg-white border border-zinc-200/80 px-3.5 py-2.5 rounded-2xl shadow-subtle no-print">
         <div class="flex items-center gap-3">
           <button onclick="goToHome()" class="text-zinc-500 hover:text-zinc-900 text-xs font-semibold flex items-center gap-1.5 transition pr-3 border-r border-zinc-200">
             <i class="fa-solid fa-arrow-left text-[10px]"></i> Sortir
           </button>
-          
           <div class="inline-flex rounded-xl bg-zinc-100 p-0.5 text-xs font-semibold">
             <button id="trimBtn1_class" onclick="setTrim(1)" class="px-3 py-1 rounded-lg transition bg-white text-zinc-900 shadow-subtle">1r Trim</button>
             <button id="trimBtn2_class" onclick="setTrim(2)" class="px-3 py-1 rounded-lg transition text-zinc-500 hover:text-zinc-900">2n Trim</button>
             <button id="trimBtn3_class" onclick="setTrim(3)" class="px-3 py-1 rounded-lg transition text-zinc-500 hover:text-zinc-900">3r Trim</button>
           </div>
         </div>
-
         <div class="flex items-center gap-2">
           <button onclick="switchView('roster')" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold text-zinc-700 bg-zinc-50 hover:bg-zinc-100 border border-zinc-200/80 transition">
             <i class="fa-solid fa-user-gear text-zinc-400 text-[11px]"></i> Gestionar Alumnes
@@ -217,7 +174,7 @@
         </div>
       </div>
 
-      <!-- VISTA 1: GRAELLA SdA (PALETA PASTEL PER COMPETÈNCIA & OAs DIFERENCIATS) -->
+      <!-- VISTA 1: GRAELLA SdA -->
       <section id="viewSda" class="space-y-4">
         <div class="bg-white border border-zinc-200/80 rounded-2xl p-3 shadow-subtle flex flex-wrap items-center justify-between gap-3">
           <div class="flex items-center gap-2.5">
@@ -228,7 +185,6 @@
               <i class="fa-solid fa-pen text-[10px]"></i> Editar
             </button>
           </div>
-          
           <div class="flex items-center gap-2">
             <span class="hidden sm:inline-flex items-center gap-1 text-[11px] font-medium text-zinc-400 bg-zinc-50 px-2.5 py-1 rounded-lg border border-zinc-200/60">
               <i class="fa-regular fa-keyboard text-zinc-500"></i> Fletxes o Enter
@@ -241,7 +197,6 @@
 
         <div class="bg-white border border-zinc-200/90 rounded-2xl shadow-card overflow-hidden">
           <div id="sdaGridTitleBar" class="bg-zinc-900 text-white px-4 py-3 flex items-center justify-between text-xs sticky top-0 z-40"></div>
-          
           <div class="overflow-auto max-h-[72vh] relative" id="sdaTableScrollWrapper">
             <table class="w-full text-left border-collapse text-xs">
               <thead id="sdaGridHead" class="select-none sticky top-0 z-30 shadow-subtle"></thead>
@@ -523,7 +478,7 @@
     </div>
   </main>
 
-  <!-- MODAL CONFIGURACIÓ ESCALA / THRESHOLDS -->
+  <!-- MODALS -->
   <div id="thresholdsModal" class="fixed inset-0 bg-zinc-950/40 backdrop-blur-xs z-50 flex items-center justify-center p-4 hidden no-print">
     <div class="bg-white rounded-3xl shadow-card max-w-xl w-full overflow-hidden border border-zinc-200">
       <div class="px-6 py-4 bg-zinc-900 text-white flex justify-between items-center">
@@ -616,7 +571,6 @@
     </div>
   </div>
 
-  <!-- MODAL NOVA CLASSE -->
   <div id="newGroupModal" class="fixed inset-0 bg-zinc-950/40 backdrop-blur-xs z-50 flex items-center justify-center p-4 hidden no-print">
     <div class="bg-white rounded-3xl shadow-card max-w-md w-full overflow-hidden border border-zinc-200">
       <div class="px-6 py-4 bg-zinc-900 text-white flex justify-between items-center">
@@ -638,7 +592,6 @@
     </div>
   </div>
 
-  <!-- MODAL SdA -->
   <div id="sdaModal" class="fixed inset-0 bg-zinc-950/40 backdrop-blur-xs z-50 flex items-center justify-center p-4 hidden no-print">
     <div class="bg-white rounded-3xl shadow-card max-w-3xl w-full max-h-[90vh] flex flex-col overflow-hidden border border-zinc-200">
       <div class="px-6 py-4 bg-zinc-900 text-white flex justify-between items-center">
@@ -701,7 +654,6 @@
   </div>
 
   <script>
-    // PALETES PASTEL REFINADES PER COMPETÈNCIA & OAs AMB TONALITATS DIFERENCIADES
     const CE_COLOR_THEMES = {
       CE1: { 
         header: 'bg-sky-100 text-sky-950 border-sky-200', 
@@ -1110,54 +1062,121 @@
       setTrim(appState.currentTrim);
     }
 
+    // =========================================================================
+    // PANTALLA D'INICI: HUB DOCENT OPERATIU AMB METÀDADES PEDAGÒGIQUES EN DIRECTE
+    // =========================================================================
     function renderHomeScreen() {
       const groupKeys = Object.keys(appData.groups);
-      let totalStudents = 0;
-      let totalSdasCount = 0;
-
-      groupKeys.forEach(gId => {
-        totalStudents += (appData.groups[gId].students || []).length;
-        totalSdasCount += (appData.groups[gId].sdas || []).length;
-      });
-
-      document.getElementById('statTotalClasses').textContent = groupKeys.length;
-      document.getElementById('statTotalStudents').textContent = totalStudents;
-      document.getElementById('statTotalSdas').textContent = totalSdasCount;
-
       const grid = document.getElementById('homeClassesGrid');
+
       grid.innerHTML = groupKeys.map(gId => {
         const group = appData.groups[gId];
         const studentCount = (group.students || []).length;
-        const sdaCount = (group.sdas || []).length;
+        const currentTrimSdas = (group.sdas || []).filter(s => s.trim === appState.currentTrim);
+        const activeSda = currentTrimSdas[0] || null;
+
+        // Càlcul del progrés d'avaluació de la classe en el trimestre actual
+        let totalPossibleScores = 0;
+        let enteredScores = 0;
+        let sumTrimScores = 0;
+        let scoredStudentsCount = 0;
+
+        (group.students || []).forEach(st => {
+          const trimScore = getStudentTrimScoreByTrim(st.id, appState.currentTrim, group);
+          if (trimScore !== null) {
+            sumTrimScores += trimScore;
+            scoredStudentsCount++;
+          }
+          currentTrimSdas.forEach(sda => {
+            OFFICIAL_CES.forEach(ce => {
+              const conf = sda.competences && sda.competences[ce.id];
+              if (conf && conf.active) {
+                if (conf.oas && conf.oas.length > 0) {
+                  conf.oas.forEach(oa => {
+                    totalPossibleScores++;
+                    const val = group.grades?.[sda.id]?.[st.id]?.[`${ce.id}_${oa.id}`];
+                    if (val !== undefined && val !== null && val !== '') enteredScores++;
+                  });
+                } else {
+                  totalPossibleScores++;
+                  const val = group.grades?.[sda.id]?.[st.id]?.[`${ce.id}_direct`];
+                  if (val !== undefined && val !== null && val !== '') enteredScores++;
+                }
+              }
+            });
+          });
+        });
+
+        const progressPct = totalPossibleScores > 0 ? Math.round((enteredScores / totalPossibleScores) * 100) : 0;
+        const avgScore = scoredStudentsCount > 0 ? (sumTrimScores / scoredStudentsCount) : null;
+        const avgLvl = getLevel(avgScore);
+
+        // Recompte d'alumnes amb penalització activa de participació
+        const penalizedCount = Object.keys(group.attendancePenalty?.[appState.currentTrim] || {})
+          .filter(stId => group.attendancePenalty[appState.currentTrim][stId]).length;
 
         return `
-          <div class="bg-white rounded-2xl border border-zinc-200/80 p-5 shadow-card hover:border-zinc-300 transition-all flex flex-col justify-between group">
-            <div class="space-y-3">
+          <div class="bg-white rounded-2xl border border-zinc-200/90 p-5 shadow-card hover:border-zinc-300 transition-all flex flex-col justify-between">
+            <div class="space-y-3.5">
+              
+              <!-- Capçalera de la Targeta de Classe -->
               <div class="flex items-start justify-between">
-                <div class="w-8 h-8 rounded-xl bg-zinc-100 text-zinc-800 flex items-center justify-center text-xs font-bold font-mono">
-                  ${group.name.slice(0, 2)}
+                <div class="flex items-center gap-2.5">
+                  <div class="w-9 h-9 rounded-xl bg-zinc-900 text-white flex items-center justify-center text-xs font-bold font-mono">
+                    ${group.name.slice(0, 2)}
+                  </div>
+                  <div>
+                    <h4 class="text-sm font-bold text-zinc-900 leading-tight">${group.name}</h4>
+                    <span class="text-[11px] text-zinc-400 font-medium">${studentCount} alumnes inscrits</span>
+                  </div>
                 </div>
+
                 <button onclick="event.stopPropagation(); deleteGroup('${gId}')" title="Eliminar classe" class="text-zinc-300 hover:text-rose-500 p-1 transition">
                   <i class="fa-regular fa-trash-can text-xs"></i>
                 </button>
               </div>
 
-              <div>
-                <h4 class="text-base font-bold text-zinc-900">${group.name}</h4>
-                <div class="flex items-center gap-2 text-xs text-zinc-400 mt-1 font-medium">
-                  <span>${studentCount} alumnes</span>
-                  <span>·</span>
-                  <span>${sdaCount} SdAs</span>
+              <!-- Bloc Contextual Pedagògic -->
+              <div class="bg-zinc-50/80 rounded-xl p-3 border border-zinc-100 space-y-2">
+                <div class="flex items-center justify-between text-xs">
+                  <span class="text-zinc-500 font-medium truncate max-w-[160px]">
+                    <i class="fa-regular fa-folder text-zinc-400 mr-1"></i> ${activeSda ? activeSda.title : 'Sense SdA activa'}
+                  </span>
+                  <span class="font-mono text-[10px] font-bold ${progressPct === 100 ? 'text-emerald-700' : 'text-zinc-500'}">
+                    ${progressPct}% avaluat
+                  </span>
+                </div>
+
+                <!-- Barra de Progrés Subtil -->
+                <div class="w-full bg-zinc-200/60 rounded-full h-1.5 overflow-hidden">
+                  <div class="bg-zinc-900 h-1.5 rounded-full transition-all duration-500" style="width: ${progressPct}%"></div>
+                </div>
+
+                <div class="flex items-center justify-between pt-1 border-t border-zinc-200/40 text-[11px]">
+                  <div class="flex items-center gap-1.5">
+                    <span class="text-zinc-400">Mitjana:</span>
+                    <span class="font-mono font-bold text-zinc-900">${avgScore !== null ? avgScore.toFixed(2) : '—'}</span>
+                    ${avgScore !== null ? `<span class="inline-flex items-center px-1.5 py-0.2 rounded text-[9px] font-bold ${avgLvl.badge}">${avgLvl.code}</span>` : ''}
+                  </div>
+
+                  ${penalizedCount > 0 ? `
+                    <span class="inline-flex items-center gap-1 text-[10px] font-bold text-rose-700 bg-rose-50 px-1.5 py-0.5 rounded border border-rose-200/80">
+                      <i class="fa-solid fa-person-running"></i> ${penalizedCount} &lt; %
+                    </span>
+                  ` : `
+                    <span class="text-[10px] text-zinc-400">T${appState.currentTrim} al dia</span>
+                  `}
                 </div>
               </div>
             </div>
 
-            <div class="pt-4 mt-4 border-t border-zinc-100 flex items-center justify-between gap-2">
-              <button onclick="enterClass('${gId}'); switchView('roster');" class="inline-flex items-center gap-1 text-xs font-semibold text-zinc-600 hover:text-zinc-900 bg-zinc-50 hover:bg-zinc-100 px-3 py-1.5 rounded-lg transition">
-                Alumnes
+            <!-- Accions Operatives Directes -->
+            <div class="pt-4 mt-3 border-t border-zinc-100 flex items-center justify-between gap-2">
+              <button onclick="enterClass('${gId}'); switchView('roster');" class="inline-flex items-center gap-1 text-xs font-semibold text-zinc-600 hover:text-zinc-900 bg-zinc-50 hover:bg-zinc-100 px-3 py-1.5 rounded-xl transition">
+                <i class="fa-solid fa-users text-zinc-400 text-[10px]"></i> Llista
               </button>
-              <button onclick="enterClass('${gId}')" class="inline-flex items-center gap-1 text-xs font-bold text-zinc-900 hover:text-zinc-600 transition">
-                Qualificar <i class="fa-solid fa-arrow-right text-[10px] ml-0.5"></i>
+              <button onclick="enterClass('${gId}')" class="inline-flex items-center gap-1 text-xs font-bold text-white bg-zinc-900 hover:bg-zinc-800 px-3.5 py-1.5 rounded-xl shadow-subtle transition">
+                Qualificar <i class="fa-solid fa-arrow-right text-[9px] ml-0.5"></i>
               </button>
             </div>
           </div>
@@ -1552,9 +1571,7 @@
       sel.innerHTML = trimSdas.map(s => `<option value="${s.id}">${s.title} (${s.trimWeight || 0}%)</option>`).join('');
     }
 
-    // =========================================================================
     // GRAELLA DE QUALIFICACIÓ (COLORS PASTEL PER CE I OAs DIFERENCIATS)
-    // =========================================================================
     function renderSdaGrid() {
       const curGroup = getCurrentGroup();
       const trimSdas = (curGroup.sdas || []).filter(s => s.trim === appState.currentTrim);
@@ -2044,114 +2061,6 @@
         saveToStorage();
         renderTrimView();
       }
-    }
-
-    // RESUM TRIMESTRAL
-    function renderTrimView() {
-      const thead = document.getElementById('trimTableHead');
-      const tbody = document.getElementById('trimTableBody');
-      const weightInputsContainer = document.getElementById('trimSdaWeightInputsContainer');
-      const curGroup = getCurrentGroup();
-      const trimSdas = (curGroup.sdas || []).filter(s => s.trim === appState.currentTrim);
-
-      let totalTrimWeight = 0;
-      weightInputsContainer.innerHTML = trimSdas.map(sda => {
-        const w = sda.trimWeight !== undefined ? sda.trimWeight : 50;
-        totalTrimWeight += w;
-        return `
-          <div class="flex items-center gap-2 bg-zinc-50 border border-zinc-200/80 px-3 py-1.5 rounded-xl">
-            <span class="font-semibold text-zinc-800 text-xs truncate max-w-[160px]">${sda.title}:</span>
-            <input type="number" min="0" max="100" value="${w}" onchange="updateSdaTrimWeight('${sda.id}', this.value)" class="w-14 text-center font-mono font-bold text-xs bg-white border border-zinc-300 rounded-lg p-1 outline-none focus:ring-2 focus:ring-zinc-900">
-            <span class="text-zinc-400 font-mono text-xs">%</span>
-          </div>
-        `;
-      }).join('') || '<span class="text-xs text-zinc-400 italic">No hi ha cap SdA programada en aquest trimestre.</span>';
-
-      const weightBadge = document.getElementById('trimTotalWeightBadge');
-      weightBadge.textContent = `Total: ${totalTrimWeight}%`;
-      weightBadge.className = totalTrimWeight === 100 
-        ? "text-xs font-mono font-bold px-2.5 py-0.5 rounded-md bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200" 
-        : "text-xs font-mono font-bold px-2.5 py-0.5 rounded-md bg-amber-50 text-amber-700 ring-1 ring-amber-200";
-
-      let headHtml = `<tr>
-        <th class="py-3 px-3 w-12 text-center font-mono text-zinc-400 font-medium">#</th>
-        <th class="py-3 px-4 font-semibold text-zinc-100 min-w-[200px]">Alumne/a</th>
-        <th class="py-2.5 px-3 text-center border-l border-zinc-800 text-[11px] w-28" title="Penalització per no assistir al % mínim de sessions pràctiques">
-          <i class="fa-solid fa-person-running text-zinc-400 mr-1"></i> Mín. Pràctica
-        </th>`;
-      
-      trimSdas.forEach(sda => {
-        headHtml += `<th class="py-2.5 px-3 text-center border-l border-zinc-800">
-          <div class="font-semibold text-zinc-100 max-w-[130px] truncate mx-auto">${sda.title}</div>
-          <div class="text-[10px] text-zinc-400 font-mono">Pes: ${sda.trimWeight || 0}%</div>
-        </th>`;
-      });
-
-      OFFICIAL_CES.forEach(ce => {
-        headHtml += `<th class="py-2.5 px-2 text-center border-l border-zinc-800">
-          <div class="font-bold text-zinc-100">${ce.id}</div>
-          <div class="text-[9px] text-zinc-400 font-normal truncate max-w-[90px] mx-auto">${ce.short}</div>
-        </th>`;
-      });
-
-      headHtml += `<th class="py-3 px-4 text-center border-l-2 border-zinc-700 bg-zinc-950 font-bold text-white uppercase tracking-wider text-xs">Qualificació Trimestre</th></tr>`;
-      thead.innerHTML = headHtml;
-
-      const students = curGroup.students || [];
-      if (students.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="25" class="p-8 text-center text-zinc-400 text-xs">Sense alumnes registrats.</td></tr>`;
-        return;
-      }
-
-      let rowsHtml = '';
-      students.forEach((st, idx) => {
-        const isPenalized = hasAttendancePenalty(st.id, appState.currentTrim, curGroup);
-
-        rowsHtml += `<tr class="hover:bg-zinc-50/70 transition-colors ${isPenalized ? 'bg-rose-50/25' : ''}">
-          <td class="py-2 px-3 text-center text-zinc-400 font-mono text-xs">${idx + 1}</td>
-          <td class="py-2 px-4 font-semibold text-zinc-800 text-xs">${st.name}</td>
-          <td class="py-2 px-2 text-center border-l border-zinc-100">
-            <button onclick="toggleAttendancePenalty(${st.id})" class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold transition ${isPenalized ? 'bg-rose-600 hover:bg-rose-700 text-white shadow-subtle' : 'bg-zinc-100 hover:bg-zinc-200/70 text-zinc-600'}" title="${isPenalized ? 'Alumne suspès per no arribar al mínim de pràctica. Clica per treure.' : 'Clica per suspendre si no arriba al mínim de pràctica.'}">
-              <i class="fa-solid fa-person-running text-[10px]"></i>
-              <span>${isPenalized ? '&lt; Mínim' : 'Assolit'}</span>
-            </button>
-          </td>`;
-
-        trimSdas.forEach(sda => {
-          const sdaScore = getStudentOverallSdaScore(sda, st.id);
-          const lvl = getLevel(sdaScore);
-          rowsHtml += `<td class="py-2 px-3 text-center border-l border-zinc-100">
-            <div class="font-bold font-mono text-zinc-800 text-xs">${sdaScore !== null ? sdaScore.toFixed(2) : '<span class="text-zinc-300 font-normal">—</span>'}</div>
-            <span class="inline-flex items-center mt-0.5 text-[9px] px-1.5 py-0.2 rounded font-bold ring-1 ring-inset ${lvl.badge}">${lvl.code}</span>
-          </td>`;
-        });
-
-        OFFICIAL_CES.forEach(ce => {
-          let ceSum = 0, count = 0;
-          trimSdas.forEach(sda => {
-            const sc = getStudentCeScoreInSda(sda, st.id, ce.id);
-            if (sc !== null) { ceSum += sc; count++; }
-          });
-          const avg = count > 0 ? (ceSum / count) : null;
-          const lvl = getLevel(avg);
-
-          rowsHtml += `<td class="py-2 px-2 text-center border-l border-zinc-100 bg-zinc-50/30">
-            <div class="font-semibold font-mono text-zinc-700 text-xs">${avg !== null ? avg.toFixed(2) : '<span class="text-zinc-300 font-normal">—</span>'}</div>
-            <span class="inline-flex items-center text-[9px] px-1 rounded font-semibold ${lvl.badge}">${lvl.code}</span>
-          </td>`;
-        });
-
-        const overallTrimScore = getStudentTrimScore(st.id);
-        const overallLvl = getLevel(overallTrimScore);
-
-        rowsHtml += `<td class="py-2 px-4 text-center border-l-2 border-zinc-800 ${isPenalized ? 'bg-rose-100/50' : 'bg-zinc-50/70'} font-bold">
-          <div class="text-sm font-black font-mono ${isPenalized ? 'text-rose-700' : 'text-zinc-950'}">${overallTrimScore !== null ? overallTrimScore.toFixed(2) : '<span class="text-zinc-300 font-normal">—</span>'}</div>
-          <span class="inline-flex items-center mt-0.5 text-[10px] px-2 py-0.5 rounded font-bold ring-1 ring-inset ${overallLvl.badge}">${overallLvl.code}</span>
-          ${isPenalized ? '<div class="text-[9px] font-bold text-rose-600 uppercase mt-0.5 tracking-tighter">No pràctica</div>' : ''}
-        </td></tr>`;
-      });
-
-      tbody.innerHTML = rowsHtml;
     }
 
     // FINAL DE CURS
