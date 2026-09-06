@@ -35,13 +35,11 @@
     body { font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11'; }
     .tabular-nums { font-variant-numeric: tabular-nums; }
     
-    /* Scrollbar invisible tipus MacOS */
     ::-webkit-scrollbar { width: 5px; height: 5px; }
     ::-webkit-scrollbar-track { background: transparent; }
     ::-webkit-scrollbar-thumb { background: #e4e4e7; border-radius: 9999px; }
     ::-webkit-scrollbar-thumb:hover { background: #d4d4d8; }
 
-    /* Eliminar controls per defecte dels inputs numèrics */
     input[type=number]::-webkit-inner-spin-button, 
     input[type=number]::-webkit-outer-spin-button { 
       -webkit-appearance: none; 
@@ -57,12 +55,11 @@
 </head>
 <body class="min-h-full flex flex-col text-zinc-900 bg-[#fafafa]">
 
-  <!-- ================= CAPÇALERA MINIMALISTA (LINEAR STYLE) ================= -->
+  <!-- ================= CAPÇALERA SLEEK ================= -->
   <header class="bg-white/90 backdrop-blur-md border-b border-zinc-200/80 sticky top-0 z-50 no-print">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <div class="flex items-center justify-between h-14 gap-4">
         
-        <!-- Identitat Visual Subtil -->
         <div class="flex items-center gap-3">
           <button onclick="goToHome()" class="flex items-center gap-2.5 text-left group">
             <div class="w-7 h-7 rounded-lg bg-zinc-900 text-white flex items-center justify-center text-xs shadow-subtle group-hover:scale-105 transition">
@@ -74,16 +71,13 @@
             </div>
           </button>
 
-          <!-- Breadcrumb de classe activa -->
           <div id="headerBreadcrumb" class="hidden items-center gap-1.5 ml-2 pl-3 border-l border-zinc-200 text-xs">
             <span class="text-zinc-400 font-medium">Grup:</span>
             <span id="breadcrumbGroupName" class="font-semibold text-zinc-800 bg-zinc-100/80 px-2 py-0.5 rounded text-[11px]">--</span>
           </div>
         </div>
 
-        <!-- Accions Ràpides de Capçalera -->
         <div class="flex items-center gap-2">
-          
           <div id="savedIndicator" class="flex items-center gap-1.5 text-[11px] font-medium text-emerald-600 px-2 py-0.5 opacity-0 transition-opacity duration-300">
             <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
             <span>Desat</span>
@@ -112,7 +106,6 @@
         </div>
       </div>
 
-      <!-- Segmented Control de Navegació de Classe -->
       <nav id="classSubNav" class="hidden flex items-center space-x-1 border-t border-zinc-100 py-1.5 overflow-x-auto text-[11px] font-semibold">
         <button id="tabBtnSda" onclick="switchView('sda')" class="px-3 py-1 rounded-md text-zinc-900 bg-zinc-100 transition">
           <i class="fa-regular fa-folder-open text-zinc-500 mr-1.5"></i> Qualificació SdA
@@ -160,7 +153,6 @@
         </div>
       </div>
 
-      <!-- Mètriques Ràpides d'Inici -->
       <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <div class="bg-white border border-zinc-200/80 rounded-2xl p-4 shadow-subtle flex items-center gap-3.5">
           <div class="w-9 h-9 rounded-xl bg-zinc-100 text-zinc-800 flex items-center justify-center text-sm font-semibold">
@@ -205,7 +197,6 @@
     <!-- ================= PANTALLA DE TREBALL DE LA CLASSE ================= -->
     <div id="screenClassWorkspace" class="hidden space-y-5">
 
-      <!-- Barra de Trimestre i Controls de la Classe -->
       <div class="flex flex-wrap items-center justify-between gap-3 bg-white border border-zinc-200/80 px-3.5 py-2.5 rounded-2xl shadow-subtle no-print">
         <div class="flex items-center gap-3">
           <button onclick="goToHome()" class="text-zinc-500 hover:text-zinc-900 text-xs font-semibold flex items-center gap-1.5 transition pr-3 border-r border-zinc-200">
@@ -226,7 +217,7 @@
         </div>
       </div>
 
-      <!-- VISTA 1: GRAELLA SdA (REFINADA LINEAR STYLE) -->
+      <!-- VISTA 1: GRAELLA SdA (PALETA PASTEL PER COMPETÈNCIA & OAs DIFERENCIATS) -->
       <section id="viewSda" class="space-y-4">
         <div class="bg-white border border-zinc-200/80 rounded-2xl p-3 shadow-subtle flex flex-wrap items-center justify-between gap-3">
           <div class="flex items-center gap-2.5">
@@ -248,7 +239,6 @@
           </div>
         </div>
 
-        <!-- Canvas de la Taula amb congelat 2D i estètica neta -->
         <div class="bg-white border border-zinc-200/90 rounded-2xl shadow-card overflow-hidden">
           <div id="sdaGridTitleBar" class="bg-zinc-900 text-white px-4 py-3 flex items-center justify-between text-xs sticky top-0 z-40"></div>
           
@@ -711,14 +701,80 @@
   </div>
 
   <script>
-    // Paleta cromàtica editorial refinada (estil Notion / Linear)
+    // PALETES PASTEL REFINADES PER COMPETÈNCIA & OAs AMB TONALITATS DIFERENCIADES
     const CE_COLOR_THEMES = {
-      CE1: { header: 'bg-zinc-50 text-zinc-900', critHeader: 'text-zinc-600', scoreCe: 'font-semibold text-zinc-900' },
-      CE2: { header: 'bg-zinc-50 text-zinc-900', critHeader: 'text-zinc-600', scoreCe: 'font-semibold text-zinc-900' },
-      CE3: { header: 'bg-zinc-50 text-zinc-900', critHeader: 'text-zinc-600', scoreCe: 'font-semibold text-zinc-900' },
-      CE4: { header: 'bg-zinc-50 text-zinc-900', critHeader: 'text-zinc-600', scoreCe: 'font-semibold text-zinc-900' },
-      CE5: { header: 'bg-zinc-50 text-zinc-900', critHeader: 'text-zinc-600', scoreCe: 'font-semibold text-zinc-900' }
+      CE1: { 
+        header: 'bg-sky-100 text-sky-950 border-sky-200', 
+        critHeader: 'bg-sky-50 text-sky-800 border-sky-200', 
+        weightHeader: 'bg-sky-100/70 text-sky-900 border-sky-200', 
+        scoreCe: 'bg-sky-100 text-sky-950 font-bold border-sky-300', 
+        levelCe: 'bg-sky-50 border-sky-200',
+        oaTints: [
+          { header: 'bg-sky-50/70 text-sky-900', cell: 'bg-sky-50/20' },
+          { header: 'bg-sky-100/70 text-sky-900', cell: 'bg-sky-100/30' },
+          { header: 'bg-blue-50/70 text-blue-900', cell: 'bg-blue-50/25' },
+          { header: 'bg-cyan-50/70 text-cyan-900', cell: 'bg-cyan-50/25' }
+        ]
+      },
+      CE2: { 
+        header: 'bg-emerald-100 text-emerald-950 border-emerald-200', 
+        critHeader: 'bg-emerald-50 text-emerald-800 border-emerald-200', 
+        weightHeader: 'bg-emerald-100/70 text-emerald-900 border-emerald-200', 
+        scoreCe: 'bg-emerald-100 text-emerald-950 font-bold border-emerald-300', 
+        levelCe: 'bg-emerald-50 border-emerald-200',
+        oaTints: [
+          { header: 'bg-emerald-50/70 text-emerald-900', cell: 'bg-emerald-50/20' },
+          { header: 'bg-emerald-100/70 text-emerald-900', cell: 'bg-emerald-100/30' },
+          { header: 'bg-teal-50/70 text-teal-900', cell: 'bg-teal-50/25' },
+          { header: 'bg-green-50/70 text-green-900', cell: 'bg-green-50/25' }
+        ]
+      },
+      CE3: { 
+        header: 'bg-purple-100 text-purple-950 border-purple-200', 
+        critHeader: 'bg-purple-50 text-purple-800 border-purple-200', 
+        weightHeader: 'bg-purple-100/70 text-purple-900 border-purple-200', 
+        scoreCe: 'bg-purple-100 text-purple-950 font-bold border-purple-300', 
+        levelCe: 'bg-purple-50 border-purple-200',
+        oaTints: [
+          { header: 'bg-purple-50/70 text-purple-900', cell: 'bg-purple-50/20' },
+          { header: 'bg-purple-100/70 text-purple-900', cell: 'bg-purple-100/30' },
+          { header: 'bg-fuchsia-50/70 text-fuchsia-900', cell: 'bg-fuchsia-50/25' },
+          { header: 'bg-violet-50/70 text-violet-900', cell: 'bg-violet-50/25' }
+        ]
+      },
+      CE4: { 
+        header: 'bg-amber-100 text-amber-950 border-amber-200', 
+        critHeader: 'bg-amber-50 text-amber-800 border-amber-200', 
+        weightHeader: 'bg-amber-100/70 text-amber-900 border-amber-200', 
+        scoreCe: 'bg-amber-100 text-amber-950 font-bold border-amber-300', 
+        levelCe: 'bg-amber-50 border-amber-200',
+        oaTints: [
+          { header: 'bg-amber-50/70 text-amber-900', cell: 'bg-amber-50/20' },
+          { header: 'bg-amber-100/70 text-amber-900', cell: 'bg-amber-100/30' },
+          { header: 'bg-orange-50/70 text-orange-900', cell: 'bg-orange-50/25' },
+          { header: 'bg-yellow-50/70 text-yellow-900', cell: 'bg-yellow-50/25' }
+        ]
+      },
+      CE5: { 
+        header: 'bg-rose-100 text-rose-950 border-rose-200', 
+        critHeader: 'bg-rose-50 text-rose-800 border-rose-200', 
+        weightHeader: 'bg-rose-100/70 text-rose-900 border-rose-200', 
+        scoreCe: 'bg-rose-100 text-rose-950 font-bold border-rose-300', 
+        levelCe: 'bg-rose-50 border-rose-200',
+        oaTints: [
+          { header: 'bg-rose-50/70 text-rose-900', cell: 'bg-rose-50/20' },
+          { header: 'bg-rose-100/70 text-rose-900', cell: 'bg-rose-100/30' },
+          { header: 'bg-pink-50/70 text-pink-900', cell: 'bg-pink-50/25' },
+          { header: 'bg-red-50/70 text-red-900', cell: 'bg-red-50/25' }
+        ]
+      }
     };
+
+    function getOaColorTheme(ceId, oaIndex) {
+      const theme = CE_COLOR_THEMES[ceId] || CE_COLOR_THEMES.CE1;
+      const tints = theme.oaTints || [{ header: 'bg-zinc-50', cell: 'bg-white' }];
+      return tints[oaIndex % tints.length];
+    }
 
     const CURRICULAR_CRITERIA_CATALOG = {
       CE1: [
@@ -812,10 +868,10 @@
                   weight: 80,
                   curricularCriteria: "1.1 - 1.2 - 1.3",
                   oas: [
-                    { id: "oa1", label: "OA1: Identificar grups musculars i ossos", weight: 25 },
-                    { id: "oa2", label: "OA2: Reconèixer les 4 Qualitats Físiques Bàsiques", weight: 25 },
-                    { id: "oa3", label: "OA3: Valorar el nivell inicial de condició física", weight: 25 },
-                    { id: "oa4", label: "OA4: Adoptar i defensar hàbits saludables (escalfament)", weight: 25 }
+                    { id: "oa1", label: "OA1: Grups musculars i ossos", weight: 25 },
+                    { id: "oa2", label: "OA2: 4 Qualitats Físiques Bàsiques", weight: 25 },
+                    { id: "oa3", label: "OA3: Nivell inicial de condició física", weight: 25 },
+                    { id: "oa4", label: "OA4: Hàbits saludables i escalfament", weight: 25 }
                   ]
                 },
                 CE5: {
@@ -823,10 +879,10 @@
                   weight: 20,
                   curricularCriteria: "5.1 - 5.3",
                   oas: [
-                    { id: "oa5_1", label: "OG_MAT1: Material i higiene esportiva", weight: 25 },
-                    { id: "oa5_2", label: "OG_ESF1: Participació activa i esforç constant", weight: 25 },
-                    { id: "oa5_3", label: "OG_ACT1: Respecte a les normes de la sessió", weight: 25 },
-                    { id: "oa5_4", label: "OG_ACT2: Treball cooperatiu i actitud inclusiva", weight: 25 }
+                    { id: "oa5_1", label: "OG1: Material i higiene", weight: 25 },
+                    { id: "oa5_2", label: "OG2: Participació i esforç", weight: 25 },
+                    { id: "oa5_3", label: "OG3: Normes de classe", weight: 25 },
+                    { id: "oa5_4", label: "OG4: Actitud cooperativa", weight: 25 }
                   ]
                 }
               }
@@ -879,10 +935,10 @@
                   weight: 80,
                   curricularCriteria: "1.1 - 1.2 - 1.3",
                   oas: [
-                    { id: "oa1", label: "OA1: Identificar grups musculars i ossos", weight: 25 },
-                    { id: "oa2", label: "OA2: Reconèixer les 4 Qualitats Físiques Bàsiques", weight: 25 },
-                    { id: "oa3", label: "OA3: Valorar el nivell inicial de condició física", weight: 25 },
-                    { id: "oa4", label: "OA4: Adoptar i defensar hàbits saludables (escalfament)", weight: 25 }
+                    { id: "oa1", label: "OA1: Grups musculars i ossos", weight: 25 },
+                    { id: "oa2", label: "OA2: 4 Qualitats Físiques Bàsiques", weight: 25 },
+                    { id: "oa3", label: "OA3: Nivell inicial de condició física", weight: 25 },
+                    { id: "oa4", label: "OA4: Hàbits saludables i escalfament", weight: 25 }
                   ]
                 },
                 CE5: {
@@ -890,10 +946,10 @@
                   weight: 20,
                   curricularCriteria: "5.1 - 5.3",
                   oas: [
-                    { id: "oa5_1", label: "OG_MAT1: Material i higiene esportiva", weight: 25 },
-                    { id: "oa5_2", label: "OG_ESF1: Participació activa i esforç constant", weight: 25 },
-                    { id: "oa5_3", label: "OG_ACT1: Respecte a les normes de la sessió", weight: 25 },
-                    { id: "oa5_4", label: "OG_ACT2: Treball cooperatiu i actitud inclusiva", weight: 25 }
+                    { id: "oa5_1", label: "OG1: Material i higiene", weight: 25 },
+                    { id: "oa5_2", label: "OG2: Participació i esforç", weight: 25 },
+                    { id: "oa5_3", label: "OG3: Normes de classe", weight: 25 },
+                    { id: "oa5_4", label: "OG4: Actitud cooperativa", weight: 25 }
                   ]
                 }
               }
@@ -1282,7 +1338,6 @@
       if (view === 'stats') initStatsView();
     }
 
-    // Píndoles de nivell estil Notion (discretes i d'alta resolució)
     function getLevel(val) {
       if (val === null || val === undefined || isNaN(val) || val <= 0) {
         return { code: "—", badge: "bg-zinc-100 text-zinc-400 ring-zinc-200/60" };
@@ -1295,18 +1350,17 @@
       return { code: "AE", badge: "bg-emerald-50 text-emerald-800 ring-emerald-200/80 font-bold" };
     }
 
-    // Cel·les d'entrada Zero-Border amb glow ring en focus
     function getScoreColorClass(val) {
       if (val === '' || val === null || val === undefined || isNaN(val)) {
-        return 'bg-transparent text-zinc-800 hover:bg-zinc-100/50';
+        return 'text-zinc-800 hover:bg-zinc-100/50';
       }
       const num = parseFloat(val);
       const th = gradeThresholds;
-      if (num < th.epa) return 'bg-rose-50/50 text-rose-800 font-bold';
-      if (num < th.as) return 'bg-amber-50/50 text-amber-900 font-bold';
-      if (num < th.an) return 'bg-sky-50/50 text-sky-900 font-bold';
-      if (num < th.ae) return 'bg-indigo-50/50 text-indigo-900 font-bold';
-      return 'bg-emerald-50/50 text-emerald-900 font-bold';
+      if (num < th.epa) return 'bg-rose-100/60 text-rose-900 font-bold';
+      if (num < th.as) return 'bg-amber-100/60 text-amber-950 font-bold';
+      if (num < th.an) return 'bg-sky-100/60 text-sky-950 font-bold';
+      if (num < th.ae) return 'bg-indigo-100/60 text-indigo-950 font-bold';
+      return 'bg-emerald-100/70 text-emerald-950 font-bold';
     }
 
     function openThresholdsModal() {
@@ -1498,9 +1552,9 @@
       sel.innerHTML = trimSdas.map(s => `<option value="${s.id}">${s.title} (${s.trimWeight || 0}%)</option>`).join('');
     }
 
-    // ==========================================
-    // GRAELLA DE QUALIFICACIÓ (LINEAR / CRAFT STYLE)
-    // ==========================================
+    // =========================================================================
+    // GRAELLA DE QUALIFICACIÓ (COLORS PASTEL PER CE I OAs DIFERENCIATS)
+    // =========================================================================
     function renderSdaGrid() {
       const curGroup = getCurrentGroup();
       const trimSdas = (curGroup.sdas || []).filter(s => s.trim === appState.currentTrim);
@@ -1563,55 +1617,62 @@
 
       const activeCes = OFFICIAL_CES.filter(ce => sda.competences && sda.competences[ce.id] && sda.competences[ce.id].active);
 
-      // Fila 1: CEs amb disseny clar i delimitat
-      let r1 = `<tr class="border-b border-zinc-200 bg-zinc-50/90 text-zinc-800">
+      // Fila 1: CEs amb fons pastel dedicat
+      let r1 = `<tr class="border-b border-zinc-200">
         <th rowspan="4" class="py-2.5 px-2.5 w-12 min-w-[48px] max-w-[48px] text-center font-mono text-zinc-500 font-bold bg-zinc-100 border-r border-zinc-200 sticky top-0 left-0 z-40">#</th>
         <th rowspan="4" class="py-2.5 px-3.5 w-56 min-w-[224px] max-w-[224px] font-bold text-zinc-900 bg-zinc-100 border-r border-zinc-200 sticky top-0 left-12 z-40 shadow-[4px_0_8px_-4px_rgba(0,0,0,0.06)]">Alumne/a</th>`;
       
       activeCes.forEach(ce => {
+        const theme = CE_COLOR_THEMES[ce.id] || CE_COLOR_THEMES.CE1;
         const conf = sda.competences[ce.id];
         const oasCount = (conf.oas && conf.oas.length > 0) ? conf.oas.length : 1;
-        r1 += `<th colspan="${oasCount + 2}" class="py-2.5 px-3 text-center border-r border-zinc-200 font-bold text-xs text-zinc-900">${ce.name}</th>`;
+        r1 += `<th colspan="${oasCount + 2}" class="py-2.5 px-3 text-center border-r border-zinc-200 font-bold text-xs ${theme.header}">${ce.name}</th>`;
       });
       r1 += `<th colspan="2" class="py-2.5 px-3 text-center border-l border-zinc-300 bg-zinc-900 text-white font-bold uppercase tracking-wider text-[11px]">Qualificació SdA</th></tr>`;
 
       // Fila 2: Criteris Curriculars
-      let r2 = `<tr class="border-b border-zinc-200/80 bg-zinc-50/40 text-[11px]">`;
+      let r2 = `<tr class="border-b border-zinc-200 text-[11px]">`;
       activeCes.forEach(ce => {
+        const theme = CE_COLOR_THEMES[ce.id] || CE_COLOR_THEMES.CE1;
         const conf = sda.competences[ce.id];
         const oasCount = (conf.oas && conf.oas.length > 0) ? conf.oas.length : 1;
-        r2 += `<th colspan="${oasCount}" class="py-1 px-2 text-center border-r border-zinc-200 font-mono text-[10px] text-zinc-500 font-medium">${conf.curricularCriteria || '<span class="text-zinc-300 italic">Sense criteris</span>'}</th>`;
-        r2 += `<th colspan="2" rowspan="2" class="py-1 px-2 text-center border-r border-zinc-200 bg-zinc-100/50 text-[11px] font-bold text-zinc-900">Assoliment ${ce.id}</th>`;
+        r2 += `<th colspan="${oasCount}" class="py-1 px-2 text-center border-r border-zinc-200 font-mono text-[10px] ${theme.critHeader} font-semibold">${conf.curricularCriteria || '<span class="text-zinc-300 italic font-normal">Sense criteris</span>'}</th>`;
+        r2 += `<th colspan="2" rowspan="2" class="py-1 px-2 text-center border-r border-zinc-200 ${theme.scoreCe} text-[11px]">Assoliment ${ce.id}</th>`;
       });
       r2 += `<th colspan="2" rowspan="2" class="py-1 px-2 text-center border-l border-zinc-300 bg-zinc-800 text-zinc-200 font-semibold text-[11px]">Consolidació SdA</th></tr>`;
 
-      // Fila 3: OAs
-      let r3 = `<tr class="border-b border-zinc-200 text-[10px] bg-white">`;
+      // Fila 3: OAs amb tons diferenciats
+      let r3 = `<tr class="border-b border-zinc-200 text-[10px]">`;
       activeCes.forEach(ce => {
         const conf = sda.competences[ce.id];
         if (conf.oas && conf.oas.length > 0) {
-          conf.oas.forEach((oa) => {
-            r3 += `<th class="py-1.5 px-2 border-r border-zinc-200/70 font-medium max-w-[120px] truncate text-zinc-600" title="${oa.label}">${oa.label}</th>`;
+          conf.oas.forEach((oa, oaIdx) => {
+            const oaTheme = getOaColorTheme(ce.id, oaIdx);
+            r3 += `<th class="py-1.5 px-2 border-r border-zinc-200 font-medium max-w-[120px] truncate ${oaTheme.header}" title="${oa.label}">${oa.label}</th>`;
           });
         } else {
-          r3 += `<th class="py-1.5 px-2 border-r border-zinc-200/70 font-normal italic text-zinc-400">Avaluació directa</th>`;
+          const oaTheme = getOaColorTheme(ce.id, 0);
+          r3 += `<th class="py-1.5 px-2 border-r border-zinc-200 font-normal italic ${oaTheme.header}">Avaluació directa</th>`;
         }
       });
       r3 += `</tr>`;
 
       // Fila 4: Ponderacions
-      let r4 = `<tr class="border-b border-zinc-200 text-xs font-semibold bg-zinc-50/60">`;
+      let r4 = `<tr class="border-b border-zinc-200 text-xs font-semibold">`;
       activeCes.forEach(ce => {
+        const theme = CE_COLOR_THEMES[ce.id] || CE_COLOR_THEMES.CE1;
         const conf = sda.competences[ce.id];
         if (conf.oas && conf.oas.length > 0) {
-          conf.oas.forEach((oa) => {
-            r4 += `<th class="py-1 px-1.5 text-center border-r border-zinc-200 font-mono text-[10px] text-zinc-500">${oa.weight || 0}%</th>`;
+          conf.oas.forEach((oa, oaIdx) => {
+            const oaTheme = getOaColorTheme(ce.id, oaIdx);
+            r4 += `<th class="py-1 px-1.5 text-center border-r border-zinc-200 font-mono text-[10px] ${oaTheme.header}">${oa.weight || 0}%</th>`;
           });
         } else {
-          r4 += `<th class="py-1 px-1.5 text-center border-r border-zinc-200 font-mono text-[10px] text-zinc-500">100%</th>`;
+          const oaTheme = getOaColorTheme(ce.id, 0);
+          r4 += `<th class="py-1 px-1.5 text-center border-r border-zinc-200 font-mono text-[10px] ${oaTheme.header}">100%</th>`;
         }
-        r4 += `<th class="py-1 px-2 text-center border-r border-zinc-200 font-mono text-zinc-700 bg-zinc-100/40">${conf.weight || 0}%</th>`;
-        r4 += `<th class="py-1 px-2 text-center border-r border-zinc-200 text-[10px] text-zinc-500 bg-zinc-100/40">Nivell</th>`;
+        r4 += `<th class="py-1 px-2 text-center border-r border-zinc-200 ${theme.weightHeader} font-mono">${conf.weight || 0}%</th>`;
+        r4 += `<th class="py-1 px-2 text-center border-r border-zinc-200 ${theme.weightHeader} text-[10px]">Nivell</th>`;
       });
       r4 += `<th class="py-1 px-2 text-center border-l border-zinc-300 bg-zinc-900 text-white font-mono text-[10px]">Nota</th>`;
       r4 += `<th class="py-1 px-2 text-center bg-zinc-900 text-white text-[10px]">Nivell</th></tr>`;
@@ -1632,8 +1693,8 @@
         const isPenalized = hasAttendancePenalty(st.id, appState.currentTrim, curGroup);
 
         rowsHtml += `<tr class="hover:bg-zinc-50/70 transition-colors group">
-          <td class="py-1.5 px-2.5 w-12 min-w-[48px] max-w-[48px] text-center text-zinc-400 font-mono text-xs border-r border-zinc-200/80 bg-white sticky left-0 z-20">${rIdx + 1}</td>
-          <td class="py-1.5 px-3.5 w-56 min-w-[224px] max-w-[224px] font-semibold text-zinc-900 border-r border-zinc-200/80 bg-white sticky left-12 z-20 shadow-[4px_0_8px_-4px_rgba(0,0,0,0.06)]">
+          <td class="py-1 px-2.5 w-12 min-w-[48px] max-w-[48px] text-center text-zinc-400 font-mono text-xs border-r border-zinc-200/80 bg-white sticky left-0 z-20">${rIdx + 1}</td>
+          <td class="py-1 px-3.5 w-56 min-w-[224px] max-w-[224px] font-semibold text-zinc-900 border-r border-zinc-200/80 bg-white sticky left-12 z-20 shadow-[4px_0_8px_-4px_rgba(0,0,0,0.06)]">
             <div class="flex items-center justify-between gap-1.5">
               <span class="truncate text-xs" title="${st.name}">${st.name}</span>
               ${isPenalized ? '<span class="inline-flex items-center text-[9px] font-bold text-rose-700 bg-rose-50 border border-rose-200 px-1 rounded shrink-0" title="Penalització activa per manca de pràctica"><i class="fa-solid fa-person-running mr-0.5"></i>&lt;%</span>' : ''}
@@ -1641,17 +1702,19 @@
           </td>`;
 
         activeCes.forEach(ce => {
+          const theme = CE_COLOR_THEMES[ce.id] || CE_COLOR_THEMES.CE1;
           const conf = sda.competences[ce.id];
           let ceScore = getStudentCeScoreInSda(sda, st.id, ce.id);
           let lvl = getLevel(ceScore);
 
           if (conf.oas && conf.oas.length > 0) {
-            conf.oas.forEach((oa) => {
+            conf.oas.forEach((oa, oaIdx) => {
+              const oaTheme = getOaColorTheme(ce.id, oaIdx);
               const gradeKey = `${ce.id}_${oa.id}`;
               const val = stGrades[gradeKey] !== undefined ? stGrades[gradeKey] : '';
               const colorClass = getScoreColorClass(val);
 
-              rowsHtml += `<td class="p-0.5 border-r border-zinc-200/60 text-center">
+              rowsHtml += `<td class="p-0.5 border-r border-zinc-200/60 text-center ${oaTheme.cell}">
                 <input type="number" step="0.1" min="0" max="4" value="${val}"
                   data-row="${rIdx}" data-col="${colCounter}"
                   onkeydown="handleGridKeyboardNavigation(event, ${rIdx}, ${colCounter})"
@@ -1662,11 +1725,12 @@
               colCounter++;
             });
           } else {
+            const oaTheme = getOaColorTheme(ce.id, 0);
             const gradeKey = `${ce.id}_direct`;
             const val = stGrades[gradeKey] !== undefined ? stGrades[gradeKey] : '';
             const colorClass = getScoreColorClass(val);
 
-            rowsHtml += `<td class="p-0.5 border-r border-zinc-200/60 text-center">
+            rowsHtml += `<td class="p-0.5 border-r border-zinc-200/60 text-center ${oaTheme.cell}">
               <input type="number" step="0.1" min="0" max="4" value="${val}"
                 data-row="${rIdx}" data-col="${colCounter}"
                 onkeydown="handleGridKeyboardNavigation(event, ${rIdx}, ${colCounter})"
@@ -1678,10 +1742,10 @@
           }
 
           rowsHtml += `
-            <td class="py-1.5 px-2 text-center font-mono font-bold border-r border-zinc-200/80 bg-zinc-50/40 text-xs">
+            <td class="py-1 px-2 text-center font-mono font-bold border-r border-zinc-200/80 ${theme.scoreCe} text-xs">
               ${ceScore !== null ? ceScore.toFixed(2) : '<span class="text-zinc-300 font-normal">—</span>'}
             </td>
-            <td class="py-1.5 px-2 text-center border-r border-zinc-200/80 bg-zinc-50/40">
+            <td class="py-1 px-2 text-center border-r border-zinc-200/80 ${theme.levelCe}">
               <span class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-bold ring-1 ring-inset ${lvl.badge}">${lvl.code}</span>
             </td>
           `;
@@ -1691,10 +1755,10 @@
         const overallSdaLvl = getLevel(overallSdaScore);
 
         rowsHtml += `
-          <td class="py-1.5 px-2.5 text-center font-mono font-black text-zinc-900 border-l border-zinc-300 bg-zinc-50/70 text-xs">
+          <td class="py-1 px-2.5 text-center font-mono font-black text-zinc-900 border-l border-zinc-300 bg-zinc-50/70 text-xs">
             ${overallSdaScore !== null ? overallSdaScore.toFixed(2) : '<span class="text-zinc-300 font-normal">—</span>'}
           </td>
-          <td class="py-1.5 px-2 text-center bg-zinc-50/70">
+          <td class="py-1 px-2 text-center bg-zinc-50/70">
             <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold ring-1 ring-inset ${overallSdaLvl.badge}">${overallSdaLvl.code}</span>
           </td>
         </tr>`;
@@ -1982,7 +2046,7 @@
       }
     }
 
-    // RESUM TRIMESTRAL (AMB CONTROL SWITCH DE PARTICIPACIÓ PRÀCTICA)
+    // RESUM TRIMESTRAL
     function renderTrimView() {
       const thead = document.getElementById('trimTableHead');
       const tbody = document.getElementById('trimTableBody');
@@ -2256,7 +2320,7 @@
 
         html += `<td class="py-2 px-4 text-center border-l-2 border-zinc-800 bg-zinc-50/70 font-bold">
           <div class="text-sm font-black font-mono text-zinc-950">${finalScore !== null ? finalScore.toFixed(2) : '<span class="text-zinc-300 font-normal">—</span>'}</div>
-          <span class="inline-flex items-center mt-0.5 text-[10px] px-2 py-0.5 rounded font-bold ring-1 ring-inset ${finalLvl.badge}">${finalLvl.code}</span>
+          <span class="inline-flex items-center mt-0.5 text-[10px] px-2.5 py-0.5 rounded font-bold ring-1 ring-inset ${finalLvl.badge}">${finalLvl.code}</span>
         </td></tr>`;
       });
 
