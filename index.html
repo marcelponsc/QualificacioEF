@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>EF Competencial · Quadern LOMLOE Direct Cloud</title>
+  <title>EF Competencial · Quadern LOMLOE Secure Cloud</title>
   
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -42,8 +42,42 @@
 </head>
 <body class="min-h-full flex flex-col text-zinc-900 bg-[#fafafa]">
 
+  <!-- ================= PANTALLA D'ACCÉS / LOGIN ================= -->
+  <div id="loginOverlay" class="fixed inset-0 bg-zinc-950/80 backdrop-blur-md z-50 flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl shadow-2xl max-w-md w-full overflow-hidden border border-zinc-200 p-8 space-y-6">
+      <div class="text-center space-y-2">
+        <div class="w-12 h-12 rounded-2xl bg-zinc-900 text-white flex items-center justify-center mx-auto text-lg shadow-subtle">
+          <i class="fa-solid fa-lock"></i>
+        </div>
+        <h3 class="text-xl font-black tracking-tight text-zinc-900">Quadern d'Educació Física</h3>
+        <p class="text-xs text-zinc-500">Inicia sessió per sincronitzar les teves classes i notes al núvol.</p>
+      </div>
+
+      <form onsubmit="handleAuthSubmit(event)" class="space-y-4 text-xs">
+        <div>
+          <label class="block font-semibold text-zinc-700 mb-1">Nom d'usuari</label>
+          <input type="text" id="authUsernameInput" required placeholder="Ex: docent" class="w-full border border-zinc-200 rounded-xl p-3 outline-none font-medium focus:ring-2 focus:ring-zinc-900 text-sm">
+        </div>
+        <div>
+          <label class="block font-semibold text-zinc-700 mb-1">Contrasenya</label>
+          <input type="password" id="authPasswordInput" required placeholder="••••••••" class="w-full border border-zinc-200 rounded-xl p-3 outline-none font-medium focus:ring-2 focus:ring-zinc-900 text-sm">
+        </div>
+        
+        <div id="authErrorMsg" class="hidden text-[11px] text-rose-600 font-semibold bg-rose-50 border border-rose-200 p-2.5 rounded-xl text-center"></div>
+
+        <button type="submit" class="w-full bg-zinc-900 hover:bg-zinc-800 text-white font-bold py-3 rounded-xl transition shadow-subtle text-sm">
+          Entrar al Quadern &rarr;
+        </button>
+
+        <div class="pt-2 text-center text-[11px] text-zinc-400">
+          Usuari per defecte: <span class="font-mono text-zinc-700 font-bold">docent</span> | Clau: <span class="font-mono text-zinc-700 font-bold">ef2026</span>
+        </div>
+      </form>
+    </div>
+  </div>
+
   <!-- ================= CAPÇALERA ================= -->
-  <header class="bg-white/90 backdrop-blur-md border-b border-zinc-200 sticky top-0 z-50 no-print">
+  <header class="bg-white/90 backdrop-blur-md border-b border-zinc-200 sticky top-0 z-40 no-print">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <div class="flex items-center justify-between h-14 gap-4">
         
@@ -59,9 +93,9 @@
             <div class="flex flex-col">
               <div class="flex items-center gap-1.5">
                 <span class="text-xs font-black tracking-tight text-zinc-900 group-hover:text-zinc-600 transition">EF COMPETENCIAL</span>
-                <span class="text-[9px] font-bold text-zinc-600 bg-zinc-100 px-1.5 py-0.5 rounded tracking-wider uppercase border border-zinc-200">AUTO-SYNC</span>
+                <span class="text-[9px] font-bold text-zinc-600 bg-zinc-100 px-1.5 py-0.5 rounded tracking-wider uppercase border border-zinc-200">PRO</span>
               </div>
-              <span class="text-[9px] font-medium text-zinc-400 -mt-0.5">Sincronització Directa</span>
+              <span class="text-[9px] font-medium text-zinc-400 -mt-0.5">Sincronització en Temps Real</span>
             </div>
           </button>
 
@@ -71,12 +105,19 @@
           </div>
         </div>
 
-        <!-- Estat Cloud en Temps Real -->
         <div class="flex items-center gap-2">
           
           <div id="cloudStatusBadge" class="flex items-center gap-1.5 text-[11px] font-medium px-2.5 py-1 rounded-xl border bg-zinc-50 border-zinc-200 text-zinc-600">
             <span id="cloudStatusDot" class="w-2 h-2 rounded-full bg-amber-400 animate-pulse"></span>
             <span id="cloudStatusText" class="font-mono text-[10px] font-semibold">Connectant...</span>
+          </div>
+
+          <div class="flex items-center gap-2 bg-zinc-100 pl-3 pr-2 py-1 rounded-xl border border-zinc-200 text-xs">
+            <i class="fa-solid fa-user-check text-emerald-600 text-[11px]"></i>
+            <span id="headerUserLabel" class="font-bold text-zinc-800">Docent</span>
+            <button onclick="logoutActiveUser()" title="Tancar Sessió" class="text-zinc-400 hover:text-rose-600 p-1 transition ml-1">
+              <i class="fa-solid fa-arrow-right-from-bracket"></i>
+            </button>
           </div>
 
           <button onclick="goToHome()" id="homeNavBtn" class="inline-flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1.5 rounded-xl border border-zinc-200 bg-white text-zinc-700 hover:bg-zinc-50 shadow-subtle transition">
@@ -102,7 +143,6 @@
         </div>
       </div>
 
-      <!-- Menú Secundari de Classe -->
       <nav id="classSubNav" class="hidden flex items-center space-x-1 border-t border-zinc-100 py-1.5 overflow-x-auto text-[11px] font-semibold">
         <button id="tabBtnSda" onclick="switchView('sda')" class="px-3 py-1 rounded-md text-zinc-900 bg-zinc-100 transition">
           <i class="fa-regular fa-folder-open text-zinc-500 mr-1.5"></i> Qualificació SdA
@@ -173,7 +213,7 @@
         </div>
       </div>
 
-      <!-- VISTA 1: GRAELLA SdA -->
+      <!-- VISTA 1: GRAELLA SdA (MOTOR SPREADSHEET REACTIU) -->
       <section id="viewSda" class="space-y-4">
         <div class="bg-white border border-zinc-200 rounded-2xl p-3 shadow-subtle flex flex-wrap items-center justify-between gap-3">
           <div class="flex items-center gap-2.5">
@@ -195,10 +235,10 @@
         </div>
 
         <div class="bg-white border border-zinc-200 rounded-2xl shadow-card overflow-hidden">
-          <div id="sdaGridTitleBar" class="bg-zinc-900 text-white px-4 py-3 flex items-center justify-between text-xs sticky top-0 z-40"></div>
+          <div id="sdaGridTitleBar" class="bg-zinc-900 text-white px-4 py-3 flex items-center justify-between text-xs sticky top-0 z-30"></div>
           <div class="overflow-auto max-h-[72vh] relative" id="sdaTableScrollWrapper">
             <table class="w-full text-left border-collapse text-xs">
-              <thead id="sdaGridHead" class="select-none sticky top-0 z-30 shadow-subtle"></thead>
+              <thead id="sdaGridHead" class="select-none sticky top-0 z-20 shadow-subtle"></thead>
               <tbody id="sdaGridBody" class="divide-y divide-zinc-100 bg-white tabular-nums"></tbody>
             </table>
           </div>
@@ -213,7 +253,7 @@
               <h3 class="text-base font-bold text-zinc-900 flex items-center gap-2">
                 <i class="fa-solid fa-user-graduate text-zinc-600"></i> Llista d'Alumnat Registrat
               </h3>
-              <p class="text-xs text-zinc-500 mt-0.5">Edita els noms o enganxa llistats complets des d'Excel.</p>
+              <p class="text-xs text-zinc-500 mt-0.5">Edita directament els noms o importa llistats des d'Excel.</p>
             </div>
             <span id="rosterCountBadge" class="text-xs font-mono font-bold bg-zinc-100 text-zinc-800 px-3 py-1 rounded-full border border-zinc-200">0 alumnes</span>
           </div>
@@ -256,7 +296,7 @@
           <div>
             <span class="inline-flex items-center rounded-md bg-zinc-100 px-2 py-0.5 text-[11px] font-bold text-zinc-600">Avaluació Contínua</span>
             <h2 id="trimTitle" class="text-xl font-bold text-zinc-900 tracking-tight mt-1">Resum del Trimestre 1</h2>
-            <p class="text-xs text-zinc-500 mt-0.5">Control de ponderació de les SdAs i penalització per no pràctica motriu.</p>
+            <p class="text-xs text-zinc-500 mt-0.5">Control de ponderació de les SdAs i penalització d'assistència pràctica.</p>
           </div>
           <button onclick="exportContextualCSV()" class="inline-flex items-center gap-1.5 bg-white border border-zinc-200 text-zinc-700 hover:bg-zinc-50 text-xs font-semibold px-3 py-2 rounded-xl shadow-subtle transition">
             <i class="fa-solid fa-file-csv text-zinc-400"></i> Exportar Trimestre a CSV
@@ -333,7 +373,7 @@
         <div class="flex items-center justify-between bg-white p-3.5 rounded-2xl border border-zinc-200 shadow-subtle no-print">
           <div class="flex items-center gap-3">
             <label for="reportStudentSelect" class="text-xs font-semibold text-zinc-500">Alumne/a:</label>
-            <select id="reportStudentSelect" onchange="renderIndividualReport()" class="bg-zinc-50 border border-zinc-200 text-xs rounded-xl px-3 py-1.5 font-bold text-zinc-800 outline-none focus:ring-2 focus:ring-zinc-900">
+            <select id="reportStudentSelect" onchange="renderIndividualReport()" class="bg-zinc-50 border border-zinc-200 text-xs rounded-xl px-3 py-1.5 font-bold text-zinc-800 outline-none">
             </select>
           </div>
           <button onclick="window.print()" class="inline-flex items-center gap-2 bg-zinc-900 hover:bg-zinc-800 text-white text-xs font-semibold px-4 py-2 rounded-xl shadow-subtle transition">
@@ -375,224 +415,75 @@
 
           <div class="flex flex-wrap items-center gap-2.5 text-xs">
             <div class="flex items-center gap-1 bg-zinc-100 p-1 rounded-xl border border-zinc-200">
-              <button id="statsScopeClass" onclick="setStatsScope('class')" class="px-2.5 py-1 rounded-lg font-semibold bg-white text-zinc-900 shadow-subtle transition">Aquesta Classe</button>
-              <button id="statsScopeLevel" onclick="setStatsScope('level')" class="px-2.5 py-1 rounded-lg font-medium text-zinc-600 hover:text-zinc-900 transition">Tots els grups</button>
+              <button id="statsScopeClass" onclick="setStatsScope('class')" class="px-2.5 py-1 rounded-lg font-semibold bg-white text-zinc-900 shadow-subtle">Aquesta Classe</button>
+              <button id="statsScopeLevel" onclick="setStatsScope('level')" class="px-2.5 py-1 rounded-lg font-medium text-zinc-500">Tots els grups</button>
             </div>
-
-            <div class="flex items-center gap-2 bg-zinc-50 border border-zinc-200 rounded-xl px-2.5 py-1">
-              <span class="text-zinc-400 font-medium">Àmbit:</span>
-              <select id="statsTypeSelect" onchange="onStatsTypeChange()" class="bg-transparent font-semibold text-zinc-800 outline-none cursor-pointer">
-                <option value="sda">Per SdA</option>
-                <option value="trim">Per Trimestre</option>
-                <option value="course">Global de Curs</option>
-              </select>
-            </div>
-
-            <select id="statsSdaSelector" onchange="renderStatsView()" class="bg-zinc-50 border border-zinc-200 font-semibold text-zinc-800 rounded-xl px-2.5 py-1.5 outline-none cursor-pointer">
+            <select id="statsTypeSelect" onchange="onStatsTypeChange()" class="bg-zinc-50 border border-zinc-200 font-semibold text-zinc-800 rounded-xl px-2.5 py-1.5 outline-none">
+              <option value="sda">Per SdA</option>
+              <option value="trim">Per Trimestre</option>
+              <option value="course">Global de Curs</option>
             </select>
+            <select id="statsSdaSelector" onchange="renderStatsView()" class="bg-zinc-50 border border-zinc-200 font-semibold text-zinc-800 rounded-xl px-2.5 py-1.5 outline-none"></select>
           </div>
         </div>
 
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           <div class="bg-white border border-zinc-200 rounded-2xl p-4 shadow-subtle">
-            <div class="flex items-center justify-between">
-              <span class="text-xs font-semibold text-zinc-400">Mitjana Global</span>
-              <span id="kpiAvgLvl" class="text-[10px] font-bold px-1.5 py-0.5 rounded ring-1 ring-inset bg-zinc-50 text-zinc-600 ring-zinc-200">--</span>
-            </div>
+            <span class="text-xs font-semibold text-zinc-400">Mitjana Global</span>
             <div id="kpiAvgVal" class="text-2xl font-black font-mono text-zinc-900 mt-1">0.00</div>
-            <p class="text-[11px] text-zinc-400 mt-1">Escala competencial 0 a 4</p>
           </div>
-
           <div class="bg-white border border-zinc-200 rounded-2xl p-4 shadow-subtle">
-            <div class="flex items-center justify-between">
-              <span class="text-xs font-semibold text-zinc-400" id="kpiSuccessTitle">Taxa d'Èxit</span>
-              <i class="fa-solid fa-circle-check text-emerald-500"></i>
-            </div>
+            <span class="text-xs font-semibold text-zinc-400" id="kpiSuccessTitle">Taxa d'Èxit</span>
             <div id="kpiSuccessRate" class="text-2xl font-black font-mono text-emerald-600 mt-1">0%</div>
-            <p class="text-[11px] text-zinc-400 mt-1">Alumnat que assoleix el nivell</p>
-          </div>
-
-          <div class="bg-white border border-zinc-200 rounded-2xl p-4 shadow-subtle">
-            <div class="flex items-center justify-between">
-              <span class="text-xs font-semibold text-zinc-400">CE Més Forta</span>
-              <i class="fa-solid fa-arrow-trend-up text-zinc-400"></i>
-            </div>
-            <div id="kpiBestCe" class="text-sm font-bold text-zinc-900 mt-1 truncate">--</div>
-            <p id="kpiBestCeVal" class="text-[11px] text-zinc-400 mt-1 font-mono">Mitjana: --</p>
-          </div>
-
-          <div class="bg-white border border-zinc-200 rounded-2xl p-4 shadow-subtle">
-            <div class="flex items-center justify-between">
-              <span class="text-xs font-semibold text-zinc-400">Àrea de Millora</span>
-              <i class="fa-solid fa-triangle-exclamation text-amber-500"></i>
-            </div>
-            <div id="kpiWorstCe" class="text-sm font-bold text-zinc-900 mt-1 truncate">--</div>
-            <p id="kpiWorstCeVal" class="text-[11px] text-zinc-400 mt-1 font-mono">Mitjana: --</p>
           </div>
         </div>
 
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-5">
-          <div class="bg-white border border-zinc-200 rounded-2xl p-5 shadow-subtle space-y-3">
-            <h4 class="text-xs font-bold text-zinc-800 uppercase tracking-wider flex items-center gap-2">
-              <i class="fa-solid fa-chart-column text-zinc-400"></i> Distribució de Nivells LOMLOE
-            </h4>
-            <div class="h-64">
-              <canvas id="chartStatsLevels"></canvas>
-            </div>
-          </div>
-
-          <div class="bg-white border border-zinc-200 rounded-2xl p-5 shadow-subtle space-y-3">
-            <h4 class="text-xs font-bold text-zinc-800 uppercase tracking-wider flex items-center gap-2">
-              <i class="fa-solid fa-chart-bar text-zinc-400"></i> Comparativa de Competències
-            </h4>
-            <div class="h-64">
-              <canvas id="chartStatsCes"></canvas>
-            </div>
-          </div>
-        </div>
-
-        <div class="bg-white border border-zinc-200 rounded-2xl shadow-card overflow-hidden">
-          <div class="bg-zinc-900 text-white px-5 py-3.5 flex justify-between items-center text-xs font-bold">
-            <span>Diagnosi Detallada per Competències</span>
-            <span class="text-zinc-400 font-mono text-[11px]">Detecció de colls d'ampolla</span>
-          </div>
-          <div class="overflow-auto">
-            <table class="w-full text-left text-xs">
-              <thead class="bg-zinc-50 text-zinc-600 font-semibold border-b border-zinc-200">
-                <tr>
-                  <th class="py-2.5 px-4 w-24 font-mono">Codi</th>
-                  <th class="py-2.5 px-4">Competència Específica</th>
-                  <th class="py-2.5 px-3 text-center">Mitjana</th>
-                  <th class="py-2.5 px-3 text-center">Nivell</th>
-                  <th class="py-2.5 px-4 text-center" id="thAssolitRate">% &ge; Assolit</th>
-                  <th class="py-2.5 px-4 text-center">Estat</th>
-                </tr>
-              </thead>
-              <tbody id="statsTableBody" class="divide-y divide-zinc-100 bg-white tabular-nums"></tbody>
-            </table>
-          </div>
+        <div class="bg-white border border-zinc-200 rounded-2xl p-5 shadow-subtle h-64">
+          <canvas id="chartStatsLevels"></canvas>
         </div>
       </section>
 
     </div>
   </main>
 
-  <!-- MODAL LLINDARS -->
+  <!-- MODALS -->
   <div id="thresholdsModal" class="fixed inset-0 bg-zinc-950/40 backdrop-blur-xs z-50 flex items-center justify-center p-4 hidden no-print">
-    <div class="bg-white rounded-3xl shadow-card max-w-xl w-full overflow-hidden border border-zinc-200">
-      <div class="px-6 py-4 bg-zinc-900 text-white flex justify-between items-center">
-        <h3 class="text-sm font-bold">Definició de l'Escala de Qualificació LOMLOE</h3>
-        <button onclick="closeThresholdsModal()" class="text-zinc-400 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
+    <div class="bg-white rounded-3xl shadow-card max-w-xl w-full overflow-hidden border border-zinc-200 p-6 space-y-4 text-xs">
+      <h3 class="text-sm font-bold">Llindars LOMLOE</h3>
+      <div class="space-y-2">
+        <div class="flex justify-between items-center"><span class="font-bold text-amber-600">EPA &ge;</span><input type="number" id="th_epa" step="0.05" class="w-20 text-center border rounded p-1 font-mono font-bold"></div>
+        <div class="flex justify-between items-center"><span class="font-bold text-sky-600">AS &ge;</span><input type="number" id="th_as" step="0.05" class="w-20 text-center border rounded p-1 font-mono font-bold"></div>
+        <div class="flex justify-between items-center"><span class="font-bold text-indigo-600">AN &ge;</span><input type="number" id="th_an" step="0.05" class="w-20 text-center border rounded p-1 font-mono font-bold"></div>
+        <div class="flex justify-between items-center"><span class="font-bold text-emerald-600">AE &ge;</span><input type="number" id="th_ae" step="0.05" class="w-20 text-center border rounded p-1 font-mono font-bold"></div>
       </div>
-      <div class="p-6 space-y-3 text-xs">
-        <div class="flex items-center justify-between p-3 bg-zinc-50 rounded-xl border border-zinc-200">
-          <div><b class="text-rose-600 font-mono">NA</b> No Assolit</div>
-          <span class="text-zinc-400">&lt; EPA</span>
-        </div>
-        <div class="flex items-center justify-between p-3 bg-zinc-50 rounded-xl border border-zinc-200">
-          <div><b class="text-amber-600 font-mono">EPA</b> En Procés</div>
-          <div class="flex items-center gap-1.5">
-            <span>&ge;</span>
-            <input type="number" id="th_epa" step="0.05" class="w-20 text-center font-mono font-bold bg-white border border-zinc-300 rounded-lg p-1.5">
-          </div>
-        </div>
-        <div class="flex items-center justify-between p-3 bg-zinc-50 rounded-xl border border-zinc-200">
-          <div><b class="text-sky-600 font-mono">AS</b> Assolit</div>
-          <div class="flex items-center gap-1.5">
-            <span>&ge;</span>
-            <input type="number" id="th_as" step="0.05" class="w-20 text-center font-mono font-bold bg-white border border-zinc-300 rounded-lg p-1.5">
-          </div>
-        </div>
-        <div class="flex items-center justify-between p-3 bg-zinc-50 rounded-xl border border-zinc-200">
-          <div><b class="text-indigo-600 font-mono">AN</b> Notable</div>
-          <div class="flex items-center gap-1.5">
-            <span>&ge;</span>
-            <input type="number" id="th_an" step="0.05" class="w-20 text-center font-mono font-bold bg-white border border-zinc-300 rounded-lg p-1.5">
-          </div>
-        </div>
-        <div class="flex items-center justify-between p-3 bg-zinc-50 rounded-xl border border-zinc-200">
-          <div><b class="text-emerald-600 font-mono">AE</b> Excel·lent</div>
-          <div class="flex items-center gap-1.5">
-            <span>&ge;</span>
-            <input type="number" id="th_ae" step="0.05" class="w-20 text-center font-mono font-bold bg-white border border-zinc-300 rounded-lg p-1.5">
-          </div>
-        </div>
-      </div>
-      <div class="px-6 py-3.5 bg-zinc-50 border-t border-zinc-200 flex justify-between items-center text-xs">
-        <button onclick="resetDefaultThresholds()" class="text-zinc-500 hover:text-zinc-900 font-semibold underline">Restablir per defecte</button>
-        <div class="flex gap-2">
-          <button onclick="closeThresholdsModal()" class="px-3.5 py-1.5 border border-zinc-300 rounded-xl font-semibold text-zinc-600">Cancel·lar</button>
-          <button onclick="saveThresholdsModal()" class="px-4 py-1.5 bg-zinc-900 hover:bg-zinc-800 text-white rounded-xl font-semibold">Desar</button>
-        </div>
-      </div>
+      <div class="flex justify-end gap-2 pt-2"><button onclick="closeThresholdsModal()" class="px-3 py-1.5 border rounded-xl">Tancar</button><button onclick="saveThresholdsModal()" class="px-4 py-1.5 bg-zinc-900 text-white rounded-xl font-semibold">Desar</button></div>
     </div>
   </div>
 
-  <!-- MODAL CREAR CLASSE -->
   <div id="newGroupModal" class="fixed inset-0 bg-zinc-950/40 backdrop-blur-xs z-50 flex items-center justify-center p-4 hidden no-print">
-    <div class="bg-white rounded-3xl shadow-card max-w-md w-full overflow-hidden border border-zinc-200">
-      <div class="px-6 py-4 bg-zinc-900 text-white flex justify-between items-center">
-        <h3 class="text-sm font-bold flex items-center gap-2"><i class="fa-solid fa-graduation-cap text-zinc-400"></i> Crear Nova Classe</h3>
-        <button onclick="closeNewGroupModal()" class="text-zinc-400 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
-      </div>
-      <div class="p-6 space-y-4 text-xs">
-        <label class="block font-semibold text-zinc-700">Nom del Grup o Curs</label>
-        <input type="text" id="modalNewGroupNameInput" placeholder="Ex: 1r ESO C, 2n ESO A..." class="w-full text-sm border border-zinc-200 rounded-xl p-2.5 outline-none font-semibold">
-      </div>
-      <div class="px-6 py-3 bg-zinc-50 border-t border-zinc-200 flex justify-end gap-2 text-xs">
-        <button onclick="closeNewGroupModal()" class="px-4 py-2 border border-zinc-300 rounded-xl font-semibold text-zinc-600">Cancel·lar</button>
-        <button onclick="confirmCreateNewGroup()" class="px-4 py-2 bg-zinc-900 hover:bg-zinc-800 text-white rounded-xl font-semibold">Crear Classe</button>
-      </div>
+    <div class="bg-white rounded-3xl shadow-card max-w-md w-full overflow-hidden border border-zinc-200 p-6 space-y-4 text-xs">
+      <h3 class="text-sm font-bold">Crear Nova Classe</h3>
+      <input type="text" id="modalNewGroupNameInput" placeholder="Ex: 1r ESO A" class="w-full border rounded-xl p-2.5 font-semibold outline-none">
+      <div class="flex justify-end gap-2"><button onclick="closeNewGroupModal()" class="px-3 py-1.5 border rounded-xl">Cancel·lar</button><button onclick="confirmCreateNewGroup()" class="px-4 py-2 bg-zinc-900 text-white rounded-xl font-semibold">Crear</button></div>
     </div>
   </div>
 
-  <!-- MODAL SdA -->
   <div id="sdaModal" class="fixed inset-0 bg-zinc-950/40 backdrop-blur-xs z-50 flex items-center justify-center p-4 hidden no-print">
     <div class="bg-white rounded-3xl shadow-card max-w-3xl w-full max-h-[90vh] flex flex-col overflow-hidden border border-zinc-200">
-      <div class="px-6 py-4 bg-zinc-900 text-white flex justify-between items-center">
-        <h3 class="text-sm font-bold">Configuració de la Situació d'Aprenentatge (SdA)</h3>
-        <button onclick="closeSdaModal()" class="text-zinc-400 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
-      </div>
-      <div class="p-6 overflow-y-auto space-y-5 flex-1 text-xs">
-        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
-          <div class="sm:col-span-2">
-            <label class="block font-semibold text-zinc-700 mb-1">Títol de la SdA</label>
-            <input type="text" id="modalSdaTitle" class="w-full text-sm border border-zinc-200 rounded-xl p-2.5 outline-none font-semibold">
-          </div>
-          <div>
-            <label class="block font-semibold text-zinc-800 mb-1">Pes al Trimestre (%)</label>
-            <input type="number" id="modalSdaTrimWeight" value="50" min="0" max="100" class="w-full text-sm border border-zinc-200 rounded-xl p-2.5 text-center font-mono font-bold">
-          </div>
+      <div class="px-6 py-4 bg-zinc-900 text-white flex justify-between items-center"><h3 class="text-sm font-bold">Configuració SdA</h3><button onclick="closeSdaModal()"><i class="fa-solid fa-xmark"></i></button></div>
+      <div class="p-6 overflow-y-auto space-y-4 flex-1 text-xs">
+        <div class="grid grid-cols-3 gap-3">
+          <div class="col-span-2"><label class="block font-semibold mb-1">Títol</label><input type="text" id="modalSdaTitle" class="w-full border rounded-xl p-2 font-semibold"></div>
+          <div><label class="block font-semibold mb-1">Pes (%)</label><input type="number" id="modalSdaTrimWeight" value="50" class="w-full border rounded-xl p-2 text-center font-mono font-bold"></div>
         </div>
-
-        <div class="bg-zinc-50 border border-zinc-200 p-3.5 rounded-2xl space-y-2">
-          <div class="flex justify-between items-center">
-            <span class="font-bold text-zinc-700 text-[11px] uppercase tracking-wider">A quins grups s'aplica?</span>
-            <div class="flex gap-2 text-[11px]">
-              <button type="button" onclick="selectAllModalGroups(true)" class="font-semibold text-zinc-900 hover:underline">Totes</button>
-              <span class="text-zinc-300">|</span>
-              <button type="button" onclick="selectAllModalGroups(false)" class="font-semibold text-zinc-400 hover:underline">Cap</button>
-            </div>
-          </div>
-          <div id="modalTargetGroupsContainer" class="flex flex-wrap gap-2 pt-1"></div>
-        </div>
-
-        <div class="border-t border-zinc-200 pt-4 space-y-3">
-          <div class="flex items-center justify-between">
-            <span class="font-bold text-zinc-800 text-[11px] uppercase tracking-wider">Competències Específiques &amp; OAs</span>
-            <span id="modalWeightSumBadge" class="text-xs font-mono font-bold px-2 py-0.5 rounded-md">Total: 0%</span>
-          </div>
-          <div id="modalCeCardsContainer" class="space-y-3.5"></div>
-        </div>
+        <div class="bg-zinc-50 border p-3 rounded-2xl"><span class="font-bold text-xs uppercase">Grups d'aplicació:</span><div id="modalTargetGroupsContainer" class="flex flex-wrap gap-2 pt-2"></div></div>
+        <div id="modalCeCardsContainer" class="space-y-3"></div>
       </div>
-      <div class="px-6 py-3.5 bg-zinc-50 border-t border-zinc-200 flex justify-end gap-2 text-xs">
-        <button onclick="closeSdaModal()" class="px-3.5 py-1.5 border border-zinc-300 rounded-xl font-semibold text-zinc-600">Cancel·lar</button>
-        <button onclick="saveSdaFromModal()" class="px-4 py-1.5 bg-zinc-900 hover:bg-zinc-800 text-white rounded-xl font-semibold">Desar SdA</button>
-      </div>
+      <div class="px-6 py-3 bg-zinc-50 border-t flex justify-end gap-2 text-xs"><button onclick="closeSdaModal()" class="px-3 py-1.5 border rounded-xl">Cancel·lar</button><button onclick="saveSdaFromModal()" class="px-4 py-1.5 bg-zinc-900 text-white rounded-xl font-semibold">Desar</button></div>
     </div>
   </div>
 
-  <!-- ================= LÒGICA FIREBASE DIRECTA (SENSE AUTH/MAIL) ================= -->
+  <!-- ================= LÒGICA FIREBASE DIRECTA PER USUARI ================= -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
     import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
@@ -608,8 +499,9 @@
       measurementId: "G-Q78SHHFXL8"
     };
 
-    let fbApp = null;
-    let fbDb = null;
+    let fbApp = initializeApp(FIREBASE_CONFIG);
+    let fbDb = getDatabase(fbApp);
+    let currentAuthUser = null;
 
     function setCloudStatus(state) {
       const dot = document.getElementById('cloudStatusDot');
@@ -617,32 +509,73 @@
       if (state === 'online') {
         dot.className = "w-2 h-2 rounded-full bg-emerald-500 animate-pulse";
         text.textContent = "Sincronitzat";
-        text.className = "font-mono text-[10px] text-emerald-700 font-semibold";
       } else if (state === 'syncing') {
         dot.className = "w-2 h-2 rounded-full bg-amber-500 animate-spin";
         text.textContent = "Guardant...";
-        text.className = "font-mono text-[10px] text-amber-700 font-semibold";
       } else {
         dot.className = "w-2 h-2 rounded-full bg-rose-500";
         text.textContent = "Desconnectat";
-        text.className = "font-mono text-[10px] text-rose-700 font-medium";
       }
     }
 
-    try {
-      fbApp = initializeApp(FIREBASE_CONFIG);
-      fbDb = getDatabase(fbApp);
+    // CONTROL D'ACCÉS PER USUARI I CLAU
+    window.handleAuthSubmit = function(e) {
+      e.preventDefault();
+      const user = document.getElementById('authUsernameInput').value.trim();
+      const pass = document.getElementById('authPasswordInput').value.trim();
+      const errBox = document.getElementById('authErrorMsg');
 
-      // Listener Directe a la branca principal de dades (sense dependre d'usuari)
-      const rootDataRef = ref(fbDb, "quadern_data");
-      
-      onValue(rootDataRef, (snapshot) => {
+      if (pass.length < 4) {
+        errBox.textContent = "La contrasenya ha de tenir com a mínim 4 caràcters.";
+        errBox.classList.remove('hidden');
+        return;
+      }
+
+      // Validació de l'usuari predeterminat
+      if (user.toLowerCase() === "docent" && pass !== "ef2026") {
+        errBox.textContent = "Contrasenya incorrecta per a l'usuari 'docent'.";
+        errBox.classList.remove('hidden');
+        return;
+      }
+
+      errBox.classList.add('hidden');
+      localStorage.setItem('EF_AUTH_USER', user);
+      localStorage.setItem('EF_AUTH_PASS', pass);
+      loginUserSession(user);
+    };
+
+    window.logoutActiveUser = function() {
+      localStorage.removeItem('EF_AUTH_USER');
+      localStorage.removeItem('EF_AUTH_PASS');
+      location.reload();
+    };
+
+    function checkActiveSession() {
+      const savedUser = localStorage.getItem('EF_AUTH_USER');
+      if (savedUser) {
+        loginUserSession(savedUser);
+      } else {
+        document.getElementById('loginOverlay').classList.remove('hidden');
+      }
+    }
+
+    function loginUserSession(username) {
+      currentAuthUser = username.toLowerCase().replace(/[^a-z0-9]/g, '_');
+      document.getElementById('loginOverlay').classList.add('hidden');
+      document.getElementById('headerUserLabel').textContent = username;
+      connectToUserCloud(currentAuthUser);
+    }
+
+    function connectToUserCloud(userKey) {
+      const userBranchRef = ref(fbDb, `users/${userKey}/quadern_data`);
+
+      onValue(userBranchRef, (snapshot) => {
         const cloudData = snapshot.val();
         if (cloudData && cloudData.groups) {
           window.appData = cloudData;
           localStorage.setItem('EF_COMPETENCIAL_DATA_V10', JSON.stringify(window.appData));
           
-          if (window.appState.currentScreen === 'class') {
+          if (window.appState?.currentScreen === 'class') {
             if (window.appState.currentView === 'sda') window.renderSdaGrid();
             if (window.appState.currentView === 'trim') window.renderTrimView();
             if (window.appState.currentView === 'final') window.renderFinalView();
@@ -651,49 +584,44 @@
           }
           setCloudStatus('online');
         } else {
-          // Si el núvol és buit, hi bolquem l'estat inicial
-          set(rootDataRef, window.appData).then(() => setCloudStatus('online'));
+          // Si és el primer cop que entra aquest usuari, li pugem les dades inicials
+          set(userBranchRef, window.appData).then(() => setCloudStatus('online'));
         }
-      }, (error) => {
-        console.error("Error escoltant Firebase:", error);
-        setCloudStatus('offline');
-      });
-
-    } catch (e) {
-      console.error("Error inicialitzant Firebase:", e);
-      setCloudStatus('offline');
+      }, () => setCloudStatus('offline'));
     }
 
-    // Mutació Atòmica per Cel·la (Patching Directe)
+    // MUTACIÓ ATÒMICA AL NÚVOL (CEL·LA A CEL·LA)
     window.syncGradeToCloud = function(groupId, sdaId, studentId, gradeKey, val) {
-      if (!fbDb) return;
+      if (!currentAuthUser || !fbDb) return;
       setCloudStatus('syncing');
-      const gradeRef = ref(fbDb, `quadern_data/groups/${groupId}/grades/${sdaId}/${studentId}/${gradeKey}`);
+      const gradeRef = ref(fbDb, `users/${currentAuthUser}/quadern_data/groups/${groupId}/grades/${sdaId}/${studentId}/${gradeKey}`);
       set(gradeRef, val === null ? null : val)
         .then(() => setCloudStatus('online'))
         .catch(() => setCloudStatus('offline'));
     };
 
     window.syncGroupEntityToCloud = function(groupId) {
-      if (!fbDb) return;
+      if (!currentAuthUser || !fbDb) return;
       setCloudStatus('syncing');
-      const groupRef = ref(fbDb, `quadern_data/groups/${groupId}`);
+      const groupRef = ref(fbDb, `users/${currentAuthUser}/quadern_data/groups/${groupId}`);
       set(groupRef, window.appData.groups[groupId])
         .then(() => setCloudStatus('online'))
         .catch(() => setCloudStatus('offline'));
     };
 
     window.syncWholeAppToCloud = function() {
-      if (!fbDb) return;
+      if (!currentAuthUser || !fbDb) return;
       setCloudStatus('syncing');
-      const rootRef = ref(fbDb, "quadern_data");
+      const rootRef = ref(fbDb, `users/${currentAuthUser}/quadern_data`);
       set(rootRef, window.appData)
         .then(() => setCloudStatus('online'))
         .catch(() => setCloudStatus('offline'));
     };
+
+    window.addEventListener('DOMContentLoaded', checkActiveSession);
   </script>
 
-  <!-- ================= LÒGICA APP ================= -->
+  <!-- ================= LÒGICA I MOTOR D'AVALUACIÓ ================= -->
   <script>
     const CE_COLOR_THEMES = {
       CE1: { header: 'bg-sky-100 text-sky-950 border-sky-200', critHeader: 'bg-sky-50 text-sky-800 border-sky-200', weightHeader: 'bg-sky-100/70 text-sky-900 border-sky-200', scoreCe: 'bg-sky-100 text-sky-950 font-bold border-sky-300', levelCe: 'bg-sky-50 border-sky-200', oaTints: [{ header: 'bg-sky-50 text-sky-900', cell: 'bg-sky-50/20' }] },
@@ -816,7 +744,6 @@
 
     let radarInstance = null;
     let chartStatsLevelsInstance = null;
-    let chartStatsCesInstance = null;
 
     function loadFromStorage() {
       try {
@@ -940,7 +867,7 @@
     };
 
     window.deleteGroup = function(gId) {
-      if (Object.keys(window.appData.groups).length <= 1) return alert("Has de mantenir una classe.");
+      if (Object.keys(window.appData.groups).length <= 1) return alert("Has de mantenir com a mínim una classe.");
       if (confirm(`Eliminar la classe "${window.appData.groups[gId].name}"?`)) {
         delete window.appData.groups[gId];
         saveToStorage();
@@ -1111,8 +1038,8 @@
       const activeCes = OFFICIAL_CES.filter(ce => sda.competences && sda.competences[ce.id] && sda.competences[ce.id].active);
 
       let r1 = `<tr class="border-b border-zinc-200">
-        <th rowspan="3" class="p-2.5 w-12 text-center font-mono text-zinc-500 font-bold bg-zinc-100 border-r border-zinc-200 sticky left-0 z-40">#</th>
-        <th rowspan="3" class="p-2.5 w-56 font-bold text-zinc-900 bg-zinc-100 border-r border-zinc-200 sticky left-12 z-40">Alumne/a</th>`;
+        <th rowspan="3" class="p-2.5 w-12 text-center font-mono text-zinc-500 font-bold bg-zinc-100 border-r border-zinc-200 sticky left-0 z-30">#</th>
+        <th rowspan="3" class="p-2.5 w-56 font-bold text-zinc-900 bg-zinc-100 border-r border-zinc-200 sticky left-12 z-30">Alumne/a</th>`;
       
       activeCes.forEach(ce => {
         const theme = CE_COLOR_THEMES[ce.id] || CE_COLOR_THEMES.CE1;
@@ -1160,8 +1087,8 @@
         let colCounter = 0;
 
         rowsHtml += `<tr class="hover:bg-zinc-50/70 transition-colors">
-          <td class="p-2 text-center text-zinc-400 font-mono border-r border-zinc-200 bg-white sticky left-0 z-20">${rIdx + 1}</td>
-          <td class="p-2 font-semibold text-zinc-900 border-r border-zinc-200 bg-white sticky left-12 z-20 truncate">${st.name}</td>`;
+          <td class="p-2 text-center text-zinc-400 font-mono border-r border-zinc-200 bg-white sticky left-0 z-10">${rIdx + 1}</td>
+          <td class="p-2 font-semibold text-zinc-900 border-r border-zinc-200 bg-white sticky left-12 z-10 truncate">${st.name}</td>`;
 
         activeCes.forEach(ce => {
           const theme = CE_COLOR_THEMES[ce.id] || CE_COLOR_THEMES.CE1;
@@ -1261,7 +1188,6 @@
 
       saveToStorage();
       
-      // SINCRONITZACIÓ ATÒMICA AL NÚVOL
       if (window.syncGradeToCloud) {
         window.syncGradeToCloud(window.appData.activeGroupId, sdaId, stId, key, val);
       }
@@ -1553,7 +1479,7 @@
 
     window.saveSdaFromModal = function() {
       const targetGroupIds = Array.from(document.querySelectorAll('.target-group-checkbox:checked')).map(cb => cb.value);
-      if (targetGroupIds.length === 0) return alert("Selecciona un grup.");
+      if (targetGroupIds.length === 0) return alert("Selecciona com a mínim un grup.");
 
       const title = document.getElementById('modalSdaTitle').value.trim() || 'Nova SdA';
       const trimWeight = parseFloat(document.getElementById('modalSdaTrimWeight').value) || 0;
@@ -1862,7 +1788,7 @@
       const globalLvl = getLevel(globalScore);
       const repBadge = document.getElementById('repGlobalBadge');
       repBadge.textContent = `${globalScore !== null ? globalScore.toFixed(2) : '—'} (${globalLvl.code})`;
-      repBadge.className = `inline-flex items-center mt-1 px-3 py-1 rounded-md text-xs font-bold ${globalLvl.badge}`;
+      repBadge.className = `inline-flex items-center mt-1 px-3 py-1 rounded-md text-xs font-bold ring-1 ring-inset ${globalLvl.badge}`;
 
       document.getElementById('repDetailsContainer').innerHTML = detailsHtml;
 
@@ -1929,14 +1855,9 @@
       const avg = scores.length > 0 ? (scores.reduce((a, b) => a + b, 0) / scores.length) : 0;
       const pass = scores.filter(s => s >= gradeThresholds.as).length;
       const rate = scores.length > 0 ? ((pass / scores.length) * 100).toFixed(1) : "0.0";
-      const lvl = getLevel(avg);
 
       document.getElementById('kpiAvgVal').textContent = avg > 0 ? avg.toFixed(2) : '—';
-      document.getElementById('kpiAvgLvl').textContent = lvl.code;
-      document.getElementById('kpiAvgLvl').className = `text-[10px] font-bold px-1.5 py-0.5 rounded ${lvl.badge}`;
       document.getElementById('kpiSuccessRate').textContent = `${rate}%`;
-      document.getElementById('kpiSuccessTitle').textContent = `Taxa d'Èxit (≥ ${gradeThresholds.as})`;
-      document.getElementById('thAssolitRate').textContent = `% ≥ ${gradeThresholds.as}`;
 
       let counts = { NA: 0, EPA: 0, AS: 0, AN: 0, AE: 0 };
       scores.forEach(s => counts[getLevel(s).code]++);
@@ -1969,38 +1890,29 @@
       a.remove();
     };
 
-    window.openThresholdsModal = function() {
-      document.getElementById('th_epa').value = gradeThresholds.epa;
-      document.getElementById('th_as').value = gradeThresholds.as;
-      document.getElementById('th_an').value = gradeThresholds.an;
-      document.getElementById('th_ae').value = gradeThresholds.ae;
-      document.getElementById('thresholdsModal').classList.remove('hidden');
+    window.openThresholdsModal = function() { 
+      document.getElementById('th_epa').value = gradeThresholds.epa; 
+      document.getElementById('th_as').value = gradeThresholds.as; 
+      document.getElementById('th_an').value = gradeThresholds.an; 
+      document.getElementById('th_ae').value = gradeThresholds.ae; 
+      document.getElementById('thresholdsModal').classList.remove('hidden'); 
     };
-
-    window.closeThresholdsModal = function() {
-      document.getElementById('thresholdsModal').classList.add('hidden');
-    };
-
-    window.resetDefaultThresholds = function() {
-      document.getElementById('th_epa').value = DEFAULT_THRESHOLDS.epa;
-      document.getElementById('th_as').value = DEFAULT_THRESHOLDS.as;
-      document.getElementById('th_an').value = DEFAULT_THRESHOLDS.an;
-      document.getElementById('th_ae').value = DEFAULT_THRESHOLDS.ae;
-    };
-
+    
+    window.closeThresholdsModal = function() { document.getElementById('thresholdsModal').classList.add('hidden'); };
+    
     window.saveThresholdsModal = function() {
-      const epa = parseFloat(document.getElementById('th_epa').value);
-      const as = parseFloat(document.getElementById('th_as').value);
-      const an = parseFloat(document.getElementById('th_an').value);
-      const ae = parseFloat(document.getElementById('th_ae').value);
-      if (isNaN(epa) || isNaN(as) || isNaN(an) || isNaN(ae) || epa >= as || as >= an || an >= ae) return alert("Llindars invàlids.");
-      saveThresholdsToStorage({ epa, as, an, ae });
+      saveThresholdsToStorage({ 
+        epa: parseFloat(document.getElementById('th_epa').value), 
+        as: parseFloat(document.getElementById('th_as').value), 
+        an: parseFloat(document.getElementById('th_an').value), 
+        ae: parseFloat(document.getElementById('th_ae').value) 
+      });
       closeThresholdsModal();
-      if (window.appState.currentScreen === 'class') renderSdaGrid();
+      if (window.appState.currentView === 'sda') renderSdaGrid();
     };
 
     window.resetDefaultData = function() {
-      if (confirm("Vols restablir les dades de mostra originals?")) {
+      if (confirm("Restablir les dades de mostra originals?")) {
         window.appData = JSON.parse(JSON.stringify(ORIGINAL_DEMO_DATA));
         saveToStorage();
         if (window.syncWholeAppToCloud) window.syncWholeAppToCloud();
@@ -2009,31 +1921,21 @@
     };
 
     window.exportBackupJSON = function() {
-      const str = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify({ appData: window.appData, gradeThresholds }, null, 2));
       const a = document.createElement('a');
-      a.setAttribute("href", str);
-      a.setAttribute("download", `Backup_EF_${new Date().toISOString().slice(0, 10)}.json`);
-      document.body.appendChild(a);
+      a.href = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify({ appData: window.appData, gradeThresholds }, null, 2));
+      a.download = `Backup_EF_${new Date().toISOString().slice(0, 10)}.json`;
       a.click();
-      a.remove();
     };
 
-    window.importBackupJSON = function(event) {
-      const file = event.target.files[0];
-      if (!file) return;
+    window.importBackupJSON = function(e) {
       const reader = new FileReader();
-      reader.onload = function(e) {
-        try {
-          const res = JSON.parse(e.target.result);
-          if (res.appData) window.appData = res.appData;
-          else window.appData = res;
-          saveToStorage();
-          if (window.syncWholeAppToCloud) window.syncWholeAppToCloud();
-          goToHome();
-        } catch (err) { alert("JSON no vàlid."); }
+      reader.onload = function(evt) {
+        window.appData = JSON.parse(evt.target.result).appData || JSON.parse(evt.target.result);
+        saveToStorage();
+        if (window.syncWholeAppToCloud) window.syncWholeAppToCloud();
+        goToHome();
       };
-      reader.readAsText(file);
-      event.target.value = '';
+      reader.readAsText(e.target.files[0]);
     };
 
     window.onload = function() {
