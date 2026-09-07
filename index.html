@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>EF Competencial · Quadern LOMLOE Pro</title>
+  <title>EF Competencial · Quadern LOMLOE Cloud Sync</title>
   
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -24,7 +24,6 @@
           boxShadow: {
             'subtle': '0 1px 2px 0 rgba(0, 0, 0, 0.03)',
             'card': '0 1px 3px 0 rgba(0, 0, 0, 0.04), 0 1px 2px -1px rgba(0, 0, 0, 0.03)',
-            'float': '0 4px 14px 0 rgba(0, 0, 0, 0.05)',
           }
         }
       }
@@ -34,30 +33,17 @@
   <style>
     body { font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11'; }
     .tabular-nums { font-variant-numeric: tabular-nums; }
-    
-    ::-webkit-scrollbar { width: 6px; height: 6px; }
-    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar { width: 5px; height: 5px; }
     ::-webkit-scrollbar-thumb { background: #e4e4e7; border-radius: 9999px; }
-    ::-webkit-scrollbar-thumb:hover { background: #d4d4d8; }
-
-    input[type=number]::-webkit-inner-spin-button, 
-    input[type=number]::-webkit-outer-spin-button { 
-      -webkit-appearance: none; 
-      margin: 0; 
-    }
+    input[type=number]::-webkit-inner-spin-button, input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
     input[type=number] { -moz-appearance: textfield; }
-
-    @media print {
-      .no-print { display: none !important; }
-      body { background: white !important; }
-      .print-card { box-shadow: none !important; border: 1px solid #e4e4e7 !important; page-break-inside: avoid; }
-    }
+    @media print { .no-print { display: none !important; } body { background: white !important; } }
   </style>
 </head>
 <body class="min-h-full flex flex-col text-zinc-900 bg-[#fafafa]">
 
-  <!-- ================= CAPÇALERA ================= -->
-  <header class="bg-white/90 backdrop-blur-md border-b border-zinc-200/80 sticky top-0 z-50 no-print">
+  <!-- ================= CAPÇALERA AMB GESTOR CLOUD ================= -->
+  <header class="bg-white/90 backdrop-blur-md border-b border-zinc-200 sticky top-0 z-50 no-print">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <div class="flex items-center justify-between h-14 gap-4">
         
@@ -73,9 +59,9 @@
             <div class="flex flex-col">
               <div class="flex items-center gap-1.5">
                 <span class="text-xs font-black tracking-tight text-zinc-900 group-hover:text-zinc-600 transition">EF COMPETENCIAL</span>
-                <span class="text-[9px] font-bold text-zinc-600 bg-zinc-100 px-1.5 py-0.5 rounded tracking-wider uppercase border border-zinc-200/60">PRO</span>
+                <span class="text-[9px] font-bold text-zinc-600 bg-zinc-100 px-1.5 py-0.5 rounded tracking-wider uppercase border border-zinc-200">CLOUD SYNC</span>
               </div>
-              <span class="text-[9px] font-medium text-zinc-400 -mt-0.5">Avaluació Educació Física LOMLOE</span>
+              <span class="text-[9px] font-medium text-zinc-400 -mt-0.5">Sincronització en Temps Real</span>
             </div>
           </button>
 
@@ -85,10 +71,27 @@
           </div>
         </div>
 
+        <!-- Estat Cloud + Sessió Google + Eines -->
         <div class="flex items-center gap-2">
-          <div id="savedIndicator" class="flex items-center gap-1.5 text-[11px] font-medium text-emerald-600 px-2 py-0.5 opacity-0 transition-opacity duration-300">
-            <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
-            <span class="font-semibold text-[10px]">Desat</span>
+          
+          <!-- Monitor de Sincronització Firebase -->
+          <div id="cloudStatusBadge" class="flex items-center gap-1.5 text-[11px] font-medium px-2.5 py-1 rounded-xl border bg-zinc-50 border-zinc-200 text-zinc-600">
+            <span id="cloudStatusDot" class="w-2 h-2 rounded-full bg-zinc-300"></span>
+            <span id="cloudStatusText" class="font-mono text-[10px] hidden sm:inline font-semibold">Local</span>
+          </div>
+
+          <!-- Botó Sessió Google -->
+          <div id="authContainer">
+            <button id="googleLoginBtn" onclick="loginWithGoogle()" class="inline-flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1.5 rounded-xl border border-zinc-200 bg-white hover:bg-zinc-50 text-zinc-700 shadow-subtle transition">
+              <i class="fa-brands fa-google text-rose-500"></i>
+              <span class="hidden sm:inline">Connectar Núvol</span>
+            </button>
+            <div id="userProfileBadge" class="hidden items-center gap-2 bg-zinc-100 pl-2.5 pr-1.5 py-1 rounded-xl border border-zinc-200">
+              <span id="userNameDisplay" class="text-xs font-bold text-zinc-800 max-w-[100px] truncate">Docent</span>
+              <button onclick="logoutFirebase()" title="Tancar Sessió" class="w-6 h-6 rounded-lg bg-white hover:bg-zinc-200 text-zinc-600 flex items-center justify-center text-[10px] transition">
+                <i class="fa-solid fa-arrow-right-from-bracket"></i>
+              </button>
+            </div>
           </div>
 
           <button onclick="goToHome()" id="homeNavBtn" class="inline-flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1.5 rounded-xl border border-zinc-200 bg-white text-zinc-700 hover:bg-zinc-50 shadow-subtle transition">
@@ -103,10 +106,10 @@
             <button onclick="resetDefaultData()" title="Restablir dades originals" class="p-1.5 text-zinc-400 hover:text-zinc-900 hover:bg-zinc-100 rounded-lg text-xs transition">
               <i class="fa-solid fa-rotate-left"></i>
             </button>
-            <button onclick="exportBackupJSON()" title="Exportar Backup JSON" class="p-1.5 text-zinc-400 hover:text-zinc-900 hover:bg-zinc-100 rounded-lg text-xs transition">
+            <button onclick="exportBackupJSON()" title="Còpia de Seguretat (JSON)" class="p-1.5 text-zinc-400 hover:text-zinc-900 hover:bg-zinc-100 rounded-lg text-xs transition">
               <i class="fa-solid fa-arrow-down-to-line"></i>
             </button>
-            <label title="Restaurar Backup JSON" class="p-1.5 text-zinc-400 hover:text-zinc-900 hover:bg-zinc-100 rounded-lg text-xs transition cursor-pointer">
+            <label title="Restaurar fitxer JSON" class="p-1.5 text-zinc-400 hover:text-zinc-900 hover:bg-zinc-100 rounded-lg text-xs transition cursor-pointer">
               <i class="fa-solid fa-arrow-up-from-line"></i>
               <input type="file" id="backupFileInput" accept=".json" onchange="importBackupJSON(event)" class="hidden">
             </label>
@@ -114,7 +117,7 @@
         </div>
       </div>
 
-      <!-- Menú Secundari de Classe -->
+      <!-- Segmented Control de Navegació de Classe -->
       <nav id="classSubNav" class="hidden flex items-center space-x-1 border-t border-zinc-100 py-1.5 overflow-x-auto text-[11px] font-semibold">
         <button id="tabBtnSda" onclick="switchView('sda')" class="px-3 py-1 rounded-md text-zinc-900 bg-zinc-100 transition">
           <i class="fa-regular fa-folder-open text-zinc-500 mr-1.5"></i> Qualificació SdA
@@ -138,16 +141,16 @@
     </div>
   </header>
 
-  <!-- ================= CONTINGUT PRINCIPAL ================= -->
+  <!-- ================= COS PRINCIPAL ================= -->
   <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-5">
 
-    <!-- PANTALLA INICI -->
+    <!-- PANTALLA D'INICI -->
     <section id="screenHome" class="space-y-6">
       <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-zinc-200 pb-4">
         <div>
           <div class="flex items-center gap-2 text-xs font-semibold text-zinc-400">
             <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
-            <span>Curs Actiu · Gestor d'Avaluació Contínua</span>
+            <span>Curs Actiu · Gestor d'Avaluació LOMLOE</span>
           </div>
           <h2 class="text-xl font-extrabold tracking-tight text-zinc-900 mt-0.5">Tauler de Classes</h2>
         </div>
@@ -165,7 +168,7 @@
       <div id="homeClassesGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"></div>
     </section>
 
-    <!-- ÀMBIT DE TREBALL DE LA CLASSE -->
+    <!-- ZONA DE TREBALL DE LA CLASSE -->
     <div id="screenClassWorkspace" class="hidden space-y-5">
       <div class="flex flex-wrap items-center justify-between gap-3 bg-white border border-zinc-200 px-3.5 py-2.5 rounded-2xl shadow-subtle no-print">
         <div class="flex items-center gap-3">
@@ -185,7 +188,7 @@
         </div>
       </div>
 
-      <!-- VISTA 1: GRAELLA SdA (OPTIMITZADA REACTIVA) -->
+      <!-- VISTA 1: GRAELLA SdA (MOTOR SPREADSHEET REACTIU) -->
       <section id="viewSda" class="space-y-4">
         <div class="bg-white border border-zinc-200 rounded-2xl p-3 shadow-subtle flex flex-wrap items-center justify-between gap-3">
           <div class="flex items-center gap-2.5">
@@ -198,7 +201,7 @@
           </div>
           <div class="flex items-center gap-2">
             <span class="hidden sm:inline-flex items-center gap-1.5 text-[11px] font-medium text-zinc-500 bg-zinc-50 px-2.5 py-1 rounded-lg border border-zinc-200 font-mono">
-              <i class="fa-regular fa-keyboard text-zinc-400"></i> Fletxes o Dreceres (e:4, n:3, a:2, p:1, x:0)
+              <i class="fa-regular fa-keyboard text-zinc-400"></i> Dreceres: e:4, n:3, a:2, p:1, x:0
             </span>
             <button onclick="openSdaModal(true)" class="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs font-semibold text-white bg-zinc-900 hover:bg-zinc-800 shadow-subtle transition">
               <i class="fa-solid fa-plus text-[10px]"></i> Nova SdA
@@ -225,7 +228,7 @@
               <h3 class="text-base font-bold text-zinc-900 flex items-center gap-2">
                 <i class="fa-solid fa-user-graduate text-zinc-600"></i> Llista d'Alumnat Registrat
               </h3>
-              <p class="text-xs text-zinc-500 mt-0.5">Edita directament els noms o enganxa llistats des d'Excel / Esfera.</p>
+              <p class="text-xs text-zinc-500 mt-0.5">Edita directament els noms o enganxa llistats complets des d'Excel o Esfera.</p>
             </div>
             <span id="rosterCountBadge" class="text-xs font-mono font-bold bg-zinc-100 text-zinc-800 px-3 py-1 rounded-full border border-zinc-200">0 alumnes</span>
           </div>
@@ -241,7 +244,7 @@
             <div>
               <label class="block font-medium text-zinc-600 text-xs mb-1">Importació en bloc (un per línia):</label>
               <div class="flex gap-2">
-                <textarea id="rosterBulkInput" rows="1" placeholder="Enganxa columnes de noms..." class="flex-1 bg-white border border-zinc-200 rounded-xl p-1.5 text-xs focus:ring-2 focus:ring-zinc-900 outline-none resize-none font-medium"></textarea>
+                <textarea id="rosterBulkInput" rows="1" placeholder="Enganxa columna de noms..." class="flex-1 bg-white border border-zinc-200 rounded-xl p-1.5 text-xs focus:ring-2 focus:ring-zinc-900 outline-none resize-none font-medium"></textarea>
                 <button onclick="addBulkStudentsFromRoster()" class="bg-zinc-800 hover:bg-zinc-700 text-white font-semibold px-3.5 py-1.5 rounded-xl text-xs transition">Carregar</button>
               </div>
             </div>
@@ -268,7 +271,7 @@
           <div>
             <span class="inline-flex items-center rounded-md bg-zinc-100 px-2 py-0.5 text-[11px] font-bold text-zinc-600">Avaluació Contínua</span>
             <h2 id="trimTitle" class="text-xl font-bold text-zinc-900 tracking-tight mt-1">Resum del Trimestre 1</h2>
-            <p class="text-xs text-zinc-500 mt-0.5">Control de ponderació de les SdAs i penalització d'assistència pràctica.</p>
+            <p class="text-xs text-zinc-500 mt-0.5">Control de ponderació de les SdAs i penalització per no pràctica motriu.</p>
           </div>
           <button onclick="exportContextualCSV()" class="inline-flex items-center gap-1.5 bg-white border border-zinc-200 text-zinc-700 hover:bg-zinc-50 text-xs font-semibold px-3 py-2 rounded-xl shadow-subtle transition">
             <i class="fa-solid fa-file-csv text-zinc-400"></i> Exportar Trimestre a CSV
@@ -301,7 +304,7 @@
           <div>
             <span class="inline-flex items-center rounded-md bg-zinc-100 px-2 py-0.5 text-[11px] font-bold text-zinc-600">Convocatòria Ordinària</span>
             <h2 class="text-xl font-bold text-zinc-900 tracking-tight mt-1">Avaluació Final de Curs</h2>
-            <p class="text-xs text-zinc-500 mt-0.5">Defineix el criteri de qualificació final (ponderació per trimestres o per CEs).</p>
+            <p class="text-xs text-zinc-500 mt-0.5">Tria el criteri de càlcul final (ponderació per trimestres o per CEs).</p>
           </div>
 
           <div class="flex flex-wrap items-center gap-3">
@@ -353,7 +356,7 @@
           </button>
         </div>
 
-        <div class="print-card bg-white border border-zinc-200 rounded-3xl p-8 shadow-card max-w-4xl mx-auto space-y-6">
+        <div class="bg-white border border-zinc-200 rounded-3xl p-8 shadow-card max-w-4xl mx-auto space-y-6">
           <div class="flex justify-between items-start border-b border-zinc-200 pb-5">
             <div>
               <span class="text-[11px] font-bold text-zinc-400 uppercase tracking-wider">Informe Individual Competencial</span>
@@ -489,95 +492,52 @@
     </div>
   </main>
 
-  <!-- ================= MODALS ================= -->
-  <!-- MODAL LLINDARS -->
+  <!-- MODAL CONFIGURACIÓ LLINDARS -->
   <div id="thresholdsModal" class="fixed inset-0 bg-zinc-950/40 backdrop-blur-xs z-50 flex items-center justify-center p-4 hidden no-print">
     <div class="bg-white rounded-3xl shadow-card max-w-xl w-full overflow-hidden border border-zinc-200">
       <div class="px-6 py-4 bg-zinc-900 text-white flex justify-between items-center">
-        <div class="flex items-center gap-2.5">
-          <div class="w-8 h-8 rounded-xl bg-zinc-800 text-zinc-200 flex items-center justify-center text-xs">
-            <i class="fa-solid fa-sliders"></i>
-          </div>
-          <div>
-            <h3 class="text-sm font-bold tracking-tight">Definició de l'Escala de Qualificació</h3>
-            <p class="text-[11px] text-zinc-400">Ajusta els llindars mínims dels nivells LOMLOE</p>
-          </div>
-        </div>
+        <h3 class="text-sm font-bold">Definició de l'Escala de Qualificació LOMLOE</h3>
         <button onclick="closeThresholdsModal()" class="text-zinc-400 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
       </div>
-
-      <div class="p-6 space-y-4 text-xs">
-        <p class="text-zinc-500 text-[11px] leading-relaxed">
-          Defineix la nota mínima per assolir cada tram (en escala 0 a 4). El sistema recalcularà automàticament colors, nivells i estadístiques.
-        </p>
-
-        <div class="space-y-2.5 pt-1">
-          <div class="flex items-center gap-3 bg-zinc-50 border border-zinc-200 p-3 rounded-xl">
-            <div class="w-12 font-black font-mono text-sm text-rose-600">NA</div>
-            <div class="flex-1">
-              <span class="block font-semibold text-zinc-800">No Assolit</span>
-              <span class="text-[11px] text-zinc-400">Qualsevol nota inferior a EPA</span>
-            </div>
-            <div class="text-right">
-              <span class="font-mono text-xs text-zinc-400 font-bold">&lt; EPA</span>
-            </div>
+      <div class="p-6 space-y-3 text-xs">
+        <div class="flex items-center justify-between p-3 bg-zinc-50 rounded-xl border border-zinc-200">
+          <div><b class="text-rose-600 font-mono">NA</b> No Assolit</div>
+          <span class="text-zinc-400">&lt; EPA</span>
+        </div>
+        <div class="flex items-center justify-between p-3 bg-zinc-50 rounded-xl border border-zinc-200">
+          <div><b class="text-amber-600 font-mono">EPA</b> En Procés</div>
+          <div class="flex items-center gap-1.5">
+            <span>&ge;</span>
+            <input type="number" id="th_epa" step="0.05" class="w-20 text-center font-mono font-bold bg-white border border-zinc-300 rounded-lg p-1.5">
           </div>
-
-          <div class="flex items-center gap-3 bg-zinc-50 border border-zinc-200 p-3 rounded-xl">
-            <div class="w-12 font-black font-mono text-sm text-amber-600">EPA</div>
-            <div class="flex-1">
-              <span class="block font-semibold text-zinc-800">En Procés d'Assoliment</span>
-              <span class="text-[11px] text-zinc-400">Nota mínima a partir de la qual és EPA</span>
-            </div>
-            <div class="flex items-center gap-1.5">
-              <span class="text-zinc-400 font-medium text-[11px]">&ge;</span>
-              <input type="number" id="th_epa" step="0.05" min="0" max="4" class="w-20 text-center font-mono font-bold text-sm bg-white border border-zinc-300 rounded-lg p-1.5 outline-none focus:ring-2 focus:ring-zinc-900">
-            </div>
+        </div>
+        <div class="flex items-center justify-between p-3 bg-zinc-50 rounded-xl border border-zinc-200">
+          <div><b class="text-sky-600 font-mono">AS</b> Assolit</div>
+          <div class="flex items-center gap-1.5">
+            <span>&ge;</span>
+            <input type="number" id="th_as" step="0.05" class="w-20 text-center font-mono font-bold bg-white border border-zinc-300 rounded-lg p-1.5">
           </div>
-
-          <div class="flex items-center gap-3 bg-zinc-50 border border-zinc-200 p-3 rounded-xl">
-            <div class="w-12 font-black font-mono text-sm text-sky-600">AS</div>
-            <div class="flex-1">
-              <span class="block font-semibold text-zinc-800">Assolit (Aprovat)</span>
-              <span class="text-[11px] text-zinc-400">Llindar mínim d'assoliment</span>
-            </div>
-            <div class="flex items-center gap-1.5">
-              <span class="text-zinc-400 font-medium text-[11px]">&ge;</span>
-              <input type="number" id="th_as" step="0.05" min="0" max="4" class="w-20 text-center font-mono font-bold text-sm bg-white border border-zinc-300 rounded-lg p-1.5 outline-none focus:ring-2 focus:ring-zinc-900">
-            </div>
+        </div>
+        <div class="flex items-center justify-between p-3 bg-zinc-50 rounded-xl border border-zinc-200">
+          <div><b class="text-indigo-600 font-mono">AN</b> Notable</div>
+          <div class="flex items-center gap-1.5">
+            <span>&ge;</span>
+            <input type="number" id="th_an" step="0.05" class="w-20 text-center font-mono font-bold bg-white border border-zinc-300 rounded-lg p-1.5">
           </div>
-
-          <div class="flex items-center gap-3 bg-zinc-50 border border-zinc-200 p-3 rounded-xl">
-            <div class="w-12 font-black font-mono text-sm text-indigo-600">AN</div>
-            <div class="flex-1">
-              <span class="block font-semibold text-zinc-800">Assoliment Notable</span>
-              <span class="text-[11px] text-zinc-400">Nota mínima per a notable</span>
-            </div>
-            <div class="flex items-center gap-1.5">
-              <span class="text-zinc-400 font-medium text-[11px]">&ge;</span>
-              <input type="number" id="th_an" step="0.05" min="0" max="4" class="w-20 text-center font-mono font-bold text-sm bg-white border border-zinc-300 rounded-lg p-1.5 outline-none focus:ring-2 focus:ring-zinc-900">
-            </div>
-          </div>
-
-          <div class="flex items-center gap-3 bg-zinc-50 border border-zinc-200 p-3 rounded-xl">
-            <div class="w-12 font-black font-mono text-sm text-emerald-600">AE</div>
-            <div class="flex-1">
-              <span class="block font-semibold text-zinc-800">Assoliment Excel·lent</span>
-              <span class="text-[11px] text-zinc-400">Nota mínima per a excel·lència</span>
-            </div>
-            <div class="flex items-center gap-1.5">
-              <span class="text-zinc-400 font-medium text-[11px]">&ge;</span>
-              <input type="number" id="th_ae" step="0.05" min="0" max="4" class="w-20 text-center font-mono font-bold text-sm bg-white border border-zinc-300 rounded-lg p-1.5 outline-none focus:ring-2 focus:ring-zinc-900">
-            </div>
+        </div>
+        <div class="flex items-center justify-between p-3 bg-zinc-50 rounded-xl border border-zinc-200">
+          <div><b class="text-emerald-600 font-mono">AE</b> Excel·lent</div>
+          <div class="flex items-center gap-1.5">
+            <span>&ge;</span>
+            <input type="number" id="th_ae" step="0.05" class="w-20 text-center font-mono font-bold bg-white border border-zinc-300 rounded-lg p-1.5">
           </div>
         </div>
       </div>
-
       <div class="px-6 py-3.5 bg-zinc-50 border-t border-zinc-200 flex justify-between items-center text-xs">
-        <button onclick="resetDefaultThresholds()" class="text-zinc-500 hover:text-zinc-900 font-semibold underline">Restablir (1.0, 2.0, 3.0, 4.0)</button>
+        <button onclick="resetDefaultThresholds()" class="text-zinc-500 hover:text-zinc-900 font-semibold underline">Restablir per defecte</button>
         <div class="flex gap-2">
-          <button onclick="closeThresholdsModal()" class="px-3.5 py-1.5 border border-zinc-300 rounded-xl font-semibold text-zinc-600 hover:bg-zinc-100">Cancel·lar</button>
-          <button onclick="saveThresholdsModal()" class="px-4 py-1.5 bg-zinc-900 hover:bg-zinc-800 text-white rounded-xl font-semibold shadow-subtle">Desar</button>
+          <button onclick="closeThresholdsModal()" class="px-3.5 py-1.5 border border-zinc-300 rounded-xl font-semibold text-zinc-600">Cancel·lar</button>
+          <button onclick="saveThresholdsModal()" class="px-4 py-1.5 bg-zinc-900 hover:bg-zinc-800 text-white rounded-xl font-semibold">Desar</button>
         </div>
       </div>
     </div>
@@ -587,52 +547,36 @@
   <div id="newGroupModal" class="fixed inset-0 bg-zinc-950/40 backdrop-blur-xs z-50 flex items-center justify-center p-4 hidden no-print">
     <div class="bg-white rounded-3xl shadow-card max-w-md w-full overflow-hidden border border-zinc-200">
       <div class="px-6 py-4 bg-zinc-900 text-white flex justify-between items-center">
-        <h3 class="text-sm font-bold flex items-center gap-2">
-          <i class="fa-solid fa-graduation-cap text-zinc-400"></i> Crear Nova Classe
-        </h3>
+        <h3 class="text-sm font-bold flex items-center gap-2"><i class="fa-solid fa-graduation-cap text-zinc-400"></i> Crear Nova Classe</h3>
         <button onclick="closeNewGroupModal()" class="text-zinc-400 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
       </div>
       <div class="p-6 space-y-4 text-xs">
-        <div>
-          <label class="block font-semibold text-zinc-700 mb-1">Nom del Grup o Curs</label>
-          <input type="text" id="modalNewGroupNameInput" placeholder="Ex: 1r ESO A, 2n ESO B..." class="w-full text-sm border border-zinc-200 rounded-xl p-2.5 focus:ring-2 focus:ring-zinc-900 outline-none font-semibold">
-        </div>
+        <label class="block font-semibold text-zinc-700">Nom del Grup o Curs</label>
+        <input type="text" id="modalNewGroupNameInput" placeholder="Ex: 1r ESO C, 2n ESO A..." class="w-full text-sm border border-zinc-200 rounded-xl p-2.5 outline-none font-semibold">
       </div>
       <div class="px-6 py-3 bg-zinc-50 border-t border-zinc-200 flex justify-end gap-2 text-xs">
-        <button onclick="closeNewGroupModal()" class="px-4 py-2 border border-zinc-300 rounded-xl font-semibold text-zinc-600 hover:bg-zinc-100">Cancel·lar</button>
-        <button onclick="confirmCreateNewGroup()" class="px-4 py-2 bg-zinc-900 hover:bg-zinc-800 text-white rounded-xl font-semibold shadow-subtle">Crear Classe</button>
+        <button onclick="closeNewGroupModal()" class="px-4 py-2 border border-zinc-300 rounded-xl font-semibold text-zinc-600">Cancel·lar</button>
+        <button onclick="confirmCreateNewGroup()" class="px-4 py-2 bg-zinc-900 hover:bg-zinc-800 text-white rounded-xl font-semibold">Crear Classe</button>
       </div>
     </div>
   </div>
 
-  <!-- MODAL CONFIGURAR SdA -->
+  <!-- MODAL SdA -->
   <div id="sdaModal" class="fixed inset-0 bg-zinc-950/40 backdrop-blur-xs z-50 flex items-center justify-center p-4 hidden no-print">
     <div class="bg-white rounded-3xl shadow-card max-w-3xl w-full max-h-[90vh] flex flex-col overflow-hidden border border-zinc-200">
       <div class="px-6 py-4 bg-zinc-900 text-white flex justify-between items-center">
-        <div class="flex items-center gap-2.5">
-          <div class="w-8 h-8 rounded-xl bg-zinc-800 text-zinc-200 flex items-center justify-center text-xs">
-            <i class="fa-solid fa-sliders"></i>
-          </div>
-          <div>
-            <h3 class="text-sm font-bold tracking-tight">Configuració de la Situació d'Aprenentatge (SdA)</h3>
-            <p class="text-[11px] text-zinc-400">Ponderació de la SdA, Criteris oficials i OAs.</p>
-          </div>
-        </div>
+        <h3 class="text-sm font-bold">Configuració de la Situació d'Aprenentatge (SdA)</h3>
         <button onclick="closeSdaModal()" class="text-zinc-400 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
       </div>
-
       <div class="p-6 overflow-y-auto space-y-5 flex-1 text-xs">
         <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
           <div class="sm:col-span-2">
-            <label class="block font-semibold text-zinc-700 mb-1">Títol de la Situació d'Aprenentatge</label>
-            <input type="text" id="modalSdaTitle" placeholder="Ex: Hàbits saludables i condició física" class="w-full text-sm border border-zinc-200 rounded-xl p-2.5 focus:ring-2 focus:ring-zinc-900 outline-none font-semibold text-zinc-900">
+            <label class="block font-semibold text-zinc-700 mb-1">Títol de la SdA</label>
+            <input type="text" id="modalSdaTitle" class="w-full text-sm border border-zinc-200 rounded-xl p-2.5 outline-none font-semibold">
           </div>
           <div>
             <label class="block font-semibold text-zinc-800 mb-1">Pes al Trimestre (%)</label>
-            <div class="flex items-center gap-1.5">
-              <input type="number" id="modalSdaTrimWeight" value="50" min="0" max="100" class="w-full text-sm border border-zinc-200 bg-zinc-50 rounded-xl p-2.5 focus:ring-2 focus:ring-zinc-900 outline-none font-mono font-bold text-zinc-900 text-center">
-              <span class="text-zinc-400 font-mono font-bold text-sm">%</span>
-            </div>
+            <input type="number" id="modalSdaTrimWeight" value="50" min="0" max="100" class="w-full text-sm border border-zinc-200 rounded-xl p-2.5 text-center font-mono font-bold">
           </div>
         </div>
 
@@ -656,121 +600,155 @@
           <div id="modalCeCardsContainer" class="space-y-3.5"></div>
         </div>
       </div>
-
-      <div class="px-6 py-3.5 bg-zinc-50 border-t border-zinc-200 flex justify-between items-center text-xs">
-        <span class="text-[11px] text-zinc-400">Els criteris i OAs es poden ajustar en qualsevol moment.</span>
-        <div class="flex gap-2">
-          <button onclick="closeSdaModal()" class="px-3.5 py-1.5 border border-zinc-300 rounded-xl font-semibold text-zinc-600 hover:bg-zinc-100">Cancel·lar</button>
-          <button onclick="saveSdaFromModal()" class="px-4 py-1.5 bg-zinc-900 hover:bg-zinc-800 text-white rounded-xl font-semibold shadow-subtle">Desar SdA</button>
-        </div>
+      <div class="px-6 py-3.5 bg-zinc-50 border-t border-zinc-200 flex justify-end gap-2 text-xs">
+        <button onclick="closeSdaModal()" class="px-3.5 py-1.5 border border-zinc-300 rounded-xl font-semibold text-zinc-600">Cancel·lar</button>
+        <button onclick="saveSdaFromModal()" class="px-4 py-1.5 bg-zinc-900 hover:bg-zinc-800 text-white rounded-xl font-semibold">Desar SdA</button>
       </div>
     </div>
   </div>
 
-  <!-- ================= JAVASCRIPT PRO REENGINEERED ================= -->
-  <script>
-    const CE_COLOR_THEMES = {
-      CE1: { 
-        header: 'bg-sky-100 text-sky-950 border-sky-200', 
-        critHeader: 'bg-sky-50 text-sky-800 border-sky-200', 
-        weightHeader: 'bg-sky-100/70 text-sky-900 border-sky-200', 
-        scoreCe: 'bg-sky-100 text-sky-950 font-bold border-sky-300', 
-        levelCe: 'bg-sky-50 border-sky-200',
-        oaTints: [
-          { header: 'bg-sky-50 text-sky-900', cell: 'bg-sky-50/20' },
-          { header: 'bg-sky-100/70 text-sky-900', cell: 'bg-sky-100/25' },
-          { header: 'bg-blue-50 text-blue-900', cell: 'bg-blue-50/20' },
-          { header: 'bg-cyan-50 text-cyan-900', cell: 'bg-cyan-50/20' }
-        ]
-      },
-      CE2: { 
-        header: 'bg-emerald-100 text-emerald-950 border-emerald-200', 
-        critHeader: 'bg-emerald-50 text-emerald-800 border-emerald-200', 
-        weightHeader: 'bg-emerald-100/70 text-emerald-900 border-emerald-200', 
-        scoreCe: 'bg-emerald-100 text-emerald-950 font-bold border-emerald-300', 
-        levelCe: 'bg-emerald-50 border-emerald-200',
-        oaTints: [
-          { header: 'bg-emerald-50 text-emerald-900', cell: 'bg-emerald-50/20' },
-          { header: 'bg-emerald-100/70 text-emerald-900', cell: 'bg-emerald-100/25' },
-          { header: 'bg-teal-50 text-teal-900', cell: 'bg-teal-50/20' },
-          { header: 'bg-green-50 text-green-900', cell: 'bg-green-50/20' }
-        ]
-      },
-      CE3: { 
-        header: 'bg-purple-100 text-purple-950 border-purple-200', 
-        critHeader: 'bg-purple-50 text-purple-800 border-purple-200', 
-        weightHeader: 'bg-purple-100/70 text-purple-900 border-purple-200', 
-        scoreCe: 'bg-purple-100 text-purple-950 font-bold border-purple-300', 
-        levelCe: 'bg-purple-50 border-purple-200',
-        oaTints: [
-          { header: 'bg-purple-50 text-purple-900', cell: 'bg-purple-50/20' },
-          { header: 'bg-purple-100/70 text-purple-900', cell: 'bg-purple-100/25' },
-          { header: 'bg-fuchsia-50 text-fuchsia-900', cell: 'bg-fuchsia-50/20' },
-          { header: 'bg-violet-50 text-violet-900', cell: 'bg-violet-50/20' }
-        ]
-      },
-      CE4: { 
-        header: 'bg-amber-100 text-amber-950 border-amber-200', 
-        critHeader: 'bg-amber-50 text-amber-800 border-amber-200', 
-        weightHeader: 'bg-amber-100/70 text-amber-900 border-amber-200', 
-        scoreCe: 'bg-amber-100 text-amber-950 font-bold border-amber-300', 
-        levelCe: 'bg-amber-50 border-amber-200',
-        oaTints: [
-          { header: 'bg-amber-50 text-amber-900', cell: 'bg-amber-50/20' },
-          { header: 'bg-amber-100/70 text-amber-900', cell: 'bg-amber-100/25' },
-          { header: 'bg-orange-50 text-orange-900', cell: 'bg-orange-50/20' },
-          { header: 'bg-yellow-50 text-yellow-900', cell: 'bg-yellow-50/20' }
-        ]
-      },
-      CE5: { 
-        header: 'bg-rose-100 text-rose-950 border-rose-200', 
-        critHeader: 'bg-rose-50 text-rose-800 border-rose-200', 
-        weightHeader: 'bg-rose-100/70 text-rose-900 border-rose-200', 
-        scoreCe: 'bg-rose-100 text-rose-950 font-bold border-rose-300', 
-        levelCe: 'bg-rose-50 border-rose-200',
-        oaTints: [
-          { header: 'bg-rose-50 text-rose-900', cell: 'bg-rose-50/20' },
-          { header: 'bg-rose-100/70 text-rose-900', cell: 'bg-rose-100/25' },
-          { header: 'bg-pink-50 text-pink-900', cell: 'bg-pink-50/20' },
-          { header: 'bg-red-50 text-red-900', cell: 'bg-red-50/20' }
-        ]
+  <!-- ================= LÒGICA FIREBASE OFICIAL INTEGRADA ================= -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+    import { getAuth, signInWithPopup, GoogleAuthProvider, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+    import { getDatabase, ref, set, onValue, update } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+
+    const FIREBASE_CONFIG = {
+      apiKey: "AIzaSyB9no7A0vKk9HQH1CS58mFmyLQSsj4rD1U",
+      authDomain: "quadern-ef.firebaseapp.com",
+      databaseURL: "https://quadern-ef-default-rtdb.europe-west1.firebasedatabase.app",
+      projectId: "quadern-ef",
+      storageBucket: "quadern-ef.firebasestorage.app",
+      messagingSenderId: "222136993621",
+      appId: "1:222136993621:web:4cd862a94d07b6942d11dc",
+      measurementId: "G-Q78SHHFXL8"
+    };
+
+    let fbApp = null;
+    let fbAuth = null;
+    let fbDb = null;
+    let currentUser = null;
+
+    try {
+      fbApp = initializeApp(FIREBASE_CONFIG);
+      fbAuth = getAuth(fbApp);
+      fbDb = getDatabase(fbApp);
+    } catch (e) {
+      console.warn("Avís d'inicialització Firebase:", e);
+    }
+
+    function setCloudStatus(state) {
+      const dot = document.getElementById('cloudStatusDot');
+      const text = document.getElementById('cloudStatusText');
+      if (state === 'online') {
+        dot.className = "w-2 h-2 rounded-full bg-emerald-500 animate-pulse";
+        text.textContent = "Sincronitzat";
+        text.className = "font-mono text-[10px] text-emerald-700 font-semibold";
+      } else if (state === 'syncing') {
+        dot.className = "w-2 h-2 rounded-full bg-amber-500 animate-spin";
+        text.textContent = "Pujant...";
+        text.className = "font-mono text-[10px] text-amber-700 font-semibold";
+      } else {
+        dot.className = "w-2 h-2 rounded-full bg-zinc-300";
+        text.textContent = "Local";
+        text.className = "font-mono text-[10px] text-zinc-500 font-medium";
+      }
+    }
+
+    window.loginWithGoogle = async function() {
+      if (!fbAuth) return alert("Firebase no s'ha pogut carregar.");
+      try {
+        const provider = new GoogleAuthProvider();
+        await signInWithPopup(fbAuth, provider);
+      } catch (err) {
+        alert("Error en l'inici de sessió de Google: " + err.message);
       }
     };
 
-    function getOaColorTheme(ceId, oaIndex) {
-      const theme = CE_COLOR_THEMES[ceId] || CE_COLOR_THEMES.CE1;
-      const tints = theme.oaTints || [{ header: 'bg-zinc-50', cell: 'bg-white' }];
-      return tints[oaIndex % tints.length];
+    window.logoutFirebase = async function() {
+      if (fbAuth) await signOut(fbAuth);
+    };
+
+    if (fbAuth) {
+      onAuthStateChanged(fbAuth, (user) => {
+        currentUser = user;
+        const loginBtn = document.getElementById('googleLoginBtn');
+        const badge = document.getElementById('userProfileBadge');
+        const nameEl = document.getElementById('userNameDisplay');
+
+        if (user) {
+          loginBtn.classList.add('hidden');
+          badge.classList.remove('hidden');
+          badge.classList.add('flex');
+          nameEl.textContent = user.displayName ? user.displayName.split(' ')[0] : 'Docent';
+          setCloudStatus('syncing');
+          setupCloudRealtimeListener(user.uid);
+        } else {
+          loginBtn.classList.remove('hidden');
+          badge.classList.add('hidden');
+          badge.classList.remove('flex');
+          setCloudStatus('offline');
+        }
+      });
     }
 
-    const CURRICULAR_CRITERIA_CATALOG = {
-      CE1: [
-        { code: "1.1", label: "1.1. Executar activitats i exercicis orientats a l’adquisició d’un estil de vida actiu i saludable." },
-        { code: "1.2", label: "1.2. Identificar els elements d’un pla de treball de la condició física a través de la pràctica motriu." },
-        { code: "1.3", label: "1.3. Incorporar hàbits saludables (alimentació, hidratació, descans, higiene) valorant la millora integral." },
-        { code: "1.4", label: "1.4. Aplicar els protocols d’actuació de prevenció i mesures bàsiques de primers auxilis." },
-        { code: "1.5", label: "1.5. Utilitzar recursos digitals per a la pràctica d’activitat física i l’adquisició d’hàbits saludables." }
-      ],
-      CE2: [
-        { code: "2.1", label: "2.1. Executar habilitats motrius específiques i tècniques en reptes, formes jugades i joc reduït." },
-        { code: "2.2", label: "2.2. Resoldre situacions motrius variades en activitats lúdiques, jocs modificats i esports." }
-      ],
-      CE3: [
-        { code: "3.1", label: "3.1. Expressar emocions, sentiments i missatges mitjançant tècniques d’expressió corporal." },
-        { code: "3.2", label: "3.2. Representar composicions individuals o col·lectives amb i sense base musical." },
-        { code: "3.3", label: "3.3. Prendre part en danses i jocs populars i tradicionals valorant la influència cultural." }
-      ],
-      CE4: [
-        { code: "4.1", label: "4.1. Realitzar activitat física en el medi natural i urbà minimitzant l’empremta ecològica." },
-        { code: "4.2", label: "4.2. Aplicar les normes de seguretat, equipament i eines de les activitats al medi." },
-        { code: "4.3", label: "4.3. Utilitzar les possibilitats de l’entorn per a l'activitat física i el lleure actiu." }
-      ],
-      CE5: [
-        { code: "5.1", label: "5.1. Aplicar els valors positius de l’esport valorant el joc net per davant del resultat." },
-        { code: "5.2", label: "5.2. Identificar i gestionar emocions en la pràctica d’activitat física i esportiva." },
-        { code: "5.3", label: "5.3. Mostrar actituds de respecte, empatia i escolta envers els companys/es." },
-        { code: "5.4", label: "5.4. Identificar estereotips i actuacions discriminatòries en contextos esportius." }
-      ]
+    function setupCloudRealtimeListener(uid) {
+      const userRef = ref(fbDb, `users/${uid}`);
+      onValue(userRef, (snapshot) => {
+        const cloudData = snapshot.val();
+        if (cloudData && cloudData.groups) {
+          window.appData = cloudData;
+          localStorage.setItem('EF_COMPETENCIAL_DATA_V10', JSON.stringify(window.appData));
+          if (window.appState.currentScreen === 'class') {
+            if (window.appState.currentView === 'sda') window.renderSdaGrid();
+            if (window.appState.currentView === 'trim') window.renderTrimView();
+            if (window.appState.currentView === 'final') window.renderFinalView();
+          } else {
+            window.renderHomeScreen();
+          }
+          setCloudStatus('online');
+        } else {
+          set(userRef, window.appData).then(() => setCloudStatus('online'));
+        }
+      });
+    }
+
+    window.syncGradeToCloud = function(groupId, sdaId, studentId, gradeKey, val) {
+      if (!currentUser || !fbDb) return;
+      setCloudStatus('syncing');
+      const gradeRef = ref(fbDb, `users/${currentUser.uid}/groups/${groupId}/grades/${sdaId}/${studentId}/${gradeKey}`);
+      set(gradeRef, val === null ? null : val)
+        .then(() => setCloudStatus('online'))
+        .catch(() => setCloudStatus('offline'));
+    };
+
+    window.syncGroupEntityToCloud = function(groupId) {
+      if (!currentUser || !fbDb) return;
+      setCloudStatus('syncing');
+      const groupRef = ref(fbDb, `users/${currentUser.uid}/groups/${groupId}`);
+      set(groupRef, window.appData.groups[groupId])
+        .then(() => setCloudStatus('online'))
+        .catch(() => setCloudStatus('offline'));
+    };
+
+    window.syncWholeAppToCloud = function() {
+      if (!currentUser || !fbDb) return;
+      setCloudStatus('syncing');
+      const userRef = ref(fbDb, `users/${currentUser.uid}`);
+      set(userRef, window.appData)
+        .then(() => setCloudStatus('online'))
+        .catch(() => setCloudStatus('offline'));
+    };
+  </script>
+
+  <!-- ================= LÒGICA D'AVALUACIÓ I UI ================= -->
+  <script>
+    const CE_COLOR_THEMES = {
+      CE1: { header: 'bg-sky-100 text-sky-950 border-sky-200', critHeader: 'bg-sky-50 text-sky-800 border-sky-200', weightHeader: 'bg-sky-100/70 text-sky-900 border-sky-200', scoreCe: 'bg-sky-100 text-sky-950 font-bold border-sky-300', levelCe: 'bg-sky-50 border-sky-200', oaTints: [{ header: 'bg-sky-50 text-sky-900', cell: 'bg-sky-50/20' }] },
+      CE2: { header: 'bg-emerald-100 text-emerald-950 border-emerald-200', critHeader: 'bg-emerald-50 text-emerald-800 border-emerald-200', weightHeader: 'bg-emerald-100/70 text-emerald-900 border-emerald-200', scoreCe: 'bg-emerald-100 text-emerald-950 font-bold border-emerald-300', levelCe: 'bg-emerald-50 border-emerald-200', oaTints: [{ header: 'bg-emerald-50 text-emerald-900', cell: 'bg-emerald-50/20' }] },
+      CE3: { header: 'bg-purple-100 text-purple-950 border-purple-200', critHeader: 'bg-purple-50 text-purple-800 border-purple-200', weightHeader: 'bg-purple-100/70 text-purple-900 border-purple-200', scoreCe: 'bg-purple-100 text-purple-950 font-bold border-purple-300', levelCe: 'bg-purple-50 border-purple-200', oaTints: [{ header: 'bg-purple-50 text-purple-900', cell: 'bg-purple-50/20' }] },
+      CE4: { header: 'bg-amber-100 text-amber-950 border-amber-200', critHeader: 'bg-amber-50 text-amber-800 border-amber-200', weightHeader: 'bg-amber-100/70 text-amber-900 border-amber-200', scoreCe: 'bg-amber-100 text-amber-950 font-bold border-amber-300', levelCe: 'bg-amber-50 border-amber-200', oaTints: [{ header: 'bg-amber-50 text-amber-900', cell: 'bg-amber-50/20' }] },
+      CE5: { header: 'bg-rose-100 text-rose-950 border-rose-200', critHeader: 'bg-rose-50 text-rose-800 border-rose-200', weightHeader: 'bg-rose-100/70 text-rose-900 border-rose-200', scoreCe: 'bg-rose-100 text-rose-950 font-bold border-rose-300', levelCe: 'bg-rose-50 border-rose-200', oaTints: [{ header: 'bg-rose-50 text-rose-900', cell: 'bg-rose-50/20' }] }
     };
 
     const OFFICIAL_CES = [
@@ -781,8 +759,30 @@
       { id: 'CE5', name: 'CE5. Valors, inclusió i convivència', short: 'Valors' }
     ];
 
-    const STORAGE_KEY = 'EF_COMPETENCIAL_DATA_V10';
-    const THRESHOLDS_STORAGE_KEY = 'EF_COMPETENCIAL_THRESHOLDS_V1';
+    const CURRICULAR_CRITERIA_CATALOG = {
+      CE1: [
+        { code: "1.1", label: "1.1. Executar activitats i exercicis orientats a l’adquisició d’un estil de vida actiu i saludable." },
+        { code: "1.2", label: "1.2. Identificar els elements d’un pla de treball de la condició física a través de la pràctica motriu." },
+        { code: "1.3", label: "1.3. Incorporar hàbits saludables (alimentació, descans, higiene) valorant la millora integral." },
+        { code: "1.4", label: "1.4. Protocols d’actuació de prevenció i primers auxilis." }
+      ],
+      CE2: [
+        { code: "2.1", label: "2.1. Executar habilitats motrius específiques en reptes i formes jugades." },
+        { code: "2.2", label: "2.2. Resoldre situacions motrius aplicant habilitats tècniques i estratègiques." }
+      ],
+      CE3: [
+        { code: "3.1", label: "3.1. Expressar emocions i missatges mitjançant el cos." },
+        { code: "3.2", label: "3.2. Representar composicions col·lectives amb base musical." }
+      ],
+      CE4: [
+        { code: "4.1", label: "4.1. Realitzar activitat física en el medi natural minimitzant l'empremta." },
+        { code: "4.2", label: "4.2. Aplicar normes de seguretat en l'entorn." }
+      ],
+      CE5: [
+        { code: "5.1", label: "5.1. Aplicar els valors positius de l'esport i el joc net." },
+        { code: "5.2", label: "5.2. Mostrar actituds de respecte i empatia." }
+      ]
+    };
 
     const DEFAULT_THRESHOLDS = { epa: 1.0, as: 2.0, an: 3.0, ae: 4.0 };
     const DEFAULT_FINAL_CE_WEIGHTS = { CE1: 20, CE2: 20, CE3: 20, CE4: 20, CE5: 20 };
@@ -792,18 +792,15 @@
 
     function loadThresholds() {
       try {
-        const raw = localStorage.getItem(THRESHOLDS_STORAGE_KEY);
-        if (raw) {
-          const parsed = JSON.parse(raw);
-          if (parsed && typeof parsed.epa === 'number') return parsed;
-        }
+        const raw = localStorage.getItem('EF_COMPETENCIAL_THRESHOLDS_V1');
+        if (raw) return JSON.parse(raw);
       } catch (e) {}
       return { ...DEFAULT_THRESHOLDS };
     }
 
     function saveThresholdsToStorage(th) {
       gradeThresholds = th;
-      localStorage.setItem(THRESHOLDS_STORAGE_KEY, JSON.stringify(gradeThresholds));
+      localStorage.setItem('EF_COMPETENCIAL_THRESHOLDS_V1', JSON.stringify(gradeThresholds));
     }
 
     const ORIGINAL_DEMO_DATA = {
@@ -819,71 +816,44 @@
             { id: 1, name: "Alonso Martí, Marc" },
             { id: 2, name: "Balaguer Soler, Clara" },
             { id: 3, name: "Castelló Font, Roc" },
-            { id: 4, name: "Domingo Serra, Júlia" },
-            { id: 5, name: "Pons Vidal, Marcel" },
-            { id: 6, name: "Rovira Gómez, Pau" }
+            { id: 4, name: "Domingo Serra, Júlia" }
           ],
           sdas: [
             {
               id: "sda_1",
               trim: 1,
               title: "HÀBITS SALUDABLES I CONDICIÓ FÍSICA",
-              trimWeight: 60,
+              trimWeight: 100,
               competences: {
                 CE1: {
-                  active: true,
-                  weight: 80,
-                  curricularCriteria: "1.1 - 1.2 - 1.3",
+                  active: true, weight: 70, curricularCriteria: "1.1 - 1.2",
                   oas: [
-                    { id: "oa1", label: "OA1: Grups musculars i ossos", weight: 25 },
-                    { id: "oa2", label: "OA2: 4 Qualitats Físiques Bàsiques", weight: 25 },
-                    { id: "oa3", label: "OA3: Nivell inicial de condició física", weight: 25 },
-                    { id: "oa4", label: "OA4: Hàbits saludables i escalfament", weight: 25 }
+                    { id: "oa1", label: "OA1: Anatomia i Qualitats Bàsiques", weight: 50 },
+                    { id: "oa2", label: "OA2: Test inicial de resistència", weight: 50 }
                   ]
                 },
                 CE5: {
-                  active: true,
-                  weight: 20,
-                  curricularCriteria: "5.1 - 5.3",
+                  active: true, weight: 30, curricularCriteria: "5.1",
                   oas: [
-                    { id: "oa5_1", label: "OG1: Material i higiene", weight: 25 },
-                    { id: "oa5_2", label: "OG2: Participació i esforç", weight: 25 },
-                    { id: "oa5_3", label: "OG3: Normes de classe", weight: 25 },
-                    { id: "oa5_4", label: "OG4: Actitud cooperativa", weight: 25 }
+                    { id: "oa5_1", label: "OG1: Material, higiene i esforç", weight: 100 }
                   ]
                 }
-              }
-            },
-            {
-              id: "sda_2",
-              trim: 1,
-              title: "JOCS D'OPOSICIÓ I ESPORTS COL·LABORATIUS",
-              trimWeight: 40,
-              competences: {
-                CE2: { active: true, weight: 60, curricularCriteria: "2.1 - 2.2", oas: [] },
-                CE5: { active: true, weight: 40, curricularCriteria: "5.1", oas: [] }
               }
             }
           ],
           grades: {
             "sda_1": {
-              1: { "CE1_oa1": 3.5, "CE1_oa2": 3.5, "CE1_oa3": 3.5, "CE1_oa4": 3.5, "CE5_oa5_1": 4, "CE5_oa5_2": 4, "CE5_oa5_3": 3.5, "CE5_oa5_4": 4 },
-              2: { "CE1_oa1": 4, "CE1_oa2": 3.5, "CE1_oa3": 4, "CE1_oa4": 3.7, "CE5_oa5_1": 4, "CE5_oa5_2": 4, "CE5_oa5_3": 4, "CE5_oa5_4": 4 },
-              5: { "CE1_oa1": 2, "CE1_oa2": 3, "CE1_oa3": 3, "CE1_oa4": 1, "CE5_oa5_1": 3, "CE5_oa5_2": 3, "CE5_oa5_3": 4, "CE5_oa5_4": 4 }
-            },
-            "sda_2": {
-              1: { "CE2_direct": 3.8, "CE5_direct": 3.8 },
-              2: { "CE2_direct": 3.8, "CE5_direct": 4.0 },
-              5: { "CE2_direct": 2.5, "CE5_direct": 3.0 }
+              1: { "CE1_oa1": 3.5, "CE1_oa2": 3.0, "CE5_oa5_1": 4.0 },
+              2: { "CE1_oa1": 4.0, "CE1_oa2": 3.8, "CE5_oa5_1": 4.0 }
             }
           }
         }
       }
     };
 
-    let appData = loadFromStorage();
+    window.appData = loadFromStorage();
 
-    let appState = {
+    window.appState = {
       currentScreen: 'home',
       currentTrim: 1,
       currentView: 'sda',
@@ -898,115 +868,38 @@
 
     function loadFromStorage() {
       try {
-        const raw = localStorage.getItem(STORAGE_KEY);
-        if (raw) {
-          const parsed = JSON.parse(raw);
-          if (parsed && parsed.groups && Object.keys(parsed.groups).length > 0) {
-            Object.keys(parsed.groups).forEach(k => {
-              if (!Array.isArray(parsed.groups[k].students)) parsed.groups[k].students = [];
-              if (!Array.isArray(parsed.groups[k].sdas)) parsed.groups[k].sdas = [];
-              if (!parsed.groups[k].grades) parsed.groups[k].grades = {};
-              if (!parsed.groups[k].finalCeWeights) parsed.groups[k].finalCeWeights = { ...DEFAULT_FINAL_CE_WEIGHTS };
-              if (!parsed.groups[k].finalTrimWeights) parsed.groups[k].finalTrimWeights = { ...DEFAULT_FINAL_TRIM_WEIGHTS };
-              if (!parsed.groups[k].finalMethod) parsed.groups[k].finalMethod = 'trim';
-              if (!parsed.groups[k].attendancePenalty) parsed.groups[k].attendancePenalty = { 1: {}, 2: {}, 3: {} };
-            });
-            return parsed;
-          }
-        }
+        const raw = localStorage.getItem('EF_COMPETENCIAL_DATA_V10');
+        if (raw) return JSON.parse(raw);
       } catch (e) {}
       return JSON.parse(JSON.stringify(ORIGINAL_DEMO_DATA));
     }
 
     function saveToStorage() {
       try {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(appData));
-        showSavedIndicator();
+        localStorage.setItem('EF_COMPETENCIAL_DATA_V10', JSON.stringify(window.appData));
       } catch (e) {}
     }
 
-    function showSavedIndicator() {
-      const el = document.getElementById('savedIndicator');
-      if (el) {
-        el.classList.remove('opacity-0');
-        clearTimeout(window._savedTimeout);
-        window._savedTimeout = setTimeout(() => el.classList.add('opacity-0'), 1200);
-      }
-    }
-
-    function resetDefaultData() {
-      if (confirm("Vols restablir les dades de mostra originals? S'esborraran els canvis actuals.")) {
-        appData = JSON.parse(JSON.stringify(ORIGINAL_DEMO_DATA));
-        saveToStorage();
-        goToHome();
-      }
-    }
-
-    function exportBackupJSON() {
-      const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify({ appData, gradeThresholds }, null, 2));
-      const a = document.createElement('a');
-      a.setAttribute("href", dataStr);
-      a.setAttribute("download", `EF_Competencial_Backup_${new Date().toISOString().slice(0, 10)}.json`);
-      document.body.appendChild(a);
-      a.click();
-      a.remove();
-    }
-
-    function importBackupJSON(event) {
-      const file = event.target.files[0];
-      if (!file) return;
-      const reader = new FileReader();
-      reader.onload = function(e) {
-        try {
-          const imported = JSON.parse(e.target.result);
-          if (imported && (imported.groups || (imported.appData && imported.appData.groups))) {
-            if (confirm("Vols carregar aquesta còpia de seguretat? Es reemplaçaran les dades.")) {
-              if (imported.appData) {
-                appData = imported.appData;
-                if (imported.gradeThresholds) saveThresholdsToStorage(imported.gradeThresholds);
-              } else {
-                appData = imported;
-              }
-              saveToStorage();
-              goToHome();
-            }
-          }
-        } catch (err) { alert("Fitxer invàlid."); }
-      };
-      reader.readAsText(file);
-      event.target.value = '';
-    }
-
     function getCurrentGroup() {
-      if (!appData.groups[appData.activeGroupId]) {
-        appData.activeGroupId = Object.keys(appData.groups)[0];
+      if (!window.appData.groups[window.appData.activeGroupId]) {
+        window.appData.activeGroupId = Object.keys(window.appData.groups)[0];
       }
-      const grp = appData.groups[appData.activeGroupId];
-      if (!grp.finalCeWeights) grp.finalCeWeights = { ...DEFAULT_FINAL_CE_WEIGHTS };
-      if (!grp.finalTrimWeights) grp.finalTrimWeights = { ...DEFAULT_FINAL_TRIM_WEIGHTS };
-      if (!grp.finalMethod) grp.finalMethod = 'trim';
-      if (!grp.attendancePenalty) grp.attendancePenalty = { 1: {}, 2: {}, 3: {} };
-      return grp;
+      return window.appData.groups[window.appData.activeGroupId];
     }
 
-    function init() {
-      renderHomeScreen();
-      goToHome();
-    }
-
-    function goToHome() {
-      appState.currentScreen = 'home';
+    window.goToHome = function() {
+      window.appState.currentScreen = 'home';
       document.getElementById('screenHome').classList.remove('hidden');
       document.getElementById('screenClassWorkspace').classList.add('hidden');
       document.getElementById('headerBreadcrumb').classList.add('hidden');
       document.getElementById('classSubNav').classList.add('hidden');
       renderHomeScreen();
-    }
+    };
 
-    function enterClass(groupId) {
-      appData.activeGroupId = groupId;
+    window.enterClass = function(groupId) {
+      window.appData.activeGroupId = groupId;
       saveToStorage();
-      appState.currentScreen = 'class';
+      window.appState.currentScreen = 'class';
       
       document.getElementById('screenHome').classList.add('hidden');
       document.getElementById('screenClassWorkspace').classList.remove('hidden');
@@ -1022,138 +915,66 @@
       renderRosterTab();
       renderSdaGrid();
       switchView('sda');
-      setTrim(appState.currentTrim);
-    }
+      setTrim(window.appState.currentTrim);
+    };
 
-    function renderHomeScreen() {
-      const groupKeys = Object.keys(appData.groups);
+    window.renderHomeScreen = function() {
+      const groupKeys = Object.keys(window.appData.groups);
       const grid = document.getElementById('homeClassesGrid');
 
       grid.innerHTML = groupKeys.map(gId => {
-        const group = appData.groups[gId];
+        const group = window.appData.groups[gId];
         const studentCount = (group.students || []).length;
-        const currentTrimSdas = (group.sdas || []).filter(s => s.trim === appState.currentTrim);
+        const currentTrimSdas = (group.sdas || []).filter(s => s.trim === window.appState.currentTrim);
         const activeSda = currentTrimSdas[0] || null;
 
-        let totalPossibleScores = 0;
-        let enteredScores = 0;
-        let sumTrimScores = 0;
-        let scoredStudentsCount = 0;
-
-        (group.students || []).forEach(st => {
-          const trimScore = getStudentTrimScoreByTrim(st.id, appState.currentTrim, group);
-          if (trimScore !== null) {
-            sumTrimScores += trimScore;
-            scoredStudentsCount++;
-          }
-          currentTrimSdas.forEach(sda => {
-            OFFICIAL_CES.forEach(ce => {
-              const conf = sda.competences && sda.competences[ce.id];
-              if (conf && conf.active) {
-                if (conf.oas && conf.oas.length > 0) {
-                  conf.oas.forEach(oa => {
-                    totalPossibleScores++;
-                    const val = group.grades?.[sda.id]?.[st.id]?.[`${ce.id}_${oa.id}`];
-                    if (val !== undefined && val !== null && val !== '') enteredScores++;
-                  });
-                } else {
-                  totalPossibleScores++;
-                  const val = group.grades?.[sda.id]?.[st.id]?.[`${ce.id}_direct`];
-                  if (val !== undefined && val !== null && val !== '') enteredScores++;
-                }
-              }
-            });
-          });
-        });
-
-        const progressPct = totalPossibleScores > 0 ? Math.round((enteredScores / totalPossibleScores) * 100) : 0;
-        const avgScore = scoredStudentsCount > 0 ? (sumTrimScores / scoredStudentsCount) : null;
-        const avgLvl = getLevel(avgScore);
-
-        const penalizedCount = Object.keys(group.attendancePenalty?.[appState.currentTrim] || {})
-          .filter(stId => group.attendancePenalty[appState.currentTrim][stId]).length;
-
         return `
-          <div class="bg-white rounded-2xl border border-zinc-200 p-5 shadow-card hover:border-zinc-300 transition-all flex flex-col justify-between">
-            <div class="space-y-3.5">
-              <div class="flex items-start justify-between">
+          <div class="bg-white rounded-2xl border border-zinc-200 p-5 shadow-card hover:border-zinc-300 transition flex flex-col justify-between">
+            <div class="space-y-3">
+              <div class="flex items-center justify-between">
                 <div class="flex items-center gap-2.5">
                   <div class="w-9 h-9 rounded-xl bg-zinc-900 text-white flex items-center justify-center text-xs font-bold font-mono">
                     ${group.name.slice(0, 2)}
                   </div>
                   <div>
-                    <h4 class="text-sm font-bold text-zinc-900 leading-tight">${group.name}</h4>
-                    <span class="text-[11px] text-zinc-400 font-medium">${studentCount} alumnes inscrits</span>
+                    <h4 class="text-sm font-bold text-zinc-900">${group.name}</h4>
+                    <span class="text-[11px] text-zinc-400 font-medium">${studentCount} alumnes</span>
                   </div>
                 </div>
-
                 <button onclick="event.stopPropagation(); deleteGroup('${gId}')" title="Eliminar classe" class="text-zinc-300 hover:text-rose-500 p-1 transition">
                   <i class="fa-regular fa-trash-can text-xs"></i>
                 </button>
               </div>
-
-              <div class="bg-zinc-50 rounded-xl p-3 border border-zinc-100 space-y-2">
-                <div class="flex items-center justify-between text-xs">
-                  <span class="text-zinc-600 font-medium truncate max-w-[160px]">
-                    <i class="fa-regular fa-folder text-zinc-400 mr-1"></i> ${activeSda ? activeSda.title : 'Sense SdA activa'}
-                  </span>
-                  <span class="font-mono text-[10px] font-bold ${progressPct === 100 ? 'text-emerald-700' : 'text-zinc-500'}">
-                    ${progressPct}% avaluat
-                  </span>
-                </div>
-
-                <div class="w-full bg-zinc-200/60 rounded-full h-1.5 overflow-hidden">
-                  <div class="bg-zinc-900 h-1.5 rounded-full transition-all duration-500" style="width: ${progressPct}%"></div>
-                </div>
-
-                <div class="flex items-center justify-between pt-1 border-t border-zinc-200/50 text-[11px]">
-                  <div class="flex items-center gap-1.5">
-                    <span class="text-zinc-400">Mitjana:</span>
-                    <span class="font-mono font-bold text-zinc-900">${avgScore !== null ? avgScore.toFixed(2) : '—'}</span>
-                    ${avgScore !== null ? `<span class="inline-flex items-center px-1.5 py-0.2 rounded text-[9px] font-bold ${avgLvl.badge}">${avgLvl.code}</span>` : ''}
-                  </div>
-
-                  ${penalizedCount > 0 ? `
-                    <span class="inline-flex items-center gap-1 text-[10px] font-bold text-rose-700 bg-rose-50 px-1.5 py-0.5 rounded border border-rose-200">
-                      <i class="fa-solid fa-person-running"></i> ${penalizedCount} &lt; %
-                    </span>
-                  ` : `
-                    <span class="text-[10px] text-zinc-400">T${appState.currentTrim} al dia</span>
-                  `}
-                </div>
+              <div class="bg-zinc-50 rounded-xl p-2.5 text-xs text-zinc-600 font-medium border border-zinc-100">
+                <i class="fa-regular fa-folder mr-1 text-zinc-400"></i> ${activeSda ? activeSda.title : 'Sense SdA activa'}
               </div>
             </div>
-
-            <div class="pt-4 mt-3 border-t border-zinc-100 flex items-center justify-between gap-2">
-              <button onclick="enterClass('${gId}'); switchView('roster');" class="inline-flex items-center gap-1 text-xs font-semibold text-zinc-600 hover:text-zinc-900 bg-zinc-50 hover:bg-zinc-100 px-3 py-1.5 rounded-xl transition">
-                <i class="fa-solid fa-users text-zinc-400 text-[10px]"></i> Llista
-              </button>
-              <button onclick="enterClass('${gId}')" class="inline-flex items-center gap-1 text-xs font-bold text-white bg-zinc-900 hover:bg-zinc-800 px-3.5 py-1.5 rounded-xl shadow-subtle transition">
-                Qualificar <i class="fa-solid fa-arrow-right text-[9px] ml-0.5"></i>
-              </button>
+            <div class="pt-4 mt-3 border-t border-zinc-100 flex items-center justify-between">
+              <button onclick="enterClass('${gId}'); switchView('roster');" class="text-xs font-semibold text-zinc-600 hover:text-zinc-900 bg-zinc-50 px-3 py-1.5 rounded-xl border border-zinc-200">Alumnat</button>
+              <button onclick="enterClass('${gId}')" class="text-xs font-bold text-white bg-zinc-900 hover:bg-zinc-800 px-3.5 py-1.5 rounded-xl">Qualificar &rarr;</button>
             </div>
           </div>
         `;
       }).join('');
-    }
+    };
 
-    function openNewGroupModal() {
+    window.openNewGroupModal = function() {
       document.getElementById('modalNewGroupNameInput').value = '';
       document.getElementById('newGroupModal').classList.remove('hidden');
-    }
+    };
 
-    function closeNewGroupModal() {
+    window.closeNewGroupModal = function() {
       document.getElementById('newGroupModal').classList.add('hidden');
-    }
+    };
 
-    function confirmCreateNewGroup() {
+    window.confirmCreateNewGroup = function() {
       const name = document.getElementById('modalNewGroupNameInput').value.trim();
       if (!name) return;
       const gId = 'g_' + Date.now();
-      appData.groups[gId] = { 
-        name: name, 
-        students: [], 
-        sdas: [], 
+      window.appData.groups[gId] = {
+        name: name,
+        students: [],
+        sdas: [],
         grades: {},
         finalMethod: 'trim',
         finalTrimWeights: { ...DEFAULT_FINAL_TRIM_WEIGHTS },
@@ -1161,159 +982,23 @@
         attendancePenalty: { 1: {}, 2: {}, 3: {} }
       };
       saveToStorage();
+      if (window.syncGroupEntityToCloud) window.syncGroupEntityToCloud(gId);
       closeNewGroupModal();
       enterClass(gId);
-    }
+    };
 
-    function deleteGroup(gId) {
-      if (Object.keys(appData.groups).length <= 1) {
-        alert("Has de mantenir com a mínim una classe.");
-        return;
-      }
-      if (confirm(`Segur que vols eliminar la classe "${appData.groups[gId].name}"?`)) {
-        delete appData.groups[gId];
+    window.deleteGroup = function(gId) {
+      if (Object.keys(window.appData.groups).length <= 1) return alert("Has de mantenir una classe.");
+      if (confirm(`Eliminar la classe "${window.appData.groups[gId].name}"?`)) {
+        delete window.appData.groups[gId];
         saveToStorage();
+        if (window.syncWholeAppToCloud) window.syncWholeAppToCloud();
         renderHomeScreen();
       }
-    }
-
-    function openGlobalSdaModal() {
-      openSdaModal(true);
-    }
-
-    function renderRosterTab() {
-      const curGroup = getCurrentGroup();
-      const countBadge = document.getElementById('rosterCountBadge');
-      const tabBadge = document.getElementById('tabStudentCount');
-      const tbody = document.getElementById('rosterTableBody');
-
-      const count = (curGroup.students || []).length;
-      countBadge.textContent = `${count} alumnes`;
-      tabBadge.textContent = count;
-
-      if (!curGroup.students || curGroup.students.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="3" class="p-8 text-center text-zinc-400 text-xs">Cap alumne registrat. Afegeix-ne un des del formulari superior.</td></tr>`;
-        return;
-      }
-
-      tbody.innerHTML = curGroup.students.map((st, idx) => `
-        <tr class="hover:bg-zinc-50/60 transition">
-          <td class="py-2 px-3 text-center text-zinc-400 font-mono text-xs">${idx + 1}</td>
-          <td class="py-2 px-4">
-            <input type="text" value="${st.name || ''}" onchange="updateStudentName(${st.id}, this.value)" class="w-full bg-transparent border-0 border-b border-transparent hover:border-zinc-300 focus:border-zinc-900 rounded-none py-1 font-semibold text-zinc-800 outline-none text-xs">
-          </td>
-          <td class="py-2 px-3 text-center">
-            <button onclick="deleteStudent(${st.id})" class="text-zinc-400 hover:text-rose-500 p-1 transition" title="Eliminar alumne">
-              <i class="fa-regular fa-trash-can text-xs"></i>
-            </button>
-          </td>
-        </tr>
-      `).join('');
-    }
-
-    function addSingleStudentFromRoster() {
-      const input = document.getElementById('rosterNewStudentInput');
-      const name = input.value.trim();
-      if (!name) return;
-      const curGroup = getCurrentGroup();
-      if (!Array.isArray(curGroup.students)) curGroup.students = [];
-      curGroup.students.push({ id: Date.now(), name: name });
-      input.value = '';
-      saveToStorage();
-      renderRosterTab();
-      renderSdaGrid();
-      populateReportStudents();
-    }
-
-    function addBulkStudentsFromRoster() {
-      const area = document.getElementById('rosterBulkInput');
-      const lines = area.value.trim().split('\n').map(l => l.trim()).filter(l => l.length > 0);
-      if (!lines.length) return;
-      const curGroup = getCurrentGroup();
-      if (!Array.isArray(curGroup.students)) curGroup.students = [];
-      lines.forEach((line, i) => curGroup.students.push({ id: Date.now() + i, name: line }));
-      area.value = '';
-      saveToStorage();
-      renderRosterTab();
-      renderSdaGrid();
-      populateReportStudents();
-    }
-
-    function updateStudentName(stId, newName) {
-      const curGroup = getCurrentGroup();
-      const st = (curGroup.students || []).find(s => s.id === stId);
-      if (st && newName.trim()) {
-        st.name = newName.trim();
-        saveToStorage();
-        renderSdaGrid();
-      }
-    }
-
-    function deleteStudent(stId) {
-      const curGroup = getCurrentGroup();
-      if (confirm("Eliminar aquest alumne/a d'aquesta classe?")) {
-        curGroup.students = (curGroup.students || []).filter(s => s.id !== stId);
-        saveToStorage();
-        renderRosterTab();
-        renderSdaGrid();
-        populateReportStudents();
-      }
-    }
-
-    function setTrim(t) {
-      appState.currentTrim = t;
-      [1, 2, 3].forEach(n => {
-        const btn = document.getElementById(`trimBtn${n}_class`);
-        if (btn) {
-          if (n === t) {
-            btn.className = "px-3 py-1 rounded-lg transition bg-white text-zinc-900 shadow-subtle font-bold";
-          } else {
-            btn.className = "px-3 py-1 rounded-lg transition text-zinc-500 hover:text-zinc-900 font-medium";
-          }
-        }
-      });
-      document.getElementById('trimTitle').textContent = `Resum del Trimestre ${t}`;
-      populateSdaSelect();
-      if (appState.currentView === 'sda') renderSdaGrid();
-      if (appState.currentView === 'trim') renderTrimView();
-      if (appState.currentView === 'stats') renderStatsView();
-    }
-
-    function switchView(view) {
-      appState.currentView = view;
-      const tabs = [
-        { id: 'sda', el: 'tabBtnSda', sec: 'viewSda' },
-        { id: 'roster', el: 'tabBtnRoster', sec: 'viewRoster' },
-        { id: 'trim', el: 'tabBtnTrim', sec: 'viewTrim' },
-        { id: 'final', el: 'tabBtnFinal', sec: 'viewFinal' },
-        { id: 'report', el: 'tabBtnReport', sec: 'viewReport' },
-        { id: 'stats', el: 'tabBtnStats', sec: 'viewStats' }
-      ];
-
-      tabs.forEach(t => {
-        const btn = document.getElementById(t.el);
-        const sec = document.getElementById(t.sec);
-        if (t.id === view) {
-          btn.className = "px-3 py-1 rounded-md text-zinc-900 bg-zinc-100 transition";
-          sec.classList.remove('hidden');
-        } else {
-          btn.className = "px-3 py-1 rounded-md text-zinc-500 hover:text-zinc-900 hover:bg-zinc-50 transition";
-          sec.classList.add('hidden');
-        }
-      });
-
-      if (view === 'sda') renderSdaGrid();
-      if (view === 'roster') renderRosterTab();
-      if (view === 'trim') renderTrimView();
-      if (view === 'final') renderFinalView();
-      if (view === 'report') renderIndividualReport();
-      if (view === 'stats') initStatsView();
-    }
+    };
 
     function getLevel(val) {
-      if (val === null || val === undefined || isNaN(val) || val <= 0) {
-        return { code: "—", badge: "bg-zinc-100 text-zinc-400 ring-zinc-200" };
-      }
+      if (val === null || val === undefined || isNaN(val) || val <= 0) return { code: "—", badge: "bg-zinc-100 text-zinc-400 ring-zinc-200" };
       const th = gradeThresholds;
       if (val < th.epa) return { code: "NA", badge: "bg-rose-50 text-rose-700 ring-rose-200 font-bold" };
       if (val < th.as) return { code: "EPA", badge: "bg-amber-50 text-amber-800 ring-amber-200 font-bold" };
@@ -1323,9 +1008,7 @@
     }
 
     function getScoreColorClass(val) {
-      if (val === '' || val === null || val === undefined || isNaN(val)) {
-        return 'text-zinc-800 hover:bg-zinc-100/50';
-      }
+      if (val === '' || val === null || val === undefined || isNaN(val)) return 'text-zinc-800 hover:bg-zinc-100/50';
       const num = parseFloat(val);
       const th = gradeThresholds;
       if (num < th.epa) return 'bg-rose-100/70 text-rose-900 font-bold';
@@ -1335,76 +1018,12 @@
       return 'bg-emerald-100/80 text-emerald-950 font-bold';
     }
 
-    function openThresholdsModal() {
-      document.getElementById('th_epa').value = gradeThresholds.epa;
-      document.getElementById('th_as').value = gradeThresholds.as;
-      document.getElementById('th_an').value = gradeThresholds.an;
-      document.getElementById('th_ae').value = gradeThresholds.ae;
-      document.getElementById('thresholdsModal').classList.remove('hidden');
-    }
-
-    function closeThresholdsModal() {
-      document.getElementById('thresholdsModal').classList.add('hidden');
-    }
-
-    function resetDefaultThresholds() {
-      document.getElementById('th_epa').value = DEFAULT_THRESHOLDS.epa;
-      document.getElementById('th_as').value = DEFAULT_THRESHOLDS.as;
-      document.getElementById('th_an').value = DEFAULT_THRESHOLDS.an;
-      document.getElementById('th_ae').value = DEFAULT_THRESHOLDS.ae;
-    }
-
-    function saveThresholdsModal() {
-      const epa = parseFloat(document.getElementById('th_epa').value);
-      const as = parseFloat(document.getElementById('th_as').value);
-      const an = parseFloat(document.getElementById('th_an').value);
-      const ae = parseFloat(document.getElementById('th_ae').value);
-
-      if (isNaN(epa) || isNaN(as) || isNaN(an) || isNaN(ae) || epa >= as || as >= an || an >= ae) {
-        alert("Els llindars han de ser valors numèrics vàlids i estrictament creixents (EPA < AS < AN < AE).");
-        return;
-      }
-
-      saveThresholdsToStorage({ epa, as, an, ae });
-      closeThresholdsModal();
-
-      if (appState.currentScreen === 'class') {
-        if (appState.currentView === 'sda') renderSdaGrid();
-        if (appState.currentView === 'trim') renderTrimView();
-        if (appState.currentView === 'final') renderFinalView();
-        if (appState.currentView === 'report') renderIndividualReport();
-        if (appState.currentView === 'stats') renderStatsView();
-      }
-    }
-
-    function toggleAttendancePenalty(stId, trimNum = null) {
-      const t = trimNum || appState.currentTrim;
-      const curGroup = getCurrentGroup();
-      if (!curGroup.attendancePenalty) curGroup.attendancePenalty = { 1: {}, 2: {}, 3: {} };
-      if (!curGroup.attendancePenalty[t]) curGroup.attendancePenalty[t] = {};
-
-      curGroup.attendancePenalty[t][stId] = !curGroup.attendancePenalty[t][stId];
-      saveToStorage();
-
-      if (appState.currentView === 'trim') renderTrimView();
-      if (appState.currentView === 'sda') renderSdaGrid();
-      if (appState.currentView === 'final') renderFinalView();
-      if (appState.currentView === 'report') renderIndividualReport();
-      if (appState.currentView === 'stats') renderStatsView();
-    }
-
-    function hasAttendancePenalty(stId, trimNum = null, group = null) {
-      const t = trimNum || appState.currentTrim;
-      const curGroup = group || getCurrentGroup();
-      return !!(curGroup.attendancePenalty && curGroup.attendancePenalty[t] && curGroup.attendancePenalty[t][stId]);
-    }
-
-    function getStudentCeScoreInSda(sda, stId, ceId, customGrades = null) {
+    function getStudentCeScoreInSda(sda, stId, ceId) {
       if (!sda || !sda.competences) return null;
       const conf = sda.competences[ceId];
       if (!conf || !conf.active) return null;
       const curGroup = getCurrentGroup();
-      const sdaGrades = customGrades ? (customGrades[sda.id] && customGrades[sda.id][stId]) || {} : ((curGroup.grades && curGroup.grades[sda.id] && curGroup.grades[sda.id][stId]) || {});
+      const sdaGrades = (curGroup.grades && curGroup.grades[sda.id] && curGroup.grades[sda.id][stId]) || {};
 
       if (conf.oas && conf.oas.length > 0) {
         let sum = 0, weightSum = 0;
@@ -1422,7 +1041,7 @@
       }
     }
 
-    function getStudentOverallSdaScore(sda, stId, customGrades = null) {
+    function getStudentOverallSdaScore(sda, stId) {
       if (!sda || !sda.competences) return null;
       let totalWeightedScore = 0;
       let totalActiveWeight = 0;
@@ -1430,7 +1049,7 @@
       OFFICIAL_CES.forEach(ce => {
         const conf = sda.competences[ce.id];
         if (conf && conf.active) {
-          const score = getStudentCeScoreInSda(sda, stId, ce.id, customGrades);
+          const score = getStudentCeScoreInSda(sda, stId, ce.id);
           const weight = conf.weight || 0;
           if (score !== null) {
             totalWeightedScore += score * (weight / 100);
@@ -1445,31 +1064,22 @@
 
     function getStudentTrimScoreByTrim(stId, trimNum, group = null) {
       const curGroup = group || getCurrentGroup();
-      if (hasAttendancePenalty(stId, trimNum, curGroup)) {
-        return 0.90;
-      }
+      if (curGroup.attendancePenalty?.[trimNum]?.[stId]) return 0.90;
 
       const trimSdas = (curGroup.sdas || []).filter(s => s.trim === trimNum);
       if (trimSdas.length === 0) return null;
 
-      let weightedSum = 0;
-      let totalWeight = 0;
-
+      let weightedSum = 0, totalWeight = 0;
       trimSdas.forEach(sda => {
-        const sdaScore = getStudentOverallSdaScore(sda, stId, curGroup.grades);
-        const weight = sda.trimWeight !== undefined ? sda.trimWeight : (100 / trimSdas.length);
-        if (sdaScore !== null) {
-          weightedSum += sdaScore * (weight / 100);
-          totalWeight += weight;
-        }
+        const sc = getStudentOverallSdaScore(sda, stId);
+        const w = sda.trimWeight !== undefined ? sda.trimWeight : (100 / trimSdas.length);
+        if (sc !== null) { weightedSum += sc * (w / 100); totalWeight += w; }
       });
-
-      if (totalWeight === 0) return null;
-      return (weightedSum * 100) / totalWeight;
+      return totalWeight === 0 ? null : (weightedSum * 100) / totalWeight;
     }
 
     function getStudentTrimScore(stId, group = null) {
-      return getStudentTrimScoreByTrim(stId, appState.currentTrim, group);
+      return getStudentTrimScoreByTrim(stId, window.appState.currentTrim, group);
     }
 
     function getStudentCourseFinalScore(stId, group = null) {
@@ -1482,23 +1092,18 @@
         const s2 = getStudentTrimScoreByTrim(stId, 2, curGroup);
         const s3 = getStudentTrimScoreByTrim(stId, 3, curGroup);
 
-        let totalWeighted = 0;
-        let activeWeight = 0;
-
+        let totalWeighted = 0, activeWeight = 0;
         if (s1 !== null) { totalWeighted += s1 * (weights.t1 / 100); activeWeight += weights.t1; }
         if (s2 !== null) { totalWeighted += s2 * (weights.t2 / 100); activeWeight += weights.t2; }
         if (s3 !== null) { totalWeighted += s3 * (weights.t3 / 100); activeWeight += weights.t3; }
-
         return activeWeight > 0 ? (totalWeighted * 100) / activeWeight : null;
       } else {
         const weights = curGroup.finalCeWeights || DEFAULT_FINAL_CE_WEIGHTS;
-        let totalWeighted = 0;
-        let activeWeight = 0;
-
+        let totalWeighted = 0, activeWeight = 0;
         OFFICIAL_CES.forEach(ce => {
           let sum = 0, c = 0;
           (curGroup.sdas || []).forEach(sda => {
-            const sc = getStudentCeScoreInSda(sda, stId, ce.id, curGroup.grades);
+            const sc = getStudentCeScoreInSda(sda, stId, ce.id);
             if (sc !== null) { sum += sc; c++; }
           });
           if (c > 0) {
@@ -1508,7 +1113,6 @@
             activeWeight += w;
           }
         });
-
         return activeWeight > 0 ? (totalWeighted * 100) / activeWeight : null;
       }
     }
@@ -1516,128 +1120,85 @@
     function populateSdaSelect() {
       const sel = document.getElementById('sdaSelect');
       const curGroup = getCurrentGroup();
-      const trimSdas = (curGroup.sdas || []).filter(s => s.trim === appState.currentTrim);
+      const trimSdas = (curGroup.sdas || []).filter(s => s.trim === window.appState.currentTrim);
       if (trimSdas.length === 0) {
-        sel.innerHTML = `<option value="">Sense SdAs al trimestre ${appState.currentTrim}</option>`;
+        sel.innerHTML = `<option value="">Sense SdAs al trimestre ${window.appState.currentTrim}</option>`;
         return;
       }
       sel.innerHTML = trimSdas.map(s => `<option value="${s.id}">${s.title} (${s.trimWeight || 0}%)</option>`).join('');
     }
 
-    function renderSdaGrid() {
+    window.renderSdaGrid = function() {
       const curGroup = getCurrentGroup();
-      const trimSdas = (curGroup.sdas || []).filter(s => s.trim === appState.currentTrim);
-      
+      const trimSdas = (curGroup.sdas || []).filter(s => s.trim === window.appState.currentTrim);
       const sel = document.getElementById('sdaSelect');
-      let sdaId = sel.value;
-
-      let sda = trimSdas.find(s => s.id === sdaId);
-      
-      if (!sda && trimSdas.length > 0) {
-        sda = trimSdas[0];
-        sel.value = sda.id;
-      }
+      let sda = trimSdas.find(s => s.id === sel.value) || trimSdas[0];
+      if (sda) sel.value = sda.id;
 
       const head = document.getElementById('sdaGridHead');
       const body = document.getElementById('sdaGridBody');
       const titleBar = document.getElementById('sdaGridTitleBar');
-
       const students = curGroup.students || [];
 
       if (!sda) {
-        titleBar.innerHTML = `
-          <div class="flex items-center gap-2">
-            <span class="w-2 h-2 rounded-full bg-amber-400"></span>
-            <span class="font-bold text-zinc-100">Cap SdA creada al trimestre ${appState.currentTrim}</span>
-          </div>
-          <button onclick="openSdaModal(true)" class="bg-zinc-800 hover:bg-zinc-700 text-white px-2.5 py-1 rounded-lg text-xs font-semibold">
-            + Crear SdA
-          </button>
-        `;
-        head.innerHTML = `
-          <tr class="border-b border-zinc-200 bg-zinc-50 text-zinc-500">
-            <th class="py-2.5 px-3 w-12 text-center font-mono">#</th>
-            <th class="py-2.5 px-4 min-w-[224px]">Alumne/a</th>
-            <th class="py-2.5 px-4 text-center text-zinc-400 font-normal italic">Crea una SdA per començar a qualificar</th>
-          </tr>
-        `;
-        body.innerHTML = `<tr><td colspan="3" class="p-8 text-center text-zinc-400 text-xs">No hi ha cap SdA programada per a aquest trimestre.</td></tr>`;
+        titleBar.innerHTML = `<span class="font-bold">Sense SdA activa</span>`;
+        head.innerHTML = `<tr><th class="p-3">Cap SdA</th></tr>`;
+        body.innerHTML = `<tr><td class="p-8 text-center text-zinc-400">Afegeix una SdA per qualificar.</td></tr>`;
         return;
       }
 
       titleBar.innerHTML = `
-        <div class="flex items-center gap-2.5">
+        <div class="flex items-center gap-2">
           <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
-          <span class="font-bold text-zinc-100 tracking-tight uppercase">${sda.title}</span>
-          <span class="text-zinc-400 font-mono text-[11px] bg-zinc-800 px-2 py-0.5 rounded border border-zinc-700/50">Pes: ${sda.trimWeight || 0}%</span>
+          <span class="font-bold tracking-tight uppercase">${sda.title}</span>
+          <span class="text-zinc-400 font-mono text-[11px] bg-zinc-800 px-2 py-0.5 rounded">Pes: ${sda.trimWeight || 0}%</span>
         </div>
-        <div class="text-[11px] text-zinc-400 font-mono">${curGroup.name} · Trimestre ${sda.trim}</div>
+        <div class="text-[11px] text-zinc-400 font-mono">${curGroup.name} · T${sda.trim}</div>
       `;
 
       const activeCes = OFFICIAL_CES.filter(ce => sda.competences && sda.competences[ce.id] && sda.competences[ce.id].active);
 
       let r1 = `<tr class="border-b border-zinc-200">
-        <th rowspan="4" class="py-2.5 px-2.5 w-12 min-w-[48px] max-w-[48px] text-center font-mono text-zinc-500 font-bold bg-zinc-100 border-r border-zinc-200 sticky top-0 left-0 z-40">#</th>
-        <th rowspan="4" class="py-2.5 px-3.5 w-56 min-w-[224px] max-w-[224px] font-bold text-zinc-900 bg-zinc-100 border-r border-zinc-200 sticky top-0 left-12 z-40 shadow-[4px_0_8px_-4px_rgba(0,0,0,0.06)]">Alumne/a</th>`;
+        <th rowspan="3" class="p-2.5 w-12 text-center font-mono text-zinc-500 font-bold bg-zinc-100 border-r border-zinc-200 sticky left-0 z-40">#</th>
+        <th rowspan="3" class="p-2.5 w-56 font-bold text-zinc-900 bg-zinc-100 border-r border-zinc-200 sticky left-12 z-40">Alumne/a</th>`;
       
       activeCes.forEach(ce => {
         const theme = CE_COLOR_THEMES[ce.id] || CE_COLOR_THEMES.CE1;
         const conf = sda.competences[ce.id];
         const oasCount = (conf.oas && conf.oas.length > 0) ? conf.oas.length : 1;
-        r1 += `<th colspan="${oasCount + 2}" class="py-2.5 px-3 text-center border-r border-zinc-200 font-bold text-xs ${theme.header}">${ce.name}</th>`;
+        r1 += `<th colspan="${oasCount + 2}" class="p-2 text-center border-r border-zinc-200 font-bold ${theme.header}">${ce.name}</th>`;
       });
-      r1 += `<th colspan="2" class="py-2.5 px-3 text-center border-l border-zinc-300 bg-zinc-900 text-white font-bold uppercase tracking-wider text-[11px]">Qualificació SdA</th></tr>`;
+      r1 += `<th colspan="2" class="p-2 text-center bg-zinc-900 text-white font-bold uppercase text-[11px]">SdA</th></tr>`;
 
-      let r2 = `<tr class="border-b border-zinc-200 text-[11px]">`;
-      activeCes.forEach(ce => {
-        const theme = CE_COLOR_THEMES[ce.id] || CE_COLOR_THEMES.CE1;
-        const conf = sda.competences[ce.id];
-        const oasCount = (conf.oas && conf.oas.length > 0) ? conf.oas.length : 1;
-        r2 += `<th colspan="${oasCount}" class="py-1 px-2 text-center border-r border-zinc-200 font-mono text-[10px] ${theme.critHeader} font-semibold">${conf.curricularCriteria || '<span class="text-zinc-300 italic font-normal">Sense criteris</span>'}</th>`;
-        r2 += `<th colspan="2" rowspan="2" class="py-1 px-2 text-center border-r border-zinc-200 ${theme.scoreCe} text-[11px]">Assoliment ${ce.id}</th>`;
-      });
-      r2 += `<th colspan="2" rowspan="2" class="py-1 px-2 text-center border-l border-zinc-300 bg-zinc-800 text-zinc-200 font-semibold text-[11px]">Consolidació SdA</th></tr>`;
-
-      let r3 = `<tr class="border-b border-zinc-200 text-[10px]">`;
+      let r2 = `<tr class="border-b border-zinc-200 text-[10px]">`;
       activeCes.forEach(ce => {
         const conf = sda.competences[ce.id];
         if (conf.oas && conf.oas.length > 0) {
-          conf.oas.forEach((oa, oaIdx) => {
-            const oaTheme = getOaColorTheme(ce.id, oaIdx);
-            r3 += `<th class="py-1.5 px-2 border-r border-zinc-200 font-medium max-w-[120px] truncate ${oaTheme.header}" title="${oa.label}">${oa.label}</th>`;
+          conf.oas.forEach(oa => {
+            r2 += `<th class="p-1.5 border-r border-zinc-200 font-medium truncate max-w-[100px]" title="${oa.label}">${oa.label}</th>`;
           });
         } else {
-          const oaTheme = getOaColorTheme(ce.id, 0);
-          r3 += `<th class="py-1.5 px-2 border-r border-zinc-200 font-normal italic ${oaTheme.header}">Avaluació directa</th>`;
+          r2 += `<th class="p-1.5 border-r border-zinc-200 italic font-normal">Directa</th>`;
         }
+        r2 += `<th colspan="2" class="p-1 text-center border-r border-zinc-200 font-bold">Assoliment</th>`;
       });
-      r3 += `</tr>`;
+      r2 += `<th colspan="2" class="p-1 text-center bg-zinc-800 text-zinc-200 font-bold">Total</th></tr>`;
 
-      let r4 = `<tr class="border-b border-zinc-200 text-xs font-semibold">`;
+      let r3 = `<tr class="border-b border-zinc-200 text-xs">`;
       activeCes.forEach(ce => {
-        const theme = CE_COLOR_THEMES[ce.id] || CE_COLOR_THEMES.CE1;
         const conf = sda.competences[ce.id];
         if (conf.oas && conf.oas.length > 0) {
-          conf.oas.forEach((oa, oaIdx) => {
-            const oaTheme = getOaColorTheme(ce.id, oaIdx);
-            r4 += `<th class="py-1 px-1.5 text-center border-r border-zinc-200 font-mono text-[10px] ${oaTheme.header}">${oa.weight || 0}%</th>`;
+          conf.oas.forEach(oa => {
+            r3 += `<th class="p-1 text-center border-r border-zinc-200 font-mono text-[10px]">${oa.weight || 0}%</th>`;
           });
         } else {
-          const oaTheme = getOaColorTheme(ce.id, 0);
-          r4 += `<th class="py-1 px-1.5 text-center border-r border-zinc-200 font-mono text-[10px] ${oaTheme.header}">100%</th>`;
+          r3 += `<th class="p-1 text-center border-r border-zinc-200 font-mono text-[10px]">100%</th>`;
         }
-        r4 += `<th class="py-1 px-2 text-center border-r border-zinc-200 ${theme.weightHeader} font-mono">${conf.weight || 0}%</th>`;
-        r4 += `<th class="py-1 px-2 text-center border-r border-zinc-200 ${theme.weightHeader} text-[10px]">Nivell</th>`;
+        r3 += `<th class="p-1 text-center border-r border-zinc-200 font-mono text-[10px]">Nota</th><th class="p-1 text-center border-r border-zinc-200 text-[10px]">Nivell</th>`;
       });
-      r4 += `<th class="py-1 px-2 text-center border-l border-zinc-300 bg-zinc-900 text-white font-mono text-[10px]">Nota</th>`;
-      r4 += `<th class="py-1 px-2 text-center bg-zinc-900 text-white text-[10px]">Nivell</th></tr>`;
+      r3 += `<th class="p-1 text-center bg-zinc-900 text-white font-mono text-[10px]">Nota</th><th class="p-1 text-center bg-zinc-900 text-white text-[10px]">Nivell</th></tr>`;
 
-      head.innerHTML = r1 + r2 + r3 + r4;
-
-      if (students.length === 0) {
-        body.innerHTML = `<tr><td colspan="25" class="p-8 text-center text-zinc-400 text-xs">Sense alumnes registrats.</td></tr>`;
-        return;
-      }
+      head.innerHTML = r1 + r2 + r3;
 
       const currentGrades = (curGroup.grades && curGroup.grades[sda.id]) || {};
       let rowsHtml = '';
@@ -1645,16 +1206,10 @@
       students.forEach((st, rIdx) => {
         const stGrades = currentGrades[st.id] || {};
         let colCounter = 0;
-        const isPenalized = hasAttendancePenalty(st.id, appState.currentTrim, curGroup);
 
-        rowsHtml += `<tr id="row_${sda.id}_${st.id}" class="hover:bg-zinc-50/70 transition-colors group">
-          <td class="py-1 px-2.5 w-12 min-w-[48px] max-w-[48px] text-center text-zinc-400 font-mono text-xs border-r border-zinc-200 bg-white sticky left-0 z-20">${rIdx + 1}</td>
-          <td class="py-1 px-3.5 w-56 min-w-[224px] max-w-[224px] font-semibold text-zinc-900 border-r border-zinc-200 bg-white sticky left-12 z-20 shadow-[4px_0_8px_-4px_rgba(0,0,0,0.06)]">
-            <div class="flex items-center justify-between gap-1.5">
-              <span class="truncate text-xs" title="${st.name}">${st.name}</span>
-              ${isPenalized ? '<span class="inline-flex items-center text-[9px] font-bold text-rose-700 bg-rose-50 border border-rose-200 px-1 rounded shrink-0" title="Penalització activa per manca de pràctica"><i class="fa-solid fa-person-running mr-0.5"></i>&lt;%</span>' : ''}
-            </div>
-          </td>`;
+        rowsHtml += `<tr class="hover:bg-zinc-50/70 transition-colors">
+          <td class="p-2 text-center text-zinc-400 font-mono border-r border-zinc-200 bg-white sticky left-0 z-20">${rIdx + 1}</td>
+          <td class="p-2 font-semibold text-zinc-900 border-r border-zinc-200 bg-white sticky left-12 z-20 truncate">${st.name}</td>`;
 
         activeCes.forEach(ce => {
           const theme = CE_COLOR_THEMES[ce.id] || CE_COLOR_THEMES.CE1;
@@ -1663,114 +1218,77 @@
           let lvl = getLevel(ceScore);
 
           if (conf.oas && conf.oas.length > 0) {
-            conf.oas.forEach((oa, oaIdx) => {
-              const oaTheme = getOaColorTheme(ce.id, oaIdx);
+            conf.oas.forEach(oa => {
               const gradeKey = `${ce.id}_${oa.id}`;
               const val = stGrades[gradeKey] !== undefined ? stGrades[gradeKey] : '';
-              const colorClass = getScoreColorClass(val);
-
-              rowsHtml += `<td class="p-0.5 border-r border-zinc-200 text-center ${oaTheme.cell}">
-                <input type="text" value="${val !== '' ? val : ''}"
-                  data-row="${rIdx}" data-col="${colCounter}"
-                  onkeydown="handleGridInputKeyboard(event, ${rIdx}, ${colCounter}, '${sda.id}', ${st.id}, '${gradeKey}')"
-                  onfocus="this.select()"
-                  onblur="handleGradeInputCommit('${sda.id}', ${st.id}, '${gradeKey}', this)"
-                  class="grade-cell-input w-full h-8 text-center rounded-lg font-mono text-xs outline-none transition focus:ring-1 focus:ring-zinc-900 focus:bg-white ${colorClass}">
+              rowsHtml += `<td class="p-0.5 border-r border-zinc-200 text-center">
+                <input type="text" value="${val}" data-row="${rIdx}" data-col="${colCounter}"
+                  onkeydown="handleSpreadsheetInput(event, ${rIdx}, ${colCounter}, '${sda.id}', ${st.id}, '${gradeKey}')"
+                  onblur="saveCellCommit('${sda.id}', ${st.id}, '${gradeKey}', this)"
+                  class="grade-input w-full h-8 text-center rounded font-mono text-xs outline-none transition focus:ring-1 focus:ring-zinc-900 ${getScoreColorClass(val)}">
               </td>`;
               colCounter++;
             });
           } else {
-            const oaTheme = getOaColorTheme(ce.id, 0);
             const gradeKey = `${ce.id}_direct`;
             const val = stGrades[gradeKey] !== undefined ? stGrades[gradeKey] : '';
-            const colorClass = getScoreColorClass(val);
-
-            rowsHtml += `<td class="p-0.5 border-r border-zinc-200 text-center ${oaTheme.cell}">
-              <input type="text" value="${val !== '' ? val : ''}"
-                data-row="${rIdx}" data-col="${colCounter}"
-                onkeydown="handleGridInputKeyboard(event, ${rIdx}, ${colCounter}, '${sda.id}', ${st.id}, '${gradeKey}')"
-                onfocus="this.select()"
-                onblur="handleGradeInputCommit('${sda.id}', ${st.id}, '${gradeKey}', this)"
-                class="grade-cell-input w-full h-8 text-center rounded-lg font-mono text-xs outline-none transition focus:ring-1 focus:ring-zinc-900 focus:bg-white ${colorClass}">
+            rowsHtml += `<td class="p-0.5 border-r border-zinc-200 text-center">
+              <input type="text" value="${val}" data-row="${rIdx}" data-col="${colCounter}"
+                onkeydown="handleSpreadsheetInput(event, ${rIdx}, ${colCounter}, '${sda.id}', ${st.id}, '${gradeKey}')"
+                onblur="saveCellCommit('${sda.id}', ${st.id}, '${gradeKey}', this)"
+                class="grade-input w-full h-8 text-center rounded font-mono text-xs outline-none transition focus:ring-1 focus:ring-zinc-900 ${getScoreColorClass(val)}">
             </td>`;
             colCounter++;
           }
 
           rowsHtml += `
-            <td id="cell_${sda.id}_${st.id}_${ce.id}_score" class="py-1 px-2 text-center font-mono font-bold border-r border-zinc-200 ${theme.scoreCe} text-xs">
-              ${ceScore !== null ? ceScore.toFixed(2) : '<span class="text-zinc-300 font-normal">—</span>'}
-            </td>
-            <td id="cell_${sda.id}_${st.id}_${ce.id}_lvl" class="py-1 px-2 text-center border-r border-zinc-200 ${theme.levelCe}">
-              <span class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-bold ring-1 ring-inset ${lvl.badge}">${lvl.code}</span>
-            </td>
+            <td id="cell_${sda.id}_${st.id}_${ce.id}_score" class="p-1 text-center font-mono font-bold border-r border-zinc-200 ${theme.scoreCe}">${ceScore !== null ? ceScore.toFixed(2) : '—'}</td>
+            <td id="cell_${sda.id}_${st.id}_${ce.id}_lvl" class="p-1 text-center border-r border-zinc-200 ${theme.levelCe}"><span class="px-1.5 py-0.5 rounded text-[10px] font-bold ${lvl.badge}">${lvl.code}</span></td>
           `;
         });
 
-        const overallSdaScore = getStudentOverallSdaScore(sda, st.id);
-        const overallSdaLvl = getLevel(overallSdaScore);
+        const overall = getStudentOverallSdaScore(sda, st.id);
+        const ovLvl = getLevel(overall);
 
         rowsHtml += `
-          <td id="cell_${sda.id}_${st.id}_overall_score" class="py-1 px-2.5 text-center font-mono font-black text-zinc-900 border-l border-zinc-300 bg-zinc-50 text-xs">
-            ${overallSdaScore !== null ? overallSdaScore.toFixed(2) : '<span class="text-zinc-300 font-normal">—</span>'}
-          </td>
-          <td id="cell_${sda.id}_${st.id}_overall_lvl" class="py-1 px-2 text-center bg-zinc-50">
-            <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold ring-1 ring-inset ${overallSdaLvl.badge}">${overallSdaLvl.code}</span>
-          </td>
+          <td id="cell_${sda.id}_${st.id}_ov_score" class="p-1 text-center font-mono font-black border-l border-zinc-300 bg-zinc-50">${overall !== null ? overall.toFixed(2) : '—'}</td>
+          <td id="cell_${sda.id}_${st.id}_ov_lvl" class="p-1 text-center bg-zinc-50"><span class="px-2 py-0.5 rounded text-[10px] font-bold ${ovLvl.badge}">${ovLvl.code}</span></td>
         </tr>`;
       });
 
       body.innerHTML = rowsHtml;
-    }
+    };
 
-    // NAVEGACIÓ I ENTRADA ULTRA-RÀPIDA DE NOTES (PRO SPREADSHEET ENGINE)
-    function handleGridInputKeyboard(e, row, col, sdaId, stId, key) {
-      const charMap = { 'e': '4', 'n': '3', 'a': '2', 'p': '1', 'x': '' };
-      const pressedKey = e.key.toLowerCase();
+    window.handleSpreadsheetInput = function(e, row, col, sdaId, stId, key) {
+      const shortcuts = { 'e': '4', 'n': '3', 'a': '2', 'p': '1', 'x': '' };
+      const pressed = e.key.toLowerCase();
 
-      if (charMap.hasOwnProperty(pressedKey)) {
+      if (shortcuts.hasOwnProperty(pressed)) {
         e.preventDefault();
-        e.target.value = charMap[pressedKey];
-        handleGradeInputCommit(sdaId, stId, key, e.target);
-        // Desplaçar avall automàticament estil Excel
-        moveFocusToCell(row + 1, col);
+        e.target.value = shortcuts[pressed];
+        saveCellCommit(sdaId, stId, key, e.target);
+        moveFocus(row + 1, col);
         return;
       }
 
-      if (e.key === 'ArrowUp') {
-        e.preventDefault();
-        moveFocusToCell(row - 1, col);
-      } else if (e.key === 'ArrowDown' || e.key === 'Enter') {
-        e.preventDefault();
-        moveFocusToCell(row + 1, col);
-      } else if (e.key === 'ArrowLeft') {
-        if (e.target.selectionStart === 0 && e.target.selectionEnd === 0) {
-          e.preventDefault();
-          moveFocusToCell(row, col - 1);
-        }
-      } else if (e.key === 'ArrowRight') {
-        if (e.target.selectionStart === e.target.value.length) {
-          e.preventDefault();
-          moveFocusToCell(row, col + 1);
-        }
-      }
+      if (e.key === 'ArrowUp') { e.preventDefault(); moveFocus(row - 1, col); }
+      else if (e.key === 'ArrowDown' || e.key === 'Enter') { e.preventDefault(); moveFocus(row + 1, col); }
+      else if (e.key === 'ArrowLeft' && e.target.selectionStart === 0) { e.preventDefault(); moveFocus(row, col - 1); }
+      else if (e.key === 'ArrowRight' && e.target.selectionStart === e.target.value.length) { e.preventDefault(); moveFocus(row, col + 1); }
+    };
+
+    function moveFocus(r, c) {
+      const next = document.querySelector(`input.grade-input[data-row="${r}"][data-col="${c}"]`);
+      if (next) { next.focus(); next.select(); }
     }
 
-    function moveFocusToCell(row, col) {
-      const target = document.querySelector(`input.grade-cell-input[data-row="${row}"][data-col="${col}"]`);
-      if (target) {
-        target.focus();
-        target.select();
-      }
-    }
-
-    function handleGradeInputCommit(sdaId, stId, key, inputEl) {
+    window.saveCellCommit = function(sdaId, stId, key, inputEl) {
       let raw = inputEl.value.trim().replace(',', '.');
       let val = null;
 
       if (raw !== '') {
         let num = parseFloat(raw);
-        if (isNaN(num)) num = 0;
-        if (num < 0) num = 0;
+        if (isNaN(num) || num < 0) num = 0;
         if (num > 4) num = 4;
         val = Math.round(num * 100) / 100;
         inputEl.value = val;
@@ -1791,51 +1309,165 @@
 
       saveToStorage();
       
-      // Actualització reactiva instantània de la cel·la i la fila sense reconstruir la taula
-      inputEl.className = `grade-cell-input w-full h-8 text-center rounded-lg font-mono text-xs outline-none transition focus:ring-1 focus:ring-zinc-900 focus:bg-white ${getScoreColorClass(val)}`;
-      updateRowAggregatesDOM(sdaId, stId);
-    }
+      // SINCRONITZACIÓ ATÒMICA AL NÚVOL
+      if (window.syncGradeToCloud) {
+        window.syncGradeToCloud(window.appData.activeGroupId, sdaId, stId, key, val);
+      }
 
-    function updateRowAggregatesDOM(sdaId, stId) {
+      inputEl.className = `grade-input w-full h-8 text-center rounded font-mono text-xs outline-none transition focus:ring-1 focus:ring-zinc-900 ${getScoreColorClass(val)}`;
+      updateLiveRow(sdaId, stId);
+    };
+
+    function updateLiveRow(sdaId, stId) {
       const curGroup = getCurrentGroup();
       const sda = (curGroup.sdas || []).find(s => s.id === sdaId);
       if (!sda) return;
 
       OFFICIAL_CES.forEach(ce => {
-        const conf = sda.competences && sda.competences[ce.id];
-        if (conf && conf.active) {
-          const ceScore = getStudentCeScoreInSda(sda, stId, ce.id);
-          const lvl = getLevel(ceScore);
-
-          const cellScore = document.getElementById(`cell_${sda.id}_${stId}_${ce.id}_score`);
-          const cellLvl = document.getElementById(`cell_${sda.id}_${stId}_${ce.id}_lvl`);
-
-          if (cellScore) cellScore.innerHTML = ceScore !== null ? ceScore.toFixed(2) : '<span class="text-zinc-300 font-normal">—</span>';
-          if (cellLvl) cellLvl.innerHTML = `<span class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-bold ring-1 ring-inset ${lvl.badge}">${lvl.code}</span>`;
-        }
+        const sc = getStudentCeScoreInSda(sda, stId, ce.id);
+        const lvl = getLevel(sc);
+        const cellSc = document.getElementById(`cell_${sda.id}_${stId}_${ce.id}_score`);
+        const cellLvl = document.getElementById(`cell_${sda.id}_${stId}_${ce.id}_lvl`);
+        if (cellSc) cellSc.textContent = sc !== null ? sc.toFixed(2) : '—';
+        if (cellLvl) cellLvl.innerHTML = `<span class="px-1.5 py-0.5 rounded text-[10px] font-bold ${lvl.badge}">${lvl.code}</span>`;
       });
 
-      const overallSdaScore = getStudentOverallSdaScore(sda, stId);
-      const overallSdaLvl = getLevel(overallSdaScore);
-
-      const cellOverallScore = document.getElementById(`cell_${sda.id}_${stId}_overall_score`);
-      const cellOverallLvl = document.getElementById(`cell_${sda.id}_${stId}_overall_lvl`);
-
-      if (cellOverallScore) cellOverallScore.innerHTML = overallSdaScore !== null ? overallSdaScore.toFixed(2) : '<span class="text-zinc-300 font-normal">—</span>';
-      if (cellOverallLvl) cellOverallLvl.innerHTML = `<span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold ring-1 ring-inset ${overallSdaLvl.badge}">${overallSdaLvl.code}</span>`;
+      const ov = getStudentOverallSdaScore(sda, stId);
+      const ovLvl = getLevel(ov);
+      const cellOvSc = document.getElementById(`cell_${sda.id}_${stId}_ov_score`);
+      const cellOvLvl = document.getElementById(`cell_${sda.id}_${stId}_ov_lvl`);
+      if (cellOvSc) cellOvSc.textContent = ov !== null ? ov.toFixed(2) : '—';
+      if (cellOvLvl) cellOvLvl.innerHTML = `<span class="px-2 py-0.5 rounded text-[10px] font-bold ${ovLvl.badge}">${ovLvl.code}</span>`;
     }
 
-    function openSdaModal(isNew) {
+    window.setTrim = function(t) {
+      window.appState.currentTrim = t;
+      [1, 2, 3].forEach(n => {
+        const btn = document.getElementById(`trimBtn${n}_class`);
+        if (btn) btn.className = n === t ? "px-3 py-1 rounded-lg bg-white text-zinc-900 shadow-subtle font-bold" : "px-3 py-1 text-zinc-500 hover:text-zinc-900";
+      });
+      document.getElementById('trimTitle').textContent = `Resum del Trimestre ${t}`;
+      populateSdaSelect();
+      if (window.appState.currentView === 'sda') renderSdaGrid();
+      if (window.appState.currentView === 'trim') renderTrimView();
+      if (window.appState.currentView === 'stats') renderStatsView();
+    };
+
+    window.switchView = function(view) {
+      window.appState.currentView = view;
+      ['sda', 'roster', 'trim', 'final', 'report', 'stats'].forEach(id => {
+        const btn = document.getElementById(`tabBtn${id.charAt(0).toUpperCase() + id.slice(1)}`);
+        const sec = document.getElementById(`view${id.charAt(0).toUpperCase() + id.slice(1)}`);
+        if (id === view) {
+          if (btn) btn.className = "px-3 py-1 rounded-md text-zinc-900 bg-zinc-100";
+          if (sec) sec.classList.remove('hidden');
+        } else {
+          if (btn) btn.className = "px-3 py-1 rounded-md text-zinc-500 hover:text-zinc-900";
+          if (sec) sec.classList.add('hidden');
+        }
+      });
+      if (view === 'sda') renderSdaGrid();
+      if (view === 'roster') renderRosterTab();
+      if (view === 'trim') renderTrimView();
+      if (view === 'final') renderFinalView();
+      if (view === 'report') renderIndividualReport();
+      if (view === 'stats') initStatsView();
+    };
+
+    function renderRosterTab() {
+      const curGroup = getCurrentGroup();
+      const countBadge = document.getElementById('rosterCountBadge');
+      const tabBadge = document.getElementById('tabStudentCount');
+      const tbody = document.getElementById('rosterTableBody');
+
+      const count = (curGroup.students || []).length;
+      countBadge.textContent = `${count} alumnes`;
+      tabBadge.textContent = count;
+
+      if (!curGroup.students || curGroup.students.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="3" class="p-8 text-center text-zinc-400 text-xs">Cap alumne registrat.</td></tr>`;
+        return;
+      }
+
+      tbody.innerHTML = curGroup.students.map((st, idx) => `
+        <tr class="hover:bg-zinc-50/60 transition">
+          <td class="py-2 px-3 text-center text-zinc-400 font-mono text-xs">${idx + 1}</td>
+          <td class="py-2 px-4">
+            <input type="text" value="${st.name || ''}" onchange="updateStudentName(${st.id}, this.value)" class="w-full bg-transparent border-0 border-b border-transparent hover:border-zinc-300 focus:border-zinc-900 rounded-none py-1 font-semibold text-zinc-800 outline-none text-xs">
+          </td>
+          <td class="py-2 px-3 text-center">
+            <button onclick="deleteStudent(${st.id})" class="text-zinc-400 hover:text-rose-500 p-1 transition">
+              <i class="fa-regular fa-trash-can text-xs"></i>
+            </button>
+          </td>
+        </tr>
+      `).join('');
+    }
+
+    window.addSingleStudentFromRoster = function() {
+      const input = document.getElementById('rosterNewStudentInput');
+      const name = input.value.trim();
+      if (!name) return;
+      const curGroup = getCurrentGroup();
+      if (!Array.isArray(curGroup.students)) curGroup.students = [];
+      curGroup.students.push({ id: Date.now(), name: name });
+      input.value = '';
+      saveToStorage();
+      if (window.syncGroupEntityToCloud) window.syncGroupEntityToCloud(window.appData.activeGroupId);
+      renderRosterTab();
+      renderSdaGrid();
+      populateReportStudents();
+    };
+
+    window.addBulkStudentsFromRoster = function() {
+      const area = document.getElementById('rosterBulkInput');
+      const lines = area.value.trim().split('\n').map(l => l.trim()).filter(l => l.length > 0);
+      if (!lines.length) return;
+      const curGroup = getCurrentGroup();
+      if (!Array.isArray(curGroup.students)) curGroup.students = [];
+      lines.forEach((line, i) => curGroup.students.push({ id: Date.now() + i, name: line }));
+      area.value = '';
+      saveToStorage();
+      if (window.syncGroupEntityToCloud) window.syncGroupEntityToCloud(window.appData.activeGroupId);
+      renderRosterTab();
+      renderSdaGrid();
+      populateReportStudents();
+    };
+
+    window.updateStudentName = function(stId, newName) {
+      const curGroup = getCurrentGroup();
+      const st = (curGroup.students || []).find(s => s.id === stId);
+      if (st && newName.trim()) {
+        st.name = newName.trim();
+        saveToStorage();
+        if (window.syncGroupEntityToCloud) window.syncGroupEntityToCloud(window.appData.activeGroupId);
+        renderSdaGrid();
+      }
+    };
+
+    window.deleteStudent = function(stId) {
+      const curGroup = getCurrentGroup();
+      if (confirm("Eliminar aquest alumne/a?")) {
+        curGroup.students = (curGroup.students || []).filter(s => s.id !== stId);
+        saveToStorage();
+        if (window.syncGroupEntityToCloud) window.syncGroupEntityToCloud(window.appData.activeGroupId);
+        renderRosterTab();
+        renderSdaGrid();
+        populateReportStudents();
+      }
+    };
+
+    window.openSdaModal = function(isNew) {
       const curGroup = getCurrentGroup();
       let sda;
       if (isNew) {
-        appState.editingSdaId = null;
-        sda = { id: 'sda_' + Date.now(), trim: appState.currentTrim, title: '', trimWeight: 50, competences: {} };
+        window.appState.editingSdaId = null;
+        sda = { id: 'sda_' + Date.now(), trim: window.appState.currentTrim, title: '', trimWeight: 50, competences: {} };
       } else {
         const sdaId = document.getElementById('sdaSelect').value;
         sda = (curGroup.sdas || []).find(s => s.id === sdaId);
         if (!sda) { openSdaModal(true); return; }
-        appState.editingSdaId = sda.id;
+        window.appState.editingSdaId = sda.id;
       }
 
       document.getElementById('modalSdaTitle').value = sda.title || '';
@@ -1843,15 +1475,15 @@
       renderModalTargetGroups(isNew ? null : sda.title);
       renderModalCeCards(sda);
       document.getElementById('sdaModal').classList.remove('hidden');
-    }
+    };
 
     function renderModalTargetGroups(existingTitle) {
       const cont = document.getElementById('modalTargetGroupsContainer');
-      cont.innerHTML = Object.keys(appData.groups).map(gId => {
-        const group = appData.groups[gId];
-        let isChecked = !appState.editingSdaId 
-          ? (gId === appData.activeGroupId) 
-          : group.sdas.some(s => s.title === existingTitle && s.trim === appState.currentTrim);
+      cont.innerHTML = Object.keys(window.appData.groups).map(gId => {
+        const group = window.appData.groups[gId];
+        let isChecked = !window.appState.editingSdaId 
+          ? (gId === window.appData.activeGroupId) 
+          : group.sdas.some(s => s.title === existingTitle && s.trim === window.appState.currentTrim);
 
         return `
           <label class="inline-flex items-center gap-2 bg-white px-3 py-1.5 rounded-xl border border-zinc-200 cursor-pointer hover:border-zinc-300 transition">
@@ -1862,13 +1494,13 @@
       }).join('');
     }
 
-    function selectAllModalGroups(checked) {
+    window.selectAllModalGroups = function(checked) {
       document.querySelectorAll('.target-group-checkbox').forEach(cb => cb.checked = checked);
-    }
+    };
 
-    function closeSdaModal() {
+    window.closeSdaModal = function() {
       document.getElementById('sdaModal').classList.add('hidden');
-    }
+    };
 
     function renderModalCeCards(sda) {
       const container = document.getElementById('modalCeCardsContainer');
@@ -1893,21 +1525,14 @@
 
             <div id="details_${ce.id}" class="mt-3 pl-6 space-y-3.5 ${!conf.active ? 'hidden' : ''}">
               <div>
-                <div class="flex items-center justify-between mb-1">
-                  <label class="font-semibold text-zinc-700 text-xs">Criteris Oficials:</label>
-                  <span class="text-[10px] text-zinc-400">Pots seleccionar-ne múltiples</span>
-                </div>
-                
+                <label class="font-semibold text-zinc-700 text-xs block mb-1">Criteris Oficials LOMLOE:</label>
                 <div class="bg-white border border-zinc-200 rounded-xl p-2 space-y-1 max-h-32 overflow-y-auto">
-                  ${availableCriteria.map(crit => {
-                    const isChecked = currentCriteriaCodes.includes(crit.code);
-                    return `
-                      <label class="flex items-start gap-2 p-1.5 rounded-lg hover:bg-zinc-50 cursor-pointer text-zinc-700">
-                        <input type="checkbox" name="crit_checkbox_${ce.id}" value="${crit.code}" ${isChecked ? 'checked' : ''} class="rounded text-zinc-900 focus:ring-zinc-900 mt-0.5">
-                        <span class="text-[11px] leading-snug"><b class="font-mono text-zinc-900">${crit.code}:</b> ${crit.label.replace(crit.code + '. ', '').replace(crit.code + ' ', '')}</span>
-                      </label>
-                    `;
-                  }).join('')}
+                  ${availableCriteria.map(crit => `
+                    <label class="flex items-start gap-2 p-1.5 rounded-lg hover:bg-zinc-50 cursor-pointer text-zinc-700">
+                      <input type="checkbox" name="crit_checkbox_${ce.id}" value="${crit.code}" ${currentCriteriaCodes.includes(crit.code) ? 'checked' : ''} class="rounded text-zinc-900 focus:ring-zinc-900 mt-0.5">
+                      <span class="text-[11px] leading-snug"><b class="font-mono text-zinc-900">${crit.code}:</b> ${crit.label.replace(crit.code + '. ', '')}</span>
+                    </label>
+                  `).join('')}
                 </div>
               </div>
 
@@ -1921,8 +1546,8 @@
                 <div id="oas_box_${ce.id}" class="space-y-2">
                   ${(conf.oas || []).map((oa, idx) => `
                     <div class="flex items-center gap-2 modal-oa-item" data-id="${oa.id || 'oa_' + idx}">
-                      <input type="text" value="${oa.label || ''}" placeholder="Descripció de l'Objectiu..." class="flex-1 p-1.5 border border-zinc-200 rounded-xl bg-white text-xs outline-none focus:ring-2 focus:ring-zinc-900">
-                      <input type="number" value="${oa.weight || 25}" min="0" max="100" placeholder="%" class="w-14 p-1.5 border border-zinc-200 rounded-xl text-center text-xs font-mono font-semibold outline-none focus:ring-2 focus:ring-zinc-900">
+                      <input type="text" value="${oa.label || ''}" placeholder="Descripció..." class="flex-1 p-1.5 border border-zinc-200 rounded-xl bg-white text-xs outline-none">
+                      <input type="number" value="${oa.weight || 25}" min="0" max="100" class="w-14 p-1.5 border border-zinc-200 rounded-xl text-center text-xs font-mono font-semibold">
                       <span class="text-zinc-400 font-mono text-[11px]">%</span>
                       <button type="button" onclick="this.parentElement.remove(); updateModalWeightSum();" class="text-zinc-400 hover:text-rose-500 p-1">
                         <i class="fa-regular fa-trash-can"></i>
@@ -1938,50 +1563,45 @@
       updateModalWeightSum();
     }
 
-    function toggleCeInModal(ceId) {
+    window.toggleCeInModal = function(ceId) {
       const active = document.getElementById(`check_${ceId}`).checked;
       document.getElementById(`details_${ceId}`).classList.toggle('hidden', !active);
       document.getElementById(`weight_${ceId}`).disabled = !active;
       updateModalWeightSum();
-    }
+    };
 
-    function addOaToModal(ceId) {
+    window.addOaToModal = function(ceId) {
       const box = document.getElementById(`oas_box_${ceId}`);
       const div = document.createElement('div');
       div.className = "flex items-center gap-2 modal-oa-item";
       div.setAttribute('data-id', 'oa_' + Date.now());
       div.innerHTML = `
-        <input type="text" placeholder="Descripció de l'Objectiu..." class="flex-1 p-1.5 border border-zinc-200 rounded-xl bg-white text-xs outline-none focus:ring-2 focus:ring-zinc-900">
-        <input type="number" value="25" min="0" max="100" placeholder="%" class="w-14 p-1.5 border border-zinc-200 rounded-xl text-center text-xs font-mono font-semibold outline-none focus:ring-2 focus:ring-zinc-900">
+        <input type="text" placeholder="Descripció..." class="flex-1 p-1.5 border border-zinc-200 rounded-xl bg-white text-xs outline-none">
+        <input type="number" value="25" min="0" max="100" class="w-14 p-1.5 border border-zinc-200 rounded-xl text-center text-xs font-mono font-semibold">
         <span class="text-zinc-400 font-mono text-[11px]">%</span>
-        <button type="button" onclick="this.parentElement.remove()" class="text-zinc-400 hover:text-rose-500 p-1">
+        <button type="button" onclick="this.parentElement.remove(); updateModalWeightSum();" class="text-zinc-400 hover:text-rose-500 p-1">
           <i class="fa-regular fa-trash-can"></i>
         </button>
       `;
       box.appendChild(div);
-    }
+    };
 
-    function updateModalWeightSum() {
+    window.updateModalWeightSum = function() {
       let sum = 0;
       OFFICIAL_CES.forEach(ce => {
         const chk = document.getElementById(`check_${ce.id}`);
-        if (chk && chk.checked) {
-          sum += parseFloat(document.getElementById(`weight_${ce.id}`).value) || 0;
-        }
+        if (chk && chk.checked) sum += parseFloat(document.getElementById(`weight_${ce.id}`).value) || 0;
       });
       const badge = document.getElementById('modalWeightSumBadge');
       badge.textContent = `Total: ${sum}%`;
       badge.className = sum === 100 
         ? "text-xs font-mono font-bold px-2 py-0.5 rounded-md bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200" 
         : "text-xs font-mono font-bold px-2 py-0.5 rounded-md bg-amber-50 text-amber-700 ring-1 ring-amber-200";
-    }
+    };
 
-    function saveSdaFromModal() {
+    window.saveSdaFromModal = function() {
       const targetGroupIds = Array.from(document.querySelectorAll('.target-group-checkbox:checked')).map(cb => cb.value);
-      if (targetGroupIds.length === 0) {
-        alert("Has de seleccionar com a mínim un grup.");
-        return;
-      }
+      if (targetGroupIds.length === 0) return alert("Selecciona un grup.");
 
       const title = document.getElementById('modalSdaTitle').value.trim() || 'Nova SdA';
       const trimWeight = parseFloat(document.getElementById('modalSdaTrimWeight').value) || 0;
@@ -1992,37 +1612,25 @@
         if (chk && chk.checked) {
           const weight = parseFloat(document.getElementById(`weight_${ce.id}`).value) || 0;
           const checkedCriteria = Array.from(document.querySelectorAll(`input[name="crit_checkbox_${ce.id}"]:checked`)).map(cb => cb.value);
-          const critFormatted = checkedCriteria.join(' - ');
-
           const oas = [];
           document.querySelectorAll(`#oas_box_${ce.id} .modal-oa-item`).forEach(el => {
             const inputs = el.querySelectorAll('input');
-            oas.push({
-              id: el.getAttribute('data-id'),
-              label: inputs[0].value,
-              weight: parseFloat(inputs[1].value) || 0
-            });
+            oas.push({ id: el.getAttribute('data-id'), label: inputs[0].value, weight: parseFloat(inputs[1].value) || 0 });
           });
 
-          competences[ce.id] = {
-            active: true,
-            weight: weight,
-            curricularCriteria: critFormatted,
-            oas: oas
-          };
+          competences[ce.id] = { active: true, weight, curricularCriteria: checkedCriteria.join(' - '), oas };
         }
       });
 
       targetGroupIds.forEach(gId => {
-        const grp = appData.groups[gId];
-        let targetSda = appState.editingSdaId ? (grp.sdas || []).find(s => s.id === appState.editingSdaId) : null;
-        
+        const grp = window.appData.groups[gId];
+        let targetSda = window.appState.editingSdaId ? (grp.sdas || []).find(s => s.id === window.appState.editingSdaId) : null;
         if (!targetSda) {
           targetSda = {
             id: 'sda_' + Date.now() + '_' + Math.floor(Math.random()*1000),
-            trim: appState.currentTrim,
-            title: title,
-            trimWeight: trimWeight,
+            trim: window.appState.currentTrim,
+            title,
+            trimWeight,
             competences: JSON.parse(JSON.stringify(competences))
           };
           grp.sdas.push(targetSda);
@@ -2031,38 +1639,41 @@
           targetSda.trimWeight = trimWeight;
           targetSda.competences = JSON.parse(JSON.stringify(competences));
         }
+        if (window.syncGroupEntityToCloud) window.syncGroupEntityToCloud(gId);
       });
 
       saveToStorage();
       closeSdaModal();
-      
-      if (appState.currentScreen === 'class') {
+
+      if (window.appState.currentScreen === 'class') {
         populateSdaSelect();
         renderSdaGrid();
         renderTrimView();
-        if (appState.currentView === 'final') renderFinalView();
-        if (appState.currentView === 'stats') renderStatsView();
       } else {
         renderHomeScreen();
       }
-    }
+    };
 
-    function updateSdaTrimWeight(sdaId, newWeight) {
+    window.toggleAttendancePenalty = function(stId, trimNum = null) {
+      const t = trimNum || window.appState.currentTrim;
       const curGroup = getCurrentGroup();
-      const sda = (curGroup.sdas || []).find(s => s.id === sdaId);
-      if (sda) {
-        sda.trimWeight = parseFloat(newWeight) || 0;
-        saveToStorage();
-        renderTrimView();
-      }
-    }
+      if (!curGroup.attendancePenalty) curGroup.attendancePenalty = { 1: {}, 2: {}, 3: {} };
+      if (!curGroup.attendancePenalty[t]) curGroup.attendancePenalty[t] = {};
+      curGroup.attendancePenalty[t][stId] = !curGroup.attendancePenalty[t][stId];
+      saveToStorage();
+      if (window.syncGroupEntityToCloud) window.syncGroupEntityToCloud(window.appData.activeGroupId);
+
+      if (window.appState.currentView === 'trim') renderTrimView();
+      if (window.appState.currentView === 'sda') renderSdaGrid();
+      if (window.appState.currentView === 'final') renderFinalView();
+    };
 
     function renderTrimView() {
       const thead = document.getElementById('trimTableHead');
       const tbody = document.getElementById('trimTableBody');
       const weightInputsContainer = document.getElementById('trimSdaWeightInputsContainer');
       const curGroup = getCurrentGroup();
-      const trimSdas = (curGroup.sdas || []).filter(s => s.trim === appState.currentTrim);
+      const trimSdas = (curGroup.sdas || []).filter(s => s.trim === window.appState.currentTrim);
 
       let totalTrimWeight = 0;
       weightInputsContainer.innerHTML = trimSdas.map(sda => {
@@ -2071,11 +1682,11 @@
         return `
           <div class="flex items-center gap-2 bg-zinc-50 border border-zinc-200 px-3 py-1.5 rounded-xl">
             <span class="font-semibold text-zinc-800 text-xs truncate max-w-[160px]">${sda.title}:</span>
-            <input type="number" min="0" max="100" value="${w}" onchange="updateSdaTrimWeight('${sda.id}', this.value)" class="w-14 text-center font-mono font-bold text-xs bg-white border border-zinc-300 rounded-lg p-1 outline-none focus:ring-2 focus:ring-zinc-900">
+            <input type="number" min="0" max="100" value="${w}" onchange="updateSdaTrimWeight('${sda.id}', this.value)" class="w-14 text-center font-mono font-bold text-xs bg-white border border-zinc-300 rounded-lg p-1">
             <span class="text-zinc-400 font-mono text-xs">%</span>
           </div>
         `;
-      }).join('') || '<span class="text-xs text-zinc-400 italic">No hi ha cap SdA programada en aquest trimestre.</span>';
+      }).join('') || '<span class="text-xs text-zinc-400 italic">Sense SdAs en aquest trimestre.</span>';
 
       const weightBadge = document.getElementById('trimTotalWeightBadge');
       weightBadge.textContent = `Total: ${totalTrimWeight}%`;
@@ -2086,280 +1697,187 @@
       let headHtml = `<tr>
         <th class="py-3 px-3 w-12 text-center font-mono text-zinc-400 font-medium">#</th>
         <th class="py-3 px-4 font-semibold text-zinc-100 min-w-[200px]">Alumne/a</th>
-        <th class="py-2.5 px-3 text-center border-l border-zinc-800 text-[11px] w-28">
-          <i class="fa-solid fa-person-running text-zinc-400 mr-1"></i> Mín. Pràctica
-        </th>`;
+        <th class="py-2.5 px-3 text-center border-l border-zinc-800 text-[11px] w-28"><i class="fa-solid fa-person-running mr-1"></i> Mín. Pràctica</th>`;
       
       trimSdas.forEach(sda => {
-        headHtml += `<th class="py-2.5 px-3 text-center border-l border-zinc-800">
-          <div class="font-semibold text-zinc-100 max-w-[130px] truncate mx-auto">${sda.title}</div>
-          <div class="text-[10px] text-zinc-400 font-mono">Pes: ${sda.trimWeight || 0}%</div>
-        </th>`;
+        headHtml += `<th class="py-2.5 px-3 text-center border-l border-zinc-800"><div>${sda.title}</div><div class="text-[10px] text-zinc-400 font-mono">${sda.trimWeight || 0}%</div></th>`;
       });
-
       OFFICIAL_CES.forEach(ce => {
-        headHtml += `<th class="py-2.5 px-2 text-center border-l border-zinc-800">
-          <div class="font-bold text-zinc-100">${ce.id}</div>
-          <div class="text-[9px] text-zinc-400 font-normal truncate max-w-[90px] mx-auto">${ce.short}</div>
-        </th>`;
+        headHtml += `<th class="py-2.5 px-2 text-center border-l border-zinc-800"><div>${ce.id}</div><div class="text-[9px] text-zinc-400">${ce.short}</div></th>`;
       });
-
-      headHtml += `<th class="py-3 px-4 text-center border-l-2 border-zinc-700 bg-zinc-950 font-bold text-white uppercase tracking-wider text-xs">Qualificació Trimestre</th></tr>`;
+      headHtml += `<th class="py-3 px-4 text-center border-l-2 border-zinc-700 bg-zinc-950 font-bold text-white uppercase text-xs">Qualificació Trimestre</th></tr>`;
       thead.innerHTML = headHtml;
 
       const students = curGroup.students || [];
       if (students.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="25" class="p-8 text-center text-zinc-400 text-xs">Sense alumnes registrats.</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="25" class="p-8 text-center text-zinc-400 text-xs">Sense alumnes.</td></tr>`;
         return;
       }
 
-      let rowsHtml = '';
-      students.forEach((st, idx) => {
-        const isPenalized = hasAttendancePenalty(st.id, appState.currentTrim, curGroup);
-
-        rowsHtml += `<tr class="hover:bg-zinc-50/70 transition-colors ${isPenalized ? 'bg-rose-50/25' : ''}">
+      tbody.innerHTML = students.map((st, idx) => {
+        const isPenalized = !!curGroup.attendancePenalty?.[window.appState.currentTrim]?.[st.id];
+        let row = `<tr class="hover:bg-zinc-50/70 transition-colors ${isPenalized ? 'bg-rose-50/25' : ''}">
           <td class="py-2 px-3 text-center text-zinc-400 font-mono text-xs">${idx + 1}</td>
           <td class="py-2 px-4 font-semibold text-zinc-800 text-xs">${st.name}</td>
           <td class="py-2 px-2 text-center border-l border-zinc-100">
-            <button onclick="toggleAttendancePenalty(${st.id})" class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold transition ${isPenalized ? 'bg-rose-600 hover:bg-rose-700 text-white shadow-subtle' : 'bg-zinc-100 hover:bg-zinc-200/70 text-zinc-600'}">
+            <button onclick="toggleAttendancePenalty(${st.id})" class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold ${isPenalized ? 'bg-rose-600 text-white' : 'bg-zinc-100 text-zinc-600'}">
               <i class="fa-solid fa-person-running text-[10px]"></i>
-              <span>${isPenalized ? '&lt; Mínim' : 'Assolit'}</span>
+              <span>${isPenalized ? '< Mínim' : 'Assolit'}</span>
             </button>
           </td>`;
 
         trimSdas.forEach(sda => {
-          const sdaScore = getStudentOverallSdaScore(sda, st.id);
-          const lvl = getLevel(sdaScore);
-          rowsHtml += `<td class="py-2 px-3 text-center border-l border-zinc-100">
-            <div class="font-bold font-mono text-zinc-800 text-xs">${sdaScore !== null ? sdaScore.toFixed(2) : '<span class="text-zinc-300 font-normal">—</span>'}</div>
-            <span class="inline-flex items-center mt-0.5 text-[9px] px-1.5 py-0.2 rounded font-bold ring-1 ring-inset ${lvl.badge}">${lvl.code}</span>
-          </td>`;
+          const sc = getStudentOverallSdaScore(sda, st.id);
+          const lvl = getLevel(sc);
+          row += `<td class="py-2 px-3 text-center border-l border-zinc-100"><div class="font-bold font-mono text-xs">${sc !== null ? sc.toFixed(2) : '—'}</div><span class="text-[9px] px-1.5 py-0.2 rounded font-bold ${lvl.badge}">${lvl.code}</span></td>`;
         });
 
         OFFICIAL_CES.forEach(ce => {
-          let ceSum = 0, count = 0;
+          let sum = 0, count = 0;
           trimSdas.forEach(sda => {
             const sc = getStudentCeScoreInSda(sda, st.id, ce.id);
-            if (sc !== null) { ceSum += sc; count++; }
+            if (sc !== null) { sum += sc; count++; }
           });
-          const avg = count > 0 ? (ceSum / count) : null;
+          const avg = count > 0 ? (sum / count) : null;
           const lvl = getLevel(avg);
-
-          rowsHtml += `<td class="py-2 px-2 text-center border-l border-zinc-100 bg-zinc-50/30">
-            <div class="font-semibold font-mono text-zinc-700 text-xs">${avg !== null ? avg.toFixed(2) : '<span class="text-zinc-300 font-normal">—</span>'}</div>
-            <span class="inline-flex items-center text-[9px] px-1 rounded font-semibold ${lvl.badge}">${lvl.code}</span>
-          </td>`;
+          row += `<td class="py-2 px-2 text-center border-l border-zinc-100 bg-zinc-50/30"><div class="font-mono text-xs">${avg !== null ? avg.toFixed(2) : '—'}</div><span class="text-[9px] px-1 rounded font-semibold ${lvl.badge}">${lvl.code}</span></td>`;
         });
 
-        const overallTrimScore = getStudentTrimScore(st.id);
-        const overallLvl = getLevel(overallTrimScore);
-
-        rowsHtml += `<td class="py-2 px-4 text-center border-l-2 border-zinc-800 ${isPenalized ? 'bg-rose-100/50' : 'bg-zinc-50/70'} font-bold">
-          <div class="text-sm font-black font-mono ${isPenalized ? 'text-rose-700' : 'text-zinc-950'}">${overallTrimScore !== null ? overallTrimScore.toFixed(2) : '<span class="text-zinc-300 font-normal">—</span>'}</div>
-          <span class="inline-flex items-center mt-0.5 text-[10px] px-2.5 py-0.5 rounded font-bold ring-1 ring-inset ${overallLvl.badge}">${overallLvl.code}</span>
-          ${isPenalized ? '<div class="text-[9px] font-bold text-rose-600 uppercase mt-0.5 tracking-tighter">No pràctica</div>' : ''}
+        const overall = getStudentTrimScore(st.id);
+        const ovLvl = getLevel(overall);
+        row += `<td class="py-2 px-4 text-center border-l-2 border-zinc-800 ${isPenalized ? 'bg-rose-100/50' : 'bg-zinc-50/70'} font-bold">
+          <div class="text-sm font-black font-mono ${isPenalized ? 'text-rose-700' : 'text-zinc-950'}">${overall !== null ? overall.toFixed(2) : '—'}</div>
+          <span class="text-[10px] px-2.5 py-0.5 rounded font-bold ${ovLvl.badge}">${ovLvl.code}</span>
         </td></tr>`;
-      });
-
-      tbody.innerHTML = rowsHtml;
+        return row;
+      }).join('');
     }
 
-    function setFinalCalculationMethod(method) {
+    window.updateSdaTrimWeight = function(sdaId, newWeight) {
+      const curGroup = getCurrentGroup();
+      const sda = (curGroup.sdas || []).find(s => s.id === sdaId);
+      if (sda) {
+        sda.trimWeight = parseFloat(newWeight) || 0;
+        saveToStorage();
+        if (window.syncGroupEntityToCloud) window.syncGroupEntityToCloud(window.appData.activeGroupId);
+        renderTrimView();
+      }
+    };
+
+    window.setFinalCalculationMethod = function(method) {
       const curGroup = getCurrentGroup();
       curGroup.finalMethod = method;
       saveToStorage();
+      if (window.syncGroupEntityToCloud) window.syncGroupEntityToCloud(window.appData.activeGroupId);
       renderFinalView();
-    }
-
-    function updateFinalTrimWeight(trimKey, newWeight) {
-      const curGroup = getCurrentGroup();
-      if (!curGroup.finalTrimWeights) curGroup.finalTrimWeights = { ...DEFAULT_FINAL_TRIM_WEIGHTS };
-      curGroup.finalTrimWeights[trimKey] = parseFloat(newWeight) || 0;
-      saveToStorage();
-      renderFinalView();
-    }
-
-    function updateFinalCeWeight(ceId, newWeight) {
-      const curGroup = getCurrentGroup();
-      if (!curGroup.finalCeWeights) curGroup.finalCeWeights = { ...DEFAULT_FINAL_CE_WEIGHTS };
-      curGroup.finalCeWeights[ceId] = parseFloat(newWeight) || 0;
-      saveToStorage();
-      renderFinalView();
-    }
+    };
 
     function renderFinalView() {
       const curGroup = getCurrentGroup();
       const method = curGroup.finalMethod || 'trim';
 
-      const btnTrim = document.getElementById('finalMethodTrimBtn');
-      const btnCe = document.getElementById('finalMethodCeBtn');
-      if (method === 'trim') {
-        btnTrim.className = "px-3 py-1.5 rounded-lg font-semibold bg-white text-zinc-900 shadow-subtle transition";
-        btnCe.className = "px-3 py-1.5 rounded-lg font-medium text-zinc-500 hover:text-zinc-900 transition";
-      } else {
-        btnCe.className = "px-3 py-1.5 rounded-lg font-semibold bg-white text-zinc-900 shadow-subtle transition";
-        btnTrim.className = "px-3 py-1.5 rounded-lg font-medium text-zinc-500 hover:text-zinc-900 transition";
-      }
+      document.getElementById('finalMethodTrimBtn').className = method === 'trim' ? "px-3 py-1.5 rounded-lg font-semibold bg-white text-zinc-900 shadow-subtle" : "px-3 py-1.5 text-zinc-500";
+      document.getElementById('finalMethodCeBtn').className = method === 'ce' ? "px-3 py-1.5 rounded-lg font-semibold bg-white text-zinc-900 shadow-subtle" : "px-3 py-1.5 text-zinc-500";
 
       const weightsContainer = document.getElementById('finalWeightsContainer');
-      const badge = document.getElementById('finalWeightSumBadge');
       const panelTitle = document.getElementById('finalWeightPanelTitle');
-
-      let sumWeights = 0;
 
       if (method === 'trim') {
         panelTitle.innerHTML = `<i class="fa-solid fa-calendar-days text-zinc-500"></i> Ponderació dels Trimestres (T1, T2, T3)`;
         const tw = curGroup.finalTrimWeights || DEFAULT_FINAL_TRIM_WEIGHTS;
-        sumWeights = (tw.t1 || 0) + (tw.t2 || 0) + (tw.t3 || 0);
-
         weightsContainer.innerHTML = [
-          { key: 't1', label: '1r Trimestre', val: tw.t1 },
-          { key: 't2', label: '2n Trimestre', val: tw.t2 },
-          { key: 't3', label: '3r Trimestre', val: tw.t3 }
-        ].map(item => `
+          { k: 't1', l: '1r Trim', v: tw.t1 }, { k: 't2', l: '2n Trim', v: tw.t2 }, { k: 't3', l: '3r Trim', v: tw.t3 }
+        ].map(i => `
           <div class="flex items-center gap-2 bg-zinc-50 border border-zinc-200 px-3 py-1.5 rounded-xl">
-            <span class="font-semibold text-zinc-800 text-xs">${item.label}:</span>
-            <input type="number" step="0.1" min="0" max="100" value="${item.val}" onchange="updateFinalTrimWeight('${item.key}', this.value)" class="w-16 text-center font-mono font-bold text-xs bg-white border border-zinc-300 rounded-lg p-1 outline-none focus:ring-2 focus:ring-zinc-900">
+            <span class="font-semibold text-xs">${i.l}:</span>
+            <input type="number" value="${i.v}" onchange="updateFinalTrimWeight('${i.k}', this.value)" class="w-16 text-center font-mono font-bold text-xs bg-white border border-zinc-300 rounded-lg p-1">
             <span class="text-zinc-400 font-mono text-xs">%</span>
           </div>
         `).join('');
-
       } else {
-        panelTitle.innerHTML = `<i class="fa-solid fa-scale-balanced text-zinc-500"></i> Ponderació de les Competències Específiques (CEs)`;
+        panelTitle.innerHTML = `<i class="fa-solid fa-scale-balanced text-zinc-500"></i> Ponderació de les CEs`;
         const cw = curGroup.finalCeWeights || DEFAULT_FINAL_CE_WEIGHTS;
-        OFFICIAL_CES.forEach(ce => sumWeights += (cw[ce.id] !== undefined ? cw[ce.id] : 20));
-
-        weightsContainer.innerHTML = OFFICIAL_CES.map(ce => {
-          const w = cw[ce.id] !== undefined ? cw[ce.id] : 20;
-          return `
-            <div class="flex items-center gap-2 bg-zinc-50 border border-zinc-200 px-3 py-1.5 rounded-xl">
-              <span class="font-semibold text-zinc-800 text-xs">${ce.id}:</span>
-              <input type="number" min="0" max="100" value="${w}" onchange="updateFinalCeWeight('${ce.id}', this.value)" class="w-14 text-center font-mono font-bold text-xs bg-white border border-zinc-300 rounded-lg p-1 outline-none focus:ring-2 focus:ring-zinc-900">
-              <span class="text-zinc-400 font-mono text-xs">%</span>
-            </div>
-          `;
-        }).join('');
+        weightsContainer.innerHTML = OFFICIAL_CES.map(ce => `
+          <div class="flex items-center gap-2 bg-zinc-50 border border-zinc-200 px-3 py-1.5 rounded-xl">
+            <span class="font-semibold text-xs">${ce.id}:</span>
+            <input type="number" value="${cw[ce.id] || 20}" onchange="updateFinalCeWeight('${ce.id}', this.value)" class="w-14 text-center font-mono font-bold text-xs bg-white border border-zinc-300 rounded-lg p-1">
+            <span class="text-zinc-400 font-mono text-xs">%</span>
+          </div>
+        `).join('');
       }
-
-      const isRounded100 = Math.round(sumWeights) === 100;
-      badge.textContent = `Total: ${sumWeights.toFixed(1)}%`;
-      badge.className = isRounded100 
-        ? "text-xs font-mono font-bold px-2.5 py-0.5 rounded-md bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200" 
-        : "text-xs font-mono font-bold px-2.5 py-0.5 rounded-md bg-amber-50 text-amber-700 ring-1 ring-amber-200";
 
       const thead = document.getElementById('finalTableHead');
-      let headHtml = `<tr class="bg-zinc-900 text-white">
-        <th class="py-3 px-3 w-12 text-center font-mono text-zinc-400 font-medium">#</th>
-        <th class="py-3 px-4 font-semibold text-zinc-100 min-w-[200px]">Alumne/a</th>`;
-
+      let headHtml = `<tr class="bg-zinc-900 text-white"><th class="p-3 w-12 text-center font-mono text-zinc-400">#</th><th class="p-3 min-w-[200px]">Alumne/a</th>`;
       if (method === 'trim') {
-        const tw = curGroup.finalTrimWeights || DEFAULT_FINAL_TRIM_WEIGHTS;
-        headHtml += `
-          <th class="py-2.5 px-3 text-center border-l border-zinc-800">
-            <div>1r Trimestre</div>
-            <div class="text-[10px] text-zinc-400 font-mono">Pes: ${tw.t1}%</div>
-          </th>
-          <th class="py-2.5 px-3 text-center border-l border-zinc-800">
-            <div>2n Trimestre</div>
-            <div class="text-[10px] text-zinc-400 font-mono">Pes: ${tw.t2}%</div>
-          </th>
-          <th class="py-2.5 px-3 text-center border-l border-zinc-800">
-            <div>3r Trimestre</div>
-            <div class="text-[10px] text-zinc-400 font-mono">Pes: ${tw.t3}%</div>
-          </th>
-        `;
+        headHtml += `<th class="p-2 text-center border-l border-zinc-800">1r Trim</th><th class="p-2 text-center border-l border-zinc-800">2n Trim</th><th class="p-2 text-center border-l border-zinc-800">3r Trim</th>`;
       } else {
-        const cw = curGroup.finalCeWeights || DEFAULT_FINAL_CE_WEIGHTS;
-        OFFICIAL_CES.forEach(ce => {
-          const w = cw[ce.id] !== undefined ? cw[ce.id] : 20;
-          headHtml += `<th class="py-2 px-3 text-center border-l border-zinc-800">
-            <div>${ce.id} (${ce.short})</div>
-            <div class="text-[10px] text-zinc-400 font-mono">Pes: ${w}%</div>
-          </th>`;
-        });
+        OFFICIAL_CES.forEach(ce => headHtml += `<th class="p-2 text-center border-l border-zinc-800">${ce.id}</th>`);
       }
-
-      headHtml += `<th class="py-3 px-4 text-center border-l-2 border-zinc-800 bg-zinc-950 font-bold text-white uppercase tracking-wider text-xs">Qualificació Final</th></tr>`;
+      headHtml += `<th class="p-3 text-center border-l-2 border-zinc-800 bg-zinc-950 font-bold uppercase text-xs">Final Ordinària</th></tr>`;
       thead.innerHTML = headHtml;
 
       const tbody = document.getElementById('finalTableBody');
       const students = curGroup.students || [];
-      if (students.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="10" class="p-8 text-center text-zinc-400 text-xs">Sense alumnes.</td></tr>`;
-        return;
-      }
-
-      let html = '';
-      students.forEach((st, idx) => {
-        const finalScore = getStudentCourseFinalScore(st.id, curGroup);
-        const finalLvl = getLevel(finalScore);
-
-        html += `<tr class="hover:bg-zinc-50/70 transition-colors">
-          <td class="py-2 px-3 text-center text-zinc-400 font-mono text-xs">${idx + 1}</td>
-          <td class="py-2 px-4 font-semibold text-zinc-800 text-xs">${st.name}</td>`;
-
+      tbody.innerHTML = students.map((st, idx) => {
+        const sc = getStudentCourseFinalScore(st.id, curGroup);
+        const lvl = getLevel(sc);
+        let row = `<tr class="hover:bg-zinc-50"><td class="p-2 text-center text-zinc-400 font-mono text-xs">${idx + 1}</td><td class="p-2 font-semibold text-zinc-800 text-xs">${st.name}</td>`;
         if (method === 'trim') {
           [1, 2, 3].forEach(tNum => {
-            const sc = getStudentTrimScoreByTrim(st.id, tNum, curGroup);
-            const lvl = getLevel(sc);
-            const isPen = hasAttendancePenalty(st.id, tNum, curGroup);
-
-            html += `<td class="py-2 px-3 text-center border-l border-zinc-100 ${isPen ? 'bg-rose-50/30' : ''}">
-              <div class="font-bold font-mono ${isPen ? 'text-rose-700' : 'text-zinc-800'} text-xs">${sc !== null ? sc.toFixed(2) : '<span class="text-zinc-300 font-normal">—</span>'}</div>
-              <span class="inline-flex items-center mt-0.5 text-[9px] px-1.5 py-0.2 rounded font-bold ring-1 ring-inset ${lvl.badge}">${lvl.code}</span>
-              ${isPen ? '<div class="text-[8px] font-bold text-rose-600 uppercase mt-0.5">No pràctica</div>' : ''}
-            </td>`;
+            const scT = getStudentTrimScoreByTrim(st.id, tNum, curGroup);
+            row += `<td class="p-2 text-center border-l border-zinc-100 font-mono text-xs">${scT !== null ? scT.toFixed(2) : '—'}</td>`;
           });
         } else {
           OFFICIAL_CES.forEach(ce => {
             let sum = 0, c = 0;
             (curGroup.sdas || []).forEach(sda => {
-              const sc = getStudentCeScoreInSda(sda, st.id, ce.id, curGroup.grades);
-              if (sc !== null) { sum += sc; c++; }
+              const scCe = getStudentCeScoreInSda(sda, st.id, ce.id);
+              if (scCe !== null) { sum += scCe; c++; }
             });
-            const avg = c > 0 ? sum / c : null;
-            const lvl = getLevel(avg);
-
-            html += `<td class="py-2 px-3 text-center border-l border-zinc-100">
-              <div class="font-bold font-mono text-zinc-800 text-xs">${avg !== null ? avg.toFixed(2) : '<span class="text-zinc-300 font-normal">—</span>'}</div>
-              <span class="inline-flex items-center mt-0.5 text-[9px] px-1.5 py-0.2 rounded font-bold ring-1 ring-inset ${lvl.badge}">${lvl.code}</span>
-            </td>`;
+            row += `<td class="p-2 text-center border-l border-zinc-100 font-mono text-xs">${c > 0 ? (sum / c).toFixed(2) : '—'}</td>`;
           });
         }
-
-        html += `<td class="py-2 px-4 text-center border-l-2 border-zinc-800 bg-zinc-50 font-bold">
-          <div class="text-sm font-black font-mono text-zinc-950">${finalScore !== null ? finalScore.toFixed(2) : '<span class="text-zinc-300 font-normal">—</span>'}</div>
-          <span class="inline-flex items-center mt-0.5 text-[10px] px-2.5 py-0.5 rounded font-bold ring-1 ring-inset ${finalLvl.badge}">${finalLvl.code}</span>
+        row += `<td class="p-2 text-center border-l-2 border-zinc-800 bg-zinc-50 font-bold">
+          <div class="text-sm font-black font-mono">${sc !== null ? sc.toFixed(2) : '—'}</div>
+          <span class="text-[10px] px-2 py-0.5 rounded font-bold ${lvl.badge}">${lvl.code}</span>
         </td></tr>`;
-      });
-
-      tbody.innerHTML = html;
+        return row;
+      }).join('');
     }
+
+    window.updateFinalTrimWeight = function(trimKey, newWeight) {
+      const curGroup = getCurrentGroup();
+      if (!curGroup.finalTrimWeights) curGroup.finalTrimWeights = { ...DEFAULT_FINAL_TRIM_WEIGHTS };
+      curGroup.finalTrimWeights[trimKey] = parseFloat(newWeight) || 0;
+      saveToStorage();
+      if (window.syncGroupEntityToCloud) window.syncGroupEntityToCloud(window.appData.activeGroupId);
+      renderFinalView();
+    };
+
+    window.updateFinalCeWeight = function(ceId, newWeight) {
+      const curGroup = getCurrentGroup();
+      if (!curGroup.finalCeWeights) curGroup.finalCeWeights = { ...DEFAULT_FINAL_CE_WEIGHTS };
+      curGroup.finalCeWeights[ceId] = parseFloat(newWeight) || 0;
+      saveToStorage();
+      if (window.syncGroupEntityToCloud) window.syncGroupEntityToCloud(window.appData.activeGroupId);
+      renderFinalView();
+    };
 
     function populateReportStudents() {
       const sel = document.getElementById('reportStudentSelect');
       const curGroup = getCurrentGroup();
-      if (!curGroup || !curGroup.students || curGroup.students.length === 0) {
-        sel.innerHTML = `<option value="">Sense alumnes</option>`;
-        return;
-      }
-      sel.innerHTML = curGroup.students.map(s => `<option value="${s.id}">${s.name}</option>`).join('');
+      sel.innerHTML = (curGroup.students || []).map(s => `<option value="${s.id}">${s.name}</option>`).join('');
     }
 
-    function renderIndividualReport() {
+    window.renderIndividualReport = function() {
       const curGroup = getCurrentGroup();
       const sel = document.getElementById('reportStudentSelect');
       const stId = parseInt(sel.value);
       const st = (curGroup.students || []).find(s => s.id === stId);
 
-      if (!st) {
-        document.getElementById('repStudentName').textContent = "Cap alumne seleccionat";
-        document.getElementById('repDetailsContainer').innerHTML = "";
-        return;
-      }
-
+      if (!st) return;
       document.getElementById('repStudentName').textContent = st.name;
-      document.getElementById('repGroupLabel').textContent = `Classe: ${curGroup.name} | Curs 2026-2027 | LOMLOE`;
+      document.getElementById('repGroupLabel').textContent = `Classe: ${curGroup.name} | EF LOMLOE`;
 
       let ceValues = [];
       let detailsHtml = '';
@@ -2382,7 +1900,7 @@
             </div>
             <div class="text-right">
               <span class="font-bold font-mono text-zinc-900 mr-2 text-xs">${avg > 0 ? avg.toFixed(2) : '—'}</span>
-              <span class="inline-flex items-center text-[10px] font-bold px-2 py-0.5 rounded ring-1 ring-inset ${lvl.badge}">${lvl.code}</span>
+              <span class="text-[10px] font-bold px-2 py-0.5 rounded ${lvl.badge}">${lvl.code}</span>
             </div>
           </div>
         `;
@@ -2392,7 +1910,7 @@
       const globalLvl = getLevel(globalScore);
       const repBadge = document.getElementById('repGlobalBadge');
       repBadge.textContent = `${globalScore !== null ? globalScore.toFixed(2) : '—'} (${globalLvl.code})`;
-      repBadge.className = `inline-flex items-center mt-1 px-3 py-1 rounded-md text-xs font-bold ring-1 ring-inset ${globalLvl.badge}`;
+      repBadge.className = `inline-flex items-center mt-1 px-3 py-1 rounded-md text-xs font-bold ${globalLvl.badge}`;
 
       document.getElementById('repDetailsContainer').innerHTML = detailsHtml;
 
@@ -2414,340 +1932,162 @@
         options: {
           responsive: true,
           maintainAspectRatio: false,
-          scales: {
-            r: {
-              min: 0,
-              max: 4,
-              ticks: { stepSize: 1, display: false },
-              grid: { color: 'rgba(228, 228, 231, 0.8)' },
-              angleLines: { color: 'rgba(228, 228, 231, 0.8)' },
-              pointLabels: { font: { family: 'Plus Jakarta Sans', size: 10, weight: '600' }, color: '#52525b' }
-            }
-          },
+          scales: { r: { min: 0, max: 4, ticks: { stepSize: 1, display: false } } },
           plugins: { legend: { display: false } }
         }
       });
-    }
+    };
 
-    function setStatsScope(scope) {
-      appState.statsScope = scope;
-      const btnClass = document.getElementById('statsScopeClass');
-      const btnLevel = document.getElementById('statsScopeLevel');
-      if (scope === 'class') {
-        btnClass.className = "px-2.5 py-1 rounded-lg font-semibold bg-white text-zinc-900 shadow-subtle transition";
-        btnLevel.className = "px-2.5 py-1 rounded-lg font-medium text-zinc-500 hover:text-zinc-900 transition";
-      } else {
-        btnLevel.className = "px-2.5 py-1 rounded-lg font-semibold bg-white text-zinc-900 shadow-subtle transition";
-        btnClass.className = "px-2.5 py-1 rounded-lg font-medium text-zinc-500 hover:text-zinc-900 transition";
-      }
+    window.initStatsView = function() {
+      document.getElementById('statsTypeSelect').value = window.appState.statsType;
       populateStatsSdaSelector();
       renderStatsView();
-    }
+    };
 
-    function onStatsTypeChange() {
-      appState.statsType = document.getElementById('statsTypeSelect').value;
-      const sdaSel = document.getElementById('statsSdaSelector');
-      sdaSel.classList.toggle('hidden', appState.statsType !== 'sda');
+    window.setStatsScope = function(scope) {
+      window.appState.statsScope = scope;
+      document.getElementById('statsScopeClass').className = scope === 'class' ? "px-2.5 py-1 rounded-lg font-semibold bg-white text-zinc-900 shadow-subtle" : "px-2.5 py-1 text-zinc-500";
+      document.getElementById('statsScopeLevel').className = scope === 'level' ? "px-2.5 py-1 rounded-lg font-semibold bg-white text-zinc-900 shadow-subtle" : "px-2.5 py-1 text-zinc-500";
       populateStatsSdaSelector();
       renderStatsView();
-    }
+    };
 
-    function initStatsView() {
-      document.getElementById('statsTypeSelect').value = appState.statsType;
+    window.onStatsTypeChange = function() {
+      window.appState.statsType = document.getElementById('statsTypeSelect').value;
+      document.getElementById('statsSdaSelector').classList.toggle('hidden', window.appState.statsType !== 'sda');
       populateStatsSdaSelector();
       renderStatsView();
-    }
-
-    function getTargetGroupsForStats() {
-      const curGroup = getCurrentGroup();
-      if (appState.statsScope === 'class') {
-        return [curGroup];
-      }
-      const match = curGroup.name.match(/^(1r|2n)\s*d?'?ESO/i);
-      const levelPrefix = match ? match[1].toLowerCase() : curGroup.name.slice(0, 2).toLowerCase();
-
-      const matchedGroups = Object.keys(appData.groups)
-        .map(k => appData.groups[k])
-        .filter(g => g.name.toLowerCase().includes(levelPrefix));
-
-      return matchedGroups.length > 0 ? matchedGroups : [curGroup];
-    }
+    };
 
     function populateStatsSdaSelector() {
       const sel = document.getElementById('statsSdaSelector');
-      const targetGroups = getTargetGroupsForStats();
-      
-      const sdaTitles = new Set();
-      targetGroups.forEach(g => {
-        (g.sdas || []).filter(s => s.trim === appState.currentTrim).forEach(s => sdaTitles.add(s.title));
-      });
-
-      if (sdaTitles.size === 0) {
-        sel.innerHTML = `<option value="">Sense SdAs al T${appState.currentTrim}</option>`;
-        return;
-      }
-      sel.innerHTML = Array.from(sdaTitles).map(t => `<option value="${t}">${t}</option>`).join('');
+      const curGroup = getCurrentGroup();
+      const sdas = (curGroup.sdas || []).filter(s => s.trim === window.appState.currentTrim);
+      sel.innerHTML = sdas.map(s => `<option value="${s.title}">${s.title}</option>`).join('');
     }
 
     function renderStatsView() {
-      const targetGroups = getTargetGroupsForStats();
-      const scopeType = appState.statsType;
-      const selectedSdaTitle = document.getElementById('statsSdaSelector').value;
-
-      let studentScores = [];
-      let ceScoresAgg = { CE1: [], CE2: [], CE3: [], CE4: [], CE5: [] };
-
-      targetGroups.forEach(grp => {
-        const students = grp.students || [];
-        students.forEach(st => {
-          let score = null;
-          if (scopeType === 'sda') {
-            const sda = (grp.sdas || []).find(s => s.title === selectedSdaTitle && s.trim === appState.currentTrim);
-            if (sda) {
-              score = getStudentOverallSdaScore(sda, st.id, grp.grades);
-              OFFICIAL_CES.forEach(ce => {
-                const scCe = getStudentCeScoreInSda(sda, st.id, ce.id, grp.grades);
-                if (scCe !== null) ceScoresAgg[ce.id].push(scCe);
-              });
-            }
-          } else if (scopeType === 'trim') {
-            score = getStudentTrimScore(st.id, grp);
-            const trimSdas = (grp.sdas || []).filter(s => s.trim === appState.currentTrim);
-            OFFICIAL_CES.forEach(ce => {
-              let ceSum = 0, count = 0;
-              trimSdas.forEach(sda => {
-                const sc = getStudentCeScoreInSda(sda, st.id, ce.id, grp.grades);
-                if (sc !== null) { ceSum += sc; count++; }
-              });
-              if (count > 0) ceScoresAgg[ce.id].push(ceSum / count);
-            });
-          } else if (scopeType === 'course') {
-            score = getStudentCourseFinalScore(st.id, grp);
-            OFFICIAL_CES.forEach(ce => {
-              let sum = 0, c = 0;
-              (grp.sdas || []).forEach(sda => {
-                const sc = getStudentCeScoreInSda(sda, st.id, ce.id, grp.grades);
-                if (sc !== null) { sum += sc; c++; }
-              });
-              if (c > 0) ceScoresAgg[ce.id].push(sum / c);
-            });
-          }
-
-          if (score !== null && !isNaN(score)) {
-            studentScores.push(score);
-          }
-        });
+      const curGroup = getCurrentGroup();
+      let scores = [];
+      (curGroup.students || []).forEach(st => {
+        const sc = getStudentTrimScore(st.id, curGroup);
+        if (sc !== null) scores.push(sc);
       });
 
-      const totalStudents = studentScores.length;
-      const globalAvg = totalStudents > 0 ? (studentScores.reduce((a, b) => a + b, 0) / totalStudents) : 0;
-      
-      const successStudents = studentScores.filter(s => s >= gradeThresholds.as).length;
-      const successRate = totalStudents > 0 ? ((successStudents / totalStudents) * 100).toFixed(1) : "0.0";
-      const globalLvl = getLevel(globalAvg);
+      const avg = scores.length > 0 ? (scores.reduce((a, b) => a + b, 0) / scores.length) : 0;
+      const pass = scores.filter(s => s >= gradeThresholds.as).length;
+      const rate = scores.length > 0 ? ((pass / scores.length) * 100).toFixed(1) : "0.0";
+      const lvl = getLevel(avg);
 
-      document.getElementById('kpiAvgVal').textContent = globalAvg > 0 ? globalAvg.toFixed(2) : "—";
-      document.getElementById('kpiAvgLvl').textContent = globalLvl.code;
-      document.getElementById('kpiAvgLvl').className = `text-[10px] font-bold px-1.5 py-0.5 rounded ring-1 ring-inset ${globalLvl.badge}`;
-      document.getElementById('kpiSuccessRate').textContent = `${successRate}%`;
+      document.getElementById('kpiAvgVal').textContent = avg > 0 ? avg.toFixed(2) : '—';
+      document.getElementById('kpiAvgLvl').textContent = lvl.code;
+      document.getElementById('kpiAvgLvl').className = `text-[10px] font-bold px-1.5 py-0.5 rounded ${lvl.badge}`;
+      document.getElementById('kpiSuccessRate').textContent = `${rate}%`;
       document.getElementById('kpiSuccessTitle').textContent = `Taxa d'Èxit (≥ ${gradeThresholds.as})`;
-      document.getElementById('thAssolitRate').textContent = `% ≥ ${gradeThresholds.as} (Assolit)`;
-
-      let ceAvgs = [];
-      OFFICIAL_CES.forEach(ce => {
-        const arr = ceScoresAgg[ce.id];
-        const avg = arr.length > 0 ? (arr.reduce((a, b) => a + b, 0) / arr.length) : null;
-        ceAvgs.push({ id: ce.id, short: ce.short, avg: avg, count: arr.length });
-      });
-
-      const validCeAvgs = ceAvgs.filter(c => c.avg !== null);
-      if (validCeAvgs.length > 0) {
-        validCeAvgs.sort((a, b) => b.avg - a.avg);
-        const best = validCeAvgs[0];
-        const worst = validCeAvgs[validCeAvgs.length - 1];
-        document.getElementById('kpiBestCe').textContent = `${best.id} · ${best.short}`;
-        document.getElementById('kpiBestCeVal').textContent = `Mitjana: ${best.avg.toFixed(2)}`;
-        document.getElementById('kpiWorstCe').textContent = `${worst.id} · ${worst.short}`;
-        document.getElementById('kpiWorstCeVal').textContent = `Mitjana: ${worst.avg.toFixed(2)}`;
-      } else {
-        document.getElementById('kpiBestCe').textContent = "--";
-        document.getElementById('kpiBestCeVal').textContent = "Mitjana: --";
-        document.getElementById('kpiWorstCe').textContent = "--";
-        document.getElementById('kpiWorstCeVal').textContent = "Mitjana: --";
-      }
+      document.getElementById('thAssolitRate').textContent = `% ≥ ${gradeThresholds.as}`;
 
       let counts = { NA: 0, EPA: 0, AS: 0, AN: 0, AE: 0 };
-      studentScores.forEach(s => {
-        const lvl = getLevel(s).code;
-        if (counts[lvl] !== undefined) counts[lvl]++;
-      });
+      scores.forEach(s => counts[getLevel(s).code]++);
 
-      const th = gradeThresholds;
       const ctxLevels = document.getElementById('chartStatsLevels').getContext('2d');
       if (chartStatsLevelsInstance) chartStatsLevelsInstance.destroy();
       chartStatsLevelsInstance = new Chart(ctxLevels, {
         type: 'bar',
         data: {
-          labels: [
-            `NA (< ${th.epa})`, 
-            `EPA [${th.epa} - ${th.as}[`, 
-            `AS [${th.as} - ${th.an}[`, 
-            `AN [${th.an} - ${th.ae}[`, 
-            `AE (≥ ${th.ae})`
-          ],
-          datasets: [{
-            data: [counts.NA, counts.EPA, counts.AS, counts.AN, counts.AE],
-            backgroundColor: [
-              'rgba(244, 63, 94, 0.7)',
-              'rgba(245, 158, 11, 0.7)',
-              'rgba(14, 165, 233, 0.7)',
-              'rgba(99, 102, 241, 0.7)',
-              'rgba(16, 185, 129, 0.7)'
-            ],
-            borderRadius: 6
-          }]
+          labels: ['NA', 'EPA', 'AS', 'AN', 'AE'],
+          datasets: [{ data: Object.values(counts), backgroundColor: ['#f43f5e', '#f59e0b', '#0ea5e9', '#6366f1', '#10b981'], borderRadius: 6 }]
         },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          plugins: { legend: { display: false } },
-          scales: {
-            y: {
-              beginAtZero: true,
-              ticks: { stepSize: 1, font: { family: 'Plus Jakarta Sans', size: 10 } },
-              grid: { color: 'rgba(244, 244, 245, 0.9)' }
-            },
-            x: {
-              ticks: { font: { family: 'Plus Jakarta Sans', size: 10, weight: '600' } },
-              grid: { display: false }
-            }
-          }
-        }
+        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } }
       });
-
-      const ctxCes = document.getElementById('chartStatsCes').getContext('2d');
-      if (chartStatsCesInstance) chartStatsCesInstance.destroy();
-      chartStatsCesInstance = new Chart(ctxCes, {
-        type: 'bar',
-        data: {
-          labels: OFFICIAL_CES.map(c => c.id),
-          datasets: [{
-            data: ceAvgs.map(c => c.avg ? c.avg.toFixed(2) : 0),
-            backgroundColor: 'rgba(24, 24, 27, 0.8)',
-            borderRadius: 6
-          }]
-        },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          plugins: { legend: { display: false } },
-          scales: {
-            y: {
-              min: 0,
-              max: 4,
-              ticks: { stepSize: 1, font: { family: 'Plus Jakarta Sans', size: 10 } },
-              grid: { color: 'rgba(244, 244, 245, 0.9)' }
-            },
-            x: {
-              ticks: { font: { family: 'Plus Jakarta Sans', size: 10, weight: '600' } },
-              grid: { display: false }
-            }
-          }
-        }
-      });
-
-      const tbody = document.getElementById('statsTableBody');
-      tbody.innerHTML = OFFICIAL_CES.map(ce => {
-        const item = ceAvgs.find(c => c.id === ce.id);
-        const avg = item && item.avg !== null ? item.avg : null;
-        const lvl = getLevel(avg);
-        const scoresArr = ceScoresAgg[ce.id];
-        const succCount = scoresArr.filter(s => s >= gradeThresholds.as).length;
-        const succPct = scoresArr.length > 0 ? ((succCount / scoresArr.length) * 100).toFixed(0) : "—";
-
-        let statusBadge = `<span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-zinc-100 text-zinc-500">Sense dades</span>`;
-        if (avg !== null) {
-          if (avg >= gradeThresholds.an) {
-            statusBadge = `<span class="inline-flex items-center gap-1 text-[10px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded"><i class="fa-solid fa-check"></i> Consolidat</span>`;
-          } else if (avg >= gradeThresholds.as) {
-            statusBadge = `<span class="inline-flex items-center gap-1 text-[10px] font-bold text-sky-700 bg-sky-50 px-2 py-0.5 rounded"><i class="fa-solid fa-arrows-spin"></i> En progrés</span>`;
-          } else {
-            statusBadge = `<span class="inline-flex items-center gap-1 text-[10px] font-bold text-rose-700 bg-rose-50 px-2 py-0.5 rounded border border-rose-200"><i class="fa-solid fa-triangle-exclamation"></i> Cal reforç</span>`;
-          }
-        }
-
-        return `
-          <tr class="hover:bg-zinc-50/50 transition">
-            <td class="py-2 px-4 font-mono font-bold text-zinc-700">${ce.id}</td>
-            <td class="py-2 px-4 font-semibold text-zinc-900">${ce.name}</td>
-            <td class="py-2 px-3 text-center font-mono font-black">${avg !== null ? avg.toFixed(2) : "—"}</td>
-            <td class="py-2 px-3 text-center">
-              <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold ring-1 ring-inset ${lvl.badge}">${lvl.code}</span>
-            </td>
-            <td class="py-2 px-4 text-center font-mono font-semibold">${succPct !== '—' ? succPct + '%' : '—'}</td>
-            <td class="py-2 px-4 text-center">${statusBadge}</td>
-          </tr>
-        `;
-      }).join('');
     }
 
-    // EXPORTACIÓ CSV INTEL·LIGENT SEGONS LA PESTANYA ACTIVA
-    function exportContextualCSV() {
+    window.exportContextualCSV = function() {
       const curGroup = getCurrentGroup();
-      let csv = "";
-      let filename = "";
-
-      if (appState.currentView === 'trim') {
-        filename = `Resum_T${appState.currentTrim}_${curGroup.name.replace(/\s+/g, '_')}.csv`;
-        const trimSdas = (curGroup.sdas || []).filter(s => s.trim === appState.currentTrim);
-        
-        let headers = ["Alumne", "Penalitzacio_Practica"];
-        trimSdas.forEach(s => headers.push(`SdA_${s.title.replace(/,/g, '')}`));
-        OFFICIAL_CES.forEach(c => headers.push(c.id));
-        headers.push("Nota_Final_Trimestre", "Nivell_LOMLOE");
-        csv += headers.join(",") + "\n";
-
-        (curGroup.students || []).forEach(st => {
-          let row = [`"${st.name}"`, hasAttendancePenalty(st.id, appState.currentTrim, curGroup) ? "SI" : "NO"];
-          trimSdas.forEach(sda => {
-            const sc = getStudentOverallSdaScore(sda, st.id);
-            row.push(sc !== null ? sc.toFixed(2) : "");
-          });
-          OFFICIAL_CES.forEach(ce => {
-            let ceSum = 0, count = 0;
-            trimSdas.forEach(sda => {
-              const sc = getStudentCeScoreInSda(sda, st.id, ce.id);
-              if (sc !== null) { ceSum += sc; count++; }
-            });
-            row.push(count > 0 ? (ceSum / count).toFixed(2) : "");
-          });
-          const trimScore = getStudentTrimScore(st.id);
-          row.push(trimScore !== null ? trimScore.toFixed(2) : "");
-          row.push(getLevel(trimScore).code);
-          csv += row.join(",") + "\n";
-        });
-      } else {
-        filename = `Resum_Final_Curs_${curGroup.name.replace(/\s+/g, '_')}.csv`;
-        csv = `Alumne,T1,T2,T3,Qualificacio_Final,Nivell_LOMLOE,Metode\n`;
-        (curGroup.students || []).forEach(st => {
-          const t1 = getStudentTrimScoreByTrim(st.id, 1, curGroup);
-          const t2 = getStudentTrimScoreByTrim(st.id, 2, curGroup);
-          const t3 = getStudentTrimScoreByTrim(st.id, 3, curGroup);
-          const sc = getStudentCourseFinalScore(st.id, curGroup);
-          csv += `"${st.name}",${t1 !== null ? t1.toFixed(2) : ""},${t2 !== null ? t2.toFixed(2) : ""},${t3 !== null ? t3.toFixed(2) : ""},${sc !== null ? sc.toFixed(2) : ""},"${getLevel(sc).code}","${curGroup.finalMethod}"\n`;
-        });
-      }
-
+      let csv = "Alumne,Nota\n";
+      (curGroup.students || []).forEach(st => {
+        const sc = getStudentTrimScore(st.id, curGroup);
+        csv += `"${st.name}",${sc !== null ? sc.toFixed(2) : ""}\n`;
+      });
       const blob = new Blob(["\uFEFF" + csv], { type: 'text/csv;charset=utf-8;' });
       const a = document.createElement("a");
       a.href = URL.createObjectURL(blob);
-      a.download = filename;
+      a.download = `Qualificacions_${curGroup.name}.csv`;
       document.body.appendChild(a);
       a.click();
       a.remove();
-    }
+    };
 
-    window.onload = init;
+    window.openThresholdsModal = function() {
+      document.getElementById('th_epa').value = gradeThresholds.epa;
+      document.getElementById('th_as').value = gradeThresholds.as;
+      document.getElementById('th_an').value = gradeThresholds.an;
+      document.getElementById('th_ae').value = gradeThresholds.ae;
+      document.getElementById('thresholdsModal').classList.remove('hidden');
+    };
+
+    window.closeThresholdsModal = function() {
+      document.getElementById('thresholdsModal').classList.add('hidden');
+    };
+
+    window.resetDefaultThresholds = function() {
+      document.getElementById('th_epa').value = DEFAULT_THRESHOLDS.epa;
+      document.getElementById('th_as').value = DEFAULT_THRESHOLDS.as;
+      document.getElementById('th_an').value = DEFAULT_THRESHOLDS.an;
+      document.getElementById('th_ae').value = DEFAULT_THRESHOLDS.ae;
+    };
+
+    window.saveThresholdsModal = function() {
+      const epa = parseFloat(document.getElementById('th_epa').value);
+      const as = parseFloat(document.getElementById('th_as').value);
+      const an = parseFloat(document.getElementById('th_an').value);
+      const ae = parseFloat(document.getElementById('th_ae').value);
+      if (isNaN(epa) || isNaN(as) || isNaN(an) || isNaN(ae) || epa >= as || as >= an || an >= ae) return alert("Llindars invàlids.");
+      saveThresholdsToStorage({ epa, as, an, ae });
+      closeThresholdsModal();
+      if (window.appState.currentScreen === 'class') renderSdaGrid();
+    };
+
+    window.resetDefaultData = function() {
+      if (confirm("Vols restablir les dades de mostra originals?")) {
+        window.appData = JSON.parse(JSON.stringify(ORIGINAL_DEMO_DATA));
+        saveToStorage();
+        if (window.syncWholeAppToCloud) window.syncWholeAppToCloud();
+        goToHome();
+      }
+    };
+
+    window.exportBackupJSON = function() {
+      const str = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify({ appData: window.appData, gradeThresholds }, null, 2));
+      const a = document.createElement('a');
+      a.setAttribute("href", str);
+      a.setAttribute("download", `Backup_EF_${new Date().toISOString().slice(0, 10)}.json`);
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+    };
+
+    window.importBackupJSON = function(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        try {
+          const res = JSON.parse(e.target.result);
+          if (res.appData) window.appData = res.appData;
+          else window.appData = res;
+          saveToStorage();
+          if (window.syncWholeAppToCloud) window.syncWholeAppToCloud();
+          goToHome();
+        } catch (err) { alert("JSON no vàlid."); }
+      };
+      reader.readAsText(file);
+      event.target.value = '';
+    };
+
+    window.onload = function() {
+      renderHomeScreen();
+      goToHome();
+    };
   </script>
 </body>
 </html>
