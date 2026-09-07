@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>EF Competencial · Quadern LOMLOE</title>
+  <title>EF Competencial · Quadern LOMLOE Pro</title>
   
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -35,7 +35,7 @@
     body { font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11'; }
     .tabular-nums { font-variant-numeric: tabular-nums; }
     
-    ::-webkit-scrollbar { width: 5px; height: 5px; }
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
     ::-webkit-scrollbar-track { background: transparent; }
     ::-webkit-scrollbar-thumb { background: #e4e4e7; border-radius: 9999px; }
     ::-webkit-scrollbar-thumb:hover { background: #d4d4d8; }
@@ -50,17 +50,17 @@
     @media print {
       .no-print { display: none !important; }
       body { background: white !important; }
+      .print-card { box-shadow: none !important; border: 1px solid #e4e4e7 !important; page-break-inside: avoid; }
     }
   </style>
 </head>
 <body class="min-h-full flex flex-col text-zinc-900 bg-[#fafafa]">
 
-  <!-- ================= CAPÇALERA AMB IDENTITAT CORPORAL ================= -->
+  <!-- ================= CAPÇALERA ================= -->
   <header class="bg-white/90 backdrop-blur-md border-b border-zinc-200/80 sticky top-0 z-50 no-print">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <div class="flex items-center justify-between h-14 gap-4">
         
-        <!-- Identitat i Marca Visual (Isotip Vectorial Dinàmic) -->
         <div class="flex items-center gap-3">
           <button onclick="goToHome()" class="flex items-center gap-2.5 text-left group">
             <div class="w-8 h-8 rounded-xl bg-zinc-900 text-white flex items-center justify-center p-1.5 shadow-subtle group-hover:bg-zinc-800 transition">
@@ -73,41 +73,40 @@
             <div class="flex flex-col">
               <div class="flex items-center gap-1.5">
                 <span class="text-xs font-black tracking-tight text-zinc-900 group-hover:text-zinc-600 transition">EF COMPETENCIAL</span>
-                <span class="text-[9px] font-bold text-zinc-600 bg-zinc-100 px-1.5 py-0.5 rounded tracking-wider uppercase border border-zinc-200/60">LOMLOE</span>
+                <span class="text-[9px] font-bold text-zinc-600 bg-zinc-100 px-1.5 py-0.5 rounded tracking-wider uppercase border border-zinc-200/60">PRO</span>
               </div>
-              <span class="text-[9px] font-medium text-zinc-400 -mt-0.5">Avaluació Educació Física</span>
+              <span class="text-[9px] font-medium text-zinc-400 -mt-0.5">Avaluació Educació Física LOMLOE</span>
             </div>
           </button>
 
           <div id="headerBreadcrumb" class="hidden items-center gap-1.5 ml-2 pl-3 border-l border-zinc-200 text-xs">
             <span class="text-zinc-400 font-medium">Grup:</span>
-            <span id="breadcrumbGroupName" class="font-bold text-zinc-900 bg-zinc-100/90 px-2 py-0.5 rounded-md text-[11px] border border-zinc-200/70 font-mono">--</span>
+            <span id="breadcrumbGroupName" class="font-bold text-zinc-900 bg-zinc-100 px-2 py-0.5 rounded-md text-[11px] border border-zinc-200 font-mono">--</span>
           </div>
         </div>
 
-        <!-- Accions Ràpides de Capçalera -->
         <div class="flex items-center gap-2">
           <div id="savedIndicator" class="flex items-center gap-1.5 text-[11px] font-medium text-emerald-600 px-2 py-0.5 opacity-0 transition-opacity duration-300">
             <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
             <span class="font-semibold text-[10px]">Desat</span>
           </div>
 
-          <button onclick="goToHome()" id="homeNavBtn" class="inline-flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1.5 rounded-xl border border-zinc-200/80 bg-white text-zinc-700 hover:bg-zinc-50 shadow-subtle transition">
+          <button onclick="goToHome()" id="homeNavBtn" class="inline-flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1.5 rounded-xl border border-zinc-200 bg-white text-zinc-700 hover:bg-zinc-50 shadow-subtle transition">
             <i class="fa-solid fa-house text-zinc-400 text-[10px]"></i>
             <span class="hidden sm:inline">Inici</span>
           </button>
 
           <div class="flex items-center pl-1 border-l border-zinc-200 gap-1">
-            <button onclick="openThresholdsModal()" title="Configurar Escala LOMLOE" class="p-1.5 text-zinc-500 hover:text-zinc-900 hover:bg-zinc-100 rounded-lg text-xs transition">
+            <button onclick="openThresholdsModal()" title="Configurar Llindars LOMLOE" class="p-1.5 text-zinc-500 hover:text-zinc-900 hover:bg-zinc-100 rounded-lg text-xs transition">
               <i class="fa-solid fa-sliders"></i>
             </button>
             <button onclick="resetDefaultData()" title="Restablir dades originals" class="p-1.5 text-zinc-400 hover:text-zinc-900 hover:bg-zinc-100 rounded-lg text-xs transition">
               <i class="fa-solid fa-rotate-left"></i>
             </button>
-            <button onclick="exportBackupJSON()" title="Còpia de Seguretat (JSON)" class="p-1.5 text-zinc-400 hover:text-zinc-900 hover:bg-zinc-100 rounded-lg text-xs transition">
+            <button onclick="exportBackupJSON()" title="Exportar Backup JSON" class="p-1.5 text-zinc-400 hover:text-zinc-900 hover:bg-zinc-100 rounded-lg text-xs transition">
               <i class="fa-solid fa-arrow-down-to-line"></i>
             </button>
-            <label title="Restaurar fitxer JSON" class="p-1.5 text-zinc-400 hover:text-zinc-900 hover:bg-zinc-100 rounded-lg text-xs transition cursor-pointer">
+            <label title="Restaurar Backup JSON" class="p-1.5 text-zinc-400 hover:text-zinc-900 hover:bg-zinc-100 rounded-lg text-xs transition cursor-pointer">
               <i class="fa-solid fa-arrow-up-from-line"></i>
               <input type="file" id="backupFileInput" accept=".json" onchange="importBackupJSON(event)" class="hidden">
             </label>
@@ -115,7 +114,7 @@
         </div>
       </div>
 
-      <!-- Segmented Control de Navegació de Classe -->
+      <!-- Menú Secundari de Classe -->
       <nav id="classSubNav" class="hidden flex items-center space-x-1 border-t border-zinc-100 py-1.5 overflow-x-auto text-[11px] font-semibold">
         <button id="tabBtnSda" onclick="switchView('sda')" class="px-3 py-1 rounded-md text-zinc-900 bg-zinc-100 transition">
           <i class="fa-regular fa-folder-open text-zinc-500 mr-1.5"></i> Qualificació SdA
@@ -139,22 +138,22 @@
     </div>
   </header>
 
-  <!-- BODY CONTENT -->
+  <!-- ================= CONTINGUT PRINCIPAL ================= -->
   <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-5">
 
-    <!-- ================= PANTALLA D'INICI (HUB DOCENT OPERATIU) ================= -->
+    <!-- PANTALLA INICI -->
     <section id="screenHome" class="space-y-6">
-      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-zinc-200/70 pb-4">
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-zinc-200 pb-4">
         <div>
           <div class="flex items-center gap-2 text-xs font-semibold text-zinc-400">
             <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
-            <span>Curs Actiu · 1r Cicle d'ESO</span>
+            <span>Curs Actiu · Gestor d'Avaluació Contínua</span>
           </div>
           <h2 class="text-xl font-extrabold tracking-tight text-zinc-900 mt-0.5">Tauler de Classes</h2>
         </div>
 
         <div class="flex items-center gap-2">
-          <button onclick="openGlobalSdaModal()" class="inline-flex items-center gap-1.5 bg-white hover:bg-zinc-50 border border-zinc-200/90 text-zinc-700 text-xs font-semibold px-3 py-2 rounded-xl shadow-subtle transition">
+          <button onclick="openGlobalSdaModal()" class="inline-flex items-center gap-1.5 bg-white hover:bg-zinc-50 border border-zinc-200 text-zinc-700 text-xs font-semibold px-3 py-2 rounded-xl shadow-subtle transition">
             <i class="fa-solid fa-sliders text-zinc-400 text-[10px]"></i> Programar SdA
           </button>
           <button onclick="openNewGroupModal()" class="inline-flex items-center gap-1.5 bg-zinc-900 hover:bg-zinc-800 text-white text-xs font-semibold px-3.5 py-2 rounded-xl shadow-subtle transition">
@@ -166,9 +165,9 @@
       <div id="homeClassesGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"></div>
     </section>
 
-    <!-- PANTALLA DE TREBALL DE LA CLASSE -->
+    <!-- ÀMBIT DE TREBALL DE LA CLASSE -->
     <div id="screenClassWorkspace" class="hidden space-y-5">
-      <div class="flex flex-wrap items-center justify-between gap-3 bg-white border border-zinc-200/80 px-3.5 py-2.5 rounded-2xl shadow-subtle no-print">
+      <div class="flex flex-wrap items-center justify-between gap-3 bg-white border border-zinc-200 px-3.5 py-2.5 rounded-2xl shadow-subtle no-print">
         <div class="flex items-center gap-3">
           <button onclick="goToHome()" class="text-zinc-500 hover:text-zinc-900 text-xs font-semibold flex items-center gap-1.5 transition pr-3 border-r border-zinc-200">
             <i class="fa-solid fa-arrow-left text-[10px]"></i> Sortir
@@ -180,15 +179,15 @@
           </div>
         </div>
         <div class="flex items-center gap-2">
-          <button onclick="switchView('roster')" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold text-zinc-700 bg-zinc-50 hover:bg-zinc-100 border border-zinc-200/80 transition">
+          <button onclick="switchView('roster')" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold text-zinc-700 bg-zinc-50 hover:bg-zinc-100 border border-zinc-200 transition">
             <i class="fa-solid fa-user-gear text-zinc-400 text-[11px]"></i> Gestionar Alumnes
           </button>
         </div>
       </div>
 
-      <!-- VISTA 1: GRAELLA SdA -->
+      <!-- VISTA 1: GRAELLA SdA (OPTIMITZADA REACTIVA) -->
       <section id="viewSda" class="space-y-4">
-        <div class="bg-white border border-zinc-200/80 rounded-2xl p-3 shadow-subtle flex flex-wrap items-center justify-between gap-3">
+        <div class="bg-white border border-zinc-200 rounded-2xl p-3 shadow-subtle flex flex-wrap items-center justify-between gap-3">
           <div class="flex items-center gap-2.5">
             <span class="text-[11px] font-bold text-zinc-400 uppercase tracking-wider">SdA:</span>
             <select id="sdaSelect" onchange="renderSdaGrid()" class="bg-zinc-50 border border-zinc-200 text-xs font-bold text-zinc-900 rounded-xl px-3 py-1.5 focus:ring-2 focus:ring-zinc-900 outline-none cursor-pointer">
@@ -198,8 +197,8 @@
             </button>
           </div>
           <div class="flex items-center gap-2">
-            <span class="hidden sm:inline-flex items-center gap-1 text-[11px] font-medium text-zinc-400 bg-zinc-50 px-2.5 py-1 rounded-lg border border-zinc-200/60 font-mono">
-              <i class="fa-regular fa-keyboard text-zinc-500"></i> Fletxes o Enter
+            <span class="hidden sm:inline-flex items-center gap-1.5 text-[11px] font-medium text-zinc-500 bg-zinc-50 px-2.5 py-1 rounded-lg border border-zinc-200 font-mono">
+              <i class="fa-regular fa-keyboard text-zinc-400"></i> Fletxes o Dreceres (e:4, n:3, a:2, p:1, x:0)
             </span>
             <button onclick="openSdaModal(true)" class="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs font-semibold text-white bg-zinc-900 hover:bg-zinc-800 shadow-subtle transition">
               <i class="fa-solid fa-plus text-[10px]"></i> Nova SdA
@@ -207,7 +206,7 @@
           </div>
         </div>
 
-        <div class="bg-white border border-zinc-200/90 rounded-2xl shadow-card overflow-hidden">
+        <div class="bg-white border border-zinc-200 rounded-2xl shadow-card overflow-hidden">
           <div id="sdaGridTitleBar" class="bg-zinc-900 text-white px-4 py-3 flex items-center justify-between text-xs sticky top-0 z-40"></div>
           <div class="overflow-auto max-h-[72vh] relative" id="sdaTableScrollWrapper">
             <table class="w-full text-left border-collapse text-xs">
@@ -218,7 +217,7 @@
         </div>
       </section>
 
-      <!-- VISTA 2: LLISTA D'ALUMNAT -->
+      <!-- VISTA 2: ROSTER D'ALUMNAT -->
       <section id="viewRoster" class="space-y-4 hidden">
         <div class="bg-white border border-zinc-200 rounded-2xl p-6 shadow-card space-y-4">
           <div class="flex items-center justify-between border-b border-zinc-100 pb-4">
@@ -226,12 +225,12 @@
               <h3 class="text-base font-bold text-zinc-900 flex items-center gap-2">
                 <i class="fa-solid fa-user-graduate text-zinc-600"></i> Llista d'Alumnat Registrat
               </h3>
-              <p class="text-xs text-zinc-500 mt-0.5">Edita els noms directament sobre la taula o importa llistats complets.</p>
+              <p class="text-xs text-zinc-500 mt-0.5">Edita directament els noms o enganxa llistats des d'Excel / Esfera.</p>
             </div>
             <span id="rosterCountBadge" class="text-xs font-mono font-bold bg-zinc-100 text-zinc-800 px-3 py-1 rounded-full border border-zinc-200">0 alumnes</span>
           </div>
 
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-3 bg-zinc-50/70 border border-zinc-200/80 p-3.5 rounded-2xl">
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-3 bg-zinc-50/70 border border-zinc-200 p-3.5 rounded-2xl">
             <div>
               <label class="block font-medium text-zinc-600 text-xs mb-1">Afegir Alumne/a:</label>
               <div class="flex gap-2">
@@ -240,9 +239,9 @@
               </div>
             </div>
             <div>
-              <label class="block font-medium text-zinc-600 text-xs mb-1">Còpia d'Esfera / Excel (un per línia):</label>
+              <label class="block font-medium text-zinc-600 text-xs mb-1">Importació en bloc (un per línia):</label>
               <div class="flex gap-2">
-                <textarea id="rosterBulkInput" rows="1" placeholder="Enganxa llista d'alumnes..." class="flex-1 bg-white border border-zinc-200 rounded-xl p-1.5 text-xs focus:ring-2 focus:ring-zinc-900 outline-none resize-none font-medium"></textarea>
+                <textarea id="rosterBulkInput" rows="1" placeholder="Enganxa columnes de noms..." class="flex-1 bg-white border border-zinc-200 rounded-xl p-1.5 text-xs focus:ring-2 focus:ring-zinc-900 outline-none resize-none font-medium"></textarea>
                 <button onclick="addBulkStudentsFromRoster()" class="bg-zinc-800 hover:bg-zinc-700 text-white font-semibold px-3.5 py-1.5 rounded-xl text-xs transition">Carregar</button>
               </div>
             </div>
@@ -250,10 +249,10 @@
 
           <div class="border border-zinc-200 rounded-xl overflow-hidden">
             <table class="w-full text-left text-xs">
-              <thead class="bg-zinc-50/70 text-zinc-600 font-semibold border-b border-zinc-200">
+              <thead class="bg-zinc-50 text-zinc-600 font-semibold border-b border-zinc-200">
                 <tr>
                   <th class="py-2.5 px-3 w-12 text-center font-mono">#</th>
-                  <th class="py-2.5 px-4">Nom i Cognoms (Fes clic per editar)</th>
+                  <th class="py-2.5 px-4">Nom i Cognoms (Clic per editar)</th>
                   <th class="py-2.5 px-3 w-20 text-center">Acció</th>
                 </tr>
               </thead>
@@ -265,18 +264,18 @@
 
       <!-- VISTA 3: RESUM TRIMESTRAL -->
       <section id="viewTrim" class="space-y-4 hidden">
-        <div class="flex flex-wrap items-end justify-between gap-4 border-b border-zinc-200/70 pb-4">
+        <div class="flex flex-wrap items-end justify-between gap-4 border-b border-zinc-200 pb-4">
           <div>
             <span class="inline-flex items-center rounded-md bg-zinc-100 px-2 py-0.5 text-[11px] font-bold text-zinc-600">Avaluació Contínua</span>
             <h2 id="trimTitle" class="text-xl font-bold text-zinc-900 tracking-tight mt-1">Resum del Trimestre 1</h2>
-            <p class="text-xs text-zinc-500 mt-0.5">Controla la ponderació de les SdAs i marca la manca de participació pràctica quan calgui.</p>
+            <p class="text-xs text-zinc-500 mt-0.5">Control de ponderació de les SdAs i penalització d'assistència pràctica.</p>
           </div>
-          <button onclick="exportCSV()" class="inline-flex items-center gap-1.5 bg-white border border-zinc-200 text-zinc-700 hover:bg-zinc-50 text-xs font-semibold px-3 py-2 rounded-xl shadow-subtle transition">
-            <i class="fa-solid fa-file-csv text-zinc-400"></i> Exportar a CSV
+          <button onclick="exportContextualCSV()" class="inline-flex items-center gap-1.5 bg-white border border-zinc-200 text-zinc-700 hover:bg-zinc-50 text-xs font-semibold px-3 py-2 rounded-xl shadow-subtle transition">
+            <i class="fa-solid fa-file-csv text-zinc-400"></i> Exportar Trimestre a CSV
           </button>
         </div>
 
-        <div class="bg-white border border-zinc-200/90 rounded-2xl p-4 shadow-subtle space-y-3">
+        <div class="bg-white border border-zinc-200 rounded-2xl p-4 shadow-subtle space-y-3">
           <div class="flex items-center justify-between">
             <h4 class="text-xs font-bold text-zinc-800 uppercase tracking-wider flex items-center gap-2">
               <i class="fa-solid fa-weight-scale text-zinc-500"></i> Ponderació de les SdAs en aquest Trimestre
@@ -298,11 +297,11 @@
 
       <!-- VISTA 4: FINAL DE CURS -->
       <section id="viewFinal" class="space-y-4 hidden">
-        <div class="flex flex-wrap items-end justify-between gap-4 border-b border-zinc-200/70 pb-4">
+        <div class="flex flex-wrap items-end justify-between gap-4 border-b border-zinc-200 pb-4">
           <div>
             <span class="inline-flex items-center rounded-md bg-zinc-100 px-2 py-0.5 text-[11px] font-bold text-zinc-600">Convocatòria Ordinària</span>
             <h2 class="text-xl font-bold text-zinc-900 tracking-tight mt-1">Avaluació Final de Curs</h2>
-            <p class="text-xs text-zinc-500 mt-0.5">Tria el mètode de càlcul de final de curs i pondera els percentatges.</p>
+            <p class="text-xs text-zinc-500 mt-0.5">Defineix el criteri de qualificació final (ponderació per trimestres o per CEs).</p>
           </div>
 
           <div class="flex flex-wrap items-center gap-3">
@@ -315,13 +314,13 @@
               </button>
             </div>
 
-            <button onclick="exportCSV()" class="inline-flex items-center gap-1.5 bg-white border border-zinc-200 text-zinc-700 hover:bg-zinc-50 text-xs font-semibold px-3 py-2 rounded-xl shadow-subtle transition">
-              <i class="fa-solid fa-file-csv text-zinc-400"></i> Exportar
+            <button onclick="exportContextualCSV()" class="inline-flex items-center gap-1.5 bg-white border border-zinc-200 text-zinc-700 hover:bg-zinc-50 text-xs font-semibold px-3 py-2 rounded-xl shadow-subtle transition">
+              <i class="fa-solid fa-file-csv text-zinc-400"></i> Exportar Curs a CSV
             </button>
           </div>
         </div>
 
-        <div class="bg-white border border-zinc-200/90 rounded-2xl p-4 shadow-subtle space-y-3">
+        <div class="bg-white border border-zinc-200 rounded-2xl p-4 shadow-subtle space-y-3">
           <div class="flex items-center justify-between">
             <h4 id="finalWeightPanelTitle" class="text-xs font-bold text-zinc-800 uppercase tracking-wider flex items-center gap-2">
               <i class="fa-solid fa-sliders text-zinc-500"></i> Ponderació del Càlcul Final
@@ -350,16 +349,16 @@
             </select>
           </div>
           <button onclick="window.print()" class="inline-flex items-center gap-2 bg-zinc-900 hover:bg-zinc-800 text-white text-xs font-semibold px-4 py-2 rounded-xl shadow-subtle transition">
-            <i class="fa-solid fa-print"></i> Imprimir Informe
+            <i class="fa-solid fa-print"></i> Imprimir Butlletí
           </button>
         </div>
 
-        <div class="bg-white border border-zinc-200 rounded-3xl p-8 shadow-card max-w-4xl mx-auto space-y-6">
+        <div class="print-card bg-white border border-zinc-200 rounded-3xl p-8 shadow-card max-w-4xl mx-auto space-y-6">
           <div class="flex justify-between items-start border-b border-zinc-200 pb-5">
             <div>
               <span class="text-[11px] font-bold text-zinc-400 uppercase tracking-wider">Informe Individual Competencial</span>
               <h3 id="repStudentName" class="text-2xl font-black text-zinc-900 tracking-tight mt-0.5">Alumne</h3>
-              <p id="repGroupLabel" class="text-xs text-zinc-500 mt-1 font-medium">1r i 2n d'ESO | Matèria: Educació Física | LOMLOE</p>
+              <p id="repGroupLabel" class="text-xs text-zinc-500 mt-1 font-medium">Matèria: Educació Física | LOMLOE</p>
             </div>
             <div class="text-right">
               <span class="text-[11px] font-semibold text-zinc-400 block uppercase">Nivell Global</span>
@@ -376,14 +375,14 @@
         </div>
       </section>
 
-      <!-- VISTA 6: ANALÍTICA & ESTADÍSTIQUES -->
+      <!-- VISTA 6: ANALÍTICA -->
       <section id="viewStats" class="space-y-5 hidden">
-        <div class="bg-white border border-zinc-200/90 rounded-2xl p-4 shadow-subtle flex flex-wrap items-center justify-between gap-4">
+        <div class="bg-white border border-zinc-200 rounded-2xl p-4 shadow-subtle flex flex-wrap items-center justify-between gap-4">
           <div>
             <span class="inline-flex items-center gap-1 text-[11px] font-bold text-zinc-400 uppercase tracking-wider">
               <i class="fa-solid fa-chart-simple"></i> Dashboard Analític
             </span>
-            <h3 class="text-lg font-bold text-zinc-900 tracking-tight">Rendiment Competencial de Curs</h3>
+            <h3 class="text-lg font-bold text-zinc-900 tracking-tight">Rendiment Competencial Global</h3>
           </div>
 
           <div class="flex flex-wrap items-center gap-2.5 text-xs">
@@ -407,7 +406,7 @@
         </div>
 
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          <div class="bg-white border border-zinc-200/90 rounded-2xl p-4 shadow-subtle">
+          <div class="bg-white border border-zinc-200 rounded-2xl p-4 shadow-subtle">
             <div class="flex items-center justify-between">
               <span class="text-xs font-semibold text-zinc-400">Mitjana Global</span>
               <span id="kpiAvgLvl" class="text-[10px] font-bold px-1.5 py-0.5 rounded ring-1 ring-inset bg-zinc-50 text-zinc-600 ring-zinc-200">--</span>
@@ -416,7 +415,7 @@
             <p class="text-[11px] text-zinc-400 mt-1">Escala competencial 0 a 4</p>
           </div>
 
-          <div class="bg-white border border-zinc-200/90 rounded-2xl p-4 shadow-subtle">
+          <div class="bg-white border border-zinc-200 rounded-2xl p-4 shadow-subtle">
             <div class="flex items-center justify-between">
               <span class="text-xs font-semibold text-zinc-400" id="kpiSuccessTitle">Taxa d'Èxit</span>
               <i class="fa-solid fa-circle-check text-emerald-500"></i>
@@ -425,7 +424,7 @@
             <p class="text-[11px] text-zinc-400 mt-1">Alumnat que assoleix el nivell</p>
           </div>
 
-          <div class="bg-white border border-zinc-200/90 rounded-2xl p-4 shadow-subtle">
+          <div class="bg-white border border-zinc-200 rounded-2xl p-4 shadow-subtle">
             <div class="flex items-center justify-between">
               <span class="text-xs font-semibold text-zinc-400">CE Més Forta</span>
               <i class="fa-solid fa-arrow-trend-up text-zinc-400"></i>
@@ -434,7 +433,7 @@
             <p id="kpiBestCeVal" class="text-[11px] text-zinc-400 mt-1 font-mono">Mitjana: --</p>
           </div>
 
-          <div class="bg-white border border-zinc-200/90 rounded-2xl p-4 shadow-subtle">
+          <div class="bg-white border border-zinc-200 rounded-2xl p-4 shadow-subtle">
             <div class="flex items-center justify-between">
               <span class="text-xs font-semibold text-zinc-400">Àrea de Millora</span>
               <i class="fa-solid fa-triangle-exclamation text-amber-500"></i>
@@ -490,7 +489,8 @@
     </div>
   </main>
 
-  <!-- MODAL CONFIGURACIÓ ESCALA -->
+  <!-- ================= MODALS ================= -->
+  <!-- MODAL LLINDARS -->
   <div id="thresholdsModal" class="fixed inset-0 bg-zinc-950/40 backdrop-blur-xs z-50 flex items-center justify-center p-4 hidden no-print">
     <div class="bg-white rounded-3xl shadow-card max-w-xl w-full overflow-hidden border border-zinc-200">
       <div class="px-6 py-4 bg-zinc-900 text-white flex justify-between items-center">
@@ -512,7 +512,7 @@
         </p>
 
         <div class="space-y-2.5 pt-1">
-          <div class="flex items-center gap-3 bg-zinc-50 border border-zinc-200/80 p-3 rounded-xl">
+          <div class="flex items-center gap-3 bg-zinc-50 border border-zinc-200 p-3 rounded-xl">
             <div class="w-12 font-black font-mono text-sm text-rose-600">NA</div>
             <div class="flex-1">
               <span class="block font-semibold text-zinc-800">No Assolit</span>
@@ -523,7 +523,7 @@
             </div>
           </div>
 
-          <div class="flex items-center gap-3 bg-zinc-50 border border-zinc-200/80 p-3 rounded-xl">
+          <div class="flex items-center gap-3 bg-zinc-50 border border-zinc-200 p-3 rounded-xl">
             <div class="w-12 font-black font-mono text-sm text-amber-600">EPA</div>
             <div class="flex-1">
               <span class="block font-semibold text-zinc-800">En Procés d'Assoliment</span>
@@ -535,7 +535,7 @@
             </div>
           </div>
 
-          <div class="flex items-center gap-3 bg-zinc-50 border border-zinc-200/80 p-3 rounded-xl">
+          <div class="flex items-center gap-3 bg-zinc-50 border border-zinc-200 p-3 rounded-xl">
             <div class="w-12 font-black font-mono text-sm text-sky-600">AS</div>
             <div class="flex-1">
               <span class="block font-semibold text-zinc-800">Assolit (Aprovat)</span>
@@ -547,7 +547,7 @@
             </div>
           </div>
 
-          <div class="flex items-center gap-3 bg-zinc-50 border border-zinc-200/80 p-3 rounded-xl">
+          <div class="flex items-center gap-3 bg-zinc-50 border border-zinc-200 p-3 rounded-xl">
             <div class="w-12 font-black font-mono text-sm text-indigo-600">AN</div>
             <div class="flex-1">
               <span class="block font-semibold text-zinc-800">Assoliment Notable</span>
@@ -559,7 +559,7 @@
             </div>
           </div>
 
-          <div class="flex items-center gap-3 bg-zinc-50 border border-zinc-200/80 p-3 rounded-xl">
+          <div class="flex items-center gap-3 bg-zinc-50 border border-zinc-200 p-3 rounded-xl">
             <div class="w-12 font-black font-mono text-sm text-emerald-600">AE</div>
             <div class="flex-1">
               <span class="block font-semibold text-zinc-800">Assoliment Excel·lent</span>
@@ -615,7 +615,7 @@
           </div>
           <div>
             <h3 class="text-sm font-bold tracking-tight">Configuració de la Situació d'Aprenentatge (SdA)</h3>
-            <p class="text-[11px] text-zinc-400">Ponderació de la SdA, Criteris oficials de 1r i 2n d'ESO i OAs.</p>
+            <p class="text-[11px] text-zinc-400">Ponderació de la SdA, Criteris oficials i OAs.</p>
           </div>
         </div>
         <button onclick="closeSdaModal()" class="text-zinc-400 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
@@ -636,7 +636,7 @@
           </div>
         </div>
 
-        <div class="bg-zinc-50 border border-zinc-200/80 p-3.5 rounded-2xl space-y-2">
+        <div class="bg-zinc-50 border border-zinc-200 p-3.5 rounded-2xl space-y-2">
           <div class="flex justify-between items-center">
             <span class="font-bold text-zinc-700 text-[11px] uppercase tracking-wider">A quins grups s'aplica?</span>
             <div class="flex gap-2 text-[11px]">
@@ -667,9 +667,8 @@
     </div>
   </div>
 
-  <!-- ================= LÒGICA JAVASCRIPT COMPLETA ================= -->
+  <!-- ================= JAVASCRIPT PRO REENGINEERED ================= -->
   <script>
-    // Paletes pastel calibrades segons accessibilitat WCAG AA
     const CE_COLOR_THEMES = {
       CE1: { 
         header: 'bg-sky-100 text-sky-950 border-sky-200', 
@@ -678,10 +677,10 @@
         scoreCe: 'bg-sky-100 text-sky-950 font-bold border-sky-300', 
         levelCe: 'bg-sky-50 border-sky-200',
         oaTints: [
-          { header: 'bg-sky-50/80 text-sky-900', cell: 'bg-sky-50/25' },
-          { header: 'bg-sky-100/70 text-sky-900', cell: 'bg-sky-100/30' },
-          { header: 'bg-blue-50/80 text-blue-900', cell: 'bg-blue-50/25' },
-          { header: 'bg-cyan-50/80 text-cyan-900', cell: 'bg-cyan-50/25' }
+          { header: 'bg-sky-50 text-sky-900', cell: 'bg-sky-50/20' },
+          { header: 'bg-sky-100/70 text-sky-900', cell: 'bg-sky-100/25' },
+          { header: 'bg-blue-50 text-blue-900', cell: 'bg-blue-50/20' },
+          { header: 'bg-cyan-50 text-cyan-900', cell: 'bg-cyan-50/20' }
         ]
       },
       CE2: { 
@@ -691,10 +690,10 @@
         scoreCe: 'bg-emerald-100 text-emerald-950 font-bold border-emerald-300', 
         levelCe: 'bg-emerald-50 border-emerald-200',
         oaTints: [
-          { header: 'bg-emerald-50/80 text-emerald-900', cell: 'bg-emerald-50/25' },
-          { header: 'bg-emerald-100/70 text-emerald-900', cell: 'bg-emerald-100/30' },
-          { header: 'bg-teal-50/80 text-teal-900', cell: 'bg-teal-50/25' },
-          { header: 'bg-green-50/80 text-green-900', cell: 'bg-green-50/25' }
+          { header: 'bg-emerald-50 text-emerald-900', cell: 'bg-emerald-50/20' },
+          { header: 'bg-emerald-100/70 text-emerald-900', cell: 'bg-emerald-100/25' },
+          { header: 'bg-teal-50 text-teal-900', cell: 'bg-teal-50/20' },
+          { header: 'bg-green-50 text-green-900', cell: 'bg-green-50/20' }
         ]
       },
       CE3: { 
@@ -704,10 +703,10 @@
         scoreCe: 'bg-purple-100 text-purple-950 font-bold border-purple-300', 
         levelCe: 'bg-purple-50 border-purple-200',
         oaTints: [
-          { header: 'bg-purple-50/80 text-purple-900', cell: 'bg-purple-50/25' },
-          { header: 'bg-purple-100/70 text-purple-900', cell: 'bg-purple-100/30' },
-          { header: 'bg-fuchsia-50/80 text-fuchsia-900', cell: 'bg-fuchsia-50/25' },
-          { header: 'bg-violet-50/80 text-violet-900', cell: 'bg-violet-50/25' }
+          { header: 'bg-purple-50 text-purple-900', cell: 'bg-purple-50/20' },
+          { header: 'bg-purple-100/70 text-purple-900', cell: 'bg-purple-100/25' },
+          { header: 'bg-fuchsia-50 text-fuchsia-900', cell: 'bg-fuchsia-50/20' },
+          { header: 'bg-violet-50 text-violet-900', cell: 'bg-violet-50/20' }
         ]
       },
       CE4: { 
@@ -717,10 +716,10 @@
         scoreCe: 'bg-amber-100 text-amber-950 font-bold border-amber-300', 
         levelCe: 'bg-amber-50 border-amber-200',
         oaTints: [
-          { header: 'bg-amber-50/80 text-amber-900', cell: 'bg-amber-50/25' },
-          { header: 'bg-amber-100/70 text-amber-900', cell: 'bg-amber-100/30' },
-          { header: 'bg-orange-50/80 text-orange-900', cell: 'bg-orange-50/25' },
-          { header: 'bg-yellow-50/80 text-yellow-900', cell: 'bg-yellow-50/25' }
+          { header: 'bg-amber-50 text-amber-900', cell: 'bg-amber-50/20' },
+          { header: 'bg-amber-100/70 text-amber-900', cell: 'bg-amber-100/25' },
+          { header: 'bg-orange-50 text-orange-900', cell: 'bg-orange-50/20' },
+          { header: 'bg-yellow-50 text-yellow-900', cell: 'bg-yellow-50/20' }
         ]
       },
       CE5: { 
@@ -730,10 +729,10 @@
         scoreCe: 'bg-rose-100 text-rose-950 font-bold border-rose-300', 
         levelCe: 'bg-rose-50 border-rose-200',
         oaTints: [
-          { header: 'bg-rose-50/80 text-rose-900', cell: 'bg-rose-50/25' },
-          { header: 'bg-rose-100/70 text-rose-900', cell: 'bg-rose-100/30' },
-          { header: 'bg-pink-50/80 text-pink-900', cell: 'bg-pink-50/25' },
-          { header: 'bg-red-50/80 text-red-900', cell: 'bg-red-50/25' }
+          { header: 'bg-rose-50 text-rose-900', cell: 'bg-rose-50/20' },
+          { header: 'bg-rose-100/70 text-rose-900', cell: 'bg-rose-100/25' },
+          { header: 'bg-pink-50 text-pink-900', cell: 'bg-pink-50/20' },
+          { header: 'bg-red-50 text-red-900', cell: 'bg-red-50/20' }
         ]
       }
     };
@@ -748,29 +747,29 @@
       CE1: [
         { code: "1.1", label: "1.1. Executar activitats i exercicis orientats a l’adquisició d’un estil de vida actiu i saludable." },
         { code: "1.2", label: "1.2. Identificar els elements d’un pla de treball de la condició física a través de la pràctica motriu." },
-        { code: "1.3", label: "1.3. Incorporar hàbits saludables (alimentació i hidratació, descans, educació postural, relaxació i higiene) valorant la millora integral." },
-        { code: "1.4", label: "1.4. Aplicar els protocols d’actuació de prevenció i intervenció en accidents i mesures bàsiques de primers auxilis." },
-        { code: "1.5", label: "1.5. Utilitzar recursos i aplicacions digitals per a la pràctica d’activitat física i l’adquisició d’hàbits saludables." }
+        { code: "1.3", label: "1.3. Incorporar hàbits saludables (alimentació, hidratació, descans, higiene) valorant la millora integral." },
+        { code: "1.4", label: "1.4. Aplicar els protocols d’actuació de prevenció i mesures bàsiques de primers auxilis." },
+        { code: "1.5", label: "1.5. Utilitzar recursos digitals per a la pràctica d’activitat física i l’adquisició d’hàbits saludables." }
       ],
       CE2: [
         { code: "2.1", label: "2.1. Executar habilitats motrius específiques i tècniques en reptes, formes jugades i joc reduït." },
-        { code: "2.2", label: "2.2. Resoldre situacions motrius variades en activitats lúdiques, jocs modificats i esports aplicant habilitats tècniques, tàctiques i estratègiques." }
+        { code: "2.2", label: "2.2. Resoldre situacions motrius variades en activitats lúdiques, jocs modificats i esports." }
       ],
       CE3: [
-        { code: "3.1", label: "3.1. Expressar emocions, sentiments i missatges mitjançant diferents tècniques d’expressió corporal." },
-        { code: "3.2", label: "3.2. Representar composicions individuals o col·lectives amb i sense base musical utilitzant el cos com a eina d’expressió i comunicació." },
-        { code: "3.3", label: "3.3. Prendre part en danses i jocs populars i tradicionals de diferents territoris valorant la seva influència cultural i social." }
+        { code: "3.1", label: "3.1. Expressar emocions, sentiments i missatges mitjançant tècniques d’expressió corporal." },
+        { code: "3.2", label: "3.2. Representar composicions individuals o col·lectives amb i sense base musical." },
+        { code: "3.3", label: "3.3. Prendre part en danses i jocs populars i tradicionals valorant la influència cultural." }
       ],
       CE4: [
         { code: "4.1", label: "4.1. Realitzar activitat física en el medi natural i urbà minimitzant l’empremta ecològica." },
-        { code: "4.2", label: "4.2. Aplicar les normes de seguretat, l’equipament, eines i tècniques adequades de les activitats físiques en el medi natural i urbà." },
-        { code: "4.3", label: "4.3. Utilitzar les possibilitats que ofereix l’entorn per a la practica activitat física i l’ocupació del temps de lleure de forma activa." }
+        { code: "4.2", label: "4.2. Aplicar les normes de seguretat, equipament i eines de les activitats al medi." },
+        { code: "4.3", label: "4.3. Utilitzar les possibilitats de l’entorn per a l'activitat física i el lleure actiu." }
       ],
       CE5: [
-        { code: "5.1", label: "5.1. Aplicar els valors positius de l’esport en les activitats físiques i esportives valorant el joc per davant del resultat." },
-        { code: "5.2", label: "5.2. Identificar emocions en la pràctica d’activitat física i esportiva." },
-        { code: "5.3", label: "5.3. Mostrar actituds de respecte i escolta envers els altres independentment del seu nivell d’habilitat." },
-        { code: "5.4", label: "5.4. Identificar estereotips i actuacions discriminatòries en situacions de pràctica esportiva." }
+        { code: "5.1", label: "5.1. Aplicar els valors positius de l’esport valorant el joc net per davant del resultat." },
+        { code: "5.2", label: "5.2. Identificar i gestionar emocions en la pràctica d’activitat física i esportiva." },
+        { code: "5.3", label: "5.3. Mostrar actituds de respecte, empatia i escolta envers els companys/es." },
+        { code: "5.4", label: "5.4. Identificar estereotips i actuacions discriminatòries en contextos esportius." }
       ]
     };
 
@@ -858,7 +857,7 @@
             {
               id: "sda_2",
               trim: 1,
-              title: "JOCS D'OPOSICIÓ I ESPORTS DE COLLABORACIÓ",
+              title: "JOCS D'OPOSICIÓ I ESPORTS COL·LABORATIUS",
               trimWeight: 40,
               competences: {
                 CE2: { active: true, weight: 60, curricularCriteria: "2.1 - 2.2", oas: [] },
@@ -878,58 +877,6 @@
               5: { "CE2_direct": 2.5, "CE5_direct": 3.0 }
             }
           }
-        },
-        "1esoB": {
-          name: "1r ESO B",
-          finalMethod: 'trim',
-          finalTrimWeights: { t1: 33.33, t2: 33.33, t3: 33.34 },
-          finalCeWeights: { CE1: 20, CE2: 20, CE3: 20, CE4: 20, CE5: 20 },
-          attendancePenalty: { 1: {}, 2: {}, 3: {} },
-          students: [
-            { id: 11, name: "Bassa Solà, Jordi" },
-            { id: 12, name: "Ferrer Roig, Núria" },
-            { id: 13, name: "García Puyol, Eric" },
-            { id: 14, name: "Mendoza Valls, Paula" }
-          ],
-          sdas: [
-            {
-              id: "sda_1_b",
-              trim: 1,
-              title: "HÀBITS SALUDABLES I CONDICIÓ FÍSICA",
-              trimWeight: 60,
-              competences: {
-                CE1: {
-                  active: true,
-                  weight: 80,
-                  curricularCriteria: "1.1 - 1.2 - 1.3",
-                  oas: [
-                    { id: "oa1", label: "OA1: Grups musculars i ossos", weight: 25 },
-                    { id: "oa2", label: "OA2: 4 Qualitats Físiques Bàsiques", weight: 25 },
-                    { id: "oa3", label: "OA3: Nivell inicial de condició física", weight: 25 },
-                    { id: "oa4", label: "OA4: Hàbits saludables i escalfament", weight: 25 }
-                  ]
-                },
-                CE5: {
-                  active: true,
-                  weight: 20,
-                  curricularCriteria: "5.1 - 5.3",
-                  oas: [
-                    { id: "oa5_1", label: "OG1: Material i higiene", weight: 25 },
-                    { id: "oa5_2", label: "OG2: Participació i esforç", weight: 25 },
-                    { id: "oa5_3", label: "OG3: Normes de classe", weight: 25 },
-                    { id: "oa5_4", label: "OG4: Actitud cooperativa", weight: 25 }
-                  ]
-                }
-              }
-            }
-          ],
-          grades: {
-            "sda_1_b": {
-              11: { "CE1_oa1": 3.0, "CE1_oa2": 3.0, "CE1_oa3": 2.5, "CE1_oa4": 3.0, "CE5_oa5_1": 3.5, "CE5_oa5_2": 3.5, "CE5_oa5_3": 3.5, "CE5_oa5_4": 3.5 },
-              12: { "CE1_oa1": 4.0, "CE1_oa2": 4.0, "CE1_oa3": 4.0, "CE1_oa4": 4.0, "CE5_oa5_1": 4.0, "CE5_oa5_2": 4.0, "CE5_oa5_3": 4.0, "CE5_oa5_4": 4.0 },
-              13: { "CE1_oa1": 1.5, "CE1_oa2": 2.0, "CE1_oa3": 2.0, "CE1_oa4": 1.5, "CE5_oa5_1": 2.5, "CE5_oa5_2": 3.0, "CE5_oa5_3": 3.0, "CE5_oa5_4": 2.5 }
-            }
-          }
         }
       }
     };
@@ -940,7 +887,7 @@
       currentScreen: 'home',
       currentTrim: 1,
       currentView: 'sda',
-      editingIsNew: false,
+      editingSdaId: null,
       statsScope: 'class',
       statsType: 'sda'
     };
@@ -983,12 +930,12 @@
       if (el) {
         el.classList.remove('opacity-0');
         clearTimeout(window._savedTimeout);
-        window._savedTimeout = setTimeout(() => el.classList.add('opacity-0'), 1400);
+        window._savedTimeout = setTimeout(() => el.classList.add('opacity-0'), 1200);
       }
     }
 
     function resetDefaultData() {
-      if (confirm("Vols restablir les dades de mostra originals?")) {
+      if (confirm("Vols restablir les dades de mostra originals? S'esborraran els canvis actuals.")) {
         appData = JSON.parse(JSON.stringify(ORIGINAL_DEMO_DATA));
         saveToStorage();
         goToHome();
@@ -1013,7 +960,7 @@
         try {
           const imported = JSON.parse(e.target.result);
           if (imported && (imported.groups || (imported.appData && imported.appData.groups))) {
-            if (confirm("Vols carregar aquesta còpia de seguretat? Es reemplaçaran les dades actuals.")) {
+            if (confirm("Vols carregar aquesta còpia de seguretat? Es reemplaçaran les dades.")) {
               if (imported.appData) {
                 appData = imported.appData;
                 if (imported.gradeThresholds) saveThresholdsToStorage(imported.gradeThresholds);
@@ -1127,7 +1074,7 @@
           .filter(stId => group.attendancePenalty[appState.currentTrim][stId]).length;
 
         return `
-          <div class="bg-white rounded-2xl border border-zinc-200/90 p-5 shadow-card hover:border-zinc-300 transition-all flex flex-col justify-between">
+          <div class="bg-white rounded-2xl border border-zinc-200 p-5 shadow-card hover:border-zinc-300 transition-all flex flex-col justify-between">
             <div class="space-y-3.5">
               <div class="flex items-start justify-between">
                 <div class="flex items-center gap-2.5">
@@ -1145,7 +1092,7 @@
                 </button>
               </div>
 
-              <div class="bg-zinc-50/80 rounded-xl p-3 border border-zinc-100 space-y-2">
+              <div class="bg-zinc-50 rounded-xl p-3 border border-zinc-100 space-y-2">
                 <div class="flex items-center justify-between text-xs">
                   <span class="text-zinc-600 font-medium truncate max-w-[160px]">
                     <i class="fa-regular fa-folder text-zinc-400 mr-1"></i> ${activeSda ? activeSda.title : 'Sense SdA activa'}
@@ -1159,7 +1106,7 @@
                   <div class="bg-zinc-900 h-1.5 rounded-full transition-all duration-500" style="width: ${progressPct}%"></div>
                 </div>
 
-                <div class="flex items-center justify-between pt-1 border-t border-zinc-200/40 text-[11px]">
+                <div class="flex items-center justify-between pt-1 border-t border-zinc-200/50 text-[11px]">
                   <div class="flex items-center gap-1.5">
                     <span class="text-zinc-400">Mitjana:</span>
                     <span class="font-mono font-bold text-zinc-900">${avgScore !== null ? avgScore.toFixed(2) : '—'}</span>
@@ -1167,7 +1114,7 @@
                   </div>
 
                   ${penalizedCount > 0 ? `
-                    <span class="inline-flex items-center gap-1 text-[10px] font-bold text-rose-700 bg-rose-50 px-1.5 py-0.5 rounded border border-rose-200/80">
+                    <span class="inline-flex items-center gap-1 text-[10px] font-bold text-rose-700 bg-rose-50 px-1.5 py-0.5 rounded border border-rose-200">
                       <i class="fa-solid fa-person-running"></i> ${penalizedCount} &lt; %
                     </span>
                   ` : `
@@ -1365,14 +1312,14 @@
 
     function getLevel(val) {
       if (val === null || val === undefined || isNaN(val) || val <= 0) {
-        return { code: "—", badge: "bg-zinc-100 text-zinc-400 ring-zinc-200/60" };
+        return { code: "—", badge: "bg-zinc-100 text-zinc-400 ring-zinc-200" };
       }
       const th = gradeThresholds;
-      if (val < th.epa) return { code: "NA", badge: "bg-rose-50 text-rose-700 ring-rose-200/80 font-bold" };
-      if (val < th.as) return { code: "EPA", badge: "bg-amber-50 text-amber-800 ring-amber-200/80 font-bold" };
-      if (val < th.an) return { code: "AS", badge: "bg-sky-50 text-sky-800 ring-sky-200/80 font-bold" };
-      if (val < th.ae) return { code: "AN", badge: "bg-indigo-50 text-indigo-800 ring-indigo-200/80 font-bold" };
-      return { code: "AE", badge: "bg-emerald-50 text-emerald-800 ring-emerald-200/80 font-bold" };
+      if (val < th.epa) return { code: "NA", badge: "bg-rose-50 text-rose-700 ring-rose-200 font-bold" };
+      if (val < th.as) return { code: "EPA", badge: "bg-amber-50 text-amber-800 ring-amber-200 font-bold" };
+      if (val < th.an) return { code: "AS", badge: "bg-sky-50 text-sky-800 ring-sky-200 font-bold" };
+      if (val < th.ae) return { code: "AN", badge: "bg-indigo-50 text-indigo-800 ring-indigo-200 font-bold" };
+      return { code: "AE", badge: "bg-emerald-50 text-emerald-800 ring-emerald-200 font-bold" };
     }
 
     function getScoreColorClass(val) {
@@ -1381,11 +1328,11 @@
       }
       const num = parseFloat(val);
       const th = gradeThresholds;
-      if (num < th.epa) return 'bg-rose-100/60 text-rose-900 font-bold';
-      if (num < th.as) return 'bg-amber-100/60 text-amber-950 font-bold';
-      if (num < th.an) return 'bg-sky-100/60 text-sky-950 font-bold';
-      if (num < th.ae) return 'bg-indigo-100/60 text-indigo-950 font-bold';
-      return 'bg-emerald-100/70 text-emerald-950 font-bold';
+      if (num < th.epa) return 'bg-rose-100/70 text-rose-900 font-bold';
+      if (num < th.as) return 'bg-amber-100/70 text-amber-950 font-bold';
+      if (num < th.an) return 'bg-sky-100/70 text-sky-950 font-bold';
+      if (num < th.ae) return 'bg-indigo-100/70 text-indigo-950 font-bold';
+      return 'bg-emerald-100/80 text-emerald-950 font-bold';
     }
 
     function openThresholdsModal() {
@@ -1608,23 +1555,13 @@
           </button>
         `;
         head.innerHTML = `
-          <tr class="border-b border-zinc-200 bg-zinc-50/70 text-zinc-500">
+          <tr class="border-b border-zinc-200 bg-zinc-50 text-zinc-500">
             <th class="py-2.5 px-3 w-12 text-center font-mono">#</th>
             <th class="py-2.5 px-4 min-w-[224px]">Alumne/a</th>
             <th class="py-2.5 px-4 text-center text-zinc-400 font-normal italic">Crea una SdA per començar a qualificar</th>
           </tr>
         `;
-        if (students.length === 0) {
-          body.innerHTML = `<tr><td colspan="3" class="p-8 text-center text-zinc-400 text-xs">No hi ha alumnes en aquest grup.</td></tr>`;
-        } else {
-          body.innerHTML = students.map((st, idx) => `
-            <tr class="hover:bg-zinc-50/50">
-              <td class="py-2 px-3 text-center text-zinc-400 font-mono text-xs">${idx + 1}</td>
-              <td class="py-2 px-4 font-semibold text-zinc-900 text-xs">${st.name}</td>
-              <td class="py-2 px-4 text-center text-zinc-300 text-xs italic">Sense SdA activa</td>
-            </tr>
-          `).join('');
-        }
+        body.innerHTML = `<tr><td colspan="3" class="p-8 text-center text-zinc-400 text-xs">No hi ha cap SdA programada per a aquest trimestre.</td></tr>`;
         return;
       }
 
@@ -1710,9 +1647,9 @@
         let colCounter = 0;
         const isPenalized = hasAttendancePenalty(st.id, appState.currentTrim, curGroup);
 
-        rowsHtml += `<tr class="hover:bg-zinc-50/70 transition-colors group">
-          <td class="py-1 px-2.5 w-12 min-w-[48px] max-w-[48px] text-center text-zinc-400 font-mono text-xs border-r border-zinc-200/80 bg-white sticky left-0 z-20">${rIdx + 1}</td>
-          <td class="py-1 px-3.5 w-56 min-w-[224px] max-w-[224px] font-semibold text-zinc-900 border-r border-zinc-200/80 bg-white sticky left-12 z-20 shadow-[4px_0_8px_-4px_rgba(0,0,0,0.06)]">
+        rowsHtml += `<tr id="row_${sda.id}_${st.id}" class="hover:bg-zinc-50/70 transition-colors group">
+          <td class="py-1 px-2.5 w-12 min-w-[48px] max-w-[48px] text-center text-zinc-400 font-mono text-xs border-r border-zinc-200 bg-white sticky left-0 z-20">${rIdx + 1}</td>
+          <td class="py-1 px-3.5 w-56 min-w-[224px] max-w-[224px] font-semibold text-zinc-900 border-r border-zinc-200 bg-white sticky left-12 z-20 shadow-[4px_0_8px_-4px_rgba(0,0,0,0.06)]">
             <div class="flex items-center justify-between gap-1.5">
               <span class="truncate text-xs" title="${st.name}">${st.name}</span>
               ${isPenalized ? '<span class="inline-flex items-center text-[9px] font-bold text-rose-700 bg-rose-50 border border-rose-200 px-1 rounded shrink-0" title="Penalització activa per manca de pràctica"><i class="fa-solid fa-person-running mr-0.5"></i>&lt;%</span>' : ''}
@@ -1732,12 +1669,12 @@
               const val = stGrades[gradeKey] !== undefined ? stGrades[gradeKey] : '';
               const colorClass = getScoreColorClass(val);
 
-              rowsHtml += `<td class="p-0.5 border-r border-zinc-200/60 text-center ${oaTheme.cell}">
-                <input type="number" step="0.1" min="0" max="4" value="${val}"
+              rowsHtml += `<td class="p-0.5 border-r border-zinc-200 text-center ${oaTheme.cell}">
+                <input type="text" value="${val !== '' ? val : ''}"
                   data-row="${rIdx}" data-col="${colCounter}"
-                  onkeydown="handleGridKeyboardNavigation(event, ${rIdx}, ${colCounter})"
+                  onkeydown="handleGridInputKeyboard(event, ${rIdx}, ${colCounter}, '${sda.id}', ${st.id}, '${gradeKey}')"
                   onfocus="this.select()"
-                  onchange="setGrade('${sda.id}', ${st.id}, '${gradeKey}', this.value, ${rIdx}, ${colCounter})"
+                  onblur="handleGradeInputCommit('${sda.id}', ${st.id}, '${gradeKey}', this)"
                   class="grade-cell-input w-full h-8 text-center rounded-lg font-mono text-xs outline-none transition focus:ring-1 focus:ring-zinc-900 focus:bg-white ${colorClass}">
               </td>`;
               colCounter++;
@@ -1748,22 +1685,22 @@
             const val = stGrades[gradeKey] !== undefined ? stGrades[gradeKey] : '';
             const colorClass = getScoreColorClass(val);
 
-            rowsHtml += `<td class="p-0.5 border-r border-zinc-200/60 text-center ${oaTheme.cell}">
-              <input type="number" step="0.1" min="0" max="4" value="${val}"
+            rowsHtml += `<td class="p-0.5 border-r border-zinc-200 text-center ${oaTheme.cell}">
+              <input type="text" value="${val !== '' ? val : ''}"
                 data-row="${rIdx}" data-col="${colCounter}"
-                onkeydown="handleGridKeyboardNavigation(event, ${rIdx}, ${colCounter})"
+                onkeydown="handleGridInputKeyboard(event, ${rIdx}, ${colCounter}, '${sda.id}', ${st.id}, '${gradeKey}')"
                 onfocus="this.select()"
-                onchange="setGrade('${sda.id}', ${st.id}, '${gradeKey}', this.value, ${rIdx}, ${colCounter})"
+                onblur="handleGradeInputCommit('${sda.id}', ${st.id}, '${gradeKey}', this)"
                 class="grade-cell-input w-full h-8 text-center rounded-lg font-mono text-xs outline-none transition focus:ring-1 focus:ring-zinc-900 focus:bg-white ${colorClass}">
             </td>`;
             colCounter++;
           }
 
           rowsHtml += `
-            <td class="py-1 px-2 text-center font-mono font-bold border-r border-zinc-200/80 ${theme.scoreCe} text-xs">
+            <td id="cell_${sda.id}_${st.id}_${ce.id}_score" class="py-1 px-2 text-center font-mono font-bold border-r border-zinc-200 ${theme.scoreCe} text-xs">
               ${ceScore !== null ? ceScore.toFixed(2) : '<span class="text-zinc-300 font-normal">—</span>'}
             </td>
-            <td class="py-1 px-2 text-center border-r border-zinc-200/80 ${theme.levelCe}">
+            <td id="cell_${sda.id}_${st.id}_${ce.id}_lvl" class="py-1 px-2 text-center border-r border-zinc-200 ${theme.levelCe}">
               <span class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-bold ring-1 ring-inset ${lvl.badge}">${lvl.code}</span>
             </td>
           `;
@@ -1773,10 +1710,10 @@
         const overallSdaLvl = getLevel(overallSdaScore);
 
         rowsHtml += `
-          <td class="py-1 px-2.5 text-center font-mono font-black text-zinc-900 border-l border-zinc-300 bg-zinc-50/70 text-xs">
+          <td id="cell_${sda.id}_${st.id}_overall_score" class="py-1 px-2.5 text-center font-mono font-black text-zinc-900 border-l border-zinc-300 bg-zinc-50 text-xs">
             ${overallSdaScore !== null ? overallSdaScore.toFixed(2) : '<span class="text-zinc-300 font-normal">—</span>'}
           </td>
-          <td class="py-1 px-2 text-center bg-zinc-50/70">
+          <td id="cell_${sda.id}_${st.id}_overall_lvl" class="py-1 px-2 text-center bg-zinc-50">
             <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold ring-1 ring-inset ${overallSdaLvl.badge}">${overallSdaLvl.code}</span>
           </td>
         </tr>`;
@@ -1785,65 +1722,120 @@
       body.innerHTML = rowsHtml;
     }
 
-    function handleGridKeyboardNavigation(e, row, col) {
-      let targetRow = row;
-      let targetCol = col;
+    // NAVEGACIÓ I ENTRADA ULTRA-RÀPIDA DE NOTES (PRO SPREADSHEET ENGINE)
+    function handleGridInputKeyboard(e, row, col, sdaId, stId, key) {
+      const charMap = { 'e': '4', 'n': '3', 'a': '2', 'p': '1', 'x': '' };
+      const pressedKey = e.key.toLowerCase();
 
-      if (e.key === 'ArrowUp') {
-        targetRow = row - 1;
+      if (charMap.hasOwnProperty(pressedKey)) {
         e.preventDefault();
-      } else if (e.key === 'ArrowDown' || e.key === 'Enter') {
-        targetRow = row + 1;
-        e.preventDefault();
-      } else if (e.key === 'ArrowLeft') {
-        targetCol = col - 1;
-        e.preventDefault();
-      } else if (e.key === 'ArrowRight') {
-        targetCol = col + 1;
-        e.preventDefault();
-      } else {
+        e.target.value = charMap[pressedKey];
+        handleGradeInputCommit(sdaId, stId, key, e.target);
+        // Desplaçar avall automàticament estil Excel
+        moveFocusToCell(row + 1, col);
         return;
       }
 
-      const nextInput = document.querySelector(`input.grade-cell-input[data-row="${targetRow}"][data-col="${targetCol}"]`);
-      if (nextInput) {
-        nextInput.focus();
-        nextInput.select();
-      }
-    }
-
-    function setGrade(sdaId, stId, key, val, keepRow = null, keepCol = null) {
-      const curGroup = getCurrentGroup();
-      if (!curGroup.grades) curGroup.grades = {};
-      if (!curGroup.grades[sdaId]) curGroup.grades[sdaId] = {};
-      if (!curGroup.grades[sdaId][stId]) curGroup.grades[sdaId][stId] = {};
-      
-      if (val === '') {
-        delete curGroup.grades[sdaId][stId][key];
-      } else {
-        curGroup.grades[sdaId][stId][key] = parseFloat(val);
-      }
-      saveToStorage();
-      renderSdaGrid();
-
-      if (keepRow !== null && keepCol !== null) {
-        const activeInput = document.querySelector(`input.grade-cell-input[data-row="${keepRow}"][data-col="${keepCol}"]`);
-        if (activeInput) {
-          activeInput.focus();
+      if (e.key === 'ArrowUp') {
+        e.preventDefault();
+        moveFocusToCell(row - 1, col);
+      } else if (e.key === 'ArrowDown' || e.key === 'Enter') {
+        e.preventDefault();
+        moveFocusToCell(row + 1, col);
+      } else if (e.key === 'ArrowLeft') {
+        if (e.target.selectionStart === 0 && e.target.selectionEnd === 0) {
+          e.preventDefault();
+          moveFocusToCell(row, col - 1);
+        }
+      } else if (e.key === 'ArrowRight') {
+        if (e.target.selectionStart === e.target.value.length) {
+          e.preventDefault();
+          moveFocusToCell(row, col + 1);
         }
       }
     }
 
+    function moveFocusToCell(row, col) {
+      const target = document.querySelector(`input.grade-cell-input[data-row="${row}"][data-col="${col}"]`);
+      if (target) {
+        target.focus();
+        target.select();
+      }
+    }
+
+    function handleGradeInputCommit(sdaId, stId, key, inputEl) {
+      let raw = inputEl.value.trim().replace(',', '.');
+      let val = null;
+
+      if (raw !== '') {
+        let num = parseFloat(raw);
+        if (isNaN(num)) num = 0;
+        if (num < 0) num = 0;
+        if (num > 4) num = 4;
+        val = Math.round(num * 100) / 100;
+        inputEl.value = val;
+      } else {
+        inputEl.value = '';
+      }
+
+      const curGroup = getCurrentGroup();
+      if (!curGroup.grades) curGroup.grades = {};
+      if (!curGroup.grades[sdaId]) curGroup.grades[sdaId] = {};
+      if (!curGroup.grades[sdaId][stId]) curGroup.grades[sdaId][stId] = {};
+
+      if (val === null) {
+        delete curGroup.grades[sdaId][stId][key];
+      } else {
+        curGroup.grades[sdaId][stId][key] = val;
+      }
+
+      saveToStorage();
+      
+      // Actualització reactiva instantània de la cel·la i la fila sense reconstruir la taula
+      inputEl.className = `grade-cell-input w-full h-8 text-center rounded-lg font-mono text-xs outline-none transition focus:ring-1 focus:ring-zinc-900 focus:bg-white ${getScoreColorClass(val)}`;
+      updateRowAggregatesDOM(sdaId, stId);
+    }
+
+    function updateRowAggregatesDOM(sdaId, stId) {
+      const curGroup = getCurrentGroup();
+      const sda = (curGroup.sdas || []).find(s => s.id === sdaId);
+      if (!sda) return;
+
+      OFFICIAL_CES.forEach(ce => {
+        const conf = sda.competences && sda.competences[ce.id];
+        if (conf && conf.active) {
+          const ceScore = getStudentCeScoreInSda(sda, stId, ce.id);
+          const lvl = getLevel(ceScore);
+
+          const cellScore = document.getElementById(`cell_${sda.id}_${stId}_${ce.id}_score`);
+          const cellLvl = document.getElementById(`cell_${sda.id}_${stId}_${ce.id}_lvl`);
+
+          if (cellScore) cellScore.innerHTML = ceScore !== null ? ceScore.toFixed(2) : '<span class="text-zinc-300 font-normal">—</span>';
+          if (cellLvl) cellLvl.innerHTML = `<span class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-bold ring-1 ring-inset ${lvl.badge}">${lvl.code}</span>`;
+        }
+      });
+
+      const overallSdaScore = getStudentOverallSdaScore(sda, stId);
+      const overallSdaLvl = getLevel(overallSdaScore);
+
+      const cellOverallScore = document.getElementById(`cell_${sda.id}_${stId}_overall_score`);
+      const cellOverallLvl = document.getElementById(`cell_${sda.id}_${stId}_overall_lvl`);
+
+      if (cellOverallScore) cellOverallScore.innerHTML = overallSdaScore !== null ? overallSdaScore.toFixed(2) : '<span class="text-zinc-300 font-normal">—</span>';
+      if (cellOverallLvl) cellOverallLvl.innerHTML = `<span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold ring-1 ring-inset ${overallSdaLvl.badge}">${overallSdaLvl.code}</span>`;
+    }
+
     function openSdaModal(isNew) {
-      appState.editingIsNew = isNew;
       const curGroup = getCurrentGroup();
       let sda;
       if (isNew) {
+        appState.editingSdaId = null;
         sda = { id: 'sda_' + Date.now(), trim: appState.currentTrim, title: '', trimWeight: 50, competences: {} };
       } else {
         const sdaId = document.getElementById('sdaSelect').value;
         sda = (curGroup.sdas || []).find(s => s.id === sdaId);
         if (!sda) { openSdaModal(true); return; }
+        appState.editingSdaId = sda.id;
       }
 
       document.getElementById('modalSdaTitle').value = sda.title || '';
@@ -1857,7 +1849,7 @@
       const cont = document.getElementById('modalTargetGroupsContainer');
       cont.innerHTML = Object.keys(appData.groups).map(gId => {
         const group = appData.groups[gId];
-        let isChecked = appState.editingIsNew 
+        let isChecked = !appState.editingSdaId 
           ? (gId === appData.activeGroupId) 
           : group.sdas.some(s => s.title === existingTitle && s.trim === appState.currentTrim);
 
@@ -1886,7 +1878,7 @@
         const currentCriteriaCodes = (conf.curricularCriteria || "").split(/[-,\s]+/).map(c => c.trim()).filter(c => c.length > 0);
 
         return `
-          <div class="border border-zinc-200/80 rounded-2xl p-4 bg-zinc-50/50" id="ce_card_${ce.id}">
+          <div class="border border-zinc-200 rounded-2xl p-4 bg-zinc-50/50" id="ce_card_${ce.id}">
             <div class="flex items-center justify-between gap-4">
               <label class="flex items-center gap-2.5 cursor-pointer font-bold text-zinc-900">
                 <input type="checkbox" id="check_${ce.id}" ${conf.active ? 'checked' : ''} onchange="toggleCeInModal('${ce.id}')" class="rounded text-zinc-900 focus:ring-zinc-900 w-4 h-4">
@@ -1903,7 +1895,7 @@
               <div>
                 <div class="flex items-center justify-between mb-1">
                   <label class="font-semibold text-zinc-700 text-xs">Criteris Oficials:</label>
-                  <span class="text-[10px] text-zinc-400">Pots seleccionar-ne diversos</span>
+                  <span class="text-[10px] text-zinc-400">Pots seleccionar-ne múltiples</span>
                 </div>
                 
                 <div class="bg-white border border-zinc-200 rounded-xl p-2 space-y-1 max-h-32 overflow-y-auto">
@@ -1932,7 +1924,7 @@
                       <input type="text" value="${oa.label || ''}" placeholder="Descripció de l'Objectiu..." class="flex-1 p-1.5 border border-zinc-200 rounded-xl bg-white text-xs outline-none focus:ring-2 focus:ring-zinc-900">
                       <input type="number" value="${oa.weight || 25}" min="0" max="100" placeholder="%" class="w-14 p-1.5 border border-zinc-200 rounded-xl text-center text-xs font-mono font-semibold outline-none focus:ring-2 focus:ring-zinc-900">
                       <span class="text-zinc-400 font-mono text-[11px]">%</span>
-                      <button type="button" onclick="this.parentElement.remove()" class="text-zinc-400 hover:text-rose-500 p-1">
+                      <button type="button" onclick="this.parentElement.remove(); updateModalWeightSum();" class="text-zinc-400 hover:text-rose-500 p-1">
                         <i class="fa-regular fa-trash-can"></i>
                       </button>
                     </div>
@@ -2023,7 +2015,8 @@
 
       targetGroupIds.forEach(gId => {
         const grp = appData.groups[gId];
-        let targetSda = grp.sdas.find(s => s.title === title && s.trim === appState.currentTrim);
+        let targetSda = appState.editingSdaId ? (grp.sdas || []).find(s => s.id === appState.editingSdaId) : null;
+        
         if (!targetSda) {
           targetSda = {
             id: 'sda_' + Date.now() + '_' + Math.floor(Math.random()*1000),
@@ -2076,7 +2069,7 @@
         const w = sda.trimWeight !== undefined ? sda.trimWeight : 50;
         totalTrimWeight += w;
         return `
-          <div class="flex items-center gap-2 bg-zinc-50 border border-zinc-200/80 px-3 py-1.5 rounded-xl">
+          <div class="flex items-center gap-2 bg-zinc-50 border border-zinc-200 px-3 py-1.5 rounded-xl">
             <span class="font-semibold text-zinc-800 text-xs truncate max-w-[160px]">${sda.title}:</span>
             <input type="number" min="0" max="100" value="${w}" onchange="updateSdaTrimWeight('${sda.id}', this.value)" class="w-14 text-center font-mono font-bold text-xs bg-white border border-zinc-300 rounded-lg p-1 outline-none focus:ring-2 focus:ring-zinc-900">
             <span class="text-zinc-400 font-mono text-xs">%</span>
@@ -2093,7 +2086,7 @@
       let headHtml = `<tr>
         <th class="py-3 px-3 w-12 text-center font-mono text-zinc-400 font-medium">#</th>
         <th class="py-3 px-4 font-semibold text-zinc-100 min-w-[200px]">Alumne/a</th>
-        <th class="py-2.5 px-3 text-center border-l border-zinc-800 text-[11px] w-28" title="Penalització per no assistir al % mínim de sessions pràctiques">
+        <th class="py-2.5 px-3 text-center border-l border-zinc-800 text-[11px] w-28">
           <i class="fa-solid fa-person-running text-zinc-400 mr-1"></i> Mín. Pràctica
         </th>`;
       
@@ -2128,7 +2121,7 @@
           <td class="py-2 px-3 text-center text-zinc-400 font-mono text-xs">${idx + 1}</td>
           <td class="py-2 px-4 font-semibold text-zinc-800 text-xs">${st.name}</td>
           <td class="py-2 px-2 text-center border-l border-zinc-100">
-            <button onclick="toggleAttendancePenalty(${st.id})" class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold transition ${isPenalized ? 'bg-rose-600 hover:bg-rose-700 text-white shadow-subtle' : 'bg-zinc-100 hover:bg-zinc-200/70 text-zinc-600'}" title="${isPenalized ? 'Alumne suspès per no arribar al mínim de pràctica. Clica per treure.' : 'Clica per suspendre si no arriba al mínim de pràctica.'}">
+            <button onclick="toggleAttendancePenalty(${st.id})" class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold transition ${isPenalized ? 'bg-rose-600 hover:bg-rose-700 text-white shadow-subtle' : 'bg-zinc-100 hover:bg-zinc-200/70 text-zinc-600'}">
               <i class="fa-solid fa-person-running text-[10px]"></i>
               <span>${isPenalized ? '&lt; Mínim' : 'Assolit'}</span>
             </button>
@@ -2224,7 +2217,7 @@
           { key: 't2', label: '2n Trimestre', val: tw.t2 },
           { key: 't3', label: '3r Trimestre', val: tw.t3 }
         ].map(item => `
-          <div class="flex items-center gap-2 bg-zinc-50 border border-zinc-200/80 px-3 py-1.5 rounded-xl">
+          <div class="flex items-center gap-2 bg-zinc-50 border border-zinc-200 px-3 py-1.5 rounded-xl">
             <span class="font-semibold text-zinc-800 text-xs">${item.label}:</span>
             <input type="number" step="0.1" min="0" max="100" value="${item.val}" onchange="updateFinalTrimWeight('${item.key}', this.value)" class="w-16 text-center font-mono font-bold text-xs bg-white border border-zinc-300 rounded-lg p-1 outline-none focus:ring-2 focus:ring-zinc-900">
             <span class="text-zinc-400 font-mono text-xs">%</span>
@@ -2239,7 +2232,7 @@
         weightsContainer.innerHTML = OFFICIAL_CES.map(ce => {
           const w = cw[ce.id] !== undefined ? cw[ce.id] : 20;
           return `
-            <div class="flex items-center gap-2 bg-zinc-50 border border-zinc-200/80 px-3 py-1.5 rounded-xl">
+            <div class="flex items-center gap-2 bg-zinc-50 border border-zinc-200 px-3 py-1.5 rounded-xl">
               <span class="font-semibold text-zinc-800 text-xs">${ce.id}:</span>
               <input type="number" min="0" max="100" value="${w}" onchange="updateFinalCeWeight('${ce.id}', this.value)" class="w-14 text-center font-mono font-bold text-xs bg-white border border-zinc-300 rounded-lg p-1 outline-none focus:ring-2 focus:ring-zinc-900">
               <span class="text-zinc-400 font-mono text-xs">%</span>
@@ -2334,7 +2327,7 @@
           });
         }
 
-        html += `<td class="py-2 px-4 text-center border-l-2 border-zinc-800 bg-zinc-50/70 font-bold">
+        html += `<td class="py-2 px-4 text-center border-l-2 border-zinc-800 bg-zinc-50 font-bold">
           <div class="text-sm font-black font-mono text-zinc-950">${finalScore !== null ? finalScore.toFixed(2) : '<span class="text-zinc-300 font-normal">—</span>'}</div>
           <span class="inline-flex items-center mt-0.5 text-[10px] px-2.5 py-0.5 rounded font-bold ring-1 ring-inset ${finalLvl.badge}">${finalLvl.code}</span>
         </td></tr>`;
@@ -2366,7 +2359,7 @@
       }
 
       document.getElementById('repStudentName').textContent = st.name;
-      document.getElementById('repGroupLabel').textContent = `Classe: ${curGroup.name} | 1r i 2n d'ESO | LOMLOE`;
+      document.getElementById('repGroupLabel').textContent = `Classe: ${curGroup.name} | Curs 2026-2027 | LOMLOE`;
 
       let ceValues = [];
       let detailsHtml = '';
@@ -2596,11 +2589,11 @@
         type: 'bar',
         data: {
           labels: [
-            `NA (<${th.epa})`, 
-            `EPA (${th.epa}-${(th.as - 0.1).toFixed(1)})`, 
-            `AS (${th.as}-${(th.an - 0.1).toFixed(1)})`, 
-            `AN (${th.an}-${(th.ae - 0.1).toFixed(1)})`, 
-            `AE (≥${th.ae})`
+            `NA (< ${th.epa})`, 
+            `EPA [${th.epa} - ${th.as}[`, 
+            `AS [${th.as} - ${th.an}[`, 
+            `AN [${th.an} - ${th.ae}[`, 
+            `AE (≥ ${th.ae})`
           ],
           datasets: [{
             data: [counts.NA, counts.EPA, counts.AS, counts.AN, counts.AE],
@@ -2698,18 +2691,60 @@
       }).join('');
     }
 
-    function exportCSV() {
+    // EXPORTACIÓ CSV INTEL·LIGENT SEGONS LA PESTANYA ACTIVA
+    function exportContextualCSV() {
       const curGroup = getCurrentGroup();
-      let csv = `Alumne,Qualificacio_Final_${curGroup.finalMethod === 'trim' ? 'Trimestres' : 'Competencies'},Grup\n`;
-      (curGroup.students || []).forEach(st => {
-        const sc = getStudentCourseFinalScore(st.id, curGroup);
-        csv += `"${st.name}",${sc !== null ? sc.toFixed(2) : ""},"${curGroup.name}"\n`;
-      });
-      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+      let csv = "";
+      let filename = "";
+
+      if (appState.currentView === 'trim') {
+        filename = `Resum_T${appState.currentTrim}_${curGroup.name.replace(/\s+/g, '_')}.csv`;
+        const trimSdas = (curGroup.sdas || []).filter(s => s.trim === appState.currentTrim);
+        
+        let headers = ["Alumne", "Penalitzacio_Practica"];
+        trimSdas.forEach(s => headers.push(`SdA_${s.title.replace(/,/g, '')}`));
+        OFFICIAL_CES.forEach(c => headers.push(c.id));
+        headers.push("Nota_Final_Trimestre", "Nivell_LOMLOE");
+        csv += headers.join(",") + "\n";
+
+        (curGroup.students || []).forEach(st => {
+          let row = [`"${st.name}"`, hasAttendancePenalty(st.id, appState.currentTrim, curGroup) ? "SI" : "NO"];
+          trimSdas.forEach(sda => {
+            const sc = getStudentOverallSdaScore(sda, st.id);
+            row.push(sc !== null ? sc.toFixed(2) : "");
+          });
+          OFFICIAL_CES.forEach(ce => {
+            let ceSum = 0, count = 0;
+            trimSdas.forEach(sda => {
+              const sc = getStudentCeScoreInSda(sda, st.id, ce.id);
+              if (sc !== null) { ceSum += sc; count++; }
+            });
+            row.push(count > 0 ? (ceSum / count).toFixed(2) : "");
+          });
+          const trimScore = getStudentTrimScore(st.id);
+          row.push(trimScore !== null ? trimScore.toFixed(2) : "");
+          row.push(getLevel(trimScore).code);
+          csv += row.join(",") + "\n";
+        });
+      } else {
+        filename = `Resum_Final_Curs_${curGroup.name.replace(/\s+/g, '_')}.csv`;
+        csv = `Alumne,T1,T2,T3,Qualificacio_Final,Nivell_LOMLOE,Metode\n`;
+        (curGroup.students || []).forEach(st => {
+          const t1 = getStudentTrimScoreByTrim(st.id, 1, curGroup);
+          const t2 = getStudentTrimScoreByTrim(st.id, 2, curGroup);
+          const t3 = getStudentTrimScoreByTrim(st.id, 3, curGroup);
+          const sc = getStudentCourseFinalScore(st.id, curGroup);
+          csv += `"${st.name}",${t1 !== null ? t1.toFixed(2) : ""},${t2 !== null ? t2.toFixed(2) : ""},${t3 !== null ? t3.toFixed(2) : ""},${sc !== null ? sc.toFixed(2) : ""},"${getLevel(sc).code}","${curGroup.finalMethod}"\n`;
+        });
+      }
+
+      const blob = new Blob(["\uFEFF" + csv], { type: 'text/csv;charset=utf-8;' });
       const a = document.createElement("a");
       a.href = URL.createObjectURL(blob);
-      a.download = `Resum_Final_${curGroup.name.replace(/\s+/g, '_')}.csv`;
+      a.download = filename;
+      document.body.appendChild(a);
       a.click();
+      a.remove();
     }
 
     window.onload = init;
