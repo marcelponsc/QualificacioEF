@@ -24,6 +24,7 @@
           boxShadow: {
             'subtle': '0 1px 2px 0 rgba(0, 0, 0, 0.03)',
             'card': '0 1px 3px 0 rgba(0, 0, 0, 0.04), 0 1px 2px -1px rgba(0, 0, 0, 0.03)',
+            'float': '0 4px 14px 0 rgba(0, 0, 0, 0.05)',
           }
         }
       }
@@ -33,11 +34,23 @@
   <style>
     body { font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11'; }
     .tabular-nums { font-variant-numeric: tabular-nums; }
+    
     ::-webkit-scrollbar { width: 5px; height: 5px; }
+    ::-webkit-scrollbar-track { background: transparent; }
     ::-webkit-scrollbar-thumb { background: #e4e4e7; border-radius: 9999px; }
-    input[type=number]::-webkit-inner-spin-button, input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+    ::-webkit-scrollbar-thumb:hover { background: #d4d4d8; }
+
+    input[type=number]::-webkit-inner-spin-button, 
+    input[type=number]::-webkit-outer-spin-button { 
+      -webkit-appearance: none; 
+      margin: 0; 
+    }
     input[type=number] { -moz-appearance: textfield; }
-    @media print { .no-print { display: none !important; } body { background: white !important; } }
+
+    @media print {
+      .no-print { display: none !important; }
+      body { background: white !important; }
+    }
   </style>
 </head>
 <body class="min-h-full flex flex-col text-zinc-900 bg-[#fafafa]">
@@ -73,7 +86,7 @@
   </div>
 
   <!-- ================= CAPÇALERA ================= -->
-  <header class="bg-white/90 backdrop-blur-md border-b border-zinc-200 sticky top-0 z-40 no-print">
+  <header class="bg-white/90 backdrop-blur-md border-b border-zinc-200/80 sticky top-0 z-40 no-print">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <div class="flex items-center justify-between h-14 gap-4">
         
@@ -89,20 +102,19 @@
             <div class="flex flex-col">
               <div class="flex items-center gap-1.5">
                 <span class="text-xs font-black tracking-tight text-zinc-900 group-hover:text-zinc-600 transition">EF COMPETENCIAL</span>
-                <span class="text-[9px] font-bold text-zinc-600 bg-zinc-100 px-1.5 py-0.5 rounded tracking-wider uppercase border border-zinc-200">PRO</span>
+                <span class="text-[9px] font-bold text-zinc-600 bg-zinc-100 px-1.5 py-0.5 rounded tracking-wider uppercase border border-zinc-200/60">PRO</span>
               </div>
-              <span class="text-[9px] font-medium text-zinc-400 -mt-0.5">Sincronització en Temps Real</span>
+              <span class="text-[9px] font-medium text-zinc-400 -mt-0.5">Avaluació Educació Física LOMLOE</span>
             </div>
           </button>
 
           <div id="headerBreadcrumb" class="hidden items-center gap-1.5 ml-2 pl-3 border-l border-zinc-200 text-xs">
             <span class="text-zinc-400 font-medium">Grup:</span>
-            <span id="breadcrumbGroupName" class="font-bold text-zinc-900 bg-zinc-100 px-2 py-0.5 rounded-md text-[11px] border border-zinc-200 font-mono">--</span>
+            <span id="breadcrumbGroupName" class="font-bold text-zinc-900 bg-zinc-100/90 px-2 py-0.5 rounded-md text-[11px] border border-zinc-200/70 font-mono">--</span>
           </div>
         </div>
 
         <div class="flex items-center gap-2">
-          
           <div id="cloudStatusBadge" class="flex items-center gap-1.5 text-[11px] font-medium px-2.5 py-1 rounded-xl border bg-zinc-50 border-zinc-200 text-zinc-600">
             <span id="cloudStatusDot" class="w-2 h-2 rounded-full bg-amber-400 animate-pulse"></span>
             <span id="cloudStatusText" class="font-mono text-[10px] font-semibold">Connectant...</span>
@@ -116,13 +128,13 @@
             </button>
           </div>
 
-          <button onclick="goToHome()" id="homeNavBtn" class="inline-flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1.5 rounded-xl border border-zinc-200 bg-white text-zinc-700 hover:bg-zinc-50 shadow-subtle transition">
+          <button onclick="goToHome()" id="homeNavBtn" class="inline-flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1.5 rounded-xl border border-zinc-200/80 bg-white text-zinc-700 hover:bg-zinc-50 shadow-subtle transition">
             <i class="fa-solid fa-house text-zinc-400 text-[10px]"></i>
             <span class="hidden sm:inline">Inici</span>
           </button>
 
           <div class="flex items-center pl-1 border-l border-zinc-200 gap-1">
-            <button onclick="openThresholdsModal()" title="Configurar Llindars LOMLOE" class="p-1.5 text-zinc-500 hover:text-zinc-900 hover:bg-zinc-100 rounded-lg text-xs transition">
+            <button onclick="openThresholdsModal()" title="Configurar Escala LOMLOE" class="p-1.5 text-zinc-500 hover:text-zinc-900 hover:bg-zinc-100 rounded-lg text-xs transition">
               <i class="fa-solid fa-sliders"></i>
             </button>
             <button onclick="resetDefaultData()" title="Restablir dades originals" class="p-1.5 text-zinc-400 hover:text-zinc-900 hover:bg-zinc-100 rounded-lg text-xs transition">
@@ -165,19 +177,19 @@
   <!-- ================= COS PRINCIPAL ================= -->
   <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-5">
 
-    <!-- PANTALLA D'INICI -->
+    <!-- PANTALLA D'INICI (HUB DE CLASSES) -->
     <section id="screenHome" class="space-y-6">
-      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-zinc-200 pb-4">
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-zinc-200/70 pb-4">
         <div>
           <div class="flex items-center gap-2 text-xs font-semibold text-zinc-400">
             <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
-            <span>Curs Actiu · Gestor d'Avaluació LOMLOE</span>
+            <span>Curs Actiu · 1r Cicle d'ESO</span>
           </div>
           <h2 class="text-xl font-extrabold tracking-tight text-zinc-900 mt-0.5">Tauler de Classes</h2>
         </div>
 
         <div class="flex items-center gap-2">
-          <button onclick="openGlobalSdaModal()" class="inline-flex items-center gap-1.5 bg-white hover:bg-zinc-50 border border-zinc-200 text-zinc-700 text-xs font-semibold px-3 py-2 rounded-xl shadow-subtle transition">
+          <button onclick="openGlobalSdaModal()" class="inline-flex items-center gap-1.5 bg-white hover:bg-zinc-50 border border-zinc-200/90 text-zinc-700 text-xs font-semibold px-3 py-2 rounded-xl shadow-subtle transition">
             <i class="fa-solid fa-sliders text-zinc-400 text-[10px]"></i> Programar SdA
           </button>
           <button onclick="openNewGroupModal()" class="inline-flex items-center gap-1.5 bg-zinc-900 hover:bg-zinc-800 text-white text-xs font-semibold px-3.5 py-2 rounded-xl shadow-subtle transition">
@@ -191,7 +203,7 @@
 
     <!-- ZONA DE TREBALL DE LA CLASSE -->
     <div id="screenClassWorkspace" class="hidden space-y-5">
-      <div class="flex flex-wrap items-center justify-between gap-3 bg-white border border-zinc-200 px-3.5 py-2.5 rounded-2xl shadow-subtle no-print">
+      <div class="flex flex-wrap items-center justify-between gap-3 bg-white border border-zinc-200/80 px-3.5 py-2.5 rounded-2xl shadow-subtle no-print">
         <div class="flex items-center gap-3">
           <button onclick="goToHome()" class="text-zinc-500 hover:text-zinc-900 text-xs font-semibold flex items-center gap-1.5 transition pr-3 border-r border-zinc-200">
             <i class="fa-solid fa-arrow-left text-[10px]"></i> Sortir
@@ -203,15 +215,15 @@
           </div>
         </div>
         <div class="flex items-center gap-2">
-          <button onclick="switchView('roster')" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold text-zinc-700 bg-zinc-50 hover:bg-zinc-100 border border-zinc-200 transition">
+          <button onclick="switchView('roster')" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold text-zinc-700 bg-zinc-50 hover:bg-zinc-100 border border-zinc-200/80 transition">
             <i class="fa-solid fa-user-gear text-zinc-400 text-[11px]"></i> Gestionar Alumnes
           </button>
         </div>
       </div>
 
-      <!-- VISTA 1: GRAELLA SdA (MOTOR SPREADSHEET REACTIU) -->
+      <!-- VISTA 1: GRAELLA SdA (MOTOR SPREADSHEET PRO REACTIU) -->
       <section id="viewSda" class="space-y-4">
-        <div class="bg-white border border-zinc-200 rounded-2xl p-3 shadow-subtle flex flex-wrap items-center justify-between gap-3">
+        <div class="bg-white border border-zinc-200/80 rounded-2xl p-3 shadow-subtle flex flex-wrap items-center justify-between gap-3">
           <div class="flex items-center gap-2.5">
             <span class="text-[11px] font-bold text-zinc-400 uppercase tracking-wider">SdA:</span>
             <select id="sdaSelect" onchange="renderSdaGrid()" class="bg-zinc-50 border border-zinc-200 text-xs font-bold text-zinc-900 rounded-xl px-3 py-1.5 focus:ring-2 focus:ring-zinc-900 outline-none cursor-pointer">
@@ -221,8 +233,8 @@
             </button>
           </div>
           <div class="flex items-center gap-2">
-            <span class="hidden sm:inline-flex items-center gap-1.5 text-[11px] font-medium text-zinc-500 bg-zinc-50 px-2.5 py-1 rounded-lg border border-zinc-200 font-mono">
-              <i class="fa-regular fa-keyboard text-zinc-400"></i> Dreceres: e:4, n:3, a:2, p:1, x:0
+            <span class="hidden sm:inline-flex items-center gap-1 text-[11px] font-medium text-zinc-400 bg-zinc-50 px-2.5 py-1 rounded-lg border border-zinc-200/60 font-mono">
+              <i class="fa-regular fa-keyboard text-zinc-500"></i> Dreceres: e:4, n:3, a:2, p:1, x:0
             </span>
             <button onclick="openSdaModal(true)" class="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs font-semibold text-white bg-zinc-900 hover:bg-zinc-800 shadow-subtle transition">
               <i class="fa-solid fa-plus text-[10px]"></i> Nova SdA
@@ -230,11 +242,11 @@
           </div>
         </div>
 
-        <div class="bg-white border border-zinc-200 rounded-2xl shadow-card overflow-hidden">
-          <div id="sdaGridTitleBar" class="bg-zinc-900 text-white px-4 py-3 flex items-center justify-between text-xs sticky top-0 z-30"></div>
+        <div class="bg-white border border-zinc-200/90 rounded-2xl shadow-card overflow-hidden">
+          <div id="sdaGridTitleBar" class="bg-zinc-900 text-white px-4 py-3 flex items-center justify-between text-xs sticky top-0 z-40"></div>
           <div class="overflow-auto max-h-[72vh] relative" id="sdaTableScrollWrapper">
             <table class="w-full text-left border-collapse text-xs">
-              <thead id="sdaGridHead" class="select-none sticky top-0 z-20 shadow-subtle"></thead>
+              <thead id="sdaGridHead" class="select-none sticky top-0 z-30 shadow-subtle"></thead>
               <tbody id="sdaGridBody" class="divide-y divide-zinc-100 bg-white tabular-nums"></tbody>
             </table>
           </div>
@@ -249,12 +261,12 @@
               <h3 class="text-base font-bold text-zinc-900 flex items-center gap-2">
                 <i class="fa-solid fa-user-graduate text-zinc-600"></i> Llista d'Alumnat Registrat
               </h3>
-              <p class="text-xs text-zinc-500 mt-0.5">Edita directament els noms o importa llistats des d'Excel.</p>
+              <p class="text-xs text-zinc-500 mt-0.5">Edita els noms directament sobre la taula o importa llistats complets.</p>
             </div>
             <span id="rosterCountBadge" class="text-xs font-mono font-bold bg-zinc-100 text-zinc-800 px-3 py-1 rounded-full border border-zinc-200">0 alumnes</span>
           </div>
 
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-3 bg-zinc-50/70 border border-zinc-200 p-3.5 rounded-2xl">
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-3 bg-zinc-50/70 border border-zinc-200/80 p-3.5 rounded-2xl">
             <div>
               <label class="block font-medium text-zinc-600 text-xs mb-1">Afegir Alumne/a:</label>
               <div class="flex gap-2">
@@ -263,9 +275,9 @@
               </div>
             </div>
             <div>
-              <label class="block font-medium text-zinc-600 text-xs mb-1">Importació en bloc (un per línia):</label>
+              <label class="block font-medium text-zinc-600 text-xs mb-1">Còpia d'Esfera / Excel (un per línia):</label>
               <div class="flex gap-2">
-                <textarea id="rosterBulkInput" rows="1" placeholder="Enganxa columna de noms..." class="flex-1 bg-white border border-zinc-200 rounded-xl p-1.5 text-xs focus:ring-2 focus:ring-zinc-900 outline-none resize-none font-medium"></textarea>
+                <textarea id="rosterBulkInput" rows="1" placeholder="Enganxa llista d'alumnes..." class="flex-1 bg-white border border-zinc-200 rounded-xl p-1.5 text-xs focus:ring-2 focus:ring-zinc-900 outline-none resize-none font-medium"></textarea>
                 <button onclick="addBulkStudentsFromRoster()" class="bg-zinc-800 hover:bg-zinc-700 text-white font-semibold px-3.5 py-1.5 rounded-xl text-xs transition">Carregar</button>
               </div>
             </div>
@@ -273,10 +285,10 @@
 
           <div class="border border-zinc-200 rounded-xl overflow-hidden">
             <table class="w-full text-left text-xs">
-              <thead class="bg-zinc-50 text-zinc-600 font-semibold border-b border-zinc-200">
+              <thead class="bg-zinc-50/70 text-zinc-600 font-semibold border-b border-zinc-200">
                 <tr>
                   <th class="py-2.5 px-3 w-12 text-center font-mono">#</th>
-                  <th class="py-2.5 px-4">Nom i Cognoms (Clic per editar)</th>
+                  <th class="py-2.5 px-4">Nom i Cognoms (Fes clic per editar)</th>
                   <th class="py-2.5 px-3 w-20 text-center">Acció</th>
                 </tr>
               </thead>
@@ -288,21 +300,21 @@
 
       <!-- VISTA 3: RESUM TRIMESTRAL -->
       <section id="viewTrim" class="space-y-4 hidden">
-        <div class="flex flex-wrap items-end justify-between gap-4 border-b border-zinc-200 pb-4">
+        <div class="flex flex-wrap items-end justify-between gap-4 border-b border-zinc-200/70 pb-4">
           <div>
             <span class="inline-flex items-center rounded-md bg-zinc-100 px-2 py-0.5 text-[11px] font-bold text-zinc-600">Avaluació Contínua</span>
             <h2 id="trimTitle" class="text-xl font-bold text-zinc-900 tracking-tight mt-1">Resum del Trimestre 1</h2>
-            <p class="text-xs text-zinc-500 mt-0.5">Control de ponderació de les SdAs i penalització d'assistència pràctica.</p>
+            <p class="text-xs text-zinc-500 mt-0.5">Controla la ponderació de les SdAs i marca la manca de participació pràctica quan calgui.</p>
           </div>
-          <button onclick="exportContextualCSV()" class="inline-flex items-center gap-1.5 bg-white border border-zinc-200 text-zinc-700 hover:bg-zinc-50 text-xs font-semibold px-3 py-2 rounded-xl shadow-subtle transition">
-            <i class="fa-solid fa-file-csv text-zinc-400"></i> Exportar Trimestre a CSV
+          <button onclick="exportCSV()" class="inline-flex items-center gap-1.5 bg-white border border-zinc-200 text-zinc-700 hover:bg-zinc-50 text-xs font-semibold px-3 py-2 rounded-xl shadow-subtle transition">
+            <i class="fa-solid fa-file-csv text-zinc-400"></i> Exportar a CSV
           </button>
         </div>
 
-        <div class="bg-white border border-zinc-200 rounded-2xl p-4 shadow-subtle space-y-3">
+        <div class="bg-white border border-zinc-200/90 rounded-2xl p-4 shadow-subtle space-y-3">
           <div class="flex items-center justify-between">
             <h4 class="text-xs font-bold text-zinc-800 uppercase tracking-wider flex items-center gap-2">
-              <i class="fa-solid fa-weight-scale text-zinc-500"></i> Ponderació de les SdAs
+              <i class="fa-solid fa-weight-scale text-zinc-500"></i> Ponderació de les SdAs en aquest Trimestre
             </h4>
             <span id="trimTotalWeightBadge" class="text-xs font-mono font-bold px-2.5 py-0.5 rounded-md">Total: 0%</span>
           </div>
@@ -321,11 +333,11 @@
 
       <!-- VISTA 4: FINAL DE CURS -->
       <section id="viewFinal" class="space-y-4 hidden">
-        <div class="flex flex-wrap items-end justify-between gap-4 border-b border-zinc-200 pb-4">
+        <div class="flex flex-wrap items-end justify-between gap-4 border-b border-zinc-200/70 pb-4">
           <div>
             <span class="inline-flex items-center rounded-md bg-zinc-100 px-2 py-0.5 text-[11px] font-bold text-zinc-600">Convocatòria Ordinària</span>
             <h2 class="text-xl font-bold text-zinc-900 tracking-tight mt-1">Avaluació Final de Curs</h2>
-            <p class="text-xs text-zinc-500 mt-0.5">Tria el criteri de càlcul final (per trimestres o per CEs).</p>
+            <p class="text-xs text-zinc-500 mt-0.5">Tria el mètode de càlcul de final de curs i pondera els percentatges.</p>
           </div>
 
           <div class="flex flex-wrap items-center gap-3">
@@ -338,13 +350,13 @@
               </button>
             </div>
 
-            <button onclick="exportContextualCSV()" class="inline-flex items-center gap-1.5 bg-white border border-zinc-200 text-zinc-700 hover:bg-zinc-50 text-xs font-semibold px-3 py-2 rounded-xl shadow-subtle transition">
-              <i class="fa-solid fa-file-csv text-zinc-400"></i> Exportar Curs a CSV
+            <button onclick="exportCSV()" class="inline-flex items-center gap-1.5 bg-white border border-zinc-200 text-zinc-700 hover:bg-zinc-50 text-xs font-semibold px-3 py-2 rounded-xl shadow-subtle transition">
+              <i class="fa-solid fa-file-csv text-zinc-400"></i> Exportar
             </button>
           </div>
         </div>
 
-        <div class="bg-white border border-zinc-200 rounded-2xl p-4 shadow-subtle space-y-3">
+        <div class="bg-white border border-zinc-200/90 rounded-2xl p-4 shadow-subtle space-y-3">
           <div class="flex items-center justify-between">
             <h4 id="finalWeightPanelTitle" class="text-xs font-bold text-zinc-800 uppercase tracking-wider flex items-center gap-2">
               <i class="fa-solid fa-sliders text-zinc-500"></i> Ponderació del Càlcul Final
@@ -369,7 +381,7 @@
         <div class="flex items-center justify-between bg-white p-3.5 rounded-2xl border border-zinc-200 shadow-subtle no-print">
           <div class="flex items-center gap-3">
             <label for="reportStudentSelect" class="text-xs font-semibold text-zinc-500">Alumne/a:</label>
-            <select id="reportStudentSelect" onchange="renderIndividualReport()" class="bg-zinc-50 border border-zinc-200 text-xs rounded-xl px-3 py-1.5 font-bold text-zinc-800 outline-none">
+            <select id="reportStudentSelect" onchange="renderIndividualReport()" class="bg-zinc-50 border border-zinc-200 text-xs rounded-xl px-3 py-1.5 font-bold text-zinc-800 outline-none focus:ring-2 focus:ring-zinc-900">
             </select>
           </div>
           <button onclick="window.print()" class="inline-flex items-center gap-2 bg-zinc-900 hover:bg-zinc-800 text-white text-xs font-semibold px-4 py-2 rounded-xl shadow-subtle transition">
@@ -382,7 +394,7 @@
             <div>
               <span class="text-[11px] font-bold text-zinc-400 uppercase tracking-wider">Informe Individual Competencial</span>
               <h3 id="repStudentName" class="text-2xl font-black text-zinc-900 tracking-tight mt-0.5">Alumne</h3>
-              <p id="repGroupLabel" class="text-xs text-zinc-500 mt-1 font-medium">Matèria: Educació Física | LOMLOE</p>
+              <p id="repGroupLabel" class="text-xs text-zinc-500 mt-1 font-medium">1r i 2n d'ESO | Matèria: Educació Física | LOMLOE</p>
             </div>
             <div class="text-right">
               <span class="text-[11px] font-semibold text-zinc-400 block uppercase">Nivell Global</span>
@@ -399,83 +411,232 @@
         </div>
       </section>
 
-      <!-- VISTA 6: ANALÍTICA -->
+      <!-- VISTA 6: ANALÍTICA & ESTADÍSTIQUES -->
       <section id="viewStats" class="space-y-5 hidden">
-        <div class="bg-white border border-zinc-200 rounded-2xl p-4 shadow-subtle flex flex-wrap items-center justify-between gap-4">
+        <div class="bg-white border border-zinc-200/90 rounded-2xl p-4 shadow-subtle flex flex-wrap items-center justify-between gap-4">
           <div>
             <span class="inline-flex items-center gap-1 text-[11px] font-bold text-zinc-400 uppercase tracking-wider">
               <i class="fa-solid fa-chart-simple"></i> Dashboard Analític
             </span>
-            <h3 class="text-lg font-bold text-zinc-900 tracking-tight">Rendiment Competencial Global</h3>
+            <h3 class="text-lg font-bold text-zinc-900 tracking-tight">Rendiment Competencial de Curs</h3>
           </div>
 
           <div class="flex flex-wrap items-center gap-2.5 text-xs">
             <div class="flex items-center gap-1 bg-zinc-100 p-1 rounded-xl border border-zinc-200">
-              <button id="statsScopeClass" onclick="setStatsScope('class')" class="px-2.5 py-1 rounded-lg font-semibold bg-white text-zinc-900 shadow-subtle">Aquesta Classe</button>
-              <button id="statsScopeLevel" onclick="setStatsScope('level')" class="px-2.5 py-1 rounded-lg font-medium text-zinc-500">Tots els grups</button>
+              <button id="statsScopeClass" onclick="setStatsScope('class')" class="px-2.5 py-1 rounded-lg font-semibold bg-white text-zinc-900 shadow-subtle transition">Aquesta Classe</button>
+              <button id="statsScopeLevel" onclick="setStatsScope('level')" class="px-2.5 py-1 rounded-lg font-medium text-zinc-600 hover:text-zinc-900 transition">Tots els grups</button>
             </div>
-            <select id="statsTypeSelect" onchange="onStatsTypeChange()" class="bg-zinc-50 border border-zinc-200 font-semibold text-zinc-800 rounded-xl px-2.5 py-1.5 outline-none">
-              <option value="sda">Per SdA</option>
-              <option value="trim">Per Trimestre</option>
-              <option value="course">Global de Curs</option>
+
+            <div class="flex items-center gap-2 bg-zinc-50 border border-zinc-200 rounded-xl px-2.5 py-1">
+              <span class="text-zinc-400 font-medium">Àmbit:</span>
+              <select id="statsTypeSelect" onchange="onStatsTypeChange()" class="bg-transparent font-semibold text-zinc-800 outline-none cursor-pointer">
+                <option value="sda">Per SdA</option>
+                <option value="trim">Per Trimestre</option>
+                <option value="course">Global de Curs</option>
+              </select>
+            </div>
+
+            <select id="statsSdaSelector" onchange="renderStatsView()" class="bg-zinc-50 border border-zinc-200 font-semibold text-zinc-800 rounded-xl px-2.5 py-1.5 outline-none cursor-pointer">
             </select>
-            <select id="statsSdaSelector" onchange="renderStatsView()" class="bg-zinc-50 border border-zinc-200 font-semibold text-zinc-800 rounded-xl px-2.5 py-1.5 outline-none"></select>
           </div>
         </div>
 
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          <div class="bg-white border border-zinc-200 rounded-2xl p-4 shadow-subtle">
-            <span class="text-xs font-semibold text-zinc-400">Mitjana Global</span>
+          <div class="bg-white border border-zinc-200/90 rounded-2xl p-4 shadow-subtle">
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-semibold text-zinc-400">Mitjana Global</span>
+              <span id="kpiAvgLvl" class="text-[10px] font-bold px-1.5 py-0.5 rounded ring-1 ring-inset bg-zinc-50 text-zinc-600 ring-zinc-200">--</span>
+            </div>
             <div id="kpiAvgVal" class="text-2xl font-black font-mono text-zinc-900 mt-1">0.00</div>
+            <p class="text-[11px] text-zinc-400 mt-1">Escala competencial 0 a 4</p>
           </div>
-          <div class="bg-white border border-zinc-200 rounded-2xl p-4 shadow-subtle">
-            <span class="text-xs font-semibold text-zinc-400" id="kpiSuccessTitle">Taxa d'Èxit</span>
+
+          <div class="bg-white border border-zinc-200/90 rounded-2xl p-4 shadow-subtle">
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-semibold text-zinc-400" id="kpiSuccessTitle">Taxa d'Èxit</span>
+              <i class="fa-solid fa-circle-check text-emerald-500"></i>
+            </div>
             <div id="kpiSuccessRate" class="text-2xl font-black font-mono text-emerald-600 mt-1">0%</div>
+            <p class="text-[11px] text-zinc-400 mt-1">Alumnat que assoleix el nivell</p>
+          </div>
+
+          <div class="bg-white border border-zinc-200/90 rounded-2xl p-4 shadow-subtle">
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-semibold text-zinc-400">CE Més Forta</span>
+              <i class="fa-solid fa-arrow-trend-up text-zinc-400"></i>
+            </div>
+            <div id="kpiBestCe" class="text-sm font-bold text-zinc-900 mt-1 truncate">--</div>
+            <p id="kpiBestCeVal" class="text-[11px] text-zinc-400 mt-1 font-mono">Mitjana: --</p>
+          </div>
+
+          <div class="bg-white border border-zinc-200/90 rounded-2xl p-4 shadow-subtle">
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-semibold text-zinc-400">Àrea de Millora</span>
+              <i class="fa-solid fa-triangle-exclamation text-amber-500"></i>
+            </div>
+            <div id="kpiWorstCe" class="text-sm font-bold text-zinc-900 mt-1 truncate">--</div>
+            <p id="kpiWorstCeVal" class="text-[11px] text-zinc-400 mt-1 font-mono">Mitjana: --</p>
           </div>
         </div>
 
-        <div class="bg-white border border-zinc-200 rounded-2xl p-5 shadow-subtle h-64">
-          <canvas id="chartStatsLevels"></canvas>
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-5">
+          <div class="bg-white border border-zinc-200 rounded-2xl p-5 shadow-subtle space-y-3">
+            <h4 class="text-xs font-bold text-zinc-800 uppercase tracking-wider flex items-center gap-2">
+              <i class="fa-solid fa-chart-column text-zinc-400"></i> Distribució de Nivells LOMLOE
+            </h4>
+            <div class="h-64">
+              <canvas id="chartStatsLevels"></canvas>
+            </div>
+          </div>
+
+          <div class="bg-white border border-zinc-200 rounded-2xl p-5 shadow-subtle space-y-3">
+            <h4 class="text-xs font-bold text-zinc-800 uppercase tracking-wider flex items-center gap-2">
+              <i class="fa-solid fa-chart-bar text-zinc-400"></i> Comparativa de Competències
+            </h4>
+            <div class="h-64">
+              <canvas id="chartStatsCes"></canvas>
+            </div>
+          </div>
+        </div>
+
+        <div class="bg-white border border-zinc-200 rounded-2xl shadow-card overflow-hidden">
+          <div class="bg-zinc-900 text-white px-5 py-3.5 flex justify-between items-center text-xs font-bold">
+            <span>Diagnosi Detallada per Competències</span>
+            <span class="text-zinc-400 font-mono text-[11px]">Detecció de colls d'ampolla</span>
+          </div>
+          <div class="overflow-x-auto">
+            <table class="w-full text-left text-xs">
+              <thead class="bg-zinc-50 text-zinc-600 font-semibold border-b border-zinc-200">
+                <tr>
+                  <th class="py-2.5 px-4 w-24 font-mono">Codi</th>
+                  <th class="py-2.5 px-4">Competència Específica</th>
+                  <th class="py-2.5 px-3 text-center">Mitjana</th>
+                  <th class="py-2.5 px-3 text-center">Nivell</th>
+                  <th class="py-2.5 px-4 text-center" id="thAssolitRate">% &ge; Assolit</th>
+                  <th class="py-2.5 px-4 text-center">Estat</th>
+                </tr>
+              </thead>
+              <tbody id="statsTableBody" class="divide-y divide-zinc-100 bg-white tabular-nums"></tbody>
+            </table>
+          </div>
         </div>
       </section>
 
     </div>
   </main>
 
-  <!-- MODALS -->
+  <!-- MODAL LLINDARS -->
   <div id="thresholdsModal" class="fixed inset-0 bg-zinc-950/40 backdrop-blur-xs z-50 flex items-center justify-center p-4 hidden no-print">
-    <div class="bg-white rounded-3xl shadow-card max-w-xl w-full overflow-hidden border border-zinc-200 p-6 space-y-4 text-xs">
-      <h3 class="text-sm font-bold">Llindars LOMLOE</h3>
-      <div class="space-y-2">
-        <div class="flex justify-between items-center"><span class="font-bold text-amber-600">EPA &ge;</span><input type="number" id="th_epa" step="0.05" class="w-20 text-center border rounded p-1 font-mono font-bold"></div>
-        <div class="flex justify-between items-center"><span class="font-bold text-sky-600">AS &ge;</span><input type="number" id="th_as" step="0.05" class="w-20 text-center border rounded p-1 font-mono font-bold"></div>
-        <div class="flex justify-between items-center"><span class="font-bold text-indigo-600">AN &ge;</span><input type="number" id="th_an" step="0.05" class="w-20 text-center border rounded p-1 font-mono font-bold"></div>
-        <div class="flex justify-between items-center"><span class="font-bold text-emerald-600">AE &ge;</span><input type="number" id="th_ae" step="0.05" class="w-20 text-center border rounded p-1 font-mono font-bold"></div>
+    <div class="bg-white rounded-3xl shadow-card max-w-xl w-full overflow-hidden border border-zinc-200">
+      <div class="px-6 py-4 bg-zinc-900 text-white flex justify-between items-center">
+        <h3 class="text-sm font-bold">Definició de l'Escala de Qualificació LOMLOE</h3>
+        <button onclick="closeThresholdsModal()" class="text-zinc-400 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
       </div>
-      <div class="flex justify-end gap-2 pt-2"><button onclick="closeThresholdsModal()" class="px-3 py-1.5 border rounded-xl">Tancar</button><button onclick="saveThresholdsModal()" class="px-4 py-1.5 bg-zinc-900 text-white rounded-xl font-semibold">Desar</button></div>
+      <div class="p-6 space-y-3 text-xs">
+        <div class="flex items-center justify-between p-3 bg-zinc-50 rounded-xl border border-zinc-200">
+          <div><b class="text-rose-600 font-mono">NA</b> No Assolit</div>
+          <span class="text-zinc-400">&lt; EPA</span>
+        </div>
+        <div class="flex items-center justify-between p-3 bg-zinc-50 rounded-xl border border-zinc-200">
+          <div><b class="text-amber-600 font-mono">EPA</b> En Procés</div>
+          <div class="flex items-center gap-1.5">
+            <span>&ge;</span>
+            <input type="number" id="th_epa" step="0.05" class="w-20 text-center font-mono font-bold bg-white border border-zinc-300 rounded-lg p-1.5">
+          </div>
+        </div>
+        <div class="flex items-center justify-between p-3 bg-zinc-50 rounded-xl border border-zinc-200">
+          <div><b class="text-sky-600 font-mono">AS</b> Assolit</div>
+          <div class="flex items-center gap-1.5">
+            <span>&ge;</span>
+            <input type="number" id="th_as" step="0.05" class="w-20 text-center font-mono font-bold bg-white border border-zinc-300 rounded-lg p-1.5">
+          </div>
+        </div>
+        <div class="flex items-center justify-between p-3 bg-zinc-50 rounded-xl border border-zinc-200">
+          <div><b class="text-indigo-600 font-mono">AN</b> Notable</div>
+          <div class="flex items-center gap-1.5">
+            <span>&ge;</span>
+            <input type="number" id="th_an" step="0.05" class="w-20 text-center font-mono font-bold bg-white border border-zinc-300 rounded-lg p-1.5">
+          </div>
+        </div>
+        <div class="flex items-center justify-between p-3 bg-zinc-50 rounded-xl border border-zinc-200">
+          <div><b class="text-emerald-600 font-mono">AE</b> Excel·lent</div>
+          <div class="flex items-center gap-1.5">
+            <span>&ge;</span>
+            <input type="number" id="th_ae" step="0.05" class="w-20 text-center font-mono font-bold bg-white border border-zinc-300 rounded-lg p-1.5">
+          </div>
+        </div>
+      </div>
+      <div class="px-6 py-3.5 bg-zinc-50 border-t border-zinc-200 flex justify-between items-center text-xs">
+        <button onclick="resetDefaultThresholds()" class="text-zinc-500 hover:text-zinc-900 font-semibold underline">Restablir per defecte</button>
+        <div class="flex gap-2">
+          <button onclick="closeThresholdsModal()" class="px-3.5 py-1.5 border border-zinc-300 rounded-xl font-semibold text-zinc-600">Cancel·lar</button>
+          <button onclick="saveThresholdsModal()" class="px-4 py-1.5 bg-zinc-900 hover:bg-zinc-800 text-white rounded-xl font-semibold">Desar</button>
+        </div>
+      </div>
     </div>
   </div>
 
+  <!-- MODAL CREAR CLASSE -->
   <div id="newGroupModal" class="fixed inset-0 bg-zinc-950/40 backdrop-blur-xs z-50 flex items-center justify-center p-4 hidden no-print">
-    <div class="bg-white rounded-3xl shadow-card max-w-md w-full overflow-hidden border border-zinc-200 p-6 space-y-4 text-xs">
-      <h3 class="text-sm font-bold">Crear Nova Classe</h3>
-      <input type="text" id="modalNewGroupNameInput" placeholder="Ex: 1r ESO A" class="w-full border rounded-xl p-2.5 font-semibold outline-none">
-      <div class="flex justify-end gap-2"><button onclick="closeNewGroupModal()" class="px-3 py-1.5 border rounded-xl">Cancel·lar</button><button onclick="confirmCreateNewGroup()" class="px-4 py-2 bg-zinc-900 text-white rounded-xl font-semibold">Crear</button></div>
+    <div class="bg-white rounded-3xl shadow-card max-w-md w-full overflow-hidden border border-zinc-200">
+      <div class="px-6 py-4 bg-zinc-900 text-white flex justify-between items-center">
+        <h3 class="text-sm font-bold flex items-center gap-2"><i class="fa-solid fa-graduation-cap text-zinc-400"></i> Crear Nova Classe</h3>
+        <button onclick="closeNewGroupModal()" class="text-zinc-400 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div class="p-6 space-y-4 text-xs">
+        <label class="block font-semibold text-zinc-700">Nom del Grup o Curs</label>
+        <input type="text" id="modalNewGroupNameInput" placeholder="Ex: 1r ESO C, 2n ESO A..." class="w-full text-sm border border-zinc-200 rounded-xl p-2.5 outline-none font-semibold">
+      </div>
+      <div class="px-6 py-3 bg-zinc-50 border-t border-zinc-200 flex justify-end gap-2 text-xs">
+        <button onclick="closeNewGroupModal()" class="px-4 py-2 border border-zinc-300 rounded-xl font-semibold text-zinc-600">Cancel·lar</button>
+        <button onclick="confirmCreateNewGroup()" class="px-4 py-2 bg-zinc-900 hover:bg-zinc-800 text-white rounded-xl font-semibold">Crear Classe</button>
+      </div>
     </div>
   </div>
 
+  <!-- MODAL SdA -->
   <div id="sdaModal" class="fixed inset-0 bg-zinc-950/40 backdrop-blur-xs z-50 flex items-center justify-center p-4 hidden no-print">
     <div class="bg-white rounded-3xl shadow-card max-w-3xl w-full max-h-[90vh] flex flex-col overflow-hidden border border-zinc-200">
-      <div class="px-6 py-4 bg-zinc-900 text-white flex justify-between items-center"><h3 class="text-sm font-bold">Configuració SdA</h3><button onclick="closeSdaModal()"><i class="fa-solid fa-xmark"></i></button></div>
-      <div class="p-6 overflow-y-auto space-y-4 flex-1 text-xs">
-        <div class="grid grid-cols-3 gap-3">
-          <div class="col-span-2"><label class="block font-semibold mb-1">Títol</label><input type="text" id="modalSdaTitle" class="w-full border rounded-xl p-2 font-semibold"></div>
-          <div><label class="block font-semibold mb-1">Pes (%)</label><input type="number" id="modalSdaTrimWeight" value="50" class="w-full border rounded-xl p-2 text-center font-mono font-bold"></div>
-        </div>
-        <div class="bg-zinc-50 border p-3 rounded-2xl"><span class="font-bold text-xs uppercase">Grups d'aplicació:</span><div id="modalTargetGroupsContainer" class="flex flex-wrap gap-2 pt-2"></div></div>
-        <div id="modalCeCardsContainer" class="space-y-3"></div>
+      <div class="px-6 py-4 bg-zinc-900 text-white flex justify-between items-center">
+        <h3 class="text-sm font-bold">Configuració de la Situació d'Aprenentatge (SdA)</h3>
+        <button onclick="closeSdaModal()" class="text-zinc-400 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
       </div>
-      <div class="px-6 py-3 bg-zinc-50 border-t flex justify-end gap-2 text-xs"><button onclick="closeSdaModal()" class="px-3 py-1.5 border rounded-xl">Cancel·lar</button><button onclick="saveSdaFromModal()" class="px-4 py-1.5 bg-zinc-900 text-white rounded-xl font-semibold">Desar</button></div>
+      <div class="p-6 overflow-y-auto space-y-5 flex-1 text-xs">
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+          <div class="sm:col-span-2">
+            <label class="block font-semibold text-zinc-700 mb-1">Títol de la SdA</label>
+            <input type="text" id="modalSdaTitle" class="w-full text-sm border border-zinc-200 rounded-xl p-2.5 outline-none font-semibold">
+          </div>
+          <div>
+            <label class="block font-semibold text-zinc-800 mb-1">Pes al Trimestre (%)</label>
+            <input type="number" id="modalSdaTrimWeight" value="50" min="0" max="100" class="w-full text-sm border border-zinc-200 rounded-xl p-2.5 text-center font-mono font-bold">
+          </div>
+        </div>
+
+        <div class="bg-zinc-50 border border-zinc-200 p-3.5 rounded-2xl space-y-2">
+          <div class="flex justify-between items-center">
+            <span class="font-bold text-zinc-700 text-[11px] uppercase tracking-wider">A quins grups s'aplica?</span>
+            <div class="flex gap-2 text-[11px]">
+              <button type="button" onclick="selectAllModalGroups(true)" class="font-semibold text-zinc-900 hover:underline">Totes</button>
+              <span class="text-zinc-300">|</span>
+              <button type="button" onclick="selectAllModalGroups(false)" class="font-semibold text-zinc-400 hover:underline">Cap</button>
+            </div>
+          </div>
+          <div id="modalTargetGroupsContainer" class="flex flex-wrap gap-2 pt-1"></div>
+        </div>
+
+        <div class="border-t border-zinc-200 pt-4 space-y-3">
+          <div class="flex items-center justify-between">
+            <span class="font-bold text-zinc-800 text-[11px] uppercase tracking-wider">Competències Específiques &amp; OAs</span>
+            <span id="modalWeightSumBadge" class="text-xs font-mono font-bold px-2 py-0.5 rounded-md">Total: 0%</span>
+          </div>
+          <div id="modalCeCardsContainer" class="space-y-3.5"></div>
+        </div>
+      </div>
+      <div class="px-6 py-3.5 bg-zinc-50 border-t border-zinc-200 flex justify-end gap-2 text-xs">
+        <button onclick="closeSdaModal()" class="px-3.5 py-1.5 border border-zinc-300 rounded-xl font-semibold text-zinc-600">Cancel·lar</button>
+        <button onclick="saveSdaFromModal()" class="px-4 py-1.5 bg-zinc-900 hover:bg-zinc-800 text-white rounded-xl font-semibold">Desar SdA</button>
+      </div>
     </div>
   </div>
 
@@ -529,7 +690,7 @@
 
       // Validació de l'usuari predeterminat
       if (user.toLowerCase() === "docent" && pass !== "ef2026") {
-        errBox.textContent = "Contrasenya incorrecta per a l'usuari 'docent'.";
+        errBox.textContent = "Contrasenya incorrecta per a aquest usuari.";
         errBox.classList.remove('hidden');
         return;
       }
@@ -618,6 +779,113 @@
 
   <!-- ================= LÒGICA I MOTOR D'AVALUACIÓ ================= -->
   <script>
+    const CE_COLOR_THEMES = {
+      CE1: { 
+        header: 'bg-sky-100 text-sky-950 border-sky-200', 
+        critHeader: 'bg-sky-50 text-sky-800 border-sky-200', 
+        weightHeader: 'bg-sky-100/70 text-sky-900 border-sky-200', 
+        scoreCe: 'bg-sky-100 text-sky-950 font-bold border-sky-300', 
+        levelCe: 'bg-sky-50 border-sky-200',
+        oaTints: [
+          { header: 'bg-sky-50/80 text-sky-900', cell: 'bg-sky-50/25' },
+          { header: 'bg-sky-100/70 text-sky-900', cell: 'bg-sky-100/30' },
+          { header: 'bg-blue-50/80 text-blue-900', cell: 'bg-blue-50/25' },
+          { header: 'bg-cyan-50/80 text-cyan-900', cell: 'bg-cyan-50/25' }
+        ]
+      },
+      CE2: { 
+        header: 'bg-emerald-100 text-emerald-950 border-emerald-200', 
+        critHeader: 'bg-emerald-50 text-emerald-800 border-emerald-200', 
+        weightHeader: 'bg-emerald-100/70 text-emerald-900 border-emerald-200', 
+        scoreCe: 'bg-emerald-100 text-emerald-950 font-bold border-emerald-300', 
+        levelCe: 'bg-emerald-50 border-emerald-200',
+        oaTints: [
+          { header: 'bg-emerald-50/80 text-emerald-900', cell: 'bg-emerald-50/25' },
+          { header: 'bg-emerald-100/70 text-emerald-900', cell: 'bg-emerald-100/30' },
+          { header: 'bg-teal-50/80 text-teal-900', cell: 'bg-teal-50/25' },
+          { header: 'bg-green-50/80 text-green-900', cell: 'bg-green-50/25' }
+        ]
+      },
+      CE3: { 
+        header: 'bg-purple-100 text-purple-950 border-purple-200', 
+        critHeader: 'bg-purple-50 text-purple-800 border-purple-200', 
+        weightHeader: 'bg-purple-100/70 text-purple-900 border-purple-200', 
+        scoreCe: 'bg-purple-100 text-purple-950 font-bold border-purple-300', 
+        levelCe: 'bg-purple-50 border-purple-200',
+        oaTints: [
+          { header: 'bg-purple-50/80 text-purple-900', cell: 'bg-purple-50/25' },
+          { header: 'bg-purple-100/70 text-purple-900', cell: 'bg-purple-100/30' },
+          { header: 'bg-fuchsia-50/80 text-fuchsia-900', cell: 'bg-fuchsia-50/25' },
+          { header: 'bg-violet-50/80 text-violet-900', cell: 'bg-violet-50/25' }
+        ]
+      },
+      CE4: { 
+        header: 'bg-amber-100 text-amber-950 border-amber-200', 
+        critHeader: 'bg-amber-50 text-amber-800 border-amber-200', 
+        weightHeader: 'bg-amber-100/70 text-amber-900 border-amber-200', 
+        scoreCe: 'bg-amber-100 text-amber-950 font-bold border-amber-300', 
+        levelCe: 'bg-amber-50 border-amber-200',
+        oaTints: [
+          { header: 'bg-amber-50/80 text-amber-900', cell: 'bg-amber-50/25' },
+          { header: 'bg-amber-100/70 text-amber-900', cell: 'bg-amber-100/30' },
+          { header: 'bg-orange-50/80 text-orange-900', cell: 'bg-orange-50/25' },
+          { header: 'bg-yellow-50/80 text-yellow-900', cell: 'bg-yellow-50/25' }
+        ]
+      },
+      CE5: { 
+        header: 'bg-rose-100 text-rose-950 border-rose-200', 
+        critHeader: 'bg-rose-50 text-rose-800 border-rose-200', 
+        weightHeader: 'bg-rose-100/70 text-rose-900 border-rose-200', 
+        scoreCe: 'bg-rose-100 text-rose-950 font-bold border-rose-300', 
+        levelCe: 'bg-rose-50 border-rose-200',
+        oaTints: [
+          { header: 'bg-rose-50/80 text-rose-900', cell: 'bg-rose-50/25' },
+          { header: 'bg-rose-100/70 text-rose-900', cell: 'bg-rose-100/30' },
+          { header: 'bg-pink-50/80 text-pink-900', cell: 'bg-pink-50/25' },
+          { header: 'bg-red-50/80 text-red-900', cell: 'bg-red-50/25' }
+        ]
+      }
+    };
+
+    function getOaColorTheme(ceId, oaIndex) {
+      const theme = CE_COLOR_THEMES[ceId] || CE_COLOR_THEMES.CE1;
+      const tints = theme.oaTints || [{ header: 'bg-zinc-50', cell: 'bg-white' }];
+      return tints[oaIndex % tints.length];
+    }
+
+    const CURRICULAR_CRITERIA_CATALOG = {
+      CE1: [
+        { code: "1.1", label: "1.1. Executar activitats i exercicis orientats a l’adquisició d’un estil de vida actiu i saludable." },
+        { code: "1.2", label: "1.2. Identificar els elements d’un pla de treball de la condició física a través de la pràctica motriu." },
+        { code: "1.3", label: "1.3. Incorporar hàbits saludables (alimentació, descans, higiene) valorant la millora integral." },
+        { code: "1.4", label: "1.4. Protocols d’actuació de prevenció i primers auxilis." }
+      ],
+      CE2: [
+        { code: "2.1", label: "2.1. Executar habilitats motrius específiques en reptes i formes jugades." },
+        { code: "2.2", label: "2.2. Resoldre situacions motrius aplicant habilitats tècniques i estratègiques." }
+      ],
+      CE3: [
+        { code: "3.1", label: "3.1. Expressar emocions i missatges mitjançant el cos." },
+        { code: "3.2", label: "3.2. Representar composicions col·lectives amb base musical." }
+      ],
+      CE4: [
+        { code: "4.1", label: "4.1. Realitzar activitat física en el medi natural minimitzant l'empremta." },
+        { code: "4.2", label: "4.2. Aplicar normes de seguretat en l'entorn." }
+      ],
+      CE5: [
+        { code: "5.1", label: "5.1. Aplicar els valors positius de l'esport i el joc net." },
+        { code: "5.2", label: "5.2. Mostrar actituds de respecte i empatia." }
+      ]
+    };
+
+    const OFFICIAL_CES = [
+      { id: 'CE1', name: 'CE1. Estil de vida actiu i saludable', short: 'Estil de vida' },
+      { id: 'CE2', name: 'CE2. Situacions motrius i joc', short: 'Motricitat' },
+      { id: 'CE3', name: 'CE3. Expressió corporal i dansa', short: 'Expressió' },
+      { id: 'CE4', name: 'CE4. Medi natural i entorn', short: 'Entorn' },
+      { id: 'CE5', name: 'CE5. Valors, inclusió i convivència', short: 'Valors' }
+    ];
+
     const DEFAULT_THRESHOLDS = { epa: 1.0, as: 2.0, an: 3.0, ae: 4.0 };
     const DEFAULT_FINAL_CE_WEIGHTS = { CE1: 20, CE2: 20, CE3: 20, CE4: 20, CE5: 20 };
     const DEFAULT_FINAL_TRIM_WEIGHTS = { t1: 33.33, t2: 33.33, t3: 33.34 };
@@ -698,6 +966,7 @@
 
     let radarInstance = null;
     let chartStatsLevelsInstance = null;
+    let chartStatsCesInstance = null;
 
     function loadFromStorage() {
       try {
@@ -762,15 +1031,15 @@
         const activeSda = currentTrimSdas[0] || null;
 
         return `
-          <div class="bg-white rounded-2xl border border-zinc-200 p-5 shadow-card hover:border-zinc-300 transition flex flex-col justify-between">
-            <div class="space-y-3">
-              <div class="flex items-center justify-between">
+          <div class="bg-white rounded-2xl border border-zinc-200/90 p-5 shadow-card hover:border-zinc-300 transition flex flex-col justify-between">
+            <div class="space-y-3.5">
+              <div class="flex items-start justify-between">
                 <div class="flex items-center gap-2.5">
                   <div class="w-9 h-9 rounded-xl bg-zinc-900 text-white flex items-center justify-center text-xs font-bold font-mono">
                     ${group.name.slice(0, 2)}
                   </div>
                   <div>
-                    <h4 class="text-sm font-bold text-zinc-900">${group.name}</h4>
+                    <h4 class="text-sm font-bold text-zinc-900 leading-tight">${group.name}</h4>
                     <span class="text-[11px] text-zinc-400 font-medium">${studentCount} alumnes</span>
                   </div>
                 </div>
@@ -778,13 +1047,23 @@
                   <i class="fa-regular fa-trash-can text-xs"></i>
                 </button>
               </div>
-              <div class="bg-zinc-50 rounded-xl p-2.5 text-xs text-zinc-600 font-medium border border-zinc-100">
-                <i class="fa-regular fa-folder mr-1 text-zinc-400"></i> ${activeSda ? activeSda.title : 'Sense SdA activa'}
+
+              <div class="bg-zinc-50/80 rounded-xl p-3 border border-zinc-100 space-y-2">
+                <div class="flex items-center justify-between text-xs">
+                  <span class="text-zinc-600 font-medium truncate max-w-[160px]">
+                    <i class="fa-regular fa-folder text-zinc-400 mr-1"></i> ${activeSda ? activeSda.title : 'Sense SdA activa'}
+                  </span>
+                </div>
               </div>
             </div>
-            <div class="pt-4 mt-3 border-t border-zinc-100 flex items-center justify-between">
-              <button onclick="enterClass('${gId}'); switchView('roster');" class="text-xs font-semibold text-zinc-600 hover:text-zinc-900 bg-zinc-50 px-3 py-1.5 rounded-xl border border-zinc-200">Alumnat</button>
-              <button onclick="enterClass('${gId}')" class="text-xs font-bold text-white bg-zinc-900 hover:bg-zinc-800 px-3.5 py-1.5 rounded-xl">Qualificar &rarr;</button>
+
+            <div class="pt-4 mt-3 border-t border-zinc-100 flex items-center justify-between gap-2">
+              <button onclick="enterClass('${gId}'); switchView('roster');" class="inline-flex items-center gap-1 text-xs font-semibold text-zinc-600 hover:text-zinc-900 bg-zinc-50 hover:bg-zinc-100 px-3 py-1.5 rounded-xl border border-zinc-200/80 transition">
+                <i class="fa-solid fa-users text-zinc-400 text-[10px]"></i> Llista
+              </button>
+              <button onclick="enterClass('${gId}')" class="inline-flex items-center gap-1 text-xs font-bold text-white bg-zinc-900 hover:bg-zinc-800 px-3.5 py-1.5 rounded-xl shadow-subtle transition">
+                Qualificar <i class="fa-solid fa-arrow-right text-[9px] ml-0.5"></i>
+              </button>
             </div>
           </div>
         `;
@@ -961,6 +1240,7 @@
       sel.innerHTML = trimSdas.map(s => `<option value="${s.id}">${s.title} (${s.trimWeight || 0}%)</option>`).join('');
     }
 
+    // GRAELLA DE QUALIFICACIÓ SdA COMPLETA (4 FILES DE CAPÇALERA)
     window.renderSdaGrid = function() {
       const curGroup = getCurrentGroup();
       const trimSdas = (curGroup.sdas || []).filter(s => s.trim === window.appState.currentTrim);
@@ -984,54 +1264,79 @@
         <div class="flex items-center gap-2">
           <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
           <span class="font-bold tracking-tight uppercase">${sda.title}</span>
-          <span class="text-zinc-400 font-mono text-[11px] bg-zinc-800 px-2 py-0.5 rounded">Pes: ${sda.trimWeight || 0}%</span>
+          <span class="text-zinc-400 font-mono text-[11px] bg-zinc-800 px-2 py-0.5 rounded border border-zinc-700">Pes: ${sda.trimWeight || 0}%</span>
         </div>
         <div class="text-[11px] text-zinc-400 font-mono">${curGroup.name} · T${sda.trim}</div>
       `;
 
       const activeCes = OFFICIAL_CES.filter(ce => sda.competences && sda.competences[ce.id] && sda.competences[ce.id].active);
 
+      // FILA 1: Capçalera CE
       let r1 = `<tr class="border-b border-zinc-200">
-        <th rowspan="3" class="p-2.5 w-12 text-center font-mono text-zinc-500 font-bold bg-zinc-100 border-r border-zinc-200 sticky left-0 z-30">#</th>
-        <th rowspan="3" class="p-2.5 w-56 font-bold text-zinc-900 bg-zinc-100 border-r border-zinc-200 sticky left-12 z-30">Alumne/a</th>`;
+        <th rowspan="4" class="py-2.5 px-2.5 w-12 min-w-[48px] max-w-[48px] text-center font-mono text-zinc-500 font-bold bg-zinc-100 border-r border-zinc-200 sticky top-0 left-0 z-40">#</th>
+        <th rowspan="4" class="py-2.5 px-3.5 w-56 min-w-[224px] max-w-[224px] font-bold text-zinc-900 bg-zinc-100 border-r border-zinc-200 sticky top-0 left-12 z-40 shadow-[4px_0_8px_-4px_rgba(0,0,0,0.06)]">Alumne/a</th>`;
       
       activeCes.forEach(ce => {
         const theme = CE_COLOR_THEMES[ce.id] || CE_COLOR_THEMES.CE1;
         const conf = sda.competences[ce.id];
         const oasCount = (conf.oas && conf.oas.length > 0) ? conf.oas.length : 1;
-        r1 += `<th colspan="${oasCount + 2}" class="p-2 text-center border-r border-zinc-200 font-bold ${theme.header}">${ce.name}</th>`;
+        r1 += `<th colspan="${oasCount + 2}" class="py-2.5 px-3 text-center border-r border-zinc-200 font-bold text-xs ${theme.header}">${ce.name}</th>`;
       });
-      r1 += `<th colspan="2" class="p-2 text-center bg-zinc-900 text-white font-bold uppercase text-[11px]">SdA</th></tr>`;
+      r1 += `<th colspan="2" class="py-2.5 px-3 text-center border-l border-zinc-300 bg-zinc-900 text-white font-bold uppercase tracking-wider text-[11px]">Qualificació SdA</th></tr>`;
 
-      let r2 = `<tr class="border-b border-zinc-200 text-[10px]">`;
+      // FILA 2: Criteris oficials
+      let r2 = `<tr class="border-b border-zinc-200 text-[11px]">`;
+      activeCes.forEach(ce => {
+        const theme = CE_COLOR_THEMES[ce.id] || CE_COLOR_THEMES.CE1;
+        const conf = sda.competences[ce.id];
+        const oasCount = (conf.oas && conf.oas.length > 0) ? conf.oas.length : 1;
+        r2 += `<th colspan="${oasCount}" class="py-1 px-2 text-center border-r border-zinc-200 font-mono text-[10px] ${theme.critHeader} font-semibold">${conf.curricularCriteria || '<span class="text-zinc-300 italic font-normal">Sense criteris</span>'}</th>`;
+        r2 += `<th colspan="2" rowspan="2" class="py-1 px-2 text-center border-r border-zinc-200 ${theme.scoreCe} text-[11px]">Assoliment ${ce.id}</th>`;
+      });
+      r2 += `<th colspan="2" rowspan="2" class="py-1 px-2 text-center border-l border-zinc-300 bg-zinc-800 text-zinc-200 font-semibold text-[11px]">Consolidació SdA</th></tr>`;
+
+      // FILA 3: OAs
+      let r3 = `<tr class="border-b border-zinc-200 text-[10px]">`;
       activeCes.forEach(ce => {
         const conf = sda.competences[ce.id];
         if (conf.oas && conf.oas.length > 0) {
-          conf.oas.forEach(oa => {
-            r2 += `<th class="p-1.5 border-r border-zinc-200 font-medium truncate max-w-[100px]" title="${oa.label}">${oa.label}</th>`;
+          conf.oas.forEach((oa, oaIdx) => {
+            const oaTheme = getOaColorTheme(ce.id, oaIdx);
+            r3 += `<th class="py-1.5 px-2 border-r border-zinc-200 font-medium max-w-[120px] truncate ${oaTheme.header}" title="${oa.label}">${oa.label}</th>`;
           });
         } else {
-          r2 += `<th class="p-1.5 border-r border-zinc-200 italic font-normal">Directa</th>`;
+          const oaTheme = getOaColorTheme(ce.id, 0);
+          r3 += `<th class="py-1.5 px-2 border-r border-zinc-200 font-normal italic ${oaTheme.header}">Avaluació directa</th>`;
         }
-        r2 += `<th colspan="2" class="p-1 text-center border-r border-zinc-200 font-bold">Assoliment</th>`;
       });
-      r2 += `<th colspan="2" class="p-1 text-center bg-zinc-800 text-zinc-200 font-bold">Total</th></tr>`;
+      r3 += `</tr>`;
 
-      let r3 = `<tr class="border-b border-zinc-200 text-xs">`;
+      // FILA 4: Pesos
+      let r4 = `<tr class="border-b border-zinc-200 text-xs font-semibold">`;
       activeCes.forEach(ce => {
+        const theme = CE_COLOR_THEMES[ce.id] || CE_COLOR_THEMES.CE1;
         const conf = sda.competences[ce.id];
         if (conf.oas && conf.oas.length > 0) {
-          conf.oas.forEach(oa => {
-            r3 += `<th class="p-1 text-center border-r border-zinc-200 font-mono text-[10px]">${oa.weight || 0}%</th>`;
+          conf.oas.forEach((oa, oaIdx) => {
+            const oaTheme = getOaColorTheme(ce.id, oaIdx);
+            r4 += `<th class="py-1 px-1.5 text-center border-r border-zinc-200 font-mono text-[10px] ${oaTheme.header}">${oa.weight || 0}%</th>`;
           });
         } else {
-          r3 += `<th class="p-1 text-center border-r border-zinc-200 font-mono text-[10px]">100%</th>`;
+          const oaTheme = getOaColorTheme(ce.id, 0);
+          r4 += `<th class="py-1 px-1.5 text-center border-r border-zinc-200 font-mono text-[10px] ${oaTheme.header}">100%</th>`;
         }
-        r3 += `<th class="p-1 text-center border-r border-zinc-200 font-mono text-[10px]">Nota</th><th class="p-1 text-center border-r border-zinc-200 text-[10px]">Nivell</th>`;
+        r4 += `<th class="py-1 px-2 text-center border-r border-zinc-200 ${theme.weightHeader} font-mono">${conf.weight || 0}%</th>`;
+        r4 += `<th class="py-1 px-2 text-center border-r border-zinc-200 ${theme.weightHeader} text-[10px]">Nivell</th>`;
       });
-      r3 += `<th class="p-1 text-center bg-zinc-900 text-white font-mono text-[10px]">Nota</th><th class="p-1 text-center bg-zinc-900 text-white text-[10px]">Nivell</th></tr>`;
+      r4 += `<th class="py-1 px-2 text-center border-l border-zinc-300 bg-zinc-900 text-white font-mono text-[10px]">Nota</th>`;
+      r4 += `<th class="py-1 px-2 text-center bg-zinc-900 text-white text-[10px]">Nivell</th></tr>`;
 
-      head.innerHTML = r1 + r2 + r3;
+      head.innerHTML = r1 + r2 + r3 + r4;
+
+      if (students.length === 0) {
+        body.innerHTML = `<tr><td colspan="30" class="p-8 text-center text-zinc-400 text-xs">Sense alumnes registrats.</td></tr>`;
+        return;
+      }
 
       const currentGrades = (curGroup.grades && curGroup.grades[sda.id]) || {};
       let rowsHtml = '';
@@ -1039,10 +1344,16 @@
       students.forEach((st, rIdx) => {
         const stGrades = currentGrades[st.id] || {};
         let colCounter = 0;
+        const isPenalized = !!curGroup.attendancePenalty?.[window.appState.currentTrim]?.[st.id];
 
-        rowsHtml += `<tr class="hover:bg-zinc-50/70 transition-colors">
-          <td class="p-2 text-center text-zinc-400 font-mono border-r border-zinc-200 bg-white sticky left-0 z-10">${rIdx + 1}</td>
-          <td class="p-2 font-semibold text-zinc-900 border-r border-zinc-200 bg-white sticky left-12 z-10 truncate">${st.name}</td>`;
+        rowsHtml += `<tr id="row_${sda.id}_${st.id}" class="hover:bg-zinc-50/70 transition-colors group">
+          <td class="py-1 px-2.5 w-12 min-w-[48px] max-w-[48px] text-center text-zinc-400 font-mono text-xs border-r border-zinc-200 bg-white sticky left-0 z-20">${rIdx + 1}</td>
+          <td class="py-1 px-3.5 w-56 min-w-[224px] max-w-[224px] font-semibold text-zinc-900 border-r border-zinc-200 bg-white sticky left-12 z-20 shadow-[4px_0_8px_-4px_rgba(0,0,0,0.06)]">
+            <div class="flex items-center justify-between gap-1.5">
+              <span class="truncate text-xs" title="${st.name}">${st.name}</span>
+              ${isPenalized ? '<span class="inline-flex items-center text-[9px] font-bold text-rose-700 bg-rose-50 border border-rose-200 px-1 rounded shrink-0"><i class="fa-solid fa-person-running mr-0.5"></i>< %</span>' : ''}
+            </div>
+          </td>`;
 
         activeCes.forEach(ce => {
           const theme = CE_COLOR_THEMES[ce.id] || CE_COLOR_THEMES.CE1;
@@ -1051,41 +1362,59 @@
           let lvl = getLevel(ceScore);
 
           if (conf.oas && conf.oas.length > 0) {
-            conf.oas.forEach(oa => {
+            conf.oas.forEach((oa, oaIdx) => {
+              const oaTheme = getOaColorTheme(ce.id, oaIdx);
               const gradeKey = `${ce.id}_${oa.id}`;
               const val = stGrades[gradeKey] !== undefined ? stGrades[gradeKey] : '';
-              rowsHtml += `<td class="p-0.5 border-r border-zinc-200 text-center">
-                <input type="text" value="${val}" data-row="${rIdx}" data-col="${colCounter}"
+              const colorClass = getScoreColorClass(val);
+
+              rowsHtml += `<td class="p-0.5 border-r border-zinc-200 text-center ${oaTheme.cell}">
+                <input type="text" value="${val !== '' ? val : ''}"
+                  data-row="${rIdx}" data-col="${colCounter}"
                   onkeydown="handleSpreadsheetInput(event, ${rIdx}, ${colCounter}, '${sda.id}', ${st.id}, '${gradeKey}')"
+                  onfocus="this.select()"
                   onblur="saveCellCommit('${sda.id}', ${st.id}, '${gradeKey}', this)"
-                  class="grade-input w-full h-8 text-center rounded font-mono text-xs outline-none transition focus:ring-1 focus:ring-zinc-900 ${getScoreColorClass(val)}">
+                  class="grade-cell-input w-full h-8 text-center rounded-lg font-mono text-xs outline-none transition focus:ring-1 focus:ring-zinc-900 focus:bg-white ${colorClass}">
               </td>`;
               colCounter++;
             });
           } else {
+            const oaTheme = getOaColorTheme(ce.id, 0);
             const gradeKey = `${ce.id}_direct`;
             const val = stGrades[gradeKey] !== undefined ? stGrades[gradeKey] : '';
-            rowsHtml += `<td class="p-0.5 border-r border-zinc-200 text-center">
-              <input type="text" value="${val}" data-row="${rIdx}" data-col="${colCounter}"
+            const colorClass = getScoreColorClass(val);
+
+            rowsHtml += `<td class="p-0.5 border-r border-zinc-200 text-center ${oaTheme.cell}">
+              <input type="text" value="${val !== '' ? val : ''}"
+                data-row="${rIdx}" data-col="${colCounter}"
                 onkeydown="handleSpreadsheetInput(event, ${rIdx}, ${colCounter}, '${sda.id}', ${st.id}, '${gradeKey}')"
+                onfocus="this.select()"
                 onblur="saveCellCommit('${sda.id}', ${st.id}, '${gradeKey}', this)"
-                class="grade-input w-full h-8 text-center rounded font-mono text-xs outline-none transition focus:ring-1 focus:ring-zinc-900 ${getScoreColorClass(val)}">
+                class="grade-cell-input w-full h-8 text-center rounded-lg font-mono text-xs outline-none transition focus:ring-1 focus:ring-zinc-900 focus:bg-white ${colorClass}">
             </td>`;
             colCounter++;
           }
 
           rowsHtml += `
-            <td id="cell_${sda.id}_${st.id}_${ce.id}_score" class="p-1 text-center font-mono font-bold border-r border-zinc-200 ${theme.scoreCe}">${ceScore !== null ? ceScore.toFixed(2) : '—'}</td>
-            <td id="cell_${sda.id}_${st.id}_${ce.id}_lvl" class="p-1 text-center border-r border-zinc-200 ${theme.levelCe}"><span class="px-1.5 py-0.5 rounded text-[10px] font-bold ${lvl.badge}">${lvl.code}</span></td>
+            <td id="cell_${sda.id}_${st.id}_${ce.id}_score" class="py-1 px-2 text-center font-mono font-bold border-r border-zinc-200 ${theme.scoreCe} text-xs">
+              ${ceScore !== null ? ceScore.toFixed(2) : '<span class="text-zinc-300 font-normal">—</span>'}
+            </td>
+            <td id="cell_${sda.id}_${st.id}_${ce.id}_lvl" class="py-1 px-2 text-center border-r border-zinc-200 ${theme.levelCe}">
+              <span class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-bold ring-1 ring-inset ${lvl.badge}">${lvl.code}</span>
+            </td>
           `;
         });
 
-        const overall = getStudentOverallSdaScore(sda, st.id);
-        const ovLvl = getLevel(overall);
+        const overallSdaScore = getStudentOverallSdaScore(sda, st.id);
+        const overallSdaLvl = getLevel(overallSdaScore);
 
         rowsHtml += `
-          <td id="cell_${sda.id}_${st.id}_ov_score" class="p-1 text-center font-mono font-black border-l border-zinc-300 bg-zinc-50">${overall !== null ? overall.toFixed(2) : '—'}</td>
-          <td id="cell_${sda.id}_${st.id}_ov_lvl" class="p-1 text-center bg-zinc-50"><span class="px-2 py-0.5 rounded text-[10px] font-bold ${ovLvl.badge}">${ovLvl.code}</span></td>
+          <td id="cell_${sda.id}_${st.id}_overall_score" class="py-1 px-2.5 text-center font-mono font-black text-zinc-900 border-l border-zinc-300 bg-zinc-50 text-xs">
+            ${overallSdaScore !== null ? overallSdaScore.toFixed(2) : '<span class="text-zinc-300 font-normal">—</span>'}
+          </td>
+          <td id="cell_${sda.id}_${st.id}_overall_lvl" class="py-1 px-2 text-center bg-zinc-50">
+            <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold ring-1 ring-inset ${overallSdaLvl.badge}">${overallSdaLvl.code}</span>
+          </td>
         </tr>`;
       });
 
@@ -1111,7 +1440,7 @@
     };
 
     function moveFocus(r, c) {
-      const next = document.querySelector(`input.grade-input[data-row="${r}"][data-col="${c}"]`);
+      const next = document.querySelector(`input.grade-cell-input[data-row="${r}"][data-col="${c}"]`);
       if (next) { next.focus(); next.select(); }
     }
 
@@ -1146,7 +1475,7 @@
         window.syncGradeToCloud(window.appData.activeGroupId, sdaId, stId, key, val);
       }
 
-      inputEl.className = `grade-input w-full h-8 text-center rounded font-mono text-xs outline-none transition focus:ring-1 focus:ring-zinc-900 ${getScoreColorClass(val)}`;
+      inputEl.className = `grade-cell-input w-full h-8 text-center rounded-lg font-mono text-xs outline-none transition focus:ring-1 focus:ring-zinc-900 focus:bg-white ${getScoreColorClass(val)}`;
       updateLiveRow(sdaId, stId);
     };
 
@@ -1160,16 +1489,16 @@
         const lvl = getLevel(sc);
         const cellSc = document.getElementById(`cell_${sda.id}_${stId}_${ce.id}_score`);
         const cellLvl = document.getElementById(`cell_${sda.id}_${stId}_${ce.id}_lvl`);
-        if (cellSc) cellSc.textContent = sc !== null ? sc.toFixed(2) : '—';
-        if (cellLvl) cellLvl.innerHTML = `<span class="px-1.5 py-0.5 rounded text-[10px] font-bold ${lvl.badge}">${lvl.code}</span>`;
+        if (cellSc) cellSc.innerHTML = sc !== null ? sc.toFixed(2) : '<span class="text-zinc-300 font-normal">—</span>';
+        if (cellLvl) cellLvl.innerHTML = `<span class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-bold ring-1 ring-inset ${lvl.badge}">${lvl.code}</span>`;
       });
 
       const ov = getStudentOverallSdaScore(sda, stId);
       const ovLvl = getLevel(ov);
-      const cellOvSc = document.getElementById(`cell_${sda.id}_${stId}_ov_score`);
-      const cellOvLvl = document.getElementById(`cell_${sda.id}_${stId}_ov_lvl`);
-      if (cellOvSc) cellOvSc.textContent = ov !== null ? ov.toFixed(2) : '—';
-      if (cellOvLvl) cellOvLvl.innerHTML = `<span class="px-2 py-0.5 rounded text-[10px] font-bold ${ovLvl.badge}">${ovLvl.code}</span>`;
+      const cellOvSc = document.getElementById(`cell_${sda.id}_${stId}_overall_score`);
+      const cellOvLvl = document.getElementById(`cell_${sda.id}_${stId}_overall_lvl`);
+      if (cellOvSc) cellOvSc.innerHTML = ov !== null ? ov.toFixed(2) : '<span class="text-zinc-300 font-normal">—</span>';
+      if (cellOvLvl) cellOvLvl.innerHTML = `<span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold ring-1 ring-inset ${ovLvl.badge}">${ovLvl.code}</span>`;
     }
 
     window.setTrim = function(t) {
@@ -1191,10 +1520,10 @@
         const btn = document.getElementById(`tabBtn${id.charAt(0).toUpperCase() + id.slice(1)}`);
         const sec = document.getElementById(`view${id.charAt(0).toUpperCase() + id.slice(1)}`);
         if (id === view) {
-          if (btn) btn.className = "px-3 py-1 rounded-md text-zinc-900 bg-zinc-100";
+          if (btn) btn.className = "px-3 py-1 rounded-md text-zinc-900 bg-zinc-100 transition";
           if (sec) sec.classList.remove('hidden');
         } else {
-          if (btn) btn.className = "px-3 py-1 rounded-md text-zinc-500 hover:text-zinc-900";
+          if (btn) btn.className = "px-3 py-1 rounded-md text-zinc-500 hover:text-zinc-900 hover:bg-zinc-50 transition";
           if (sec) sec.classList.add('hidden');
         }
       });
@@ -1217,7 +1546,7 @@
       tabBadge.textContent = count;
 
       if (!curGroup.students || curGroup.students.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="3" class="p-8 text-center text-zinc-400 text-xs">Cap alumne registrat.</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="3" class="p-8 text-center text-zinc-400 text-xs">Cap alumne registrat. Afegeix-ne un des del formulari superior.</td></tr>`;
         return;
       }
 
@@ -1228,7 +1557,7 @@
             <input type="text" value="${st.name || ''}" onchange="updateStudentName(${st.id}, this.value)" class="w-full bg-transparent border-0 border-b border-transparent hover:border-zinc-300 focus:border-zinc-900 rounded-none py-1 font-semibold text-zinc-800 outline-none text-xs">
           </td>
           <td class="py-2 px-3 text-center">
-            <button onclick="deleteStudent(${st.id})" class="text-zinc-400 hover:text-rose-500 p-1 transition">
+            <button onclick="deleteStudent(${st.id})" class="text-zinc-400 hover:text-rose-500 p-1 transition" title="Eliminar alumne">
               <i class="fa-regular fa-trash-can text-xs"></i>
             </button>
           </td>
@@ -1279,7 +1608,7 @@
 
     window.deleteStudent = function(stId) {
       const curGroup = getCurrentGroup();
-      if (confirm("Eliminar aquest alumne/a?")) {
+      if (confirm("Eliminar aquest alumne/a d'aquesta classe?")) {
         curGroup.students = (curGroup.students || []).filter(s => s.id !== stId);
         saveToStorage();
         if (window.syncGroupEntityToCloud) window.syncGroupEntityToCloud(window.appData.activeGroupId);
@@ -1342,7 +1671,7 @@
         const currentCriteriaCodes = (conf.curricularCriteria || "").split(/[-,\s]+/).map(c => c.trim()).filter(c => c.length > 0);
 
         return `
-          <div class="border border-zinc-200 rounded-2xl p-4 bg-zinc-50/50" id="ce_card_${ce.id}">
+          <div class="border border-zinc-200/80 rounded-2xl p-4 bg-zinc-50/50" id="ce_card_${ce.id}">
             <div class="flex items-center justify-between gap-4">
               <label class="flex items-center gap-2.5 cursor-pointer font-bold text-zinc-900">
                 <input type="checkbox" id="check_${ce.id}" ${conf.active ? 'checked' : ''} onchange="toggleCeInModal('${ce.id}')" class="rounded text-zinc-900 focus:ring-zinc-900 w-4 h-4">
@@ -1512,13 +1841,13 @@
         const w = sda.trimWeight !== undefined ? sda.trimWeight : 50;
         totalTrimWeight += w;
         return `
-          <div class="flex items-center gap-2 bg-zinc-50 border border-zinc-200 px-3 py-1.5 rounded-xl">
+          <div class="flex items-center gap-2 bg-zinc-50 border border-zinc-200/80 px-3 py-1.5 rounded-xl">
             <span class="font-semibold text-zinc-800 text-xs truncate max-w-[160px]">${sda.title}:</span>
-            <input type="number" min="0" max="100" value="${w}" onchange="updateSdaTrimWeight('${sda.id}', this.value)" class="w-14 text-center font-mono font-bold text-xs bg-white border border-zinc-300 rounded-lg p-1">
+            <input type="number" min="0" max="100" value="${w}" onchange="updateSdaTrimWeight('${sda.id}', this.value)" class="w-14 text-center font-mono font-bold text-xs bg-white border border-zinc-300 rounded-lg p-1 outline-none focus:ring-2 focus:ring-zinc-900">
             <span class="text-zinc-400 font-mono text-xs">%</span>
           </div>
         `;
-      }).join('') || '<span class="text-xs text-zinc-400 italic">Sense SdAs en aquest trimestre.</span>';
+      }).join('') || '<span class="text-xs text-zinc-400 italic">No hi ha cap SdA programada en aquest trimestre.</span>';
 
       const weightBadge = document.getElementById('trimTotalWeightBadge');
       weightBadge.textContent = `Total: ${totalTrimWeight}%`;
@@ -1529,60 +1858,81 @@
       let headHtml = `<tr>
         <th class="py-3 px-3 w-12 text-center font-mono text-zinc-400 font-medium">#</th>
         <th class="py-3 px-4 font-semibold text-zinc-100 min-w-[200px]">Alumne/a</th>
-        <th class="py-2.5 px-3 text-center border-l border-zinc-800 text-[11px] w-28"><i class="fa-solid fa-person-running mr-1"></i> Mín. Pràctica</th>`;
+        <th class="py-2.5 px-3 text-center border-l border-zinc-800 text-[11px] w-28" title="Penalització per no assistir al % mínim de sessions pràctiques">
+          <i class="fa-solid fa-person-running text-zinc-400 mr-1"></i> Mín. Pràctica
+        </th>`;
       
       trimSdas.forEach(sda => {
-        headHtml += `<th class="py-2.5 px-3 text-center border-l border-zinc-800"><div>${sda.title}</div><div class="text-[10px] text-zinc-400 font-mono">${sda.trimWeight || 0}%</div></th>`;
+        headHtml += `<th class="py-2.5 px-3 text-center border-l border-zinc-800">
+          <div class="font-semibold text-zinc-100 max-w-[130px] truncate mx-auto">${sda.title}</div>
+          <div class="text-[10px] text-zinc-400 font-mono">Pes: ${sda.trimWeight || 0}%</div>
+        </th>`;
       });
+
       OFFICIAL_CES.forEach(ce => {
-        headHtml += `<th class="py-2.5 px-2 text-center border-l border-zinc-800"><div>${ce.id}</div><div class="text-[9px] text-zinc-400">${ce.short}</div></th>`;
+        headHtml += `<th class="py-2.5 px-2 text-center border-l border-zinc-800">
+          <div class="font-bold text-zinc-100">${ce.id}</div>
+          <div class="text-[9px] text-zinc-400 font-normal truncate max-w-[90px] mx-auto">${ce.short}</div>
+        </th>`;
       });
-      headHtml += `<th class="py-3 px-4 text-center border-l-2 border-zinc-700 bg-zinc-950 font-bold text-white uppercase text-xs">Qualificació Trimestre</th></tr>`;
+
+      headHtml += `<th class="py-3 px-4 text-center border-l-2 border-zinc-700 bg-zinc-950 font-bold text-white uppercase tracking-wider text-xs">Qualificació Trimestre</th></tr>`;
       thead.innerHTML = headHtml;
 
       const students = curGroup.students || [];
       if (students.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="25" class="p-8 text-center text-zinc-400 text-xs">Sense alumnes.</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="25" class="p-8 text-center text-zinc-400 text-xs">Sense alumnes registrats.</td></tr>`;
         return;
       }
 
-      tbody.innerHTML = students.map((st, idx) => {
+      let rowsHtml = '';
+      students.forEach((st, idx) => {
         const isPenalized = !!curGroup.attendancePenalty?.[window.appState.currentTrim]?.[st.id];
-        let row = `<tr class="hover:bg-zinc-50/70 transition-colors ${isPenalized ? 'bg-rose-50/25' : ''}">
+
+        rowsHtml += `<tr class="hover:bg-zinc-50/70 transition-colors ${isPenalized ? 'bg-rose-50/25' : ''}">
           <td class="py-2 px-3 text-center text-zinc-400 font-mono text-xs">${idx + 1}</td>
           <td class="py-2 px-4 font-semibold text-zinc-800 text-xs">${st.name}</td>
           <td class="py-2 px-2 text-center border-l border-zinc-100">
-            <button onclick="toggleAttendancePenalty(${st.id})" class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold ${isPenalized ? 'bg-rose-600 text-white' : 'bg-zinc-100 text-zinc-600'}">
+            <button onclick="toggleAttendancePenalty(${st.id})" class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold transition ${isPenalized ? 'bg-rose-600 hover:bg-rose-700 text-white shadow-subtle' : 'bg-zinc-100 hover:bg-zinc-200/70 text-zinc-600'}" title="${isPenalized ? 'Alumne suspès per no arribar al mínim de pràctica. Clica per treure.' : 'Clica per suspendre si no arriba al mínim de pràctica.'}">
               <i class="fa-solid fa-person-running text-[10px]"></i>
               <span>${isPenalized ? '< Mínim' : 'Assolit'}</span>
             </button>
           </td>`;
 
         trimSdas.forEach(sda => {
-          const sc = getStudentOverallSdaScore(sda, st.id);
-          const lvl = getLevel(sc);
-          row += `<td class="py-2 px-3 text-center border-l border-zinc-100"><div class="font-bold font-mono text-xs">${sc !== null ? sc.toFixed(2) : '—'}</div><span class="text-[9px] px-1.5 py-0.2 rounded font-bold ${lvl.badge}">${lvl.code}</span></td>`;
+          const sdaScore = getStudentOverallSdaScore(sda, st.id);
+          const lvl = getLevel(sdaScore);
+          rowsHtml += `<td class="py-2 px-3 text-center border-l border-zinc-100">
+            <div class="font-bold font-mono text-zinc-800 text-xs">${sdaScore !== null ? sdaScore.toFixed(2) : '<span class="text-zinc-300 font-normal">—</span>'}</div>
+            <span class="inline-flex items-center mt-0.5 text-[9px] px-1.5 py-0.2 rounded font-bold ring-1 ring-inset ${lvl.badge}">${lvl.code}</span>
+          </td>`;
         });
 
         OFFICIAL_CES.forEach(ce => {
-          let sum = 0, count = 0;
+          let ceSum = 0, count = 0;
           trimSdas.forEach(sda => {
             const sc = getStudentCeScoreInSda(sda, st.id, ce.id);
-            if (sc !== null) { sum += sc; count++; }
+            if (sc !== null) { ceSum += sc; count++; }
           });
-          const avg = count > 0 ? (sum / count) : null;
+          const avg = count > 0 ? (ceSum / count) : null;
           const lvl = getLevel(avg);
-          row += `<td class="py-2 px-2 text-center border-l border-zinc-100 bg-zinc-50/30"><div class="font-mono text-xs">${avg !== null ? avg.toFixed(2) : '—'}</div><span class="text-[9px] px-1 rounded font-semibold ${lvl.badge}">${lvl.code}</span></td>`;
+
+          rowsHtml += `<td class="py-2 px-2 text-center border-l border-zinc-100 bg-zinc-50/30">
+            <div class="font-semibold font-mono text-zinc-700 text-xs">${avg !== null ? avg.toFixed(2) : '<span class="text-zinc-300 font-normal">—</span>'}</div>
+            <span class="inline-flex items-center text-[9px] px-1 rounded font-semibold ${lvl.badge}">${lvl.code}</span>
+          </td>`;
         });
 
-        const overall = getStudentTrimScore(st.id);
-        const ovLvl = getLevel(overall);
-        row += `<td class="py-2 px-4 text-center border-l-2 border-zinc-800 ${isPenalized ? 'bg-rose-100/50' : 'bg-zinc-50/70'} font-bold">
-          <div class="text-sm font-black font-mono ${isPenalized ? 'text-rose-700' : 'text-zinc-950'}">${overall !== null ? overall.toFixed(2) : '—'}</div>
-          <span class="text-[10px] px-2.5 py-0.5 rounded font-bold ${ovLvl.badge}">${ovLvl.code}</span>
+        const overallTrimScore = getStudentTrimScore(st.id);
+        const overallLvl = getLevel(overallTrimScore);
+
+        rowsHtml += `<td class="py-2 px-4 text-center border-l-2 border-zinc-800 ${isPenalized ? 'bg-rose-100/50' : 'bg-zinc-50/70'} font-bold">
+          <div class="text-sm font-black font-mono ${isPenalized ? 'text-rose-700' : 'text-zinc-950'}">${overallTrimScore !== null ? overallTrimScore.toFixed(2) : '<span class="text-zinc-300 font-normal">—</span>'}</div>
+          <span class="inline-flex items-center mt-0.5 text-[10px] px-2.5 py-0.5 rounded font-bold ring-1 ring-inset ${overallLvl.badge}">${overallLvl.code}</span>
         </td></tr>`;
-        return row;
-      }).join('');
+      });
+
+      tbody.innerHTML = rowsHtml;
     }
 
     window.updateSdaTrimWeight = function(sdaId, newWeight) {
@@ -1608,73 +1958,149 @@
       const curGroup = getCurrentGroup();
       const method = curGroup.finalMethod || 'trim';
 
-      document.getElementById('finalMethodTrimBtn').className = method === 'trim' ? "px-3 py-1.5 rounded-lg font-semibold bg-white text-zinc-900 shadow-subtle" : "px-3 py-1.5 text-zinc-500";
-      document.getElementById('finalMethodCeBtn').className = method === 'ce' ? "px-3 py-1.5 rounded-lg font-semibold bg-white text-zinc-900 shadow-subtle" : "px-3 py-1.5 text-zinc-500";
+      const btnTrim = document.getElementById('finalMethodTrimBtn');
+      const btnCe = document.getElementById('finalMethodCeBtn');
+      if (method === 'trim') {
+        btnTrim.className = "px-3 py-1.5 rounded-lg font-semibold bg-white text-zinc-900 shadow-subtle transition";
+        btnCe.className = "px-3 py-1.5 rounded-lg font-medium text-zinc-500 hover:text-zinc-900 transition";
+      } else {
+        btnCe.className = "px-3 py-1.5 rounded-lg font-semibold bg-white text-zinc-900 shadow-subtle transition";
+        btnTrim.className = "px-3 py-1.5 rounded-lg font-medium text-zinc-500 hover:text-zinc-900 transition";
+      }
 
       const weightsContainer = document.getElementById('finalWeightsContainer');
+      const badge = document.getElementById('finalWeightSumBadge');
       const panelTitle = document.getElementById('finalWeightPanelTitle');
+
+      let sumWeights = 0;
 
       if (method === 'trim') {
         panelTitle.innerHTML = `<i class="fa-solid fa-calendar-days text-zinc-500"></i> Ponderació dels Trimestres (T1, T2, T3)`;
         const tw = curGroup.finalTrimWeights || DEFAULT_FINAL_TRIM_WEIGHTS;
+        sumWeights = (tw.t1 || 0) + (tw.t2 || 0) + (tw.t3 || 0);
+
         weightsContainer.innerHTML = [
-          { k: 't1', l: '1r Trim', v: tw.t1 }, { k: 't2', l: '2n Trim', v: tw.t2 }, { k: 't3', l: '3r Trim', v: tw.t3 }
-        ].map(i => `
-          <div class="flex items-center gap-2 bg-zinc-50 border border-zinc-200 px-3 py-1.5 rounded-xl">
-            <span class="font-semibold text-xs">${i.l}:</span>
-            <input type="number" value="${i.v}" onchange="updateFinalTrimWeight('${i.k}', this.value)" class="w-16 text-center font-mono font-bold text-xs bg-white border border-zinc-300 rounded-lg p-1">
+          { key: 't1', label: '1r Trimestre', val: tw.t1 },
+          { key: 't2', label: '2n Trimestre', val: tw.t2 },
+          { key: 't3', label: '3r Trimestre', val: tw.t3 }
+        ].map(item => `
+          <div class="flex items-center gap-2 bg-zinc-50 border border-zinc-200/80 px-3 py-1.5 rounded-xl">
+            <span class="font-semibold text-zinc-800 text-xs">${item.label}:</span>
+            <input type="number" step="0.1" min="0" max="100" value="${item.val}" onchange="updateFinalTrimWeight('${item.key}', this.value)" class="w-16 text-center font-mono font-bold text-xs bg-white border border-zinc-300 rounded-lg p-1 outline-none focus:ring-2 focus:ring-zinc-900">
             <span class="text-zinc-400 font-mono text-xs">%</span>
           </div>
         `).join('');
+
       } else {
-        panelTitle.innerHTML = `<i class="fa-solid fa-scale-balanced text-zinc-500"></i> Ponderació de les CEs`;
+        panelTitle.innerHTML = `<i class="fa-solid fa-scale-balanced text-zinc-500"></i> Ponderació de les Competències Específiques (CEs)`;
         const cw = curGroup.finalCeWeights || DEFAULT_FINAL_CE_WEIGHTS;
-        weightsContainer.innerHTML = OFFICIAL_CES.map(ce => `
-          <div class="flex items-center gap-2 bg-zinc-50 border border-zinc-200 px-3 py-1.5 rounded-xl">
-            <span class="font-semibold text-xs">${ce.id}:</span>
-            <input type="number" value="${cw[ce.id] || 20}" onchange="updateFinalCeWeight('${ce.id}', this.value)" class="w-14 text-center font-mono font-bold text-xs bg-white border border-zinc-300 rounded-lg p-1">
-            <span class="text-zinc-400 font-mono text-xs">%</span>
-          </div>
-        `).join('');
+        OFFICIAL_CES.forEach(ce => sumWeights += (cw[ce.id] !== undefined ? cw[ce.id] : 20));
+
+        weightsContainer.innerHTML = OFFICIAL_CES.map(ce => {
+          const w = cw[ce.id] !== undefined ? cw[ce.id] : 20;
+          return `
+            <div class="flex items-center gap-2 bg-zinc-50 border border-zinc-200/80 px-3 py-1.5 rounded-xl">
+              <span class="font-semibold text-zinc-800 text-xs">${ce.id}:</span>
+              <input type="number" min="0" max="100" value="${w}" onchange="updateFinalCeWeight('${ce.id}', this.value)" class="w-14 text-center font-mono font-bold text-xs bg-white border border-zinc-300 rounded-lg p-1 outline-none focus:ring-2 focus:ring-zinc-900">
+              <span class="text-zinc-400 font-mono text-xs">%</span>
+            </div>
+          `;
+        }).join('');
       }
 
+      const isRounded100 = Math.round(sumWeights) === 100;
+      badge.textContent = `Total: ${sumWeights.toFixed(1)}%`;
+      badge.className = isRounded100 
+        ? "text-xs font-mono font-bold px-2.5 py-0.5 rounded-md bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200" 
+        : "text-xs font-mono font-bold px-2.5 py-0.5 rounded-md bg-amber-50 text-amber-700 ring-1 ring-amber-200";
+
       const thead = document.getElementById('finalTableHead');
-      let headHtml = `<tr class="bg-zinc-900 text-white"><th class="p-3 w-12 text-center font-mono text-zinc-400">#</th><th class="p-3 min-w-[200px]">Alumne/a</th>`;
+      let headHtml = `<tr class="bg-zinc-900 text-white">
+        <th class="py-3 px-3 w-12 text-center font-mono text-zinc-400 font-medium">#</th>
+        <th class="py-3 px-4 font-semibold text-zinc-100 min-w-[200px]">Alumne/a</th>`;
+
       if (method === 'trim') {
-        headHtml += `<th class="p-2 text-center border-l border-zinc-800">1r Trim</th><th class="p-2 text-center border-l border-zinc-800">2n Trim</th><th class="p-2 text-center border-l border-zinc-800">3r Trim</th>`;
+        const tw = curGroup.finalTrimWeights || DEFAULT_FINAL_TRIM_WEIGHTS;
+        headHtml += `
+          <th class="py-2.5 px-3 text-center border-l border-zinc-800">
+            <div>1r Trimestre</div>
+            <div class="text-[10px] text-zinc-400 font-mono">Pes: ${tw.t1}%</div>
+          </th>
+          <th class="py-2.5 px-3 text-center border-l border-zinc-800">
+            <div>2n Trimestre</div>
+            <div class="text-[10px] text-zinc-400 font-mono">Pes: ${tw.t2}%</div>
+          </th>
+          <th class="py-2.5 px-3 text-center border-l border-zinc-800">
+            <div>3r Trimestre</div>
+            <div class="text-[10px] text-zinc-400 font-mono">Pes: ${tw.t3}%</div>
+          </th>
+        `;
       } else {
-        OFFICIAL_CES.forEach(ce => headHtml += `<th class="p-2 text-center border-l border-zinc-800">${ce.id}</th>`);
+        const cw = curGroup.finalCeWeights || DEFAULT_FINAL_CE_WEIGHTS;
+        OFFICIAL_CES.forEach(ce => {
+          const w = cw[ce.id] !== undefined ? cw[ce.id] : 20;
+          headHtml += `<th class="py-2 px-3 text-center border-l border-zinc-800">
+            <div>${ce.id} (${ce.short})</div>
+            <div class="text-[10px] text-zinc-400 font-mono">Pes: ${w}%</div>
+          </th>`;
+        });
       }
-      headHtml += `<th class="p-3 text-center border-l-2 border-zinc-800 bg-zinc-950 font-bold uppercase text-xs">Final Ordinària</th></tr>`;
+
+      headHtml += `<th class="py-3 px-4 text-center border-l-2 border-zinc-800 bg-zinc-950 font-bold text-white uppercase tracking-wider text-xs">Qualificació Final</th></tr>`;
       thead.innerHTML = headHtml;
 
       const tbody = document.getElementById('finalTableBody');
       const students = curGroup.students || [];
-      tbody.innerHTML = students.map((st, idx) => {
-        const sc = getStudentCourseFinalScore(st.id, curGroup);
-        const lvl = getLevel(sc);
-        let row = `<tr class="hover:bg-zinc-50"><td class="p-2 text-center text-zinc-400 font-mono text-xs">${idx + 1}</td><td class="p-2 font-semibold text-zinc-800 text-xs">${st.name}</td>`;
+      if (students.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="10" class="p-8 text-center text-zinc-400 text-xs">Sense alumnes.</td></tr>`;
+        return;
+      }
+
+      let html = '';
+      students.forEach((st, idx) => {
+        const finalScore = getStudentCourseFinalScore(st.id, curGroup);
+        const finalLvl = getLevel(finalScore);
+
+        html += `<tr class="hover:bg-zinc-50/70 transition-colors">
+          <td class="py-2 px-3 text-center text-zinc-400 font-mono text-xs">${idx + 1}</td>
+          <td class="py-2 px-4 font-semibold text-zinc-800 text-xs">${st.name}</td>`;
+
         if (method === 'trim') {
           [1, 2, 3].forEach(tNum => {
-            const scT = getStudentTrimScoreByTrim(st.id, tNum, curGroup);
-            row += `<td class="p-2 text-center border-l border-zinc-100 font-mono text-xs">${scT !== null ? scT.toFixed(2) : '—'}</td>`;
+            const sc = getStudentTrimScoreByTrim(st.id, tNum, curGroup);
+            const lvl = getLevel(sc);
+            const isPen = curGroup.attendancePenalty?.[tNum]?.[st.id];
+
+            html += `<td class="py-2 px-3 text-center border-l border-zinc-100 ${isPen ? 'bg-rose-50/30' : ''}">
+              <div class="font-bold font-mono ${isPen ? 'text-rose-700' : 'text-zinc-800'} text-xs">${sc !== null ? sc.toFixed(2) : '<span class="text-zinc-300 font-normal">—</span>'}</div>
+              <span class="inline-flex items-center mt-0.5 text-[9px] px-1.5 py-0.2 rounded font-bold ring-1 ring-inset ${lvl.badge}">${lvl.code}</span>
+              ${isPen ? '<div class="text-[8px] font-bold text-rose-600 uppercase mt-0.5">No pràctica</div>' : ''}
+            </td>`;
           });
         } else {
           OFFICIAL_CES.forEach(ce => {
             let sum = 0, c = 0;
             (curGroup.sdas || []).forEach(sda => {
-              const scCe = getStudentCeScoreInSda(sda, st.id, ce.id);
-              if (scCe !== null) { sum += scCe; c++; }
+              const sc = getStudentCeScoreInSda(sda, st.id, ce.id);
+              if (sc !== null) { sum += sc; c++; }
             });
-            row += `<td class="p-2 text-center border-l border-zinc-100 font-mono text-xs">${c > 0 ? (sum / c).toFixed(2) : '—'}</td>`;
+            const avg = c > 0 ? sum / c : null;
+            const lvl = getLevel(avg);
+
+            html += `<td class="py-2 px-3 text-center border-l border-zinc-100">
+              <div class="font-bold font-mono text-zinc-800 text-xs">${avg !== null ? avg.toFixed(2) : '<span class="text-zinc-300 font-normal">—</span>'}</div>
+              <span class="inline-flex items-center mt-0.5 text-[9px] px-1.5 py-0.2 rounded font-bold ring-1 ring-inset ${lvl.badge}">${lvl.code}</span>
+            </td>`;
           });
         }
-        row += `<td class="p-2 text-center border-l-2 border-zinc-800 bg-zinc-50 font-bold">
-          <div class="text-sm font-black font-mono">${sc !== null ? sc.toFixed(2) : '—'}</div>
-          <span class="text-[10px] px-2 py-0.5 rounded font-bold ${lvl.badge}">${lvl.code}</span>
+
+        html += `<td class="py-2 px-4 text-center border-l-2 border-zinc-800 bg-zinc-50/70 font-bold">
+          <div class="text-sm font-black font-mono text-zinc-950">${finalScore !== null ? finalScore.toFixed(2) : '<span class="text-zinc-300 font-normal">—</span>'}</div>
+          <span class="inline-flex items-center mt-0.5 text-[10px] px-2.5 py-0.5 rounded font-bold ring-1 ring-inset ${finalLvl.badge}">${finalLvl.code}</span>
         </td></tr>`;
-        return row;
-      }).join('');
+      });
+
+      tbody.innerHTML = html;
     }
 
     window.updateFinalTrimWeight = function(trimKey, newWeight) {
@@ -1698,7 +2124,11 @@
     function populateReportStudents() {
       const sel = document.getElementById('reportStudentSelect');
       const curGroup = getCurrentGroup();
-      sel.innerHTML = (curGroup.students || []).map(s => `<option value="${s.id}">${s.name}</option>`).join('');
+      if (!curGroup || !curGroup.students || curGroup.students.length === 0) {
+        sel.innerHTML = `<option value="">Sense alumnes</option>`;
+        return;
+      }
+      sel.innerHTML = curGroup.students.map(s => `<option value="${s.id}">${s.name}</option>`).join('');
     }
 
     window.renderIndividualReport = function() {
@@ -1707,9 +2137,14 @@
       const stId = parseInt(sel.value);
       const st = (curGroup.students || []).find(s => s.id === stId);
 
-      if (!st) return;
+      if (!st) {
+        document.getElementById('repStudentName').textContent = "Cap alumne seleccionat";
+        document.getElementById('repDetailsContainer').innerHTML = "";
+        return;
+      }
+
       document.getElementById('repStudentName').textContent = st.name;
-      document.getElementById('repGroupLabel').textContent = `Classe: ${curGroup.name} | EF LOMLOE`;
+      document.getElementById('repGroupLabel').textContent = `Classe: ${curGroup.name} | 1r i 2n d'ESO | LOMLOE`;
 
       let ceValues = [];
       let detailsHtml = '';
@@ -1732,7 +2167,7 @@
             </div>
             <div class="text-right">
               <span class="font-bold font-mono text-zinc-900 mr-2 text-xs">${avg > 0 ? avg.toFixed(2) : '—'}</span>
-              <span class="text-[10px] font-bold px-2 py-0.5 rounded ${lvl.badge}">${lvl.code}</span>
+              <span class="inline-flex items-center text-[10px] font-bold px-2 py-0.5 rounded ring-1 ring-inset ${lvl.badge}">${lvl.code}</span>
             </div>
           </div>
         `;
@@ -1764,7 +2199,16 @@
         options: {
           responsive: true,
           maintainAspectRatio: false,
-          scales: { r: { min: 0, max: 4, ticks: { stepSize: 1, display: false } } },
+          scales: {
+            r: {
+              min: 0,
+              max: 4,
+              ticks: { stepSize: 1, display: false },
+              grid: { color: 'rgba(228, 228, 231, 0.8)' },
+              angleLines: { color: 'rgba(228, 228, 231, 0.8)' },
+              pointLabels: { font: { family: 'Plus Jakarta Sans', size: 10, weight: '600' }, color: '#52525b' }
+            }
+          },
           plugins: { legend: { display: false } }
         }
       });
@@ -1778,70 +2222,271 @@
 
     window.setStatsScope = function(scope) {
       window.appState.statsScope = scope;
-      document.getElementById('statsScopeClass').className = scope === 'class' ? "px-2.5 py-1 rounded-lg font-semibold bg-white text-zinc-900 shadow-subtle" : "px-2.5 py-1 text-zinc-500";
-      document.getElementById('statsScopeLevel').className = scope === 'level' ? "px-2.5 py-1 rounded-lg font-semibold bg-white text-zinc-900 shadow-subtle" : "px-2.5 py-1 text-zinc-500";
+      const btnClass = document.getElementById('statsScopeClass');
+      const btnLevel = document.getElementById('statsScopeLevel');
+      if (scope === 'class') {
+        btnClass.className = "px-2.5 py-1 rounded-lg font-semibold bg-white text-zinc-900 shadow-subtle transition";
+        btnLevel.className = "px-2.5 py-1 rounded-lg font-medium text-zinc-500 hover:text-zinc-900 transition";
+      } else {
+        btnLevel.className = "px-2.5 py-1 rounded-lg font-semibold bg-white text-zinc-900 shadow-subtle transition";
+        btnClass.className = "px-2.5 py-1 rounded-lg font-medium text-zinc-500 hover:text-zinc-900 transition";
+      }
       populateStatsSdaSelector();
       renderStatsView();
     };
 
     window.onStatsTypeChange = function() {
       window.appState.statsType = document.getElementById('statsTypeSelect').value;
-      document.getElementById('statsSdaSelector').classList.toggle('hidden', window.appState.statsType !== 'sda');
+      const sdaSel = document.getElementById('statsSdaSelector');
+      sdaSel.classList.toggle('hidden', window.appState.statsType !== 'sda');
       populateStatsSdaSelector();
       renderStatsView();
     };
 
+    function getTargetGroupsForStats() {
+      const curGroup = getCurrentGroup();
+      if (window.appState.statsScope === 'class') {
+        return [curGroup];
+      }
+      const match = curGroup.name.match(/^(1r|2n)\s*d?'?ESO/i);
+      const levelPrefix = match ? match[1].toLowerCase() : curGroup.name.slice(0, 2).toLowerCase();
+
+      const matchedGroups = Object.keys(window.appData.groups)
+        .map(k => window.appData.groups[k])
+        .filter(g => g.name.toLowerCase().includes(levelPrefix));
+
+      return matchedGroups.length > 0 ? matchedGroups : [curGroup];
+    }
+
     function populateStatsSdaSelector() {
       const sel = document.getElementById('statsSdaSelector');
-      const curGroup = getCurrentGroup();
-      const sdas = (curGroup.sdas || []).filter(s => s.trim === window.appState.currentTrim);
-      sel.innerHTML = sdas.map(s => `<option value="${s.title}">${s.title}</option>`).join('');
+      const targetGroups = getTargetGroupsForStats();
+      
+      const sdaTitles = new Set();
+      targetGroups.forEach(g => {
+        (g.sdas || []).filter(s => s.trim === window.appState.currentTrim).forEach(s => sdaTitles.add(s.title));
+      });
+
+      if (sdaTitles.size === 0) {
+        sel.innerHTML = `<option value="">Sense SdAs al T${window.appState.currentTrim}</option>`;
+        return;
+      }
+      sel.innerHTML = Array.from(sdaTitles).map(t => `<option value="${t}">${t}</option>`).join('');
     }
 
     function renderStatsView() {
-      const curGroup = getCurrentGroup();
-      let scores = [];
-      (curGroup.students || []).forEach(st => {
-        const sc = getStudentTrimScore(st.id, curGroup);
-        if (sc !== null) scores.push(sc);
+      const targetGroups = getTargetGroupsForStats();
+      const scopeType = window.appState.statsType;
+      const selectedSdaTitle = document.getElementById('statsSdaSelector').value;
+
+      let studentScores = [];
+      let ceScoresAgg = { CE1: [], CE2: [], CE3: [], CE4: [], CE5: [] };
+
+      targetGroups.forEach(grp => {
+        const students = grp.students || [];
+        students.forEach(st => {
+          let score = null;
+          if (scopeType === 'sda') {
+            const sda = (grp.sdas || []).find(s => s.title === selectedSdaTitle && s.trim === window.appState.currentTrim);
+            if (sda) {
+              score = getStudentOverallSdaScore(sda, st.id);
+              OFFICIAL_CES.forEach(ce => {
+                const scCe = getStudentCeScoreInSda(sda, st.id, ce.id);
+                if (scCe !== null) ceScoresAgg[ce.id].push(scCe);
+              });
+            }
+          } else if (scopeType === 'trim') {
+            score = getStudentTrimScore(st.id, grp);
+            const trimSdas = (grp.sdas || []).filter(s => s.trim === window.appState.currentTrim);
+            OFFICIAL_CES.forEach(ce => {
+              let ceSum = 0, count = 0;
+              trimSdas.forEach(sda => {
+                const sc = getStudentCeScoreInSda(sda, st.id, ce.id);
+                if (sc !== null) { ceSum += sc; count++; }
+              });
+              if (count > 0) ceScoresAgg[ce.id].push(ceSum / count);
+            });
+          } else if (scopeType === 'course') {
+            score = getStudentCourseFinalScore(st.id, grp);
+            OFFICIAL_CES.forEach(ce => {
+              let sum = 0, c = 0;
+              (grp.sdas || []).forEach(sda => {
+                const sc = getStudentCeScoreInSda(sda, st.id, ce.id);
+                if (sc !== null) { sum += sc; c++; }
+              });
+              if (c > 0) ceScoresAgg[ce.id].push(sum / c);
+            });
+          }
+
+          if (score !== null && !isNaN(score)) {
+            studentScores.push(score);
+          }
+        });
       });
 
-      const avg = scores.length > 0 ? (scores.reduce((a, b) => a + b, 0) / scores.length) : 0;
-      const pass = scores.filter(s => s >= gradeThresholds.as).length;
-      const rate = scores.length > 0 ? ((pass / scores.length) * 100).toFixed(1) : "0.0";
+      const totalStudents = studentScores.length;
+      const globalAvg = totalStudents > 0 ? (studentScores.reduce((a, b) => a + b, 0) / totalStudents) : 0;
+      const successStudents = studentScores.filter(s => s >= gradeThresholds.as).length;
+      const successRate = totalStudents > 0 ? ((successStudents / totalStudents) * 100).toFixed(1) : "0.0";
+      const globalLvl = getLevel(globalAvg);
 
-      document.getElementById('kpiAvgVal').textContent = avg > 0 ? avg.toFixed(2) : '—';
-      document.getElementById('kpiSuccessRate').textContent = `${rate}%`;
+      document.getElementById('kpiAvgVal').textContent = globalAvg > 0 ? globalAvg.toFixed(2) : "—";
+      document.getElementById('kpiAvgLvl').textContent = globalLvl.code;
+      document.getElementById('kpiAvgLvl').className = `text-[10px] font-bold px-1.5 py-0.5 rounded ring-1 ring-inset ${globalLvl.badge}`;
+      document.getElementById('kpiSuccessRate').textContent = `${successRate}%`;
+      document.getElementById('kpiSuccessTitle').textContent = `Taxa d'Èxit (≥ ${gradeThresholds.as})`;
+      document.getElementById('thAssolitRate').textContent = `% ≥ ${gradeThresholds.as} (Assolit)`;
+
+      let ceAvgs = [];
+      OFFICIAL_CES.forEach(ce => {
+        const arr = ceScoresAgg[ce.id];
+        const avg = arr.length > 0 ? (arr.reduce((a, b) => a + b, 0) / arr.length) : null;
+        ceAvgs.push({ id: ce.id, short: ce.short, avg: avg, count: arr.length });
+      });
+
+      const validCeAvgs = ceAvgs.filter(c => c.avg !== null);
+      if (validCeAvgs.length > 0) {
+        validCeAvgs.sort((a, b) => b.avg - a.avg);
+        const best = validCeAvgs[0];
+        const worst = validCeAvgs[validCeAvgs.length - 1];
+        document.getElementById('kpiBestCe').textContent = `${best.id} · ${best.short}`;
+        document.getElementById('kpiBestCeVal').textContent = `Mitjana: ${best.avg.toFixed(2)}`;
+        document.getElementById('kpiWorstCe').textContent = `${worst.id} · ${worst.short}`;
+        document.getElementById('kpiWorstCeVal').textContent = `Mitjana: ${worst.avg.toFixed(2)}`;
+      } else {
+        document.getElementById('kpiBestCe').textContent = "--";
+        document.getElementById('kpiBestCeVal').textContent = "Mitjana: --";
+        document.getElementById('kpiWorstCe').textContent = "--";
+        document.getElementById('kpiWorstCeVal').textContent = "Mitjana: --";
+      }
 
       let counts = { NA: 0, EPA: 0, AS: 0, AN: 0, AE: 0 };
-      scores.forEach(s => counts[getLevel(s).code]++);
+      studentScores.forEach(s => {
+        const lvl = getLevel(s).code;
+        if (counts[lvl] !== undefined) counts[lvl]++;
+      });
 
+      const th = gradeThresholds;
       const ctxLevels = document.getElementById('chartStatsLevels').getContext('2d');
       if (chartStatsLevelsInstance) chartStatsLevelsInstance.destroy();
       chartStatsLevelsInstance = new Chart(ctxLevels, {
         type: 'bar',
         data: {
-          labels: ['NA', 'EPA', 'AS', 'AN', 'AE'],
-          datasets: [{ data: Object.values(counts), backgroundColor: ['#f43f5e', '#f59e0b', '#0ea5e9', '#6366f1', '#10b981'], borderRadius: 6 }]
+          labels: [
+            `NA (< ${th.epa})`, 
+            `EPA [${th.epa} - ${th.as}[`, 
+            `AS [${th.as} - ${th.an}[`, 
+            `AN [${th.an} - ${th.ae}[`, 
+            `AE (≥ ${th.ae})`
+          ],
+          datasets: [{
+            data: [counts.NA, counts.EPA, counts.AS, counts.AN, counts.AE],
+            backgroundColor: [
+              'rgba(244, 63, 94, 0.7)',
+              'rgba(245, 158, 11, 0.7)',
+              'rgba(14, 165, 233, 0.7)',
+              'rgba(99, 102, 241, 0.7)',
+              'rgba(16, 185, 129, 0.7)'
+            ],
+            borderRadius: 6
+          }]
         },
-        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } }
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: { legend: { display: false } },
+          scales: {
+            y: {
+              beginAtZero: true,
+              ticks: { stepSize: 1, font: { family: 'Plus Jakarta Sans', size: 10 } },
+              grid: { color: 'rgba(244, 244, 245, 0.9)' }
+            },
+            x: {
+              ticks: { font: { family: 'Plus Jakarta Sans', size: 10, weight: '600' } },
+              grid: { display: false }
+            }
+          }
+        }
       });
+
+      const ctxCes = document.getElementById('chartStatsCes').getContext('2d');
+      if (chartStatsCesInstance) chartStatsCesInstance.destroy();
+      chartStatsCesInstance = new Chart(ctxCes, {
+        type: 'bar',
+        data: {
+          labels: OFFICIAL_CES.map(c => c.id),
+          datasets: [{
+            data: ceAvgs.map(c => c.avg ? c.avg.toFixed(2) : 0),
+            backgroundColor: 'rgba(24, 24, 27, 0.8)',
+            borderRadius: 6
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: { legend: { display: false } },
+          scales: {
+            y: {
+              min: 0,
+              max: 4,
+              ticks: { stepSize: 1, font: { family: 'Plus Jakarta Sans', size: 10 } },
+              grid: { color: 'rgba(244, 244, 245, 0.9)' }
+            },
+            x: {
+              ticks: { font: { family: 'Plus Jakarta Sans', size: 10, weight: '600' } },
+              grid: { display: false }
+            }
+          }
+        }
+      });
+
+      const tbody = document.getElementById('statsTableBody');
+      tbody.innerHTML = OFFICIAL_CES.map(ce => {
+        const item = ceAvgs.find(c => c.id === ce.id);
+        const avg = item && item.avg !== null ? item.avg : null;
+        const lvl = getLevel(avg);
+        const scoresArr = ceScoresAgg[ce.id];
+        const succCount = scoresArr.filter(s => s >= gradeThresholds.as).length;
+        const succPct = scoresArr.length > 0 ? ((succCount / scoresArr.length) * 100).toFixed(0) : "—";
+
+        let statusBadge = `<span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-zinc-100 text-zinc-500">Sense dades</span>`;
+        if (avg !== null) {
+          if (avg >= gradeThresholds.an) {
+            statusBadge = `<span class="inline-flex items-center gap-1 text-[10px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded"><i class="fa-solid fa-check"></i> Consolidat</span>`;
+          } else if (avg >= gradeThresholds.as) {
+            statusBadge = `<span class="inline-flex items-center gap-1 text-[10px] font-bold text-sky-700 bg-sky-50 px-2 py-0.5 rounded"><i class="fa-solid fa-arrows-spin"></i> En progrés</span>`;
+          } else {
+            statusBadge = `<span class="inline-flex items-center gap-1 text-[10px] font-bold text-rose-700 bg-rose-50 px-2 py-0.5 rounded border border-rose-200"><i class="fa-solid fa-triangle-exclamation"></i> Cal reforç</span>`;
+          }
+        }
+
+        return `
+          <tr class="hover:bg-zinc-50/50 transition">
+            <td class="py-2 px-4 font-mono font-bold text-zinc-700">${ce.id}</td>
+            <td class="py-2 px-4 font-semibold text-zinc-900">${ce.name}</td>
+            <td class="py-2 px-3 text-center font-mono font-black">${avg !== null ? avg.toFixed(2) : "—"}</td>
+            <td class="py-2 px-3 text-center">
+              <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold ring-1 ring-inset ${lvl.badge}">${lvl.code}</span>
+            </td>
+            <td class="py-2 px-4 text-center font-mono font-semibold">${succPct !== '—' ? succPct + '%' : '—'}</td>
+            <td class="py-2 px-4 text-center">${statusBadge}</td>
+          </tr>
+        `;
+      }).join('');
     }
 
-    window.exportContextualCSV = function() {
+    window.exportCSV = function() {
       const curGroup = getCurrentGroup();
-      let csv = "Alumne,Nota\n";
+      let csv = `Alumne,Qualificacio_Final_${curGroup.finalMethod === 'trim' ? 'Trimestres' : 'Competencies'},Grup\n`;
       (curGroup.students || []).forEach(st => {
-        const sc = getStudentTrimScore(st.id, curGroup);
-        csv += `"${st.name}",${sc !== null ? sc.toFixed(2) : ""}\n`;
+        const sc = getStudentCourseFinalScore(st.id, curGroup);
+        csv += `"${st.name}",${sc !== null ? sc.toFixed(2) : ""},"${curGroup.name}"\n`;
       });
-      const blob = new Blob(["\uFEFF" + csv], { type: 'text/csv;charset=utf-8;' });
+      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
       const a = document.createElement("a");
       a.href = URL.createObjectURL(blob);
-      a.download = `Qualificacions_${curGroup.name}.csv`;
-      document.body.appendChild(a);
+      a.download = `Resum_Final_${curGroup.name.replace(/\s+/g, '_')}.csv`;
       a.click();
-      a.remove();
     };
 
     window.openThresholdsModal = function() { 
@@ -1854,19 +2499,37 @@
     
     window.closeThresholdsModal = function() { document.getElementById('thresholdsModal').classList.add('hidden'); };
     
+    window.resetDefaultThresholds = function() {
+      document.getElementById('th_epa').value = DEFAULT_THRESHOLDS.epa;
+      document.getElementById('th_as').value = DEFAULT_THRESHOLDS.as;
+      document.getElementById('th_an').value = DEFAULT_THRESHOLDS.an;
+      document.getElementById('th_ae').value = DEFAULT_THRESHOLDS.ae;
+    };
+
     window.saveThresholdsModal = function() {
-      saveThresholdsToStorage({ 
-        epa: parseFloat(document.getElementById('th_epa').value), 
-        as: parseFloat(document.getElementById('th_as').value), 
-        an: parseFloat(document.getElementById('th_an').value), 
-        ae: parseFloat(document.getElementById('th_ae').value) 
-      });
+      const epa = parseFloat(document.getElementById('th_epa').value);
+      const as = parseFloat(document.getElementById('th_as').value);
+      const an = parseFloat(document.getElementById('th_an').value);
+      const ae = parseFloat(document.getElementById('th_ae').value);
+
+      if (isNaN(epa) || isNaN(as) || isNaN(an) || isNaN(ae) || epa >= as || as >= an || an >= ae) {
+        alert("Els llindars han de ser vàlids (EPA < AS < AN < AE).");
+        return;
+      }
+
+      saveThresholdsToStorage({ epa, as, an, ae });
       closeThresholdsModal();
-      if (window.appState.currentView === 'sda') renderSdaGrid();
+      if (window.appState.currentScreen === 'class') {
+        if (window.appState.currentView === 'sda') renderSdaGrid();
+        if (window.appState.currentView === 'trim') renderTrimView();
+        if (window.appState.currentView === 'final') renderFinalView();
+        if (window.appState.currentView === 'report') renderIndividualReport();
+        if (window.appState.currentView === 'stats') renderStatsView();
+      }
     };
 
     window.resetDefaultData = function() {
-      if (confirm("Restablir les dades de mostra originals?")) {
+      if (confirm("Vols restablir les dades de mostra originals?")) {
         window.appData = JSON.parse(JSON.stringify(ORIGINAL_DEMO_DATA));
         saveToStorage();
         if (window.syncWholeAppToCloud) window.syncWholeAppToCloud();
@@ -1884,10 +2547,18 @@
     window.importBackupJSON = function(e) {
       const reader = new FileReader();
       reader.onload = function(evt) {
-        window.appData = JSON.parse(evt.target.result).appData || JSON.parse(evt.target.result);
-        saveToStorage();
-        if (window.syncWholeAppToCloud) window.syncWholeAppToCloud();
-        goToHome();
+        try {
+          const imported = JSON.parse(evt.target.result);
+          if (imported.appData) {
+            window.appData = imported.appData;
+            if (imported.gradeThresholds) saveThresholdsToStorage(imported.gradeThresholds);
+          } else {
+            window.appData = imported;
+          }
+          saveToStorage();
+          if (window.syncWholeAppToCloud) window.syncWholeAppToCloud();
+          goToHome();
+        } catch (err) { alert("JSON invàlid."); }
       };
       reader.readAsText(e.target.files[0]);
     };
