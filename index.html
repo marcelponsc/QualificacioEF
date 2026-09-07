@@ -42,7 +42,7 @@
 </head>
 <body class="min-h-full flex flex-col text-zinc-900 bg-[#fafafa]">
 
-  <!-- ================= PANTALLA D'ACCÉS / LOGIN ================= -->
+  <!-- ================= PANTALLA D'ACCÉS PRIVADA ================= -->
   <div id="loginOverlay" class="fixed inset-0 bg-zinc-950/80 backdrop-blur-md z-50 flex items-center justify-center p-4">
     <div class="bg-white rounded-3xl shadow-2xl max-w-md w-full overflow-hidden border border-zinc-200 p-8 space-y-6">
       <div class="text-center space-y-2">
@@ -56,11 +56,11 @@
       <form onsubmit="handleAuthSubmit(event)" class="space-y-4 text-xs">
         <div>
           <label class="block font-semibold text-zinc-700 mb-1">Nom d'usuari</label>
-          <input type="text" id="authUsernameInput" required placeholder="Ex: docent" class="w-full border border-zinc-200 rounded-xl p-3 outline-none font-medium focus:ring-2 focus:ring-zinc-900 text-sm">
+          <input type="text" id="authUsernameInput" required autocomplete="username" class="w-full border border-zinc-200 rounded-xl p-3 outline-none font-medium focus:ring-2 focus:ring-zinc-900 text-sm">
         </div>
         <div>
           <label class="block font-semibold text-zinc-700 mb-1">Contrasenya</label>
-          <input type="password" id="authPasswordInput" required placeholder="••••••••" class="w-full border border-zinc-200 rounded-xl p-3 outline-none font-medium focus:ring-2 focus:ring-zinc-900 text-sm">
+          <input type="password" id="authPasswordInput" required autocomplete="current-password" placeholder="••••••••" class="w-full border border-zinc-200 rounded-xl p-3 outline-none font-medium focus:ring-2 focus:ring-zinc-900 text-sm">
         </div>
         
         <div id="authErrorMsg" class="hidden text-[11px] text-rose-600 font-semibold bg-rose-50 border border-rose-200 p-2.5 rounded-xl text-center"></div>
@@ -68,10 +68,6 @@
         <button type="submit" class="w-full bg-zinc-900 hover:bg-zinc-800 text-white font-bold py-3 rounded-xl transition shadow-subtle text-sm">
           Entrar al Quadern &rarr;
         </button>
-
-        <div class="pt-2 text-center text-[11px] text-zinc-400">
-          Usuari per defecte: <span class="font-mono text-zinc-700 font-bold">docent</span> | Clau: <span class="font-mono text-zinc-700 font-bold">ef2026</span>
-        </div>
       </form>
     </div>
   </div>
@@ -584,7 +580,6 @@
           }
           setCloudStatus('online');
         } else {
-          // Si és el primer cop que entra aquest usuari, li pugem les dades inicials
           set(userBranchRef, window.appData).then(() => setCloudStatus('online'));
         }
       }, () => setCloudStatus('offline'));
@@ -623,47 +618,6 @@
 
   <!-- ================= LÒGICA I MOTOR D'AVALUACIÓ ================= -->
   <script>
-    const CE_COLOR_THEMES = {
-      CE1: { header: 'bg-sky-100 text-sky-950 border-sky-200', critHeader: 'bg-sky-50 text-sky-800 border-sky-200', weightHeader: 'bg-sky-100/70 text-sky-900 border-sky-200', scoreCe: 'bg-sky-100 text-sky-950 font-bold border-sky-300', levelCe: 'bg-sky-50 border-sky-200', oaTints: [{ header: 'bg-sky-50 text-sky-900', cell: 'bg-sky-50/20' }] },
-      CE2: { header: 'bg-emerald-100 text-emerald-950 border-emerald-200', critHeader: 'bg-emerald-50 text-emerald-800 border-emerald-200', weightHeader: 'bg-emerald-100/70 text-emerald-900 border-emerald-200', scoreCe: 'bg-emerald-100 text-emerald-950 font-bold border-emerald-300', levelCe: 'bg-emerald-50 border-emerald-200', oaTints: [{ header: 'bg-emerald-50 text-emerald-900', cell: 'bg-emerald-50/20' }] },
-      CE3: { header: 'bg-purple-100 text-purple-950 border-purple-200', critHeader: 'bg-purple-50 text-purple-800 border-purple-200', weightHeader: 'bg-purple-100/70 text-purple-900 border-purple-200', scoreCe: 'bg-purple-100 text-purple-950 font-bold border-purple-300', levelCe: 'bg-purple-50 border-purple-200', oaTints: [{ header: 'bg-purple-50 text-purple-900', cell: 'bg-purple-50/20' }] },
-      CE4: { header: 'bg-amber-100 text-amber-950 border-amber-200', critHeader: 'bg-amber-50 text-amber-800 border-amber-200', weightHeader: 'bg-amber-100/70 text-amber-900 border-amber-200', scoreCe: 'bg-amber-100 text-amber-950 font-bold border-amber-300', levelCe: 'bg-amber-50 border-amber-200', oaTints: [{ header: 'bg-amber-50 text-amber-900', cell: 'bg-amber-50/20' }] },
-      CE5: { header: 'bg-rose-100 text-rose-950 border-rose-200', critHeader: 'bg-rose-50 text-rose-800 border-rose-200', weightHeader: 'bg-rose-100/70 text-rose-900 border-rose-200', scoreCe: 'bg-rose-100 text-rose-950 font-bold border-rose-300', levelCe: 'bg-rose-50 border-rose-200', oaTints: [{ header: 'bg-rose-50 text-rose-900', cell: 'bg-rose-50/20' }] }
-    };
-
-    const OFFICIAL_CES = [
-      { id: 'CE1', name: 'CE1. Estil de vida actiu i saludable', short: 'Estil de vida' },
-      { id: 'CE2', name: 'CE2. Situacions motrius i joc', short: 'Motricitat' },
-      { id: 'CE3', name: 'CE3. Expressió corporal i dansa', short: 'Expressió' },
-      { id: 'CE4', name: 'CE4. Medi natural i entorn', short: 'Entorn' },
-      { id: 'CE5', name: 'CE5. Valors, inclusió i convivència', short: 'Valors' }
-    ];
-
-    const CURRICULAR_CRITERIA_CATALOG = {
-      CE1: [
-        { code: "1.1", label: "1.1. Executar activitats i exercicis orientats a l’adquisició d’un estil de vida actiu i saludable." },
-        { code: "1.2", label: "1.2. Identificar els elements d’un pla de treball de la condició física a través de la pràctica motriu." },
-        { code: "1.3", label: "1.3. Incorporar hàbits saludables (alimentació, descans, higiene) valorant la millora integral." },
-        { code: "1.4", label: "1.4. Protocols d’actuació de prevenció i primers auxilis." }
-      ],
-      CE2: [
-        { code: "2.1", label: "2.1. Executar habilitats motrius específiques en reptes i formes jugades." },
-        { code: "2.2", label: "2.2. Resoldre situacions motrius aplicant habilitats tècniques i estratègiques." }
-      ],
-      CE3: [
-        { code: "3.1", label: "3.1. Expressar emocions i missatges mitjançant el cos." },
-        { code: "3.2", label: "3.2. Representar composicions col·lectives amb base musical." }
-      ],
-      CE4: [
-        { code: "4.1", label: "4.1. Realitzar activitat física en el medi natural minimitzant l'empremta." },
-        { code: "4.2", label: "4.2. Aplicar normes de seguretat en l'entorn." }
-      ],
-      CE5: [
-        { code: "5.1", label: "5.1. Aplicar els valors positius de l'esport i el joc net." },
-        { code: "5.2", label: "5.2. Mostrar actituds de respecte i empatia." }
-      ]
-    };
-
     const DEFAULT_THRESHOLDS = { epa: 1.0, as: 2.0, an: 3.0, ae: 4.0 };
     const DEFAULT_FINAL_CE_WEIGHTS = { CE1: 20, CE2: 20, CE3: 20, CE4: 20, CE5: 20 };
     const DEFAULT_FINAL_TRIM_WEIGHTS = { t1: 33.33, t2: 33.33, t3: 33.34 };
