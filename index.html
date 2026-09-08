@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>EF Competencial · Quadern LOMLOE Secure Cloud</title>
+  <title>EF Competencial · Quadern LOMLOE</title>
   
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -85,7 +85,7 @@
     </div>
   </div>
 
-  <!-- ================= CAPÇALERA ================= -->
+  <!-- ================= CAPÇALERA AMB IDENTITAT CORPORAL ================= -->
   <header class="bg-white/90 backdrop-blur-md border-b border-zinc-200/80 sticky top-0 z-40 no-print">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <div class="flex items-center justify-between h-14 gap-4">
@@ -103,9 +103,9 @@
             <div class="flex flex-col">
               <div class="flex items-center gap-1.5">
                 <span class="text-xs font-black tracking-tight text-zinc-900 group-hover:text-zinc-600 transition">EF COMPETENCIAL</span>
-                <span class="text-[9px] font-bold text-zinc-600 bg-zinc-100 px-1.5 py-0.5 rounded tracking-wider uppercase border border-zinc-200/60">PRO</span>
+                <span class="text-[9px] font-bold text-zinc-600 bg-zinc-100 px-1.5 py-0.5 rounded tracking-wider uppercase border border-zinc-200/60">LOMLOE</span>
               </div>
-              <span class="text-[9px] font-medium text-zinc-400 -mt-0.5">Avaluació Educació Física LOMLOE</span>
+              <span class="text-[9px] font-medium text-zinc-400 -mt-0.5">Avaluació Educació Física</span>
             </div>
           </button>
 
@@ -117,7 +117,6 @@
 
         <!-- Accions Ràpides de Capçalera -->
         <div class="flex items-center gap-2">
-          
           <div id="cloudStatusBadge" class="flex items-center gap-1.5 text-[11px] font-medium px-2.5 py-1 rounded-xl border bg-zinc-50 border-zinc-200 text-zinc-600">
             <span id="cloudStatusDot" class="w-2 h-2 rounded-full bg-amber-400 animate-pulse"></span>
             <span id="cloudStatusText" class="font-mono text-[10px] font-semibold">Connectant...</span>
@@ -129,6 +128,11 @@
             <button onclick="logoutActiveUser()" title="Tancar Sessió" class="text-zinc-400 hover:text-rose-600 p-1 transition ml-1">
               <i class="fa-solid fa-arrow-right-from-bracket"></i>
             </button>
+          </div>
+
+          <div id="savedIndicator" class="flex items-center gap-1.5 text-[11px] font-medium text-emerald-600 px-2 py-0.5 opacity-0 transition-opacity duration-300">
+            <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+            <span class="font-semibold text-[10px]">Desat</span>
           </div>
 
           <button onclick="goToHome()" id="homeNavBtn" class="inline-flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1.5 rounded-xl border border-zinc-200/80 bg-white text-zinc-700 hover:bg-zinc-50 shadow-subtle transition">
@@ -181,13 +185,13 @@
   <!-- ================= COS PRINCIPAL ================= -->
   <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-5">
 
-    <!-- PANTALLA D'INICI (HUB DE CLASSES) -->
+    <!-- PANTALLA D'INICI (HUB DOCENT OPERATIU) -->
     <section id="screenHome" class="space-y-6">
       <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-zinc-200/70 pb-4">
         <div>
           <div class="flex items-center gap-2 text-xs font-semibold text-zinc-400">
             <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
-            <span>Curs Actiu · Gestor de Classes LOMLOE</span>
+            <span>Curs Actiu · 1r Cicle d'ESO</span>
           </div>
           <h2 class="text-xl font-extrabold tracking-tight text-zinc-900 mt-0.5">Tauler de Classes</h2>
         </div>
@@ -205,7 +209,7 @@
       <div id="homeClassesGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"></div>
     </section>
 
-    <!-- ZONA DE TREBALL DE LA CLASSE -->
+    <!-- PANTALLA DE TREBALL DE LA CLASSE -->
     <div id="screenClassWorkspace" class="hidden space-y-5">
       <div class="flex flex-wrap items-center justify-between gap-3 bg-white border border-zinc-200/80 px-3.5 py-2.5 rounded-2xl shadow-subtle no-print">
         <div class="flex items-center gap-3">
@@ -225,7 +229,7 @@
         </div>
       </div>
 
-      <!-- VISTA 1: GRAELLA SdA (MOTOR SPREADSHEET PRO REACTIU) -->
+      <!-- VISTA 1: GRAELLA SdA -->
       <section id="viewSda" class="space-y-4">
         <div class="bg-white border border-zinc-200/80 rounded-2xl p-3 shadow-subtle flex flex-wrap items-center justify-between gap-3">
           <div class="flex items-center gap-2.5">
@@ -257,7 +261,7 @@
         </div>
       </section>
 
-      <!-- VISTA 2: ROSTER D'ALUMNAT -->
+      <!-- VISTA 2: LLISTA D'ALUMNAT -->
       <section id="viewRoster" class="space-y-4 hidden">
         <div class="bg-white border border-zinc-200 rounded-2xl p-6 shadow-card space-y-4">
           <div class="flex items-center justify-between border-b border-zinc-100 pb-4">
@@ -389,7 +393,7 @@
             </select>
           </div>
           <button onclick="window.print()" class="inline-flex items-center gap-2 bg-zinc-900 hover:bg-zinc-800 text-white text-xs font-semibold px-4 py-2 rounded-xl shadow-subtle transition">
-            <i class="fa-solid fa-print"></i> Imprimir Butlletí
+            <i class="fa-solid fa-print"></i> Imprimir Informe
           </button>
         </div>
 
@@ -529,58 +533,100 @@
     </div>
   </main>
 
-  <!-- MODAL LLINDARS -->
+  <!-- MODAL CONFIGURACIÓ ESCALA -->
   <div id="thresholdsModal" class="fixed inset-0 bg-zinc-950/40 backdrop-blur-xs z-50 flex items-center justify-center p-4 hidden no-print">
     <div class="bg-white rounded-3xl shadow-card max-w-xl w-full overflow-hidden border border-zinc-200">
       <div class="px-6 py-4 bg-zinc-900 text-white flex justify-between items-center">
-        <h3 class="text-sm font-bold">Definició de l'Escala de Qualificació LOMLOE</h3>
+        <div class="flex items-center gap-2.5">
+          <div class="w-8 h-8 rounded-xl bg-zinc-800 text-zinc-200 flex items-center justify-center text-xs">
+            <i class="fa-solid fa-sliders"></i>
+          </div>
+          <div>
+            <h3 class="text-sm font-bold tracking-tight">Definició de l'Escala de Qualificació</h3>
+            <p class="text-[11px] text-zinc-400">Ajusta els llindars mínims dels nivells LOMLOE</p>
+          </div>
+        </div>
         <button onclick="closeThresholdsModal()" class="text-zinc-400 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
       </div>
-      <div class="p-6 space-y-3 text-xs">
-        <div class="flex items-center justify-between p-3 bg-zinc-50 rounded-xl border border-zinc-200">
-          <div><b class="text-rose-600 font-mono">NA</b> No Assolit</div>
-          <span class="text-zinc-400">&lt; EPA</span>
-        </div>
-        <div class="flex items-center justify-between p-3 bg-zinc-50 rounded-xl border border-zinc-200">
-          <div><b class="text-amber-600 font-mono">EPA</b> En Procés</div>
-          <div class="flex items-center gap-1.5">
-            <span>&ge;</span>
-            <input type="number" id="th_epa" step="0.05" class="w-20 text-center font-mono font-bold bg-white border border-zinc-300 rounded-lg p-1.5">
+
+      <div class="p-6 space-y-4 text-xs">
+        <p class="text-zinc-500 text-[11px] leading-relaxed">
+          Defineix la nota mínima per assolir cada tram (en escala 0 a 4). El sistema recalcularà automàticament colors, nivells i estadístiques.
+        </p>
+
+        <div class="space-y-2.5 pt-1">
+          <div class="flex items-center gap-3 bg-zinc-50 border border-zinc-200/80 p-3 rounded-xl">
+            <div class="w-12 font-black font-mono text-sm text-rose-600">NA</div>
+            <div class="flex-1">
+              <span class="block font-semibold text-zinc-800">No Assolit</span>
+              <span class="text-[11px] text-zinc-400">Qualsevol nota inferior a EPA</span>
+            </div>
+            <div class="text-right">
+              <span class="font-mono text-xs text-zinc-400 font-bold">&lt; EPA</span>
+            </div>
           </div>
-        </div>
-        <div class="flex items-center justify-between p-3 bg-zinc-50 rounded-xl border border-zinc-200">
-          <div><b class="text-sky-600 font-mono">AS</b> Assolit</div>
-          <div class="flex items-center gap-1.5">
-            <span>&ge;</span>
-            <input type="number" id="th_as" step="0.05" class="w-20 text-center font-mono font-bold bg-white border border-zinc-300 rounded-lg p-1.5">
+
+          <div class="flex items-center gap-3 bg-zinc-50 border border-zinc-200/80 p-3 rounded-xl">
+            <div class="w-12 font-black font-mono text-sm text-amber-600">EPA</div>
+            <div class="flex-1">
+              <span class="block font-semibold text-zinc-800">En Procés d'Assoliment</span>
+              <span class="text-[11px] text-zinc-400">Nota mínima a partir de la qual és EPA</span>
+            </div>
+            <div class="flex items-center gap-1.5">
+              <span class="text-zinc-400 font-medium text-[11px]">&ge;</span>
+              <input type="number" id="th_epa" step="0.05" min="0" max="4" class="w-20 text-center font-mono font-bold text-sm bg-white border border-zinc-300 rounded-lg p-1.5 outline-none focus:ring-2 focus:ring-zinc-900">
+            </div>
           </div>
-        </div>
-        <div class="flex items-center justify-between p-3 bg-zinc-50 rounded-xl border border-zinc-200">
-          <div><b class="text-indigo-600 font-mono">AN</b> Notable</div>
-          <div class="flex items-center gap-1.5">
-            <span>&ge;</span>
-            <input type="number" id="th_an" step="0.05" class="w-20 text-center font-mono font-bold bg-white border border-zinc-300 rounded-lg p-1.5">
+
+          <div class="flex items-center gap-3 bg-zinc-50 border border-zinc-200/80 p-3 rounded-xl">
+            <div class="w-12 font-black font-mono text-sm text-sky-600">AS</div>
+            <div class="flex-1">
+              <span class="block font-semibold text-zinc-800">Assolit (Aprovat)</span>
+              <span class="text-[11px] text-zinc-400">Llindar mínim d'assoliment</span>
+            </div>
+            <div class="flex items-center gap-1.5">
+              <span class="text-zinc-400 font-medium text-[11px]">&ge;</span>
+              <input type="number" id="th_as" step="0.05" min="0" max="4" class="w-20 text-center font-mono font-bold text-sm bg-white border border-zinc-300 rounded-lg p-1.5 outline-none focus:ring-2 focus:ring-zinc-900">
+            </div>
           </div>
-        </div>
-        <div class="flex items-center justify-between p-3 bg-zinc-50 rounded-xl border border-zinc-200">
-          <div><b class="text-emerald-600 font-mono">AE</b> Excel·lent</div>
-          <div class="flex items-center gap-1.5">
-            <span>&ge;</span>
-            <input type="number" id="th_ae" step="0.05" class="w-20 text-center font-mono font-bold bg-white border border-zinc-300 rounded-lg p-1.5">
+
+          <div class="flex items-center gap-3 bg-zinc-50 border border-zinc-200/80 p-3 rounded-xl">
+            <div class="w-12 font-black font-mono text-sm text-indigo-600">AN</div>
+            <div class="flex-1">
+              <span class="block font-semibold text-zinc-800">Assoliment Notable</span>
+              <span class="text-[11px] text-zinc-400">Nota mínima per a notable</span>
+            </div>
+            <div class="flex items-center gap-1.5">
+              <span class="text-zinc-400 font-medium text-[11px]">&ge;</span>
+              <input type="number" id="th_an" step="0.05" min="0" max="4" class="w-20 text-center font-mono font-bold text-sm bg-white border border-zinc-300 rounded-lg p-1.5 outline-none focus:ring-2 focus:ring-zinc-900">
+            </div>
+          </div>
+
+          <div class="flex items-center gap-3 bg-zinc-50 border border-zinc-200/80 p-3 rounded-xl">
+            <div class="w-12 font-black font-mono text-sm text-emerald-600">AE</div>
+            <div class="flex-1">
+              <span class="block font-semibold text-zinc-800">Assoliment Excel·lent</span>
+              <span class="text-[11px] text-zinc-400">Nota mínima per a excel·lència</span>
+            </div>
+            <div class="flex items-center gap-1.5">
+              <span class="text-zinc-400 font-medium text-[11px]">&ge;</span>
+              <input type="number" id="th_ae" step="0.05" min="0" max="4" class="w-20 text-center font-mono font-bold text-sm bg-white border border-zinc-300 rounded-lg p-1.5 outline-none focus:ring-2 focus:ring-zinc-900">
+            </div>
           </div>
         </div>
       </div>
+
       <div class="px-6 py-3.5 bg-zinc-50 border-t border-zinc-200 flex justify-between items-center text-xs">
-        <button onclick="resetDefaultThresholds()" class="text-zinc-500 hover:text-zinc-900 font-semibold underline">Restablir per defecte</button>
+        <button onclick="resetDefaultThresholds()" class="text-zinc-500 hover:text-zinc-900 font-semibold underline">Restablir (1.0, 2.0, 3.0, 4.0)</button>
         <div class="flex gap-2">
-          <button onclick="closeThresholdsModal()" class="px-3.5 py-1.5 border border-zinc-300 rounded-xl font-semibold text-zinc-600">Cancel·lar</button>
-          <button onclick="saveThresholdsModal()" class="px-4 py-1.5 bg-zinc-900 hover:bg-zinc-800 text-white rounded-xl font-semibold">Desar</button>
+          <button onclick="closeThresholdsModal()" class="px-3.5 py-1.5 border border-zinc-300 rounded-xl font-semibold text-zinc-600 hover:bg-zinc-100">Cancel·lar</button>
+          <button onclick="saveThresholdsModal()" class="px-4 py-1.5 bg-zinc-900 hover:bg-zinc-800 text-white rounded-xl font-semibold shadow-subtle">Desar</button>
         </div>
       </div>
     </div>
   </div>
 
-  <!-- MODAL CREAR O EDITAR CLASSE -->
+  <!-- MODAL GESTIÓ DE CLASSE (CREAR O MODIFICAR) -->
   <div id="groupModal" class="fixed inset-0 bg-zinc-950/40 backdrop-blur-xs z-50 flex items-center justify-center p-4 hidden no-print">
     <div class="bg-white rounded-3xl shadow-card max-w-lg w-full overflow-hidden border border-zinc-200">
       <div class="px-6 py-4 bg-zinc-900 text-white flex justify-between items-center">
@@ -598,7 +644,7 @@
 
         <div id="groupModalSdaSection" class="border-t border-zinc-100 pt-3 space-y-2">
           <div class="flex items-center justify-between">
-            <span class="font-bold text-zinc-800 uppercase tracking-wider text-[10px]">Vols afegir SdAs d'altres classes?</span>
+            <span class="font-bold text-zinc-800 uppercase tracking-wider text-[10px]">Vols importar SdAs d'altres classes?</span>
             <span class="text-[10px] text-zinc-400">Opcional</span>
           </div>
           <div id="groupModalSdaList" class="max-h-40 overflow-y-auto space-y-1.5 bg-zinc-50 p-2.5 rounded-xl border border-zinc-200/80">
@@ -617,25 +663,34 @@
   <div id="sdaModal" class="fixed inset-0 bg-zinc-950/40 backdrop-blur-xs z-50 flex items-center justify-center p-4 hidden no-print">
     <div class="bg-white rounded-3xl shadow-card max-w-3xl w-full max-h-[90vh] flex flex-col overflow-hidden border border-zinc-200">
       <div class="px-6 py-4 bg-zinc-900 text-white flex justify-between items-center">
-        <h3 class="text-sm font-bold flex items-center gap-2">
-          <i class="fa-solid fa-sliders text-zinc-400"></i>
-          <span id="sdaModalMainTitle">Configuració de la Situació d'Aprenentatge (SdA)</span>
-        </h3>
+        <div class="flex items-center gap-2.5">
+          <div class="w-8 h-8 rounded-xl bg-zinc-800 text-zinc-200 flex items-center justify-center text-xs">
+            <i class="fa-solid fa-sliders"></i>
+          </div>
+          <div>
+            <h3 class="text-sm font-bold tracking-tight" id="sdaModalMainTitle">Configuració de la Situació d'Aprenentatge (SdA)</h3>
+            <p class="text-[11px] text-zinc-400">Ponderació de la SdA, Criteris oficials de 1r i 2n d'ESO i OAs.</p>
+          </div>
+        </div>
         <button onclick="closeSdaModal()" class="text-zinc-400 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
       </div>
+
       <div class="p-6 overflow-y-auto space-y-5 flex-1 text-xs">
         <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
           <div class="sm:col-span-2">
-            <label class="block font-semibold text-zinc-700 mb-1">Títol de la SdA</label>
-            <input type="text" id="modalSdaTitle" class="w-full text-sm border border-zinc-200 rounded-xl p-2.5 outline-none font-semibold focus:ring-2 focus:ring-zinc-900">
+            <label class="block font-semibold text-zinc-700 mb-1">Títol de la Situació d'Aprenentatge</label>
+            <input type="text" id="modalSdaTitle" placeholder="Ex: Hàbits saludables i condició física" class="w-full text-sm border border-zinc-200 rounded-xl p-2.5 focus:ring-2 focus:ring-zinc-900 outline-none font-semibold text-zinc-900">
           </div>
           <div>
             <label class="block font-semibold text-zinc-800 mb-1">Pes al Trimestre (%)</label>
-            <input type="number" id="modalSdaTrimWeight" value="50" min="0" max="100" class="w-full text-sm border border-zinc-200 rounded-xl p-2.5 text-center font-mono font-bold focus:ring-2 focus:ring-zinc-900">
+            <div class="flex items-center gap-1.5">
+              <input type="number" id="modalSdaTrimWeight" value="50" min="0" max="100" class="w-full text-sm border border-zinc-200 bg-zinc-50 rounded-xl p-2.5 focus:ring-2 focus:ring-zinc-900 outline-none font-mono font-bold text-zinc-900 text-center">
+              <span class="text-zinc-400 font-mono font-bold text-sm">%</span>
+            </div>
           </div>
         </div>
 
-        <div class="bg-zinc-50 border border-zinc-200 p-3.5 rounded-2xl space-y-2">
+        <div class="bg-zinc-50 border border-zinc-200/80 p-3.5 rounded-2xl space-y-2">
           <div class="flex justify-between items-center">
             <span class="font-bold text-zinc-700 text-[11px] uppercase tracking-wider">A quins grups s'aplica?</span>
             <div class="flex gap-2 text-[11px]">
@@ -655,6 +710,7 @@
           <div id="modalCeCardsContainer" class="space-y-3.5"></div>
         </div>
       </div>
+
       <div class="px-6 py-3.5 bg-zinc-50 border-t border-zinc-200 flex justify-between items-center text-xs">
         <button id="sdaDeleteBtn" type="button" onclick="deleteCurrentSda()" class="text-rose-600 hover:text-rose-800 font-semibold inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl hover:bg-rose-50 border border-transparent hover:border-rose-200 transition">
           <i class="fa-regular fa-trash-can"></i> Eliminar SdA
@@ -1010,7 +1066,17 @@
     function saveToStorage() {
       try {
         localStorage.setItem('EF_COMPETENCIAL_DATA_V10', JSON.stringify(window.appData));
+        showSavedIndicator();
       } catch (e) {}
+    }
+
+    function showSavedIndicator() {
+      const el = document.getElementById('savedIndicator');
+      if (el) {
+        el.classList.remove('opacity-0');
+        clearTimeout(window._savedTimeout);
+        window._savedTimeout = setTimeout(() => el.classList.add('opacity-0'), 1400);
+      }
     }
 
     function getCurrentGroup() {
@@ -1106,7 +1172,7 @@
                   </div>
                   <div>
                     <h4 class="text-sm font-bold text-zinc-900 leading-tight">${group.name}</h4>
-                    <span class="text-[11px] text-zinc-400 font-medium">${studentCount} alumnes</span>
+                    <span class="text-[11px] text-zinc-400 font-medium">${studentCount} alumnes inscrits</span>
                   </div>
                 </div>
 
@@ -1272,6 +1338,8 @@
         renderHomeScreen();
       }
     };
+
+    // ================== GESTIÓ SdA AMB EDITAR I AFEGIR TOTALMENT ROBUST ==================
 
     window.openGlobalSdaModal = function() {
       window.appState.currentTrim = window.appState.currentTrim || 1;
@@ -1812,7 +1880,7 @@
         }
 
         html += `<td class="py-2 px-4 text-center border-l-2 border-zinc-800 bg-zinc-50/70 font-bold">
-          <div class="text-sm font-black font-mono text-zinc-950">${finalScore !== null ? finalScore.toFixed(2) : '<span class="text-zinc-300 font-normal">—</span>'}</div>
+          <div class="text-sm font-black font-mono text-zinc-900">${finalScore !== null ? finalScore.toFixed(2) : '<span class="text-zinc-300 font-normal">—</span>'}</div>
           <span class="inline-flex items-center mt-0.5 text-[10px] px-2.5 py-0.5 rounded font-bold ring-1 ring-inset ${finalLvl.badge}">${finalLvl.code}</span>
         </td></tr>`;
       });
@@ -2230,7 +2298,7 @@
       const ae = parseFloat(document.getElementById('th_ae').value);
 
       if (isNaN(epa) || isNaN(as) || isNaN(an) || isNaN(ae) || epa >= as || as >= an || an >= ae) {
-        alert("Els llindars han de ser vàlids (EPA < AS < AN < AE).");
+        alert("Els llindars han de ser valors numèrics vàlids i estrictament creixents (EPA < AS < AN < AE).");
         return;
       }
 
