@@ -566,7 +566,7 @@
     </div>
   </div>
 
-  <!-- MODAL CREAR O EDITAR CLASSE AMB IMPORTADOR D'SdAs -->
+  <!-- MODAL CREAR O EDITAR CLASSE -->
   <div id="groupModal" class="fixed inset-0 bg-zinc-950/40 backdrop-blur-xs z-50 flex items-center justify-center p-4 hidden no-print">
     <div class="bg-white rounded-3xl shadow-card max-w-lg w-full overflow-hidden border border-zinc-200">
       <div class="px-6 py-4 bg-zinc-900 text-white flex justify-between items-center">
@@ -582,14 +582,12 @@
           <input type="text" id="modalGroupNameInput" placeholder="Ex: 1r ESO C, 2n ESO A..." class="w-full text-sm border border-zinc-200 rounded-xl p-2.5 outline-none font-semibold focus:ring-2 focus:ring-zinc-900">
         </div>
 
-        <!-- Secció de còpia d'SdAs existents (apareix en crear) -->
         <div id="groupModalSdaSection" class="border-t border-zinc-100 pt-3 space-y-2">
           <div class="flex items-center justify-between">
             <span class="font-bold text-zinc-800 uppercase tracking-wider text-[10px]">Vols afegir SdAs d'altres classes?</span>
             <span class="text-[10px] text-zinc-400">Opcional</span>
           </div>
           <div id="groupModalSdaList" class="max-h-40 overflow-y-auto space-y-1.5 bg-zinc-50 p-2.5 rounded-xl border border-zinc-200/80">
-            <!-- Render dinàmic de les SdAs disponibles -->
           </div>
         </div>
       </div>
@@ -605,18 +603,21 @@
   <div id="sdaModal" class="fixed inset-0 bg-zinc-950/40 backdrop-blur-xs z-50 flex items-center justify-center p-4 hidden no-print">
     <div class="bg-white rounded-3xl shadow-card max-w-3xl w-full max-h-[90vh] flex flex-col overflow-hidden border border-zinc-200">
       <div class="px-6 py-4 bg-zinc-900 text-white flex justify-between items-center">
-        <h3 class="text-sm font-bold">Configuració de la Situació d'Aprenentatge (SdA)</h3>
+        <h3 class="text-sm font-bold flex items-center gap-2">
+          <i class="fa-solid fa-sliders text-zinc-400"></i>
+          <span id="sdaModalMainTitle">Configuració de la Situació d'Aprenentatge (SdA)</span>
+        </h3>
         <button onclick="closeSdaModal()" class="text-zinc-400 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
       </div>
       <div class="p-6 overflow-y-auto space-y-5 flex-1 text-xs">
         <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
           <div class="sm:col-span-2">
             <label class="block font-semibold text-zinc-700 mb-1">Títol de la SdA</label>
-            <input type="text" id="modalSdaTitle" class="w-full text-sm border border-zinc-200 rounded-xl p-2.5 outline-none font-semibold">
+            <input type="text" id="modalSdaTitle" class="w-full text-sm border border-zinc-200 rounded-xl p-2.5 outline-none font-semibold focus:ring-2 focus:ring-zinc-900">
           </div>
           <div>
             <label class="block font-semibold text-zinc-800 mb-1">Pes al Trimestre (%)</label>
-            <input type="number" id="modalSdaTrimWeight" value="50" min="0" max="100" class="w-full text-sm border border-zinc-200 rounded-xl p-2.5 text-center font-mono font-bold">
+            <input type="number" id="modalSdaTrimWeight" value="50" min="0" max="100" class="w-full text-sm border border-zinc-200 rounded-xl p-2.5 text-center font-mono font-bold focus:ring-2 focus:ring-zinc-900">
           </div>
         </div>
 
@@ -640,9 +641,14 @@
           <div id="modalCeCardsContainer" class="space-y-3.5"></div>
         </div>
       </div>
-      <div class="px-6 py-3.5 bg-zinc-50 border-t border-zinc-200 flex justify-end gap-2 text-xs">
-        <button onclick="closeSdaModal()" class="px-3.5 py-1.5 border border-zinc-300 rounded-xl font-semibold text-zinc-600">Cancel·lar</button>
-        <button onclick="saveSdaFromModal()" class="px-4 py-1.5 bg-zinc-900 hover:bg-zinc-800 text-white rounded-xl font-semibold">Desar SdA</button>
+      <div class="px-6 py-3.5 bg-zinc-50 border-t border-zinc-200 flex justify-between items-center text-xs">
+        <button id="sdaDeleteBtn" type="button" onclick="deleteCurrentSda()" class="text-rose-600 hover:text-rose-800 font-semibold inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl hover:bg-rose-50 border border-transparent hover:border-rose-200 transition">
+          <i class="fa-regular fa-trash-can"></i> Eliminar SdA
+        </button>
+        <div class="flex gap-2">
+          <button onclick="closeSdaModal()" class="px-3.5 py-1.5 border border-zinc-300 rounded-xl font-semibold text-zinc-600 hover:bg-zinc-100">Cancel·lar</button>
+          <button onclick="saveSdaFromModal()" class="px-4 py-1.5 bg-zinc-900 hover:bg-zinc-800 text-white rounded-xl font-semibold shadow-subtle">Desar SdA</button>
+        </div>
       </div>
     </div>
   </div>
@@ -783,113 +789,6 @@
 
   <!-- ================= LÒGICA I MOTOR D'AVALUACIÓ ================= -->
   <script>
-    const CE_COLOR_THEMES = {
-      CE1: { 
-        header: 'bg-sky-100 text-sky-950 border-sky-200', 
-        critHeader: 'bg-sky-50 text-sky-800 border-sky-200', 
-        weightHeader: 'bg-sky-100/70 text-sky-900 border-sky-200', 
-        scoreCe: 'bg-sky-100 text-sky-950 font-bold border-sky-300', 
-        levelCe: 'bg-sky-50 border-sky-200',
-        oaTints: [
-          { header: 'bg-sky-50/80 text-sky-900', cell: 'bg-sky-50/25' },
-          { header: 'bg-sky-100/70 text-sky-900', cell: 'bg-sky-100/30' },
-          { header: 'bg-blue-50/80 text-blue-900', cell: 'bg-blue-50/25' },
-          { header: 'bg-cyan-50/80 text-cyan-900', cell: 'bg-cyan-50/25' }
-        ]
-      },
-      CE2: { 
-        header: 'bg-emerald-100 text-emerald-950 border-emerald-200', 
-        critHeader: 'bg-emerald-50 text-emerald-800 border-emerald-200', 
-        weightHeader: 'bg-emerald-100/70 text-emerald-900 border-emerald-200', 
-        scoreCe: 'bg-emerald-100 text-emerald-950 font-bold border-emerald-300', 
-        levelCe: 'bg-emerald-50 border-emerald-200',
-        oaTints: [
-          { header: 'bg-emerald-50/80 text-emerald-900', cell: 'bg-emerald-50/25' },
-          { header: 'bg-emerald-100/70 text-emerald-900', cell: 'bg-emerald-100/30' },
-          { header: 'bg-teal-50/80 text-teal-900', cell: 'bg-teal-50/25' },
-          { header: 'bg-green-50/80 text-green-900', cell: 'bg-green-50/25' }
-        ]
-      },
-      CE3: { 
-        header: 'bg-purple-100 text-purple-950 border-purple-200', 
-        critHeader: 'bg-purple-50 text-purple-800 border-purple-200', 
-        weightHeader: 'bg-purple-100/70 text-purple-900 border-purple-200', 
-        scoreCe: 'bg-purple-100 text-purple-950 font-bold border-purple-300', 
-        levelCe: 'bg-purple-50 border-purple-200',
-        oaTints: [
-          { header: 'bg-purple-50/80 text-purple-900', cell: 'bg-purple-50/25' },
-          { header: 'bg-purple-100/70 text-purple-900', cell: 'bg-purple-100/30' },
-          { header: 'bg-fuchsia-50/80 text-fuchsia-900', cell: 'bg-fuchsia-50/25' },
-          { header: 'bg-violet-50/80 text-violet-900', cell: 'bg-violet-50/25' }
-        ]
-      },
-      CE4: { 
-        header: 'bg-amber-100 text-amber-950 border-amber-200', 
-        critHeader: 'bg-amber-50 text-amber-800 border-amber-200', 
-        weightHeader: 'bg-amber-100/70 text-amber-900 border-amber-200', 
-        scoreCe: 'bg-amber-100 text-amber-950 font-bold border-amber-300', 
-        levelCe: 'bg-amber-50 border-amber-200',
-        oaTints: [
-          { header: 'bg-amber-50/80 text-amber-900', cell: 'bg-amber-50/25' },
-          { header: 'bg-amber-100/70 text-amber-900', cell: 'bg-amber-100/30' },
-          { header: 'bg-orange-50/80 text-orange-900', cell: 'bg-orange-50/25' },
-          { header: 'bg-yellow-50/80 text-yellow-900', cell: 'bg-yellow-50/25' }
-        ]
-      },
-      CE5: { 
-        header: 'bg-rose-100 text-rose-950 border-rose-200', 
-        critHeader: 'bg-rose-50 text-rose-800 border-rose-200', 
-        weightHeader: 'bg-rose-100/70 text-rose-900 border-rose-200', 
-        scoreCe: 'bg-rose-100 text-rose-950 font-bold border-rose-300', 
-        levelCe: 'bg-rose-50 border-rose-200',
-        oaTints: [
-          { header: 'bg-rose-50/80 text-rose-900', cell: 'bg-rose-50/25' },
-          { header: 'bg-rose-100/70 text-rose-900', cell: 'bg-rose-100/30' },
-          { header: 'bg-pink-50/80 text-pink-900', cell: 'bg-pink-50/25' },
-          { header: 'bg-red-50/80 text-red-900', cell: 'bg-red-50/25' }
-        ]
-      }
-    };
-
-    function getOaColorTheme(ceId, oaIndex) {
-      const theme = CE_COLOR_THEMES[ceId] || CE_COLOR_THEMES.CE1;
-      const tints = theme.oaTints || [{ header: 'bg-zinc-50', cell: 'bg-white' }];
-      return tints[oaIndex % tints.length];
-    }
-
-    const CURRICULAR_CRITERIA_CATALOG = {
-      CE1: [
-        { code: "1.1", label: "1.1. Executar activitats i exercicis orientats a l’adquisició d’un estil de vida actiu i saludable." },
-        { code: "1.2", label: "1.2. Identificar els elements d’un pla de treball de la condició física a través de la pràctica motriu." },
-        { code: "1.3", label: "1.3. Incorporar hàbits saludables (alimentació, descans, higiene) valorant la millora integral." },
-        { code: "1.4", label: "1.4. Protocols d’actuació de prevenció i primers auxilis." }
-      ],
-      CE2: [
-        { code: "2.1", label: "2.1. Executar habilitats motrius específiques en reptes i formes jugades." },
-        { code: "2.2", label: "2.2. Resoldre situacions motrius aplicant habilitats tècniques i estratègiques." }
-      ],
-      CE3: [
-        { code: "3.1", label: "3.1. Expressar emocions i missatges mitjançant el cos." },
-        { code: "3.2", label: "3.2. Representar composicions col·lectives amb base musical." }
-      ],
-      CE4: [
-        { code: "4.1", label: "4.1. Realitzar activitat física en el medi natural minimitzant l'empremta." },
-        { code: "4.2", label: "4.2. Aplicar normes de seguretat en l'entorn." }
-      ],
-      CE5: [
-        { code: "5.1", label: "5.1. Aplicar els valors positius de l'esport i el joc net." },
-        { code: "5.2", label: "5.2. Mostrar actituds de respecte i empatia." }
-      ]
-    };
-
-    const OFFICIAL_CES = [
-      { id: 'CE1', name: 'CE1. Estil de vida actiu i saludable', short: 'Estil de vida' },
-      { id: 'CE2', name: 'CE2. Situacions motrius i joc', short: 'Motricitat' },
-      { id: 'CE3', name: 'CE3. Expressió corporal i dansa', short: 'Expressió' },
-      { id: 'CE4', name: 'CE4. Medi natural i entorn', short: 'Entorn' },
-      { id: 'CE5', name: 'CE5. Valors, inclusió i convivència', short: 'Valors' }
-    ];
-
     const DEFAULT_THRESHOLDS = { epa: 1.0, as: 2.0, an: 3.0, ae: 4.0 };
     const DEFAULT_FINAL_CE_WEIGHTS = { CE1: 20, CE2: 20, CE3: 20, CE4: 20, CE5: 20 };
     const DEFAULT_FINAL_TRIM_WEIGHTS = { t1: 33.33, t2: 33.33, t3: 33.34 };
@@ -964,7 +863,8 @@
       currentTrim: 1,
       currentView: 'sda',
       editingSdaId: null,
-      editingGroupId: null, // Si és null, creem classe nova; si té ID, modifiquem
+      editingOriginalTitle: null, // Guarda el títol original abans d'editar per sincronitzar correctament
+      editingGroupId: null,
       statsScope: 'class',
       statsType: 'sda'
     };
@@ -1082,18 +982,13 @@
       }).join('');
     };
 
-    // ================== FUNCIONALITAT: EDITAR I CREAR CLASSES AMB CÒPIA D'SDAS ==================
-
     window.openNewGroupModal = function() {
       window.appState.editingGroupId = null;
       document.getElementById('groupModalTitle').innerHTML = `<i class="fa-solid fa-graduation-cap text-zinc-400"></i> Crear Nova Classe`;
       document.getElementById('modalGroupNameInput').value = '';
       document.getElementById('groupModalSaveBtn').textContent = "Crear Classe";
-      
-      // Mostrar i omplir el selector d'SdAs existents
       document.getElementById('groupModalSdaSection').classList.remove('hidden');
       renderAvailableSdasForNewGroup();
-
       document.getElementById('groupModal').classList.remove('hidden');
     };
 
@@ -1103,8 +998,6 @@
       document.getElementById('groupModalTitle').innerHTML = `<i class="fa-solid fa-pen text-zinc-400"></i> Modificar Nom de la Classe`;
       document.getElementById('modalGroupNameInput').value = group.name;
       document.getElementById('groupModalSaveBtn').textContent = "Actualitzar Nom";
-      
-      // En edició de nom no cal importar
       document.getElementById('groupModalSdaSection').classList.add('hidden');
       document.getElementById('groupModal').classList.remove('hidden');
     };
@@ -1117,7 +1010,6 @@
       const container = document.getElementById('groupModalSdaList');
       const uniqueSdas = new Map();
 
-      // Recorrem totes les classes per agafar les SdAs úniques que existeixen
       Object.values(window.appData.groups).forEach(grp => {
         (grp.sdas || []).forEach(sda => {
           if (!uniqueSdas.has(sda.title)) {
@@ -1131,7 +1023,7 @@
         return;
       }
 
-      container.innerHTML = Array.from(uniqueSdas.values()).map((sda, idx) => `
+      container.innerHTML = Array.from(uniqueSdas.values()).map((sda) => `
         <label class="flex items-center justify-between p-2 rounded-lg bg-white border border-zinc-200/70 hover:border-zinc-300 cursor-pointer">
           <div class="flex items-center gap-2">
             <input type="checkbox" value="${sda.title}" class="import-sda-checkbox rounded text-zinc-900 focus:ring-zinc-900">
@@ -1147,7 +1039,6 @@
       if (!name) return alert("Introdueix un nom per a la classe.");
 
       if (window.appState.editingGroupId) {
-        // Mode Modificació: actualitzem nom existent
         const gId = window.appState.editingGroupId;
         window.appData.groups[gId].name = name;
         saveToStorage();
@@ -1158,17 +1049,14 @@
           document.getElementById('breadcrumbGroupName').textContent = name;
         }
       } else {
-        // Mode Nova Classe: creem grup i opcionalment hi importem les SdAs seleccionades
         const gId = 'g_' + Date.now();
         const selectedTitles = Array.from(document.querySelectorAll('.import-sda-checkbox:checked')).map(cb => cb.value);
 
         const importedSdas = [];
         if (selectedTitles.length > 0) {
-          // Busquem les definicions de les SdAs seleccionades
           Object.values(window.appData.groups).forEach(grp => {
             (grp.sdas || []).forEach(sda => {
               if (selectedTitles.includes(sda.title) && !importedSdas.some(s => s.title === sda.title)) {
-                // Clonem l'SdA amb un ID nou i dades netes
                 importedSdas.push({
                   id: 'sda_' + Date.now() + '_' + Math.floor(Math.random() * 1000),
                   trim: sda.trim,
@@ -1719,17 +1607,39 @@
       openSdaModal(true);
     };
 
+    // ================== GESTIÓ SdA AMB EDITAR ROBUST ==================
+
     window.openSdaModal = function(isNew) {
       const curGroup = getCurrentGroup();
       let sda;
+
       if (isNew) {
         window.appState.editingSdaId = null;
+        window.appState.editingOriginalTitle = null;
         sda = { id: 'sda_' + Date.now(), trim: window.appState.currentTrim, title: '', trimWeight: 50, competences: {} };
+        document.getElementById('sdaModalMainTitle').textContent = "Nova Situació d'Aprenentatge (SdA)";
+        document.getElementById('sdaDeleteBtn').classList.add('hidden');
       } else {
-        const sdaId = document.getElementById('sdaSelect').value;
+        const sdaSelectEl = document.getElementById('sdaSelect');
+        const sdaId = sdaSelectEl ? sdaSelectEl.value : null;
         sda = (curGroup.sdas || []).find(s => s.id === sdaId);
-        if (!sda) { openSdaModal(true); return; }
+        
+        // Si no en troba cap de seleccionada per id, agafem la primera del trimestre actiu
+        if (!sda) {
+          const trimSdas = (curGroup.sdas || []).filter(s => s.trim === window.appState.currentTrim);
+          sda = trimSdas[0];
+        }
+
+        if (!sda) {
+          // Si realment no hi ha cap SdA a la classe, l'obrim en mode nou
+          openSdaModal(true);
+          return;
+        }
+
         window.appState.editingSdaId = sda.id;
+        window.appState.editingOriginalTitle = sda.title;
+        document.getElementById('sdaModalMainTitle').textContent = `Editar SdA: ${sda.title}`;
+        document.getElementById('sdaDeleteBtn').classList.remove('hidden');
       }
 
       document.getElementById('modalSdaTitle').value = sda.title || '';
@@ -1743,9 +1653,10 @@
       const cont = document.getElementById('modalTargetGroupsContainer');
       cont.innerHTML = Object.keys(window.appData.groups).map(gId => {
         const group = window.appData.groups[gId];
+        // Si és nova, marquem la classe activa. Si és edició, marquem les classes que tinguin aquesta SdA (pel seu títol o id)
         let isChecked = !window.appState.editingSdaId 
           ? (gId === window.appData.activeGroupId) 
-          : group.sdas.some(s => s.title === existingTitle && s.trim === window.appState.currentTrim);
+          : (group.sdas || []).some(s => (s.id === window.appState.editingSdaId) || (existingTitle && s.title === existingTitle));
 
         return `
           <label class="inline-flex items-center gap-2 bg-white px-3 py-1.5 rounded-xl border border-zinc-200 cursor-pointer hover:border-zinc-300 transition">
@@ -1861,6 +1772,26 @@
         : "text-xs font-mono font-bold px-2 py-0.5 rounded-md bg-amber-50 text-amber-700 ring-1 ring-amber-200";
     };
 
+    window.deleteCurrentSda = function() {
+      if (!window.appState.editingSdaId) return;
+      const curGroup = getCurrentGroup();
+      const sda = (curGroup.sdas || []).find(s => s.id === window.appState.editingSdaId);
+      if (!sda) return;
+
+      if (confirm(`Estàs segur que vols eliminar la SdA "${sda.title}" d'aquesta classe?`)) {
+        curGroup.sdas = (curGroup.sdas || []).filter(s => s.id !== sda.id);
+        if (curGroup.grades && curGroup.grades[sda.id]) {
+          delete curGroup.grades[sda.id];
+        }
+        saveToStorage();
+        if (window.syncGroupEntityToCloud) window.syncGroupEntityToCloud(window.appData.activeGroupId);
+        closeSdaModal();
+        populateSdaSelect();
+        renderSdaGrid();
+        renderTrimView();
+      }
+    };
+
     window.saveSdaFromModal = function() {
       const targetGroupIds = Array.from(document.querySelectorAll('.target-group-checkbox:checked')).map(cb => cb.value);
       if (targetGroupIds.length === 0) return alert("Selecciona com a mínim un grup.");
@@ -1884,26 +1815,40 @@
         }
       });
 
+      const originalTitle = window.appState.editingOriginalTitle;
+      const editingId = window.appState.editingSdaId;
+
       targetGroupIds.forEach(gId => {
         const grp = window.appData.groups[gId];
-        let targetSda = window.appState.editingSdaId ? (grp.sdas || []).find(s => s.id === window.appState.editingSdaId) : null;
+        if (!Array.isArray(grp.sdas)) grp.sdas = [];
+
+        // Buscar si ja existeix per ID o pel títol original
+        let targetSda = null;
+        if (editingId) {
+          targetSda = grp.sdas.find(s => s.id === editingId || (originalTitle && s.title === originalTitle && s.trim === window.appState.currentTrim));
+        }
+
         if (!targetSda) {
-          targetSda = {
-            id: 'sda_' + Date.now() + '_' + Math.floor(Math.random()*1000),
+          // Si no existeix en aquest grup, la creem de nou
+          const newSdaId = editingId || ('sda_' + Date.now() + '_' + Math.floor(Math.random() * 1000));
+          grp.sdas.push({
+            id: newSdaId,
             trim: window.appState.currentTrim,
-            title,
-            trimWeight,
+            title: title,
+            trimWeight: trimWeight,
             competences: JSON.parse(JSON.stringify(competences))
-          };
-          grp.sdas.push(targetSda);
+          });
         } else {
+          // Si ja existia, actualitzem les seves dades
           targetSda.title = title;
           targetSda.trimWeight = trimWeight;
           targetSda.competences = JSON.parse(JSON.stringify(competences));
         }
+
         if (window.syncGroupEntityToCloud) window.syncGroupEntityToCloud(gId);
       });
 
+      // Si s'ha desmarcat d'algun grup en mode edició, no l'esborrem de forma destructiva per evitar perdre notes
       saveToStorage();
       closeSdaModal();
 
