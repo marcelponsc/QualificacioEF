@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>EF Competencial · Quadern LOMLOE</title>
+  <title>EF Competencial · Quadern LOMLOE Pro</title>
   
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -34,23 +34,13 @@
   <style>
     body { font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11'; }
     .tabular-nums { font-variant-numeric: tabular-nums; }
-    
     ::-webkit-scrollbar { width: 5px; height: 5px; }
     ::-webkit-scrollbar-track { background: transparent; }
     ::-webkit-scrollbar-thumb { background: #e4e4e7; border-radius: 9999px; }
     ::-webkit-scrollbar-thumb:hover { background: #d4d4d8; }
-
-    input[type=number]::-webkit-inner-spin-button, 
-    input[type=number]::-webkit-outer-spin-button { 
-      -webkit-appearance: none; 
-      margin: 0; 
-    }
+    input[type=number]::-webkit-inner-spin-button, input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
     input[type=number] { -moz-appearance: textfield; }
-
-    @media print {
-      .no-print { display: none !important; }
-      body { background: white !important; }
-    }
+    @media print { .no-print { display: none !important; } body { background: white !important; } }
   </style>
 </head>
 <body class="min-h-full flex flex-col text-zinc-900 bg-[#fafafa]">
@@ -85,7 +75,7 @@
     </div>
   </div>
 
-  <!-- ================= CAPÇALERA AMB IDENTITAT CORPORAL ================= -->
+  <!-- ================= CAPÇALERA ================= -->
   <header class="bg-white/90 backdrop-blur-md border-b border-zinc-200/80 sticky top-0 z-40 no-print">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <div class="flex items-center justify-between h-14 gap-4">
@@ -103,9 +93,9 @@
             <div class="flex flex-col">
               <div class="flex items-center gap-1.5">
                 <span class="text-xs font-black tracking-tight text-zinc-900 group-hover:text-zinc-600 transition">EF COMPETENCIAL</span>
-                <span class="text-[9px] font-bold text-zinc-600 bg-zinc-100 px-1.5 py-0.5 rounded tracking-wider uppercase border border-zinc-200/60">LOMLOE</span>
+                <span class="text-[9px] font-bold text-zinc-600 bg-zinc-100 px-1.5 py-0.5 rounded tracking-wider uppercase border border-zinc-200/60">PRO</span>
               </div>
-              <span class="text-[9px] font-medium text-zinc-400 -mt-0.5">Avaluació Educació Física</span>
+              <span class="text-[9px] font-medium text-zinc-400 -mt-0.5">Avaluació Educació Física LOMLOE</span>
             </div>
           </button>
 
@@ -119,7 +109,7 @@
         <div class="flex items-center gap-2">
           <div id="cloudStatusBadge" class="flex items-center gap-1.5 text-[11px] font-medium px-2.5 py-1 rounded-xl border bg-zinc-50 border-zinc-200 text-zinc-600">
             <span id="cloudStatusDot" class="w-2 h-2 rounded-full bg-amber-400 animate-pulse"></span>
-            <span id="cloudStatusText" class="font-mono text-[10px] font-semibold">Connectant...</span>
+            <span id="cloudStatusText" class="font-mono text-[10px] font-semibold">Local</span>
           </div>
 
           <div class="flex items-center gap-2 bg-zinc-100 pl-3 pr-2 py-1 rounded-xl border border-zinc-200 text-xs">
@@ -158,7 +148,7 @@
         </div>
       </div>
 
-      <!-- Segmented Control de Navegació de Classe -->
+      <!-- Menú Secundari de Classe -->
       <nav id="classSubNav" class="hidden flex items-center space-x-1 border-t border-zinc-100 py-1.5 overflow-x-auto text-[11px] font-semibold">
         <button id="tabBtnSda" onclick="switchView('sda')" class="px-3 py-1 rounded-md text-zinc-900 bg-zinc-100 transition">
           <i class="fa-regular fa-folder-open text-zinc-500 mr-1.5"></i> Qualificació SdA
@@ -185,13 +175,13 @@
   <!-- ================= COS PRINCIPAL ================= -->
   <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-5">
 
-    <!-- PANTALLA D'INICI (HUB DOCENT OPERATIU) -->
+    <!-- PANTALLA D'INICI (HUB DE CLASSES) -->
     <section id="screenHome" class="space-y-6">
       <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-zinc-200/70 pb-4">
         <div>
           <div class="flex items-center gap-2 text-xs font-semibold text-zinc-400">
             <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
-            <span>Curs Actiu · 1r Cicle d'ESO</span>
+            <span>Curs Actiu · Gestor de Classes LOMLOE</span>
           </div>
           <h2 class="text-xl font-extrabold tracking-tight text-zinc-900 mt-0.5">Tauler de Classes</h2>
         </div>
@@ -209,7 +199,7 @@
       <div id="homeClassesGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"></div>
     </section>
 
-    <!-- PANTALLA DE TREBALL DE LA CLASSE -->
+    <!-- ZONA DE TREBALL DE LA CLASSE -->
     <div id="screenClassWorkspace" class="hidden space-y-5">
       <div class="flex flex-wrap items-center justify-between gap-3 bg-white border border-zinc-200/80 px-3.5 py-2.5 rounded-2xl shadow-subtle no-print">
         <div class="flex items-center gap-3">
@@ -261,7 +251,7 @@
         </div>
       </section>
 
-      <!-- VISTA 2: LLISTA D'ALUMNAT -->
+      <!-- VISTA 2: ROSTER D'ALUMNAT -->
       <section id="viewRoster" class="space-y-4 hidden">
         <div class="bg-white border border-zinc-200 rounded-2xl p-6 shadow-card space-y-4">
           <div class="flex items-center justify-between border-b border-zinc-100 pb-4">
@@ -393,7 +383,7 @@
             </select>
           </div>
           <button onclick="window.print()" class="inline-flex items-center gap-2 bg-zinc-900 hover:bg-zinc-800 text-white text-xs font-semibold px-4 py-2 rounded-xl shadow-subtle transition">
-            <i class="fa-solid fa-print"></i> Imprimir Informe
+            <i class="fa-solid fa-print"></i> Imprimir Butlletí
           </button>
         </div>
 
@@ -533,7 +523,7 @@
     </div>
   </main>
 
-  <!-- MODAL CONFIGURACIÓ ESCALA -->
+  <!-- MODAL ESCALA LOMLOE -->
   <div id="thresholdsModal" class="fixed inset-0 bg-zinc-950/40 backdrop-blur-xs z-50 flex items-center justify-center p-4 hidden no-print">
     <div class="bg-white rounded-3xl shadow-card max-w-xl w-full overflow-hidden border border-zinc-200">
       <div class="px-6 py-4 bg-zinc-900 text-white flex justify-between items-center">
@@ -723,140 +713,6 @@
     </div>
   </div>
 
-  <!-- ================= LÒGICA FIREBASE DIRECTA PER USUARI ================= -->
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-    import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
-
-    const FIREBASE_CONFIG = {
-      apiKey: "AIzaSyB9no7A0vKk9HQH1CS58mFmyLQSsj4rD1U",
-      authDomain: "quadern-ef.firebaseapp.com",
-      databaseURL: "https://quadern-ef-default-rtdb.europe-west1.firebasedatabase.app",
-      projectId: "quadern-ef",
-      storageBucket: "quadern-ef.firebasestorage.app",
-      messagingSenderId: "222136993621",
-      appId: "1:222136993621:web:4cd862a94d07b6942d11dc",
-      measurementId: "G-Q78SHHFXL8"
-    };
-
-    let fbApp = initializeApp(FIREBASE_CONFIG);
-    let fbDb = getDatabase(fbApp);
-    let currentAuthUser = null;
-
-    function setCloudStatus(state) {
-      const dot = document.getElementById('cloudStatusDot');
-      const text = document.getElementById('cloudStatusText');
-      if (state === 'online') {
-        dot.className = "w-2 h-2 rounded-full bg-emerald-500 animate-pulse";
-        text.textContent = "Sincronitzat";
-      } else if (state === 'syncing') {
-        dot.className = "w-2 h-2 rounded-full bg-amber-500 animate-spin";
-        text.textContent = "Guardant...";
-      } else {
-        dot.className = "w-2 h-2 rounded-full bg-rose-500";
-        text.textContent = "Desconnectat";
-      }
-    }
-
-    window.handleAuthSubmit = function(e) {
-      e.preventDefault();
-      const user = document.getElementById('authUsernameInput').value.trim();
-      const pass = document.getElementById('authPasswordInput').value.trim();
-      const errBox = document.getElementById('authErrorMsg');
-
-      if (pass.length < 4) {
-        errBox.textContent = "La contrasenya ha de tenir com a mínim 4 caràcters.";
-        errBox.classList.remove('hidden');
-        return;
-      }
-
-      if (user.toLowerCase() === "docent" && pass !== "ef2026") {
-        errBox.textContent = "Contrasenya incorrecta per a aquest usuari.";
-        errBox.classList.remove('hidden');
-        return;
-      }
-
-      errBox.classList.add('hidden');
-      localStorage.setItem('EF_AUTH_USER', user);
-      localStorage.setItem('EF_AUTH_PASS', pass);
-      loginUserSession(user);
-    };
-
-    window.logoutActiveUser = function() {
-      localStorage.removeItem('EF_AUTH_USER');
-      localStorage.removeItem('EF_AUTH_PASS');
-      location.reload();
-    };
-
-    function checkActiveSession() {
-      const savedUser = localStorage.getItem('EF_AUTH_USER');
-      if (savedUser) {
-        loginUserSession(savedUser);
-      } else {
-        document.getElementById('loginOverlay').classList.remove('hidden');
-      }
-    }
-
-    function loginUserSession(username) {
-      currentAuthUser = username.toLowerCase().replace(/[^a-z0-9]/g, '_');
-      document.getElementById('loginOverlay').classList.add('hidden');
-      document.getElementById('headerUserLabel').textContent = username;
-      connectToUserCloud(currentAuthUser);
-    }
-
-    function connectToUserCloud(userKey) {
-      const userBranchRef = ref(fbDb, `users/${userKey}/quadern_data`);
-
-      onValue(userBranchRef, (snapshot) => {
-        const cloudData = snapshot.val();
-        if (cloudData && cloudData.groups) {
-          window.appData = cloudData;
-          localStorage.setItem('EF_COMPETENCIAL_DATA_V10', JSON.stringify(window.appData));
-          
-          if (window.appState?.currentScreen === 'class') {
-            if (window.appState.currentView === 'sda') window.renderSdaGrid();
-            if (window.appState.currentView === 'trim') window.renderTrimView();
-            if (window.appState.currentView === 'final') window.renderFinalView();
-          } else {
-            window.renderHomeScreen();
-          }
-          setCloudStatus('online');
-        } else {
-          set(userBranchRef, window.appData).then(() => setCloudStatus('online'));
-        }
-      }, () => setCloudStatus('offline'));
-    }
-
-    window.syncGradeToCloud = function(groupId, sdaId, studentId, gradeKey, val) {
-      if (!currentAuthUser || !fbDb) return;
-      setCloudStatus('syncing');
-      const gradeRef = ref(fbDb, `users/${currentAuthUser}/quadern_data/groups/${groupId}/grades/${sdaId}/${studentId}/${gradeKey}`);
-      set(gradeRef, val === null ? null : val)
-        .then(() => setCloudStatus('online'))
-        .catch(() => setCloudStatus('offline'));
-    };
-
-    window.syncGroupEntityToCloud = function(groupId) {
-      if (!currentAuthUser || !fbDb) return;
-      setCloudStatus('syncing');
-      const groupRef = ref(fbDb, `users/${currentAuthUser}/quadern_data/groups/${groupId}`);
-      set(groupRef, window.appData.groups[groupId])
-        .then(() => setCloudStatus('online'))
-        .catch(() => setCloudStatus('offline'));
-    };
-
-    window.syncWholeAppToCloud = function() {
-      if (!currentAuthUser || !fbDb) return;
-      setCloudStatus('syncing');
-      const rootRef = ref(fbDb, `users/${currentAuthUser}/quadern_data`);
-      set(rootRef, window.appData)
-        .then(() => setCloudStatus('online'))
-        .catch(() => setCloudStatus('offline'));
-    };
-
-    window.addEventListener('DOMContentLoaded', checkActiveSession);
-  </script>
-
   <!-- ================= LÒGICA I MOTOR D'AVALUACIÓ ================= -->
   <script>
     const CE_COLOR_THEMES = {
@@ -1003,37 +859,68 @@
             { id: 1, name: "Alonso Martí, Marc" },
             { id: 2, name: "Balaguer Soler, Clara" },
             { id: 3, name: "Castelló Font, Roc" },
-            { id: 4, name: "Domingo Serra, Júlia" }
+            { id: 4, name: "Domingo Serra, Júlia" },
+            { id: 5, name: "Pons Vidal, Marcel" },
+            { id: 6, name: "Rovira Gómez, Pau" }
           ],
           sdas: [
             {
               id: "sda_1",
               trim: 1,
               title: "HÀBITS SALUDABLES I CONDICIÓ FÍSICA",
-              trimWeight: 100,
+              trimWeight: 60,
               competences: {
                 CE1: {
-                  active: true, weight: 70, curricularCriteria: "1.1 - 1.2",
+                  active: true, weight: 80, curricularCriteria: "1.1 - 1.2 - 1.3",
                   oas: [
-                    { id: "oa1", label: "OA1: Anatomia i Qualitats Bàsiques", weight: 50 },
-                    { id: "oa2", label: "OA2: Test inicial de resistència", weight: 50 }
+                    { id: "oa1", label: "OA1: Grups musculars i ossos", weight: 25 },
+                    { id: "oa2", label: "OA2: 4 Qualitats Físiques Bàsiques", weight: 25 },
+                    { id: "oa3", label: "OA3: Nivell inicial de condició física", weight: 25 },
+                    { id: "oa4", label: "OA4: Hàbits saludables i escalfament", weight: 25 }
                   ]
                 },
                 CE5: {
-                  active: true, weight: 30, curricularCriteria: "5.1",
+                  active: true, weight: 20, curricularCriteria: "5.1 - 5.3",
                   oas: [
-                    { id: "oa5_1", label: "OG1: Material, higiene i esforç", weight: 100 }
+                    { id: "oa5_1", label: "OG1: Material i higiene", weight: 25 },
+                    { id: "oa5_2", label: "OG2: Participació i esforç", weight: 25 },
+                    { id: "oa5_3", label: "OG3: Normes de classe", weight: 25 },
+                    { id: "oa5_4", label: "OG4: Actitud cooperativa", weight: 25 }
                   ]
                 }
+              }
+            },
+            {
+              id: "sda_2",
+              trim: 1,
+              title: "JOCS D'OPOSICIÓ I ESPORTS DE COL·LABORACIÓ",
+              trimWeight: 40,
+              competences: {
+                CE2: { active: true, weight: 60, curricularCriteria: "2.1 - 2.2", oas: [] },
+                CE5: { active: true, weight: 40, curricularCriteria: "5.1", oas: [] }
               }
             }
           ],
           grades: {
             "sda_1": {
-              1: { "CE1_oa1": 3.5, "CE1_oa2": 3.0, "CE5_oa5_1": 4.0 },
-              2: { "CE1_oa1": 4.0, "CE1_oa2": 3.8, "CE5_oa5_1": 4.0 }
+              1: { "CE1_oa1": 3.5, "CE1_oa2": 3.5, "CE1_oa3": 3.5, "CE1_oa4": 3.5, "CE5_oa5_1": 4, "CE5_oa5_2": 4, "CE5_oa5_3": 3.5, "CE5_oa5_4": 4 },
+              2: { "CE1_oa1": 4, "CE1_oa2": 3.5, "CE1_oa3": 4, "CE1_oa4": 3.7, "CE5_oa5_1": 4, "CE5_oa5_2": 4, "CE5_oa5_3": 4, "CE5_oa5_4": 4 }
             }
           }
+        },
+        "1esoB": {
+          name: "1r ESO B",
+          finalMethod: 'trim',
+          finalTrimWeights: { t1: 33.33, t2: 33.33, t3: 33.34 },
+          finalCeWeights: { CE1: 20, CE2: 20, CE3: 20, CE4: 20, CE5: 20 },
+          attendancePenalty: { 1: {}, 2: {}, 3: {} },
+          students: [
+            { id: 11, name: "Bassa Solà, Jordi" },
+            { id: 12, name: "Ferrer Roig, Núria" },
+            { id: 13, name: "García Puyol, Eric" }
+          ],
+          sdas: [],
+          grades: {}
         }
       }
     };
@@ -1058,7 +945,12 @@
     function loadFromStorage() {
       try {
         const raw = localStorage.getItem('EF_COMPETENCIAL_DATA_V10');
-        if (raw) return JSON.parse(raw);
+        if (raw) {
+          const parsed = JSON.parse(raw);
+          if (parsed && parsed.groups && Object.keys(parsed.groups).length > 0) {
+            return parsed;
+          }
+        }
       } catch (e) {}
       return JSON.parse(JSON.stringify(ORIGINAL_DEMO_DATA));
     }
@@ -1224,6 +1116,8 @@
       }).join('');
     };
 
+    // ================== MODAL DE CLASSE: CREACIÓ I EDICIÓ ==================
+
     window.openNewGroupModal = function() {
       window.appState.editingGroupId = null;
       document.getElementById('groupModalTitle').innerHTML = `<i class="fa-solid fa-graduation-cap text-zinc-400"></i> Crear Nova Classe`;
@@ -1339,7 +1233,7 @@
       }
     };
 
-    // ================== GESTIÓ SdA AMB EDITAR I AFEGIR TOTALMENT ROBUST ==================
+    // ================== GESTIÓ SdA ==================
 
     window.openGlobalSdaModal = function() {
       window.appState.currentTrim = window.appState.currentTrim || 1;
@@ -1880,7 +1774,7 @@
         }
 
         html += `<td class="py-2 px-4 text-center border-l-2 border-zinc-800 bg-zinc-50/70 font-bold">
-          <div class="text-sm font-black font-mono text-zinc-900">${finalScore !== null ? finalScore.toFixed(2) : '<span class="text-zinc-300 font-normal">—</span>'}</div>
+          <div class="text-sm font-black font-mono text-zinc-950">${finalScore !== null ? finalScore.toFixed(2) : '<span class="text-zinc-300 font-normal">—</span>'}</div>
           <span class="inline-flex items-center mt-0.5 text-[10px] px-2.5 py-0.5 rounded font-bold ring-1 ring-inset ${finalLvl.badge}">${finalLvl.code}</span>
         </td></tr>`;
       });
@@ -2298,7 +2192,7 @@
       const ae = parseFloat(document.getElementById('th_ae').value);
 
       if (isNaN(epa) || isNaN(as) || isNaN(an) || isNaN(ae) || epa >= as || as >= an || an >= ae) {
-        alert("Els llindars han de ser valors numèrics vàlids i estrictament creixents (EPA < AS < AN < AE).");
+        alert("Els llindars han de ser vàlids (EPA < AS < AN < AE).");
         return;
       }
 
@@ -2348,6 +2242,7 @@
       reader.readAsText(e.target.files[0]);
     };
 
+    // INICIALITZACIÓ SEGURA: CARREGAR TAULER DIRECTAMENT SENSE ESPERAR
     window.onload = function() {
       renderHomeScreen();
       goToHome();
