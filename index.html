@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>EF Competencial · Quadern LOMLOE Secure Cloud</title>
+  <title>EF Competencial · Quadern LOMLOE Pro</title>
   
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -34,23 +34,13 @@
   <style>
     body { font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11'; }
     .tabular-nums { font-variant-numeric: tabular-nums; }
-    
     ::-webkit-scrollbar { width: 5px; height: 5px; }
     ::-webkit-scrollbar-track { background: transparent; }
     ::-webkit-scrollbar-thumb { background: #e4e4e7; border-radius: 9999px; }
     ::-webkit-scrollbar-thumb:hover { background: #d4d4d8; }
-
-    input[type=number]::-webkit-inner-spin-button, 
-    input[type=number]::-webkit-outer-spin-button { 
-      -webkit-appearance: none; 
-      margin: 0; 
-    }
+    input[type=number]::-webkit-inner-spin-button, input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
     input[type=number] { -moz-appearance: textfield; }
-
-    @media print {
-      .no-print { display: none !important; }
-      body { background: white !important; }
-    }
+    @media print { .no-print { display: none !important; } body { background: white !important; } }
   </style>
 </head>
 <body class="min-h-full flex flex-col text-zinc-900 bg-[#fafafa]">
@@ -183,7 +173,7 @@
         <div>
           <div class="flex items-center gap-2 text-xs font-semibold text-zinc-400">
             <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
-            <span>Curs Actiu · 1r Cicle d'ESO</span>
+            <span>Curs Actiu · Gestor de Classes LOMLOE</span>
           </div>
           <h2 class="text-xl font-extrabold tracking-tight text-zinc-900 mt-0.5">Tauler de Classes</h2>
         </div>
@@ -576,25 +566,42 @@
     </div>
   </div>
 
-  <!-- MODAL CREAR CLASSE -->
-  <div id="newGroupModal" class="fixed inset-0 bg-zinc-950/40 backdrop-blur-xs z-50 flex items-center justify-center p-4 hidden no-print">
-    <div class="bg-white rounded-3xl shadow-card max-w-md w-full overflow-hidden border border-zinc-200">
+  <!-- MODAL CREAR O EDITAR CLASSE AMB IMPORTADOR D'SdAs -->
+  <div id="groupModal" class="fixed inset-0 bg-zinc-950/40 backdrop-blur-xs z-50 flex items-center justify-center p-4 hidden no-print">
+    <div class="bg-white rounded-3xl shadow-card max-w-lg w-full overflow-hidden border border-zinc-200">
       <div class="px-6 py-4 bg-zinc-900 text-white flex justify-between items-center">
-        <h3 class="text-sm font-bold flex items-center gap-2"><i class="fa-solid fa-graduation-cap text-zinc-400"></i> Crear Nova Classe</h3>
-        <button onclick="closeNewGroupModal()" class="text-zinc-400 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
+        <h3 class="text-sm font-bold flex items-center gap-2" id="groupModalTitle">
+          <i class="fa-solid fa-graduation-cap text-zinc-400"></i> Gestió de Classe
+        </h3>
+        <button onclick="closeGroupModal()" class="text-zinc-400 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
       </div>
+      
       <div class="p-6 space-y-4 text-xs">
-        <label class="block font-semibold text-zinc-700">Nom del Grup o Curs</label>
-        <input type="text" id="modalNewGroupNameInput" placeholder="Ex: 1r ESO C, 2n ESO A..." class="w-full text-sm border border-zinc-200 rounded-xl p-2.5 outline-none font-semibold">
+        <div>
+          <label class="block font-semibold text-zinc-700 mb-1">Nom del Grup o Curs</label>
+          <input type="text" id="modalGroupNameInput" placeholder="Ex: 1r ESO C, 2n ESO A..." class="w-full text-sm border border-zinc-200 rounded-xl p-2.5 outline-none font-semibold focus:ring-2 focus:ring-zinc-900">
+        </div>
+
+        <!-- Secció de còpia d'SdAs existents (apareix en crear) -->
+        <div id="groupModalSdaSection" class="border-t border-zinc-100 pt-3 space-y-2">
+          <div class="flex items-center justify-between">
+            <span class="font-bold text-zinc-800 uppercase tracking-wider text-[10px]">Vols afegir SdAs d'altres classes?</span>
+            <span class="text-[10px] text-zinc-400">Opcional</span>
+          </div>
+          <div id="groupModalSdaList" class="max-h-40 overflow-y-auto space-y-1.5 bg-zinc-50 p-2.5 rounded-xl border border-zinc-200/80">
+            <!-- Render dinàmic de les SdAs disponibles -->
+          </div>
+        </div>
       </div>
+
       <div class="px-6 py-3 bg-zinc-50 border-t border-zinc-200 flex justify-end gap-2 text-xs">
-        <button onclick="closeNewGroupModal()" class="px-4 py-2 border border-zinc-300 rounded-xl font-semibold text-zinc-600">Cancel·lar</button>
-        <button onclick="confirmCreateNewGroup()" class="px-4 py-2 bg-zinc-900 hover:bg-zinc-800 text-white rounded-xl font-semibold">Crear Classe</button>
+        <button onclick="closeGroupModal()" class="px-4 py-2 border border-zinc-300 rounded-xl font-semibold text-zinc-600 hover:bg-zinc-100">Cancel·lar</button>
+        <button onclick="confirmSaveGroup()" class="px-4 py-2 bg-zinc-900 hover:bg-zinc-800 text-white rounded-xl font-semibold shadow-subtle" id="groupModalSaveBtn">Desar Classe</button>
       </div>
     </div>
   </div>
 
-  <!-- MODAL SdA -->
+  <!-- MODAL CONFIGURAR SdA -->
   <div id="sdaModal" class="fixed inset-0 bg-zinc-950/40 backdrop-blur-xs z-50 flex items-center justify-center p-4 hidden no-print">
     <div class="bg-white rounded-3xl shadow-card max-w-3xl w-full max-h-[90vh] flex flex-col overflow-hidden border border-zinc-200">
       <div class="px-6 py-4 bg-zinc-900 text-white flex justify-between items-center">
@@ -675,7 +682,6 @@
       }
     }
 
-    // CONTROL D'ACCÉS PER USUARI I CLAU
     window.handleAuthSubmit = function(e) {
       e.preventDefault();
       const user = document.getElementById('authUsernameInput').value.trim();
@@ -688,7 +694,6 @@
         return;
       }
 
-      // Validació de l'usuari predeterminat
       if (user.toLowerCase() === "docent" && pass !== "ef2026") {
         errBox.textContent = "Contrasenya incorrecta per a aquest usuari.";
         errBox.classList.remove('hidden');
@@ -746,7 +751,6 @@
       }, () => setCloudStatus('offline'));
     }
 
-    // MUTACIÓ ATÒMICA AL NÚVOL (CEL·LA A CEL·LA)
     window.syncGradeToCloud = function(groupId, sdaId, studentId, gradeKey, val) {
       if (!currentAuthUser || !fbDb) return;
       setCloudStatus('syncing');
@@ -960,6 +964,7 @@
       currentTrim: 1,
       currentView: 'sda',
       editingSdaId: null,
+      editingGroupId: null, // Si és null, creem classe nova; si té ID, modifiquem
       statsScope: 'class',
       statsType: 'sda'
     };
@@ -1043,9 +1048,15 @@
                     <span class="text-[11px] text-zinc-400 font-medium">${studentCount} alumnes</span>
                   </div>
                 </div>
-                <button onclick="event.stopPropagation(); deleteGroup('${gId}')" title="Eliminar classe" class="text-zinc-300 hover:text-rose-500 p-1 transition">
-                  <i class="fa-regular fa-trash-can text-xs"></i>
-                </button>
+
+                <div class="flex items-center gap-1">
+                  <button onclick="event.stopPropagation(); openEditGroupModal('${gId}')" title="Modificar nom de la classe" class="text-zinc-400 hover:text-zinc-900 p-1.5 hover:bg-zinc-100 rounded-lg transition">
+                    <i class="fa-solid fa-pen text-xs"></i>
+                  </button>
+                  <button onclick="event.stopPropagation(); deleteGroup('${gId}')" title="Eliminar classe" class="text-zinc-300 hover:text-rose-500 p-1.5 hover:bg-zinc-100 rounded-lg transition">
+                    <i class="fa-regular fa-trash-can text-xs"></i>
+                  </button>
+                </div>
               </div>
 
               <div class="bg-zinc-50/80 rounded-xl p-3 border border-zinc-100 space-y-2">
@@ -1053,6 +1064,7 @@
                   <span class="text-zinc-600 font-medium truncate max-w-[160px]">
                     <i class="fa-regular fa-folder text-zinc-400 mr-1"></i> ${activeSda ? activeSda.title : 'Sense SdA activa'}
                   </span>
+                  <span class="text-[11px] font-mono text-zinc-400">${(group.sdas || []).length} SdA(s)</span>
                 </div>
               </div>
             </div>
@@ -1070,33 +1082,121 @@
       }).join('');
     };
 
+    // ================== FUNCIONALITAT: EDITAR I CREAR CLASSES AMB CÒPIA D'SDAS ==================
+
     window.openNewGroupModal = function() {
-      document.getElementById('modalNewGroupNameInput').value = '';
-      document.getElementById('newGroupModal').classList.remove('hidden');
+      window.appState.editingGroupId = null;
+      document.getElementById('groupModalTitle').innerHTML = `<i class="fa-solid fa-graduation-cap text-zinc-400"></i> Crear Nova Classe`;
+      document.getElementById('modalGroupNameInput').value = '';
+      document.getElementById('groupModalSaveBtn').textContent = "Crear Classe";
+      
+      // Mostrar i omplir el selector d'SdAs existents
+      document.getElementById('groupModalSdaSection').classList.remove('hidden');
+      renderAvailableSdasForNewGroup();
+
+      document.getElementById('groupModal').classList.remove('hidden');
     };
 
-    window.closeNewGroupModal = function() {
-      document.getElementById('newGroupModal').classList.add('hidden');
+    window.openEditGroupModal = function(gId) {
+      window.appState.editingGroupId = gId;
+      const group = window.appData.groups[gId];
+      document.getElementById('groupModalTitle').innerHTML = `<i class="fa-solid fa-pen text-zinc-400"></i> Modificar Nom de la Classe`;
+      document.getElementById('modalGroupNameInput').value = group.name;
+      document.getElementById('groupModalSaveBtn').textContent = "Actualitzar Nom";
+      
+      // En edició de nom no cal importar
+      document.getElementById('groupModalSdaSection').classList.add('hidden');
+      document.getElementById('groupModal').classList.remove('hidden');
     };
 
-    window.confirmCreateNewGroup = function() {
-      const name = document.getElementById('modalNewGroupNameInput').value.trim();
-      if (!name) return;
-      const gId = 'g_' + Date.now();
-      window.appData.groups[gId] = {
-        name: name,
-        students: [],
-        sdas: [],
-        grades: {},
-        finalMethod: 'trim',
-        finalTrimWeights: { ...DEFAULT_FINAL_TRIM_WEIGHTS },
-        finalCeWeights: { ...DEFAULT_FINAL_CE_WEIGHTS },
-        attendancePenalty: { 1: {}, 2: {}, 3: {} }
-      };
-      saveToStorage();
-      if (window.syncGroupEntityToCloud) window.syncGroupEntityToCloud(gId);
-      closeNewGroupModal();
-      enterClass(gId);
+    window.closeGroupModal = function() {
+      document.getElementById('groupModal').classList.add('hidden');
+    };
+
+    function renderAvailableSdasForNewGroup() {
+      const container = document.getElementById('groupModalSdaList');
+      const uniqueSdas = new Map();
+
+      // Recorrem totes les classes per agafar les SdAs úniques que existeixen
+      Object.values(window.appData.groups).forEach(grp => {
+        (grp.sdas || []).forEach(sda => {
+          if (!uniqueSdas.has(sda.title)) {
+            uniqueSdas.set(sda.title, sda);
+          }
+        });
+      });
+
+      if (uniqueSdas.size === 0) {
+        container.innerHTML = `<span class="text-zinc-400 italic">No hi ha cap SdA creada en altres classes per importar.</span>`;
+        return;
+      }
+
+      container.innerHTML = Array.from(uniqueSdas.values()).map((sda, idx) => `
+        <label class="flex items-center justify-between p-2 rounded-lg bg-white border border-zinc-200/70 hover:border-zinc-300 cursor-pointer">
+          <div class="flex items-center gap-2">
+            <input type="checkbox" value="${sda.title}" class="import-sda-checkbox rounded text-zinc-900 focus:ring-zinc-900">
+            <span class="font-semibold text-zinc-800 text-xs">${sda.title}</span>
+          </div>
+          <span class="text-[10px] font-mono text-zinc-400 bg-zinc-100 px-1.5 py-0.5 rounded">T${sda.trim} · ${sda.trimWeight}%</span>
+        </label>
+      `).join('');
+    }
+
+    window.confirmSaveGroup = function() {
+      const name = document.getElementById('modalGroupNameInput').value.trim();
+      if (!name) return alert("Introdueix un nom per a la classe.");
+
+      if (window.appState.editingGroupId) {
+        // Mode Modificació: actualitzem nom existent
+        const gId = window.appState.editingGroupId;
+        window.appData.groups[gId].name = name;
+        saveToStorage();
+        if (window.syncGroupEntityToCloud) window.syncGroupEntityToCloud(gId);
+        closeGroupModal();
+        renderHomeScreen();
+        if (window.appState.currentScreen === 'class' && window.appData.activeGroupId === gId) {
+          document.getElementById('breadcrumbGroupName').textContent = name;
+        }
+      } else {
+        // Mode Nova Classe: creem grup i opcionalment hi importem les SdAs seleccionades
+        const gId = 'g_' + Date.now();
+        const selectedTitles = Array.from(document.querySelectorAll('.import-sda-checkbox:checked')).map(cb => cb.value);
+
+        const importedSdas = [];
+        if (selectedTitles.length > 0) {
+          // Busquem les definicions de les SdAs seleccionades
+          Object.values(window.appData.groups).forEach(grp => {
+            (grp.sdas || []).forEach(sda => {
+              if (selectedTitles.includes(sda.title) && !importedSdas.some(s => s.title === sda.title)) {
+                // Clonem l'SdA amb un ID nou i dades netes
+                importedSdas.push({
+                  id: 'sda_' + Date.now() + '_' + Math.floor(Math.random() * 1000),
+                  trim: sda.trim,
+                  title: sda.title,
+                  trimWeight: sda.trimWeight,
+                  competences: JSON.parse(JSON.stringify(sda.competences || {}))
+                });
+              }
+            });
+          });
+        }
+
+        window.appData.groups[gId] = {
+          name: name,
+          students: [],
+          sdas: importedSdas,
+          grades: {},
+          finalMethod: 'trim',
+          finalTrimWeights: { ...DEFAULT_FINAL_TRIM_WEIGHTS },
+          finalCeWeights: { ...DEFAULT_FINAL_CE_WEIGHTS },
+          attendancePenalty: { 1: {}, 2: {}, 3: {} }
+        };
+
+        saveToStorage();
+        if (window.syncGroupEntityToCloud) window.syncGroupEntityToCloud(gId);
+        closeGroupModal();
+        enterClass(gId);
+      }
     };
 
     window.deleteGroup = function(gId) {
@@ -1108,6 +1208,8 @@
         renderHomeScreen();
       }
     };
+
+    // ================== GESTIÓ SdA I GRAELLA ==================
 
     function getLevel(val) {
       if (val === null || val === undefined || isNaN(val) || val <= 0) return { code: "—", badge: "bg-zinc-100 text-zinc-400 ring-zinc-200" };
@@ -1240,7 +1342,6 @@
       sel.innerHTML = trimSdas.map(s => `<option value="${s.id}">${s.title} (${s.trimWeight || 0}%)</option>`).join('');
     }
 
-    // GRAELLA DE QUALIFICACIÓ SdA COMPLETA (4 FILES DE CAPÇALERA)
     window.renderSdaGrid = function() {
       const curGroup = getCurrentGroup();
       const trimSdas = (curGroup.sdas || []).filter(s => s.trim === window.appState.currentTrim);
@@ -1254,9 +1355,9 @@
       const students = curGroup.students || [];
 
       if (!sda) {
-        titleBar.innerHTML = `<span class="font-bold">Sense SdA activa</span>`;
+        titleBar.innerHTML = `<span class="font-bold">Sense SdA activa al trimestre ${window.appState.currentTrim}</span>`;
         head.innerHTML = `<tr><th class="p-3">Cap SdA</th></tr>`;
-        body.innerHTML = `<tr><td class="p-8 text-center text-zinc-400">Afegeix una SdA per qualificar.</td></tr>`;
+        body.innerHTML = `<tr><td class="p-8 text-center text-zinc-400">Afegeix o importa una SdA per qualificar.</td></tr>`;
         return;
       }
 
@@ -1271,7 +1372,6 @@
 
       const activeCes = OFFICIAL_CES.filter(ce => sda.competences && sda.competences[ce.id] && sda.competences[ce.id].active);
 
-      // FILA 1: Capçalera CE
       let r1 = `<tr class="border-b border-zinc-200">
         <th rowspan="4" class="py-2.5 px-2.5 w-12 min-w-[48px] max-w-[48px] text-center font-mono text-zinc-500 font-bold bg-zinc-100 border-r border-zinc-200 sticky top-0 left-0 z-40">#</th>
         <th rowspan="4" class="py-2.5 px-3.5 w-56 min-w-[224px] max-w-[224px] font-bold text-zinc-900 bg-zinc-100 border-r border-zinc-200 sticky top-0 left-12 z-40 shadow-[4px_0_8px_-4px_rgba(0,0,0,0.06)]">Alumne/a</th>`;
@@ -1284,7 +1384,6 @@
       });
       r1 += `<th colspan="2" class="py-2.5 px-3 text-center border-l border-zinc-300 bg-zinc-900 text-white font-bold uppercase tracking-wider text-[11px]">Qualificació SdA</th></tr>`;
 
-      // FILA 2: Criteris oficials
       let r2 = `<tr class="border-b border-zinc-200 text-[11px]">`;
       activeCes.forEach(ce => {
         const theme = CE_COLOR_THEMES[ce.id] || CE_COLOR_THEMES.CE1;
@@ -1295,7 +1394,6 @@
       });
       r2 += `<th colspan="2" rowspan="2" class="py-1 px-2 text-center border-l border-zinc-300 bg-zinc-800 text-zinc-200 font-semibold text-[11px]">Consolidació SdA</th></tr>`;
 
-      // FILA 3: OAs
       let r3 = `<tr class="border-b border-zinc-200 text-[10px]">`;
       activeCes.forEach(ce => {
         const conf = sda.competences[ce.id];
@@ -1311,7 +1409,6 @@
       });
       r3 += `</tr>`;
 
-      // FILA 4: Pesos
       let r4 = `<tr class="border-b border-zinc-200 text-xs font-semibold">`;
       activeCes.forEach(ce => {
         const theme = CE_COLOR_THEMES[ce.id] || CE_COLOR_THEMES.CE1;
@@ -1616,6 +1713,10 @@
         renderSdaGrid();
         populateReportStudents();
       }
+    };
+
+    window.openGlobalSdaModal = function() {
+      openSdaModal(true);
     };
 
     window.openSdaModal = function(isNew) {
