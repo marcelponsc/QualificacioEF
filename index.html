@@ -133,6 +133,9 @@
           </button>
 
           <div class="flex items-center pl-1 border-l border-zinc-200 gap-1">
+            <button onclick="openCriteriaModal()" title="Gestionar Criteris d'Avaluació LOMLOE" class="p-1.5 text-zinc-500 hover:text-zinc-900 hover:bg-zinc-100 rounded-lg text-xs transition">
+              <i class="fa-solid fa-list-check"></i>
+            </button>
             <button onclick="openThresholdsModal()" title="Configurar Escala LOMLOE" class="p-1.5 text-zinc-500 hover:text-zinc-900 hover:bg-zinc-100 rounded-lg text-xs transition">
               <i class="fa-solid fa-sliders"></i>
             </button>
@@ -215,7 +218,7 @@
         </div>
 
         <div class="flex items-center gap-2">
-          <!-- Cercador d'alumnes en temps real -->
+          <!-- Cercador ràpid d'alumnes -->
           <div class="relative">
             <i class="fa-solid fa-magnifying-glass absolute left-3 top-2.5 text-zinc-400 text-[11px]"></i>
             <input type="text" id="studentSearchInput" placeholder="Cercar alumne/a..." oninput="filterStudents(this.value)" class="pl-8 pr-3 py-1.5 bg-zinc-50 border border-zinc-200 rounded-xl text-xs outline-none focus:ring-2 focus:ring-zinc-900 focus:bg-white w-36 sm:w-48 font-medium">
@@ -445,7 +448,7 @@
           <div class="flex flex-wrap items-center gap-2.5 text-xs">
             <div class="flex items-center gap-1 bg-zinc-100 p-1 rounded-xl border border-zinc-200">
               <button id="statsScopeClass" onclick="setStatsScope('class')" class="px-2.5 py-1 rounded-lg font-semibold bg-white text-zinc-900 shadow-subtle transition">Aquesta Classe</button>
-              <button id="statsScopeLevel" onclick="setStatsScope('level')" class="px-2.5 py-1 rounded-lg font-medium text-zinc-600 hover:text-zinc-900 transition">Tots els grups</button>
+              <button id="statsScopeLevel" onclick="setStatsScope('level')" class="px-2.5 py-1 rounded-lg font-medium text-zinc-500 hover:text-zinc-900 transition">Tots els grups</button>
             </div>
 
             <div class="flex items-center gap-2 bg-zinc-50 border border-zinc-200 rounded-xl px-2.5 py-1">
@@ -545,6 +548,59 @@
 
     </div>
   </main>
+
+  <!-- ================= MODAL GESTIÓ CRITERIS D'AVALUACIÓ ================= -->
+  <div id="criteriaModal" class="fixed inset-0 bg-zinc-950/40 backdrop-blur-xs z-50 flex items-center justify-center p-4 hidden no-print">
+    <div class="bg-white rounded-3xl shadow-card max-w-3xl w-full max-h-[90vh] flex flex-col overflow-hidden border border-zinc-200">
+      <div class="px-6 py-4 bg-zinc-900 text-white flex justify-between items-center">
+        <h3 class="text-sm font-bold flex items-center gap-2">
+          <i class="fa-solid fa-list-check text-zinc-400"></i> Catàleg de Criteris d'Avaluació LOMLOE
+        </h3>
+        <button onclick="closeCriteriaModal()" class="text-zinc-400 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+
+      <div class="p-6 overflow-y-auto space-y-4 flex-1 text-xs">
+        <p class="text-zinc-500">
+          Personalitza, afegeix o modifica els criteris d'avaluació de cada Competència Específica segons la programació del teu centre.
+        </p>
+
+        <!-- Selector de CE per pestanyes -->
+        <div class="flex items-center gap-1.5 bg-zinc-100 p-1 rounded-2xl overflow-x-auto" id="criteriaCeTabsContainer">
+        </div>
+
+        <!-- Formulari per afegir un nou criteri a la CE activa -->
+        <div class="bg-zinc-50 border border-zinc-200 p-3.5 rounded-2xl space-y-2">
+          <span class="font-bold text-zinc-800 text-[11px] uppercase tracking-wider block">Afegir Nou Criteri a <span id="critFormCeName">CE1</span></span>
+          <div class="flex flex-col sm:flex-row gap-2">
+            <input type="text" id="newCritCodeInput" placeholder="Ex: 1.5" class="w-full sm:w-24 p-2 bg-white border border-zinc-200 rounded-xl font-mono font-bold text-xs outline-none focus:ring-2 focus:ring-zinc-900">
+            <input type="text" id="newCritLabelInput" placeholder="Descripció completa del criteri d'avaluació..." class="flex-1 p-2 bg-white border border-zinc-200 rounded-xl text-xs outline-none focus:ring-2 focus:ring-zinc-900">
+            <button type="button" onclick="addCriterionFromModal()" class="px-4 py-2 bg-zinc-900 hover:bg-zinc-800 text-white rounded-xl font-semibold shrink-0 transition">
+              <i class="fa-solid fa-plus text-[10px] mr-1"></i> Afegir
+            </button>
+          </div>
+        </div>
+
+        <!-- Llista de criteris existents editables -->
+        <div class="space-y-2.5">
+          <div class="flex items-center justify-between">
+            <span class="font-bold text-zinc-800 uppercase tracking-wider text-[11px]">Criteris Registrats</span>
+            <span id="critListCountBadge" class="text-[10px] font-mono font-bold bg-zinc-100 text-zinc-600 px-2 py-0.5 rounded-md">0 criteris</span>
+          </div>
+          <div id="criteriaListItemsContainer" class="space-y-2 max-h-72 overflow-y-auto pr-1">
+          </div>
+        </div>
+      </div>
+
+      <div class="px-6 py-3.5 bg-zinc-50 border-t border-zinc-200 flex justify-between items-center text-xs">
+        <button onclick="resetOfficialCriteria()" class="text-zinc-500 hover:text-zinc-900 font-semibold underline">
+          Restablir criteris oficials (Decret 175/2022)
+        </button>
+        <button onclick="closeCriteriaModal()" class="px-5 py-1.5 bg-zinc-900 hover:bg-zinc-800 text-white rounded-xl font-semibold shadow-subtle">
+          Tancar
+        </button>
+      </div>
+    </div>
+  </div>
 
   <!-- MODAL LLINDARS -->
   <div id="thresholdsModal" class="fixed inset-0 bg-zinc-950/40 backdrop-blur-xs z-50 flex items-center justify-center p-4 hidden no-print">
@@ -985,10 +1041,9 @@
     }
 
     // =========================================================================
-    // CATÀLEG OFICIAL DE CRITERIS D'AVALUACIÓ LOMLOE - DECRET 175/2022
-    // MATÈRIA: EDUCACIÓ FÍSICA · PRIMER CICLE D'ESO (1r, 2n i 3r d'ESO)
+    // CATÀLEG OFICIAL BASE DE CRITERIS D'AVALUACIÓ LOMLOE - DECRET 175/2022
     // =========================================================================
-    const CURRICULAR_CRITERIA_CATALOG = {
+    const DEFAULT_CURRICULAR_CRITERIA_CATALOG = {
       CE1: [
         { code: "1.1", label: "1.1. Executar activitats i exercicis orientats a l'adquisició d'un estil de vida actiu i saludable." },
         { code: "1.2", label: "1.2. Identificar els elements d'un pla de treball de la condició física a través de la pràctica motriu." },
@@ -1047,6 +1102,7 @@
 
     const ORIGINAL_DEMO_DATA = {
       activeGroupId: "1esoA",
+      criteriaCatalog: JSON.parse(JSON.stringify(DEFAULT_CURRICULAR_CRITERIA_CATALOG)),
       groups: {
         "1esoA": {
           name: "1r ESO A",
@@ -1096,12 +1152,19 @@
 
     window.appData = loadFromStorage();
 
+    // Assegurem que el catàleg de criteris existeix a les dades
+    if (!window.appData.criteriaCatalog) {
+      window.appData.criteriaCatalog = JSON.parse(JSON.stringify(DEFAULT_CURRICULAR_CRITERIA_CATALOG));
+      saveToStorage();
+    }
+
     window.appState = {
       currentScreen: 'home',
       currentTrim: 1,
       currentView: 'sda',
       editingSdaId: null,
       editingGroupId: null,
+      activeCriteriaModalCe: 'CE1',
       statsScope: 'class',
       statsType: 'sda',
       collapsedCes: {},
@@ -1115,7 +1178,11 @@
     function loadFromStorage() {
       try {
         const raw = localStorage.getItem('EF_COMPETENCIAL_DATA_V10');
-        if (raw) return JSON.parse(raw);
+        if (raw) {
+          const parsed = JSON.parse(raw);
+          if (!parsed.criteriaCatalog) parsed.criteriaCatalog = JSON.parse(JSON.stringify(DEFAULT_CURRICULAR_CRITERIA_CATALOG));
+          return parsed;
+        }
       } catch (e) {}
       return JSON.parse(JSON.stringify(ORIGINAL_DEMO_DATA));
     }
@@ -1131,6 +1198,13 @@
         window.appData.activeGroupId = Object.keys(window.appData.groups)[0];
       }
       return window.appData.groups[window.appData.activeGroupId];
+    }
+
+    function getCriteriaForCe(ceId) {
+      if (!window.appData.criteriaCatalog || !window.appData.criteriaCatalog[ceId]) {
+        return DEFAULT_CURRICULAR_CRITERIA_CATALOG[ceId] || [];
+      }
+      return window.appData.criteriaCatalog[ceId];
     }
 
     window.goToHome = function() {
@@ -1374,6 +1448,120 @@
         saveToStorage();
         if (window.syncWholeAppToCloud) window.syncWholeAppToCloud();
         renderHomeScreen();
+      }
+    };
+
+    // ================== FUNCIONALITAT: GESTOR DE CRITERIS D'AVALUACIÓ ==================
+
+    window.openCriteriaModal = function(defaultCe = 'CE1') {
+      window.appState.activeCriteriaModalCe = defaultCe;
+      renderCriteriaModalTabs();
+      renderCriteriaItemsList();
+      document.getElementById('criteriaModal').classList.remove('hidden');
+    };
+
+    window.closeCriteriaModal = function() {
+      document.getElementById('criteriaModal').classList.add('hidden');
+      // Si el modal d'SdA està obert, refresquem les targetes de criteris
+      if (!document.getElementById('sdaModal').classList.contains('hidden')) {
+        const curGroup = getCurrentGroup();
+        const sdaId = window.appState.editingSdaId;
+        const sda = (curGroup.sdas || []).find(s => s.id === sdaId) || { competences: {} };
+        renderModalCeCards(sda);
+      }
+    };
+
+    function renderCriteriaModalTabs() {
+      const container = document.getElementById('criteriaCeTabsContainer');
+      container.innerHTML = OFFICIAL_CES.map(ce => {
+        const isActive = (ce.id === window.appState.activeCriteriaModalCe);
+        return `
+          <button type="button" onclick="selectCriteriaCeTab('${ce.id}')" class="px-3 py-1.5 rounded-xl font-bold text-xs whitespace-nowrap transition ${isActive ? 'bg-zinc-900 text-white shadow-subtle' : 'text-zinc-600 hover:text-zinc-900 hover:bg-zinc-200/60'}">
+            ${ce.id} <span class="font-normal text-[10px] opacity-80">(${ce.short})</span>
+          </button>
+        `;
+      }).join('');
+      document.getElementById('critFormCeName').textContent = window.appState.activeCriteriaModalCe;
+    }
+
+    window.selectCriteriaCeTab = function(ceId) {
+      window.appState.activeCriteriaModalCe = ceId;
+      renderCriteriaModalTabs();
+      renderCriteriaItemsList();
+    };
+
+    function renderCriteriaItemsList() {
+      const ceId = window.appState.activeCriteriaModalCe;
+      const listContainer = document.getElementById('criteriaListItemsContainer');
+      const countBadge = document.getElementById('critListCountBadge');
+      const criteria = getCriteriaForCe(ceId);
+
+      countBadge.textContent = `${criteria.length} criteris`;
+
+      if (criteria.length === 0) {
+        listContainer.innerHTML = `<div class="p-6 text-center text-zinc-400 italic bg-zinc-50 rounded-2xl border border-zinc-200/70">No hi ha cap criteri definit per a ${ceId}. Afegeix-ne un amb el formulari superior.</div>`;
+        return;
+      }
+
+      listContainer.innerHTML = criteria.map((crit, idx) => `
+        <div class="flex items-start gap-2 bg-white border border-zinc-200 rounded-2xl p-2.5 shadow-subtle hover:border-zinc-300 transition">
+          <input type="text" value="${crit.code || ''}" onchange="updateCriterion(${idx}, 'code', this.value)" class="w-16 p-1.5 text-center font-mono font-bold text-xs bg-zinc-50 border border-zinc-200 rounded-xl focus:ring-2 focus:ring-zinc-900 outline-none">
+          <textarea rows="2" onchange="updateCriterion(${idx}, 'label', this.value)" class="flex-1 p-1.5 text-xs bg-transparent border border-transparent hover:border-zinc-200 focus:border-zinc-900 rounded-xl outline-none font-medium text-zinc-800 resize-none">${crit.label || ''}</textarea>
+          <button type="button" onclick="deleteCriterion(${idx})" title="Eliminar criteri" class="p-2 text-zinc-400 hover:text-rose-600 hover:bg-rose-50 rounded-xl transition">
+            <i class="fa-regular fa-trash-can"></i>
+          </button>
+        </div>
+      `).join('');
+    }
+
+    window.addCriterionFromModal = function() {
+      const codeInput = document.getElementById('newCritCodeInput');
+      const labelInput = document.getElementById('newCritLabelInput');
+      const code = codeInput.value.trim();
+      const label = labelInput.value.trim();
+
+      if (!code || !label) return alert("Introdueix tant el codi com la descripció del criteri.");
+
+      const ceId = window.appState.activeCriteriaModalCe;
+      if (!window.appData.criteriaCatalog) window.appData.criteriaCatalog = JSON.parse(JSON.stringify(DEFAULT_CURRICULAR_CRITERIA_CATALOG));
+      if (!window.appData.criteriaCatalog[ceId]) window.appData.criteriaCatalog[ceId] = [];
+
+      // Si el text no comença pel codi, l'afegim automàticament per mantenir la coherència
+      const fullLabel = label.startsWith(code) ? label : `${code}. ${label}`;
+      window.appData.criteriaCatalog[ceId].push({ code, label: fullLabel });
+
+      codeInput.value = '';
+      labelInput.value = '';
+      saveToStorage();
+      if (window.syncWholeAppToCloud) window.syncWholeAppToCloud();
+
+      renderCriteriaItemsList();
+    };
+
+    window.updateCriterion = function(idx, field, value) {
+      const ceId = window.appState.activeCriteriaModalCe;
+      if (!window.appData.criteriaCatalog || !window.appData.criteriaCatalog[ceId]) return;
+      window.appData.criteriaCatalog[ceId][idx][field] = value.trim();
+      saveToStorage();
+      if (window.syncWholeAppToCloud) window.syncWholeAppToCloud();
+    };
+
+    window.deleteCriterion = function(idx) {
+      const ceId = window.appState.activeCriteriaModalCe;
+      if (confirm(`Vols eliminar aquest criteri d'avaluació de ${ceId}?`)) {
+        window.appData.criteriaCatalog[ceId].splice(idx, 1);
+        saveToStorage();
+        if (window.syncWholeAppToCloud) window.syncWholeAppToCloud();
+        renderCriteriaItemsList();
+      }
+    };
+
+    window.resetOfficialCriteria = function() {
+      if (confirm("Vols restablir tots els criteris d'avaluació a la versió oficial del Decret 175/2022?")) {
+        window.appData.criteriaCatalog = JSON.parse(JSON.stringify(DEFAULT_CURRICULAR_CRITERIA_CATALOG));
+        saveToStorage();
+        if (window.syncWholeAppToCloud) window.syncWholeAppToCloud();
+        renderCriteriaItemsList();
       }
     };
 
@@ -2003,7 +2191,7 @@
       const container = document.getElementById('modalCeCardsContainer');
       container.innerHTML = OFFICIAL_CES.map(ce => {
         const conf = (sda.competences && sda.competences[ce.id]) || { active: false, weight: 0, curricularCriteria: '', oas: [] };
-        const availableCriteria = CURRICULAR_CRITERIA_CATALOG[ce.id] || [];
+        const availableCriteria = getCriteriaForCe(ce.id);
         const currentCriteriaCodes = (conf.curricularCriteria || "").split(/[-,\s]+/).map(c => c.trim()).filter(c => c.length > 0);
 
         return `
@@ -2022,14 +2210,19 @@
 
             <div id="details_${ce.id}" class="mt-3 pl-6 space-y-3.5 ${!conf.active ? 'hidden' : ''}">
               <div>
-                <label class="font-semibold text-zinc-700 text-xs block mb-1">Criteris Oficials LOMLOE (Decret 175/2022):</label>
+                <div class="flex items-center justify-between mb-1">
+                  <label class="font-semibold text-zinc-700 text-xs">Criteris d'Avaluació Registrats:</label>
+                  <button type="button" onclick="openCriteriaModal('${ce.id}')" class="text-[11px] font-semibold text-zinc-500 hover:text-zinc-900 underline flex items-center gap-1">
+                    <i class="fa-solid fa-pen-to-square text-[10px]"></i> Modificar catàleg
+                  </button>
+                </div>
                 <div class="bg-white border border-zinc-200 rounded-xl p-2 space-y-1 max-h-36 overflow-y-auto">
-                  ${availableCriteria.map(crit => `
+                  ${availableCriteria.length > 0 ? availableCriteria.map(crit => `
                     <label class="flex items-start gap-2 p-1.5 rounded-lg hover:bg-zinc-50 cursor-pointer text-zinc-700">
                       <input type="checkbox" name="crit_checkbox_${ce.id}" value="${crit.code}" ${currentCriteriaCodes.includes(crit.code) ? 'checked' : ''} class="rounded text-zinc-900 focus:ring-zinc-900 mt-0.5">
                       <span class="text-[11px] leading-snug"><b class="font-mono text-zinc-900">${crit.code}:</b> ${crit.label.replace(crit.code + '. ', '')}</span>
                     </label>
-                  `).join('')}
+                  `).join('') : '<span class="text-[11px] text-zinc-400 italic p-1 block">Sense criteris creats per aquesta competència.</span>'}
                 </div>
               </div>
 
@@ -2233,7 +2426,7 @@
           <td class="py-2 px-3 text-center text-zinc-400 font-mono text-xs">${idx + 1}</td>
           <td class="py-2 px-4 font-semibold text-zinc-800 text-xs">${st.name}</td>
           <td class="py-2 px-2 text-center border-l border-zinc-100">
-            <button onclick="toggleAttendancePenalty(${st.id})" class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold transition ${isPenalized ? 'bg-rose-600 hover:bg-rose-700 text-white shadow-subtle' : 'bg-zinc-100 hover:bg-zinc-200/70 text-zinc-600'}" title="${isPenalized ? 'Alumne suspès per no arribar al mínim de pràctica. Clica per treure.' : 'Clica per suspendre si no arriba al mínim de pràctica.'}">
+            <button onclick="toggleAttendancePenalty(${st.id})" class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold transition ${isPenalized ? 'bg-rose-600 hover:bg-rose-700 text-white shadow-subtle' : 'bg-zinc-100 hover:bg-zinc-200/70 text-zinc-600'}" title="${isPenalized ? 'Alumneライ suspès per no arribar al mínim de pràctica. Clica per treure.' : 'Clica per suspendre si no arriba al mínim de pràctica.'}">
               <i class="fa-solid fa-person-running text-[10px]"></i>
               <span>${isPenalized ? '< Mínim' : 'Assolit'}</span>
             </button>
@@ -2898,6 +3091,9 @@
             if (imported.gradeThresholds) saveThresholdsToStorage(imported.gradeThresholds);
           } else {
             window.appData = imported;
+          }
+          if (!window.appData.criteriaCatalog) {
+            window.appData.criteriaCatalog = JSON.parse(JSON.stringify(DEFAULT_CURRICULAR_CRITERIA_CATALOG));
           }
           saveToStorage();
           if (window.syncWholeAppToCloud) window.syncWholeAppToCloud();
