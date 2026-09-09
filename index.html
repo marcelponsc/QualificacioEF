@@ -448,7 +448,7 @@
           <div class="flex flex-wrap items-center gap-2.5 text-xs">
             <div class="flex items-center gap-1 bg-zinc-100 p-1 rounded-xl border border-zinc-200">
               <button id="statsScopeClass" onclick="setStatsScope('class')" class="px-2.5 py-1 rounded-lg font-semibold bg-white text-zinc-900 shadow-subtle transition">Aquesta Classe</button>
-              <button id="statsScopeLevel" onclick="setStatsScope('level')" class="px-2.5 py-1 rounded-lg font-medium text-zinc-500 hover:text-zinc-900 transition">Tots els grups</button>
+              <button id="statsScopeLevel" onclick="setStatsScope('level')" class="px-2.5 py-1 rounded-lg font-medium text-zinc-600 hover:text-zinc-900 transition">Tots els grups</button>
             </div>
 
             <div class="flex items-center gap-2 bg-zinc-50 border border-zinc-200 rounded-xl px-2.5 py-1">
@@ -735,8 +735,8 @@
         </div>
       </div>
       <div class="px-6 py-3.5 bg-zinc-50 border-t border-zinc-200 flex justify-end gap-2 text-xs">
-        <button onclick="closeSdaModal()" class="px-3.5 py-1.5 border border-zinc-300 rounded-xl font-semibold text-zinc-600">Cancel·lar</button>
-        <button onclick="saveSdaFromModal()" class="px-4 py-1.5 bg-zinc-900 hover:bg-zinc-800 text-white rounded-xl font-semibold">Desar SdA</button>
+        <button type="button" onclick="closeSdaModal()" class="px-3.5 py-1.5 border border-zinc-300 rounded-xl font-semibold text-zinc-600">Cancel·lar</button>
+        <button type="button" onclick="saveSdaFromModal()" class="px-4 py-1.5 bg-zinc-900 hover:bg-zinc-800 text-white rounded-xl font-semibold">Desar SdA</button>
       </div>
     </div>
   </div>
@@ -829,6 +829,9 @@
         const cloudData = snapshot.val();
         if (cloudData && cloudData.groups) {
           window.appData = cloudData;
+          if (!window.appData.criteriaCatalog) {
+            window.appData.criteriaCatalog = JSON.parse(JSON.stringify(DEFAULT_CURRICULAR_CRITERIA_CATALOG));
+          }
           localStorage.setItem('EF_COMPETENCIAL_DATA_V10', JSON.stringify(window.appData));
           
           if (window.appState?.currentScreen === 'class') {
@@ -877,161 +880,29 @@
 
   <!-- ================= LÒGICA I MOTOR D'AVALUACIÓ ================= -->
   <script>
-    // Paleta de Colors Pastel per a les Classes
     const PASTEL_PALETTE = {
-      'pastel-blue': {
-        id: 'pastel-blue',
-        name: 'Blau Cel',
-        cardBg: 'bg-sky-50/75',
-        cardBorder: 'border-sky-200 hover:border-sky-300',
-        badgeBg: 'bg-sky-100 text-sky-900 border-sky-300',
-        avatarBg: 'bg-sky-200 text-sky-950',
-        btnBg: 'bg-sky-900 hover:bg-sky-800 text-white',
-        swatch: 'bg-sky-200'
-      },
-      'pastel-green': {
-        id: 'pastel-green',
-        name: 'Menta Suau',
-        cardBg: 'bg-emerald-50/75',
-        cardBorder: 'border-emerald-200 hover:border-emerald-300',
-        badgeBg: 'bg-emerald-100 text-emerald-900 border-emerald-300',
-        avatarBg: 'bg-emerald-200 text-emerald-950',
-        btnBg: 'bg-emerald-900 hover:bg-emerald-800 text-white',
-        swatch: 'bg-emerald-200'
-      },
-      'pastel-purple': {
-        id: 'pastel-purple',
-        name: 'Lavanda',
-        cardBg: 'bg-purple-50/75',
-        cardBorder: 'border-purple-200 hover:border-purple-300',
-        badgeBg: 'bg-purple-100 text-purple-900 border-purple-300',
-        avatarBg: 'bg-purple-200 text-purple-950',
-        btnBg: 'bg-purple-900 hover:bg-purple-800 text-white',
-        swatch: 'bg-purple-200'
-      },
-      'pastel-orange': {
-        id: 'pastel-orange',
-        name: 'Préssec',
-        cardBg: 'bg-orange-50/75',
-        cardBorder: 'border-orange-200 hover:border-orange-300',
-        badgeBg: 'bg-orange-100 text-orange-900 border-orange-300',
-        avatarBg: 'bg-orange-200 text-orange-950',
-        btnBg: 'bg-orange-900 hover:bg-orange-800 text-white',
-        swatch: 'bg-orange-200'
-      },
-      'pastel-rose': {
-        id: 'pastel-rose',
-        name: 'Rosa Pal',
-        cardBg: 'bg-rose-50/75',
-        cardBorder: 'border-rose-200 hover:border-rose-300',
-        badgeBg: 'bg-rose-100 text-rose-900 border-rose-300',
-        avatarBg: 'bg-rose-200 text-rose-950',
-        btnBg: 'bg-rose-900 hover:bg-rose-800 text-white',
-        swatch: 'bg-rose-200'
-      },
-      'pastel-amber': {
-        id: 'pastel-amber',
-        name: 'Groc Palla',
-        cardBg: 'bg-amber-50/75',
-        cardBorder: 'border-amber-200 hover:border-amber-300',
-        badgeBg: 'bg-amber-100 text-amber-900 border-amber-300',
-        avatarBg: 'bg-amber-200 text-amber-950',
-        btnBg: 'bg-amber-900 hover:bg-amber-800 text-white',
-        swatch: 'bg-amber-200'
-      },
-      'pastel-teal': {
-        id: 'pastel-teal',
-        name: 'Sàlvia',
-        cardBg: 'bg-teal-50/75',
-        cardBorder: 'border-teal-200 hover:border-teal-300',
-        badgeBg: 'bg-teal-100 text-teal-900 border-teal-300',
-        avatarBg: 'bg-teal-200 text-teal-950',
-        btnBg: 'bg-teal-900 hover:bg-teal-800 text-white',
-        swatch: 'bg-teal-200'
-      },
-      'pastel-indigo': {
-        id: 'pastel-indigo',
-        name: 'Coral Suau',
-        cardBg: 'bg-indigo-50/75',
-        cardBorder: 'border-indigo-200 hover:border-indigo-300',
-        badgeBg: 'bg-indigo-100 text-indigo-900 border-indigo-300',
-        avatarBg: 'bg-indigo-200 text-indigo-950',
-        btnBg: 'bg-indigo-900 hover:bg-indigo-800 text-white',
-        swatch: 'bg-indigo-200'
-      }
+      'pastel-blue': { id: 'pastel-blue', name: 'Blau Cel', cardBg: 'bg-sky-50/75', cardBorder: 'border-sky-200 hover:border-sky-300', badgeBg: 'bg-sky-100 text-sky-900 border-sky-300', avatarBg: 'bg-sky-200 text-sky-950', btnBg: 'bg-sky-900 hover:bg-sky-800 text-white', swatch: 'bg-sky-200' },
+      'pastel-green': { id: 'pastel-green', name: 'Menta Suau', cardBg: 'bg-emerald-50/75', cardBorder: 'border-emerald-200 hover:border-emerald-300', badgeBg: 'bg-emerald-100 text-emerald-900 border-emerald-300', avatarBg: 'bg-emerald-200 text-emerald-950', btnBg: 'bg-emerald-900 hover:bg-emerald-800 text-white', swatch: 'bg-emerald-200' },
+      'pastel-purple': { id: 'pastel-purple', name: 'Lavanda', cardBg: 'bg-purple-50/75', cardBorder: 'border-purple-200 hover:border-purple-300', badgeBg: 'bg-purple-100 text-purple-900 border-purple-300', avatarBg: 'bg-purple-200 text-purple-950', btnBg: 'bg-purple-900 hover:bg-purple-800 text-white', swatch: 'bg-purple-200' },
+      'pastel-orange': { id: 'pastel-orange', name: 'Préssec', cardBg: 'bg-orange-50/75', cardBorder: 'border-orange-200 hover:border-orange-300', badgeBg: 'bg-orange-100 text-orange-900 border-orange-300', avatarBg: 'bg-orange-200 text-orange-950', btnBg: 'bg-orange-900 hover:bg-orange-800 text-white', swatch: 'bg-orange-200' },
+      'pastel-rose': { id: 'pastel-rose', name: 'Rosa Pal', cardBg: 'bg-rose-50/75', cardBorder: 'border-rose-200 hover:border-rose-300', badgeBg: 'bg-rose-100 text-rose-900 border-rose-300', avatarBg: 'bg-rose-200 text-rose-950', btnBg: 'bg-rose-900 hover:bg-rose-800 text-white', swatch: 'bg-rose-200' },
+      'pastel-amber': { id: 'pastel-amber', name: 'Groc Palla', cardBg: 'bg-amber-50/75', cardBorder: 'border-amber-200 hover:border-amber-300', badgeBg: 'bg-amber-100 text-amber-900 border-amber-300', avatarBg: 'bg-amber-200 text-amber-950', btnBg: 'bg-amber-900 hover:bg-amber-800 text-white', swatch: 'bg-amber-200' },
+      'pastel-teal': { id: 'pastel-teal', name: 'Sàlvia', cardBg: 'bg-teal-50/75', cardBorder: 'border-teal-200 hover:border-teal-300', badgeBg: 'bg-teal-100 text-teal-900 border-teal-300', avatarBg: 'bg-teal-200 text-teal-950', btnBg: 'bg-teal-900 hover:bg-teal-800 text-white', swatch: 'bg-teal-200' },
+      'pastel-indigo': { id: 'pastel-indigo', name: 'Coral Suau', cardBg: 'bg-indigo-50/75', cardBorder: 'border-indigo-200 hover:border-indigo-300', badgeBg: 'bg-indigo-100 text-indigo-900 border-indigo-300', avatarBg: 'bg-indigo-200 text-indigo-950', btnBg: 'bg-indigo-900 hover:bg-indigo-800 text-white', swatch: 'bg-indigo-200' }
     };
 
     function getGroupPastelTheme(group) {
+      if (!group) return PASTEL_PALETTE['pastel-blue'];
       const colorKey = group.color || 'pastel-blue';
       return PASTEL_PALETTE[colorKey] || PASTEL_PALETTE['pastel-blue'];
     }
 
     const CE_COLOR_THEMES = {
-      CE1: { 
-        header: 'bg-sky-100 text-sky-950 border-sky-200', 
-        critHeader: 'bg-sky-50 text-sky-800 border-sky-200', 
-        weightHeader: 'bg-sky-100/70 text-sky-900 border-sky-200', 
-        scoreCe: 'bg-sky-100 text-sky-950 font-bold border-sky-300', 
-        levelCe: 'bg-sky-50 border-sky-200',
-        oaTints: [
-          { header: 'bg-sky-50/80 text-sky-900', cell: 'bg-sky-50/25' },
-          { header: 'bg-sky-100/70 text-sky-900', cell: 'bg-sky-100/30' },
-          { header: 'bg-blue-50/80 text-blue-900', cell: 'bg-blue-50/25' },
-          { header: 'bg-cyan-50/80 text-cyan-900', cell: 'bg-cyan-50/25' }
-        ]
-      },
-      CE2: { 
-        header: 'bg-emerald-100 text-emerald-950 border-emerald-200', 
-        critHeader: 'bg-emerald-50 text-emerald-800 border-emerald-200', 
-        weightHeader: 'bg-emerald-100/70 text-emerald-900 border-emerald-200', 
-        scoreCe: 'bg-emerald-100 text-emerald-950 font-bold border-emerald-300', 
-        levelCe: 'bg-emerald-50 border-emerald-200',
-        oaTints: [
-          { header: 'bg-emerald-50/80 text-emerald-900', cell: 'bg-emerald-50/25' },
-          { header: 'bg-emerald-100/70 text-emerald-900', cell: 'bg-emerald-100/30' },
-          { header: 'bg-teal-50/80 text-teal-900', cell: 'bg-teal-50/25' },
-          { header: 'bg-green-50/80 text-green-900', cell: 'bg-green-50/25' }
-        ]
-      },
-      CE3: { 
-        header: 'bg-purple-100 text-purple-950 border-purple-200', 
-        critHeader: 'bg-purple-50 text-purple-800 border-purple-200', 
-        weightHeader: 'bg-purple-100/70 text-purple-900 border-purple-200', 
-        scoreCe: 'bg-purple-100 text-purple-950 font-bold border-purple-300', 
-        levelCe: 'bg-purple-50 border-purple-200',
-        oaTints: [
-          { header: 'bg-purple-50/80 text-purple-900', cell: 'bg-purple-50/25' },
-          { header: 'bg-purple-100/70 text-purple-900', cell: 'bg-purple-100/30' },
-          { header: 'bg-fuchsia-50/80 text-fuchsia-900', cell: 'bg-fuchsia-50/25' },
-          { header: 'bg-violet-50/80 text-violet-900', cell: 'bg-violet-50/25' }
-        ]
-      },
-      CE4: { 
-        header: 'bg-amber-100 text-amber-950 border-amber-200', 
-        critHeader: 'bg-amber-50 text-amber-800 border-amber-200', 
-        weightHeader: 'bg-amber-100/70 text-amber-900 border-amber-200', 
-        scoreCe: 'bg-amber-100 text-amber-950 font-bold border-amber-300', 
-        levelCe: 'bg-amber-50 border-amber-200',
-        oaTints: [
-          { header: 'bg-amber-50/80 text-amber-900', cell: 'bg-amber-50/25' },
-          { header: 'bg-amber-100/70 text-amber-900', cell: 'bg-amber-100/30' },
-          { header: 'bg-orange-50/80 text-orange-900', cell: 'bg-orange-50/25' },
-          { header: 'bg-yellow-50/80 text-yellow-900', cell: 'bg-yellow-50/25' }
-        ]
-      },
-      CE5: { 
-        header: 'bg-rose-100 text-rose-950 border-rose-200', 
-        critHeader: 'bg-rose-50 text-rose-800 border-rose-200', 
-        weightHeader: 'bg-rose-100/70 text-rose-900 border-rose-200', 
-        scoreCe: 'bg-rose-100 text-rose-950 font-bold border-rose-300', 
-        levelCe: 'bg-rose-50 border-rose-200',
-        oaTints: [
-          { header: 'bg-rose-50/80 text-rose-900', cell: 'bg-rose-50/25' },
-          { header: 'bg-rose-100/70 text-rose-900', cell: 'bg-rose-100/30' },
-          { header: 'bg-pink-50/80 text-pink-900', cell: 'bg-pink-50/25' },
-          { header: 'bg-red-50/80 text-red-900', cell: 'bg-red-50/25' }
-        ]
-      }
+      CE1: { header: 'bg-sky-100 text-sky-950 border-sky-200', critHeader: 'bg-sky-50 text-sky-800 border-sky-200', weightHeader: 'bg-sky-100/70 text-sky-900 border-sky-200', scoreCe: 'bg-sky-100 text-sky-950 font-bold border-sky-300', levelCe: 'bg-sky-50 border-sky-200', oaTints: [{ header: 'bg-sky-50/80 text-sky-900', cell: 'bg-sky-50/25' }, { header: 'bg-sky-100/70 text-sky-900', cell: 'bg-sky-100/30' }, { header: 'bg-blue-50/80 text-blue-900', cell: 'bg-blue-50/25' }, { header: 'bg-cyan-50/80 text-cyan-900', cell: 'bg-cyan-50/25' }] },
+      CE2: { header: 'bg-emerald-100 text-emerald-950 border-emerald-200', critHeader: 'bg-emerald-50 text-emerald-800 border-emerald-200', weightHeader: 'bg-emerald-100/70 text-emerald-900 border-emerald-200', scoreCe: 'bg-emerald-100 text-emerald-950 font-bold border-emerald-300', levelCe: 'bg-emerald-50 border-emerald-200', oaTints: [{ header: 'bg-emerald-50/80 text-emerald-900', cell: 'bg-emerald-50/25' }, { header: 'bg-emerald-100/70 text-emerald-900', cell: 'bg-emerald-100/30' }, { header: 'bg-teal-50/80 text-teal-900', cell: 'bg-teal-50/25' }, { header: 'bg-green-50/80 text-green-900', cell: 'bg-green-50/25' }] },
+      CE3: { header: 'bg-purple-100 text-purple-950 border-purple-200', critHeader: 'bg-purple-50 text-purple-800 border-purple-200', weightHeader: 'bg-purple-100/70 text-purple-900 border-purple-200', scoreCe: 'bg-purple-100 text-purple-950 font-bold border-purple-300', levelCe: 'bg-purple-50 border-purple-200', oaTints: [{ header: 'bg-purple-50/80 text-purple-900', cell: 'bg-purple-50/25' }, { header: 'bg-purple-100/70 text-purple-900', cell: 'bg-purple-100/30' }, { header: 'bg-fuchsia-50/80 text-fuchsia-900', cell: 'bg-fuchsia-50/25' }, { header: 'bg-violet-50/80 text-violet-900', cell: 'bg-violet-50/25' }] },
+      CE4: { header: 'bg-amber-100 text-amber-950 border-amber-200', critHeader: 'bg-amber-50 text-amber-800 border-amber-200', weightHeader: 'bg-amber-100/70 text-amber-900 border-amber-200', scoreCe: 'bg-amber-100 text-amber-950 font-bold border-amber-300', levelCe: 'bg-amber-50 border-amber-200', oaTints: [{ header: 'bg-amber-50/80 text-amber-900', cell: 'bg-amber-50/25' }, { header: 'bg-amber-100/70 text-amber-900', cell: 'bg-amber-100/30' }, { header: 'bg-orange-50/80 text-orange-900', cell: 'bg-orange-50/25' }, { header: 'bg-yellow-50/80 text-yellow-900', cell: 'bg-yellow-50/25' }] },
+      CE5: { header: 'bg-rose-100 text-rose-950 border-rose-200', critHeader: 'bg-rose-50 text-rose-800 border-rose-200', weightHeader: 'bg-rose-100/70 text-rose-900 border-rose-200', scoreCe: 'bg-rose-100 text-rose-950 font-bold border-rose-300', levelCe: 'bg-rose-50 border-rose-200', oaTints: [{ header: 'bg-rose-50/80 text-rose-900', cell: 'bg-rose-50/25' }, { header: 'bg-rose-100/70 text-rose-900', cell: 'bg-rose-100/30' }, { header: 'bg-pink-50/80 text-pink-900', cell: 'bg-pink-50/25' }, { header: 'bg-red-50/80 text-red-900', cell: 'bg-red-50/25' }] }
     };
 
     function getOaColorTheme(ceId, oaIndex) {
@@ -1040,9 +911,6 @@
       return tints[oaIndex % tints.length];
     }
 
-    // =========================================================================
-    // CATÀLEG OFICIAL BASE DE CRITERIS D'AVALUACIÓ LOMLOE - DECRET 175/2022
-    // =========================================================================
     const DEFAULT_CURRICULAR_CRITERIA_CATALOG = {
       CE1: [
         { code: "1.1", label: "1.1. Executar activitats i exercicis orientats a l'adquisició d'un estil de vida actiu i saludable." },
@@ -1152,7 +1020,6 @@
 
     window.appData = loadFromStorage();
 
-    // Assegurem que el catàleg de criteris existeix a les dades
     if (!window.appData.criteriaCatalog) {
       window.appData.criteriaCatalog = JSON.parse(JSON.stringify(DEFAULT_CURRICULAR_CRITERIA_CATALOG));
       saveToStorage();
@@ -1194,10 +1061,17 @@
     }
 
     function getCurrentGroup() {
+      if (!window.appData.groups || Object.keys(window.appData.groups).length === 0) {
+        window.appData.groups = JSON.parse(JSON.stringify(ORIGINAL_DEMO_DATA.groups));
+      }
       if (!window.appData.groups[window.appData.activeGroupId]) {
         window.appData.activeGroupId = Object.keys(window.appData.groups)[0];
       }
-      return window.appData.groups[window.appData.activeGroupId];
+      const grp = window.appData.groups[window.appData.activeGroupId];
+      if (!grp.sdas) grp.sdas = [];
+      if (!grp.students) grp.students = [];
+      if (!grp.grades) grp.grades = {};
+      return grp;
     }
 
     function getCriteriaForCe(ceId) {
@@ -1243,7 +1117,7 @@
     };
 
     window.renderHomeScreen = function() {
-      const groupKeys = Object.keys(window.appData.groups);
+      const groupKeys = Object.keys(window.appData.groups || {});
       const grid = document.getElementById('homeClassesGrid');
 
       grid.innerHTML = groupKeys.map(gId => {
@@ -1358,7 +1232,7 @@
       const container = document.getElementById('groupModalSdaList');
       const uniqueSdas = new Map();
 
-      Object.values(window.appData.groups).forEach(grp => {
+      Object.values(window.appData.groups || {}).forEach(grp => {
         (grp.sdas || []).forEach(sda => {
           if (!uniqueSdas.has(sda.title)) {
             uniqueSdas.set(sda.title, sda);
@@ -1462,7 +1336,6 @@
 
     window.closeCriteriaModal = function() {
       document.getElementById('criteriaModal').classList.add('hidden');
-      // Si el modal d'SdA està obert, refresquem les targetes de criteris
       if (!document.getElementById('sdaModal').classList.contains('hidden')) {
         const curGroup = getCurrentGroup();
         const sdaId = window.appState.editingSdaId;
@@ -1526,7 +1399,6 @@
       if (!window.appData.criteriaCatalog) window.appData.criteriaCatalog = JSON.parse(JSON.stringify(DEFAULT_CURRICULAR_CRITERIA_CATALOG));
       if (!window.appData.criteriaCatalog[ceId]) window.appData.criteriaCatalog[ceId] = [];
 
-      // Si el text no comença pel codi, l'afegim automàticament per mantenir la coherència
       const fullLabel = label.startsWith(code) ? label : `${code}. ${label}`;
       window.appData.criteriaCatalog[ceId].push({ code, label: fullLabel });
 
@@ -1673,7 +1545,7 @@
         OFFICIAL_CES.forEach(ce => {
           let sum = 0, c = 0;
           (curGroup.sdas || []).forEach(sda => {
-            const scCe = getStudentCeScoreInSda(sda, stId, ce.id);
+            const sc Ce = getStudentCeScoreInSda(sda, stId, ce.id);
             if (scCe !== null) { sum += scCe; c++; }
           });
           if (c > 0) {
@@ -1698,7 +1570,6 @@
       sel.innerHTML = trimSdas.map(s => `<option value="${s.id}">${s.title} (${s.trimWeight || 0}%)</option>`).join('');
     }
 
-    // Toggle de columnes per Competències (Plegar / Desplegar)
     window.toggleCeColumn = function(ceId) {
       window.appState.collapsedCes[ceId] = !window.appState.collapsedCes[ceId];
       renderSdaGrid();
@@ -2164,11 +2035,23 @@
 
     function renderModalTargetGroups(existingTitle) {
       const cont = document.getElementById('modalTargetGroupsContainer');
-      cont.innerHTML = Object.keys(window.appData.groups).map(gId => {
-        const group = window.appData.groups[gId];
-        let isChecked = !window.appState.editingSdaId 
-          ? (gId === window.appData.activeGroupId) 
-          : group.sdas.some(s => s.title === existingTitle && s.trim === window.appState.currentTrim);
+      const groups = window.appData.groups || {};
+      const groupKeys = Object.keys(groups);
+
+      if (groupKeys.length === 0) {
+        cont.innerHTML = `<span class="text-xs text-zinc-400">No hi ha classes registrades.</span>`;
+        return;
+      }
+
+      cont.innerHTML = groupKeys.map(gId => {
+        const group = groups[gId];
+        let isChecked = false;
+        if (!window.appState.editingSdaId) {
+          isChecked = (gId === window.appData.activeGroupId);
+        } else {
+          isChecked = (group.sdas || []).some(s => s.title === existingTitle && s.trim === window.appState.currentTrim);
+          if (!isChecked && gId === window.appData.activeGroupId) isChecked = true;
+        }
 
         return `
           <label class="inline-flex items-center gap-2 bg-white px-3 py-1.5 rounded-xl border border-zinc-200 cursor-pointer hover:border-zinc-300 transition">
@@ -2237,7 +2120,7 @@
                   ${(conf.oas || []).map((oa, idx) => `
                     <div class="flex items-center gap-2 modal-oa-item" data-id="${oa.id || 'oa_' + idx}">
                       <input type="text" value="${oa.label || ''}" placeholder="Descripció..." class="flex-1 p-1.5 border border-zinc-200 rounded-xl bg-white text-xs outline-none">
-                      <input type="number" value="${oa.weight || 25}" min="0" max="100" class="w-14 p-1.5 border border-zinc-200 rounded-xl text-center text-xs font-mono font-semibold">
+                      <input type="number" value="${oa.weight !== undefined ? oa.weight : 25}" min="0" max="100" class="w-14 p-1.5 border border-zinc-200 rounded-xl text-center text-xs font-mono font-semibold">
                       <span class="text-zinc-400 font-mono text-[11px]">%</span>
                       <button type="button" onclick="this.parentElement.remove(); updateModalWeightSum();" class="text-zinc-400 hover:text-rose-500 p-1">
                         <i class="fa-regular fa-trash-can"></i>
@@ -2254,14 +2137,19 @@
     }
 
     window.toggleCeInModal = function(ceId) {
-      const active = document.getElementById(`check_${ceId}`).checked;
-      document.getElementById(`details_${ceId}`).classList.toggle('hidden', !active);
-      document.getElementById(`weight_${ceId}`).disabled = !active;
+      const chk = document.getElementById(`check_${ceId}`);
+      if (!chk) return;
+      const active = chk.checked;
+      const details = document.getElementById(`details_${ceId}`);
+      const weight = document.getElementById(`weight_${ceId}`);
+      if (details) details.classList.toggle('hidden', !active);
+      if (weight) weight.disabled = !active;
       updateModalWeightSum();
     };
 
     window.addOaToModal = function(ceId) {
       const box = document.getElementById(`oas_box_${ceId}`);
+      if (!box) return;
       const div = document.createElement('div');
       div.className = "flex items-center gap-2 modal-oa-item";
       div.setAttribute('data-id', 'oa_' + Date.now());
@@ -2280,47 +2168,88 @@
       let sum = 0;
       OFFICIAL_CES.forEach(ce => {
         const chk = document.getElementById(`check_${ce.id}`);
-        if (chk && chk.checked) sum += parseFloat(document.getElementById(`weight_${ce.id}`).value) || 0;
+        const wEl = document.getElementById(`weight_${ce.id}`);
+        if (chk && chk.checked && wEl) {
+          sum += parseFloat(wEl.value) || 0;
+        }
       });
       const badge = document.getElementById('modalWeightSumBadge');
-      badge.textContent = `Total: ${sum}%`;
-      badge.className = sum === 100 
-        ? "text-xs font-mono font-bold px-2 py-0.5 rounded-md bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200" 
-        : "text-xs font-mono font-bold px-2 py-0.5 rounded-md bg-amber-50 text-amber-700 ring-1 ring-amber-200";
+      if (badge) {
+        badge.textContent = `Total: ${sum}%`;
+        badge.className = sum === 100 
+          ? "text-xs font-mono font-bold px-2 py-0.5 rounded-md bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200" 
+          : "text-xs font-mono font-bold px-2 py-0.5 rounded-md bg-amber-50 text-amber-700 ring-1 ring-amber-200";
+      }
     };
 
+    // =========================================================================
+    // FUNCIÓ DESAR SdA (COMPLETAMENT REVISADA I BLINDADA)
+    // =========================================================================
     window.saveSdaFromModal = function() {
-      const targetGroupIds = Array.from(document.querySelectorAll('.target-group-checkbox:checked')).map(cb => cb.value);
-      if (targetGroupIds.length === 0) return alert("Selecciona com a mínim un grup.");
+      let targetGroupIds = Array.from(document.querySelectorAll('.target-group-checkbox:checked')).map(cb => cb.value);
+      
+      // Fallback de seguretat: si no hi ha cap grup marcat, s'associa directament a la classe activa
+      if (targetGroupIds.length === 0) {
+        if (window.appData.activeGroupId) {
+          targetGroupIds = [window.appData.activeGroupId];
+        } else {
+          targetGroupIds = [Object.keys(window.appData.groups)[0]];
+        }
+      }
 
-      const title = document.getElementById('modalSdaTitle').value.trim() || 'Nova SdA';
-      const trimWeight = parseFloat(document.getElementById('modalSdaTrimWeight').value) || 0;
+      const titleInput = document.getElementById('modalSdaTitle');
+      const title = (titleInput && titleInput.value.trim()) ? titleInput.value.trim() : 'Nova SdA';
+      
+      const trimWeightInput = document.getElementById('modalSdaTrimWeight');
+      const trimWeight = trimWeightInput ? (parseFloat(trimWeightInput.value) || 0) : 50;
+      
       const competences = {};
 
       OFFICIAL_CES.forEach(ce => {
         const chk = document.getElementById(`check_${ce.id}`);
         if (chk && chk.checked) {
-          const weight = parseFloat(document.getElementById(`weight_${ce.id}`).value) || 0;
+          const weightEl = document.getElementById(`weight_${ce.id}`);
+          const weight = weightEl ? (parseFloat(weightEl.value) || 0) : 0;
+          
           const checkedCriteria = Array.from(document.querySelectorAll(`input[name="crit_checkbox_${ce.id}"]:checked`)).map(cb => cb.value);
           const oas = [];
+          
           document.querySelectorAll(`#oas_box_${ce.id} .modal-oa-item`).forEach(el => {
             const inputs = el.querySelectorAll('input');
-            oas.push({ id: el.getAttribute('data-id'), label: inputs[0].value, weight: parseFloat(inputs[1].value) || 0 });
+            if (inputs && inputs.length >= 2) {
+              oas.push({
+                id: el.getAttribute('data-id') || ('oa_' + Date.now()),
+                label: inputs[0].value || '',
+                weight: parseFloat(inputs[1].value) || 0
+              });
+            }
           });
 
-          competences[ce.id] = { active: true, weight, curricularCriteria: checkedCriteria.join(' - '), oas };
+          competences[ce.id] = {
+            active: true,
+            weight,
+            curricularCriteria: checkedCriteria.join(' - '),
+            oas
+          };
         }
       });
 
+      const isEditing = !!window.appState.editingSdaId;
+      const sdaIdToUse = isEditing ? window.appState.editingSdaId : ('sda_' + Date.now() + '_' + Math.floor(Math.random() * 1000));
+
       targetGroupIds.forEach(gId => {
         const grp = window.appData.groups[gId];
-        let targetSda = window.appState.editingSdaId ? (grp.sdas || []).find(s => s.id === window.appState.editingSdaId) : null;
+        if (!grp) return;
+        if (!Array.isArray(grp.sdas)) grp.sdas = [];
+
+        let targetSda = isEditing ? grp.sdas.find(s => s.id === sdaIdToUse) : null;
+        
         if (!targetSda) {
           targetSda = {
-            id: 'sda_' + Date.now() + '_' + Math.floor(Math.random()*1000),
+            id: sdaIdToUse,
             trim: window.appState.currentTrim,
-            title,
-            trimWeight,
+            title: title,
+            trimWeight: trimWeight,
             competences: JSON.parse(JSON.stringify(competences))
           };
           grp.sdas.push(targetSda);
@@ -2329,6 +2258,7 @@
           targetSda.trimWeight = trimWeight;
           targetSda.competences = JSON.parse(JSON.stringify(competences));
         }
+
         if (window.syncGroupEntityToCloud) window.syncGroupEntityToCloud(gId);
       });
 
@@ -2337,6 +2267,8 @@
 
       if (window.appState.currentScreen === 'class') {
         populateSdaSelect();
+        const sel = document.getElementById('sdaSelect');
+        if (sel) sel.value = sdaIdToUse;
         renderSdaGrid();
         renderTrimView();
       } else {
@@ -2426,7 +2358,7 @@
           <td class="py-2 px-3 text-center text-zinc-400 font-mono text-xs">${idx + 1}</td>
           <td class="py-2 px-4 font-semibold text-zinc-800 text-xs">${st.name}</td>
           <td class="py-2 px-2 text-center border-l border-zinc-100">
-            <button onclick="toggleAttendancePenalty(${st.id})" class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold transition ${isPenalized ? 'bg-rose-600 hover:bg-rose-700 text-white shadow-subtle' : 'bg-zinc-100 hover:bg-zinc-200/70 text-zinc-600'}" title="${isPenalized ? 'Alumneライ suspès per no arribar al mínim de pràctica. Clica per treure.' : 'Clica per suspendre si no arriba al mínim de pràctica.'}">
+            <button onclick="toggleAttendancePenalty(${st.id})" class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold transition ${isPenalized ? 'bg-rose-600 hover:bg-rose-700 text-white shadow-subtle' : 'bg-zinc-100 hover:bg-zinc-200/70 text-zinc-600'}" title="${isPenalized ? 'Alumne suspès per no arribar al mínim de pràctica. Clica per treure.' : 'Clica per suspendre si no arriba al mínim de pràctica.'}">
               <i class="fa-solid fa-person-running text-[10px]"></i>
               <span>${isPenalized ? '< Mínim' : 'Assolit'}</span>
             </button>
