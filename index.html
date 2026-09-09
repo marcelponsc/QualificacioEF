@@ -215,7 +215,7 @@
         </div>
 
         <div class="flex items-center gap-2">
-          <!-- Cercador ràpid d'alumnes -->
+          <!-- Cercador d'alumnes en temps real -->
           <div class="relative">
             <i class="fa-solid fa-magnifying-glass absolute left-3 top-2.5 text-zinc-400 text-[11px]"></i>
             <input type="text" id="studentSearchInput" placeholder="Cercar alumne/a..." oninput="filterStudents(this.value)" class="pl-8 pr-3 py-1.5 bg-zinc-50 border border-zinc-200 rounded-xl text-xs outline-none focus:ring-2 focus:ring-zinc-900 focus:bg-white w-36 sm:w-48 font-medium">
@@ -421,7 +421,7 @@
           <div class="border-t border-zinc-200 pt-5 space-y-2">
             <h4 class="text-xs font-bold text-zinc-700 uppercase tracking-wider">Observacions i Valoració Docent</h4>
             <div class="p-4 bg-zinc-50 border border-zinc-200 rounded-2xl min-h-[90px] text-xs text-zinc-600 italic">
-              L'alumne/a demostra una progressió favorable en l'adquisició dels hàbits d'activitat física i autonomia motriu, complint amb els criteris d'avaluació establerts.
+              L'alumne/a demostra una progressió favorable en l'adquisició dels hàbits d'activitat física, presa de decisions estratègiques i autonomia motriu, complint amb els criteris d'avaluació establerts.
             </div>
           </div>
 
@@ -617,7 +617,6 @@
         <div>
           <label class="block font-semibold text-zinc-700 mb-1.5">Color d'Identificació (Tons Pastel)</label>
           <div class="grid grid-cols-4 sm:grid-cols-8 gap-2" id="pastelColorPickerContainer">
-            <!-- Render dinàmic de les opcions pastel -->
           </div>
           <input type="hidden" id="modalGroupColorInput" value="pastel-blue">
         </div>
@@ -985,28 +984,37 @@
       return tints[oaIndex % tints.length];
     }
 
+    // =========================================================================
+    // CATÀLEG OFICIAL DE CRITERIS D'AVALUACIÓ LOMLOE - DECRET 175/2022
+    // MATÈRIA: EDUCACIÓ FÍSICA · PRIMER CICLE D'ESO (1r, 2n i 3r d'ESO)
+    // =========================================================================
     const CURRICULAR_CRITERIA_CATALOG = {
       CE1: [
-        { code: "1.1", label: "1.1. Executar activitats i exercicis orientats a l’adquisició d’un estil de vida actiu i saludable." },
-        { code: "1.2", label: "1.2. Identificar els elements d’un pla de treball de la condició física a través de la pràctica motriu." },
-        { code: "1.3", label: "1.3. Incorporar hàbits saludables (alimentació, descans, higiene) valorant la millora integral." },
-        { code: "1.4", label: "1.4. Protocols d’actuació de prevenció i primers auxilis." }
+        { code: "1.1", label: "1.1. Executar activitats i exercicis orientats a l'adquisició d'un estil de vida actiu i saludable." },
+        { code: "1.2", label: "1.2. Identificar els elements d'un pla de treball de la condició física a través de la pràctica motriu." },
+        { code: "1.3", label: "1.3. Incorporar hàbits saludables (alimentació, descans, higiene) valorant la millora del benestar integral." },
+        { code: "1.4", label: "1.4. Aplicar protocols d'actuació per a la prevenció de lesions i actuacions bàsiques de primers auxilis." }
       ],
       CE2: [
-        { code: "2.1", label: "2.1. Executar habilitats motrius específiques en reptes i formes jugades." },
-        { code: "2.2", label: "2.2. Resoldre situacions motrius aplicant habilitats tècniques i estratègiques." }
+        { code: "2.1", label: "2.1. Executar habilitats motrius específiques en reptes i situacions motrius jugades individuals i col·lectives." },
+        { code: "2.2", label: "2.2. Resoldre situacions motrius aplicant habilitats tècniques i principis tàctics bàsics." },
+        { code: "2.3", label: "2.3. Prendre decisions motrius encertades en situacions de cooperació, oposició i cooperació-oposició." }
       ],
       CE3: [
-        { code: "3.1", label: "3.1. Expressar emocions i missatges mitjançant el cos." },
-        { code: "3.2", label: "3.2. Representar composicions col·lectives amb base musical." }
+        { code: "3.1", label: "3.1. Expressar emocions, idees i missatges mitjançant els recursos expressius del cos i el moviment." },
+        { code: "3.2", label: "3.2. Representar i crear composicions col·lectives coordinades amb base rítmica o musical." },
+        { code: "3.3", label: "3.3. Mostrar desinhibició i respecte envers les manifestacions expressives i corporals pròpies i alienes." }
       ],
       CE4: [
-        { code: "4.1", label: "4.1. Realitzar activitat física en el medi natural minimitzant l'empremta." },
-        { code: "4.2", label: "4.2. Aplicar normes de seguretat en l'entorn." }
+        { code: "4.1", label: "4.1. Realitzar activitats físiques en el medi natural i urbà minimitzant l'impacte i l'empremta ecològica." },
+        { code: "4.2", label: "4.2. Aplicar normes i mesures bàsiques de seguretat en la pràctica motriu en entorns naturals o desconeguts." },
+        { code: "4.3", label: "4.3. Valorar i tenir cura dels espais públics i naturals com a béns d'ús comú per a l'activitat física." }
       ],
       CE5: [
-        { code: "5.1", label: "5.1. Aplicar els valors positius de l'esport i el joc net." },
-        { code: "5.2", label: "5.2. Mostrar actituds de respecte i empatia." }
+        { code: "5.1", label: "5.1. Aplicar els valors positius de l'esport en les activitats físiques i esportives valorant el joc net per davant del resultat." },
+        { code: "5.2", label: "5.2. Identificar i gestionar les pròpies emocions en la pràctica d'activitat física i esportiva." },
+        { code: "5.3", label: "5.3. Mostrar actituds de respecte, empatia i escolta envers els altres independentment del seu nivell d'habilitat." },
+        { code: "5.4", label: "5.4. Identificar i rebutjar estereotips i actuacions discriminatòries (per raó de gènere, capacitat o procedència) en situacions de pràctica esportiva." }
       ]
     };
 
@@ -1068,7 +1076,7 @@
                   ]
                 },
                 CE5: {
-                  active: true, weight: 30, curricularCriteria: "5.1",
+                  active: true, weight: 30, curricularCriteria: "5.1 - 5.3",
                   oas: [
                     { id: "oa5_1", label: "OG1: Material, higiene i esforç", weight: 100 }
                   ]
@@ -1502,7 +1510,7 @@
       sel.innerHTML = trimSdas.map(s => `<option value="${s.id}">${s.title} (${s.trimWeight || 0}%)</option>`).join('');
     }
 
-    // Toggle de columnes per Competències
+    // Toggle de columnes per Competències (Plegar / Desplegar)
     window.toggleCeColumn = function(ceId) {
       window.appState.collapsedCes[ceId] = !window.appState.collapsedCes[ceId];
       renderSdaGrid();
@@ -2014,8 +2022,8 @@
 
             <div id="details_${ce.id}" class="mt-3 pl-6 space-y-3.5 ${!conf.active ? 'hidden' : ''}">
               <div>
-                <label class="font-semibold text-zinc-700 text-xs block mb-1">Criteris Oficials LOMLOE:</label>
-                <div class="bg-white border border-zinc-200 rounded-xl p-2 space-y-1 max-h-32 overflow-y-auto">
+                <label class="font-semibold text-zinc-700 text-xs block mb-1">Criteris Oficials LOMLOE (Decret 175/2022):</label>
+                <div class="bg-white border border-zinc-200 rounded-xl p-2 space-y-1 max-h-36 overflow-y-auto">
                   ${availableCriteria.map(crit => `
                     <label class="flex items-start gap-2 p-1.5 rounded-lg hover:bg-zinc-50 cursor-pointer text-zinc-700">
                       <input type="checkbox" name="crit_checkbox_${ce.id}" value="${crit.code}" ${currentCriteriaCodes.includes(crit.code) ? 'checked' : ''} class="rounded text-zinc-900 focus:ring-zinc-900 mt-0.5">
