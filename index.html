@@ -115,8 +115,8 @@
 
         <div class="flex items-center gap-2">
           <div id="cloudStatusBadge" class="flex items-center gap-1.5 text-[11px] font-medium px-2.5 py-1 rounded-xl border bg-zinc-50 border-zinc-200 text-zinc-600">
-            <span id="cloudStatusDot" class="w-2 h-2 rounded-full bg-amber-400 animate-pulse"></span>
-            <span id="cloudStatusText" class="font-mono text-[10px] font-semibold">Connectant...</span>
+            <span id="cloudStatusDot" class="w-2 h-2 rounded-full bg-emerald-500"></span>
+            <span id="cloudStatusText" class="font-mono text-[10px] font-semibold">Local (Actiu)</span>
           </div>
 
           <div class="flex items-center gap-2 bg-zinc-100 pl-3 pr-2 py-1 rounded-xl border border-zinc-200 text-xs">
@@ -133,7 +133,7 @@
           </button>
 
           <div class="flex items-center pl-1 border-l border-zinc-200 gap-1">
-            <button onclick="openCriteriaModal()" title="Gestionar Criteris d'Avaluació LOMLOE" class="p-1.5 text-zinc-500 hover:text-zinc-900 hover:bg-zinc-100 rounded-lg text-xs transition">
+            <button onclick="openCriteriaModal()" title="Gestionar Catàleg de Criteris LOMLOE" class="p-1.5 text-zinc-500 hover:text-zinc-900 hover:bg-zinc-100 rounded-lg text-xs transition">
               <i class="fa-solid fa-list-check"></i>
             </button>
             <button onclick="openThresholdsModal()" title="Configurar Escala LOMLOE" class="p-1.5 text-zinc-500 hover:text-zinc-900 hover:bg-zinc-100 rounded-lg text-xs transition">
@@ -448,7 +448,7 @@
           <div class="flex flex-wrap items-center gap-2.5 text-xs">
             <div class="flex items-center gap-1 bg-zinc-100 p-1 rounded-xl border border-zinc-200">
               <button id="statsScopeClass" onclick="setStatsScope('class')" class="px-2.5 py-1 rounded-lg font-semibold bg-white text-zinc-900 shadow-subtle transition">Aquesta Classe</button>
-              <button id="statsScopeLevel" onclick="setStatsScope('level')" class="px-2.5 py-1 rounded-lg font-medium text-zinc-600 hover:text-zinc-900 transition">Tots els grups</button>
+              <button id="statsScopeLevel" onclick="setStatsScope('level')" class="px-2.5 py-1 rounded-lg font-medium text-zinc-500 hover:text-zinc-900 transition">Tots els grups</button>
             </div>
 
             <div class="flex items-center gap-2 bg-zinc-50 border border-zinc-200 rounded-xl px-2.5 py-1">
@@ -564,11 +564,9 @@
           Personalitza, afegeix o modifica els criteris d'avaluació de cada Competència Específica segons la programació del teu centre.
         </p>
 
-        <!-- Selector de CE per pestanyes -->
         <div class="flex items-center gap-1.5 bg-zinc-100 p-1 rounded-2xl overflow-x-auto" id="criteriaCeTabsContainer">
         </div>
 
-        <!-- Formulari per afegir un nou criteri a la CE activa -->
         <div class="bg-zinc-50 border border-zinc-200 p-3.5 rounded-2xl space-y-2">
           <span class="font-bold text-zinc-800 text-[11px] uppercase tracking-wider block">Afegir Nou Criteri a <span id="critFormCeName">CE1</span></span>
           <div class="flex flex-col sm:flex-row gap-2">
@@ -580,7 +578,6 @@
           </div>
         </div>
 
-        <!-- Llista de criteris existents editables -->
         <div class="space-y-2.5">
           <div class="flex items-center justify-between">
             <span class="font-bold text-zinc-800 uppercase tracking-wider text-[11px]">Criteris Registrats</span>
@@ -669,7 +666,6 @@
           <input type="text" id="modalGroupNameInput" placeholder="Ex: 1r ESO C, 2n ESO A..." class="w-full text-sm border border-zinc-200 rounded-xl p-2.5 outline-none font-semibold focus:ring-2 focus:ring-zinc-900">
         </div>
 
-        <!-- Selector de Color Pastel -->
         <div>
           <label class="block font-semibold text-zinc-700 mb-1.5">Color d'Identificació (Tons Pastel)</label>
           <div class="grid grid-cols-4 sm:grid-cols-8 gap-2" id="pastelColorPickerContainer">
@@ -677,7 +673,6 @@
           <input type="hidden" id="modalGroupColorInput" value="pastel-blue">
         </div>
 
-        <!-- Secció de còpia d'SdAs existents -->
         <div id="groupModalSdaSection" class="border-t border-zinc-100 pt-3 space-y-2">
           <div class="flex items-center justify-between">
             <span class="font-bold text-zinc-800 uppercase tracking-wider text-[10px]">Vols afegir SdAs d'altres classes?</span>
@@ -764,6 +759,7 @@
     function setCloudStatus(state) {
       const dot = document.getElementById('cloudStatusDot');
       const text = document.getElementById('cloudStatusText');
+      if (!dot || !text) return;
       if (state === 'online') {
         dot.className = "w-2 h-2 rounded-full bg-emerald-500 animate-pulse";
         text.textContent = "Sincronitzat";
@@ -1545,8 +1541,8 @@
         OFFICIAL_CES.forEach(ce => {
           let sum = 0, c = 0;
           (curGroup.sdas || []).forEach(sda => {
-            const sc Ce = getStudentCeScoreInSda(sda, stId, ce.id);
-            if (scCe !== null) { sum += scCe; c++; }
+            const sc = getStudentCeScoreInSda(sda, stId, ce.id);
+            if (sc !== null) { sum += sc; c++; }
           });
           if (c > 0) {
             const avg = sum / c;
@@ -2182,13 +2178,9 @@
       }
     };
 
-    // =========================================================================
-    // FUNCIÓ DESAR SdA (COMPLETAMENT REVISADA I BLINDADA)
-    // =========================================================================
     window.saveSdaFromModal = function() {
       let targetGroupIds = Array.from(document.querySelectorAll('.target-group-checkbox:checked')).map(cb => cb.value);
       
-      // Fallback de seguretat: si no hi ha cap grup marcat, s'associa directament a la classe activa
       if (targetGroupIds.length === 0) {
         if (window.appData.activeGroupId) {
           targetGroupIds = [window.appData.activeGroupId];
