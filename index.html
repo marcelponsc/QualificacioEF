@@ -403,6 +403,9 @@
             <button onclick="moveTtWeek(0)" id="ttWeekLabel" class="h-9 px-3 rounded-xl border border-zinc-200 bg-white hover:bg-zinc-50 text-xs font-semibold text-zinc-700 min-w-[150px]">Aquesta setmana</button>
             <button onclick="moveTtWeek(1)" class="w-9 h-9 rounded-xl border border-zinc-200 bg-white hover:bg-zinc-50 text-zinc-600" title="Setmana següent"><i class="fa-solid fa-chevron-right text-xs"></i></button>
           </div>
+          <button onclick="openHolidayModal()" class="inline-flex items-center gap-1.5 bg-white hover:bg-zinc-50 border border-zinc-200/90 text-zinc-700 text-xs font-semibold px-3 py-2 rounded-xl shadow-subtle transition">
+            <i class="fa-regular fa-calendar-xmark text-zinc-400 text-[10px]"></i> Festius
+          </button>
           <button onclick="printTimetable()" class="inline-flex items-center gap-1.5 bg-white hover:bg-zinc-50 border border-zinc-200/90 text-zinc-700 text-xs font-semibold px-3 py-2 rounded-xl shadow-subtle transition">
             <i class="fa-solid fa-print text-zinc-400 text-[10px]"></i> Imprimir
           </button>
@@ -1264,6 +1267,75 @@
     </div>
   </div>
 
+  <!-- MODAL ANUL·LAR SESSIÓ -->
+  <div id="cancelModal" class="fixed inset-0 bg-zinc-950/40 backdrop-blur-xs z-50 flex items-center justify-center p-4 hidden no-print">
+    <div class="bg-white rounded-3xl shadow-card max-w-md w-full overflow-hidden border border-zinc-200">
+      <div class="px-6 py-4 bg-zinc-900 text-white flex justify-between items-center">
+        <h3 class="text-sm font-bold flex items-center gap-2"><i class="fa-solid fa-ban text-zinc-400"></i> Sessió que no es fa</h3>
+        <button onclick="closeCancelModal()" class="text-zinc-400 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div class="p-6 space-y-4 text-xs">
+        <div id="cancelModalInfo" class="font-semibold text-zinc-800 text-sm"></div>
+        <div>
+          <span class="block font-semibold text-zinc-700 mb-1.5">Motiu</span>
+          <div id="cancelReasonChips" class="flex flex-wrap gap-1.5"></div>
+        </div>
+        <div>
+          <label class="block font-semibold text-zinc-700 mb-1">Detall <span class="font-normal text-zinc-400">(opcional)</span></label>
+          <input type="text" id="cancelNote" placeholder="Ex: Sortida a la neu de 2n" class="w-full text-sm border border-zinc-200 rounded-xl p-2.5 outline-none font-medium focus:ring-2 focus:ring-zinc-900">
+        </div>
+      </div>
+      <div class="px-6 py-3.5 bg-zinc-50 border-t border-zinc-200 flex justify-between items-center text-xs">
+        <div>
+          <button id="cancelRestoreBtn" onclick="restoreCancelledFromModal()" class="hidden px-3 py-1.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 rounded-xl font-semibold"><i class="fa-solid fa-rotate-left mr-1"></i> Sí que es fa</button>
+        </div>
+        <div class="flex gap-2">
+          <button onclick="closeCancelModal()" class="px-3.5 py-1.5 border border-zinc-300 rounded-xl font-semibold text-zinc-600">Cancel·lar</button>
+          <button onclick="saveCancelFromModal()" class="px-4 py-1.5 bg-zinc-900 hover:bg-zinc-800 text-white rounded-xl font-semibold">Marcar com a no feta</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL FESTIUS -->
+  <div id="holidayModal" class="fixed inset-0 bg-zinc-950/40 backdrop-blur-xs z-50 flex items-center justify-center p-4 hidden no-print">
+    <div class="bg-white rounded-3xl shadow-card max-w-lg w-full max-h-[90vh] flex flex-col overflow-hidden border border-zinc-200">
+      <div class="px-6 py-4 bg-zinc-900 text-white flex justify-between items-center">
+        <h3 class="text-sm font-bold flex items-center gap-2"><i class="fa-regular fa-calendar-xmark text-zinc-400"></i> Festius i dies sense classe</h3>
+        <button onclick="closeHolidayModal()" class="text-zinc-400 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div class="p-6 space-y-4 text-xs overflow-y-auto">
+        <div class="bg-zinc-50 border border-zinc-200 rounded-2xl p-3.5 space-y-3">
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <label class="block font-semibold text-zinc-700 mb-1">Des del dia</label>
+              <input type="date" id="holFrom" class="w-full border border-zinc-200 rounded-xl p-2 outline-none focus:ring-2 focus:ring-zinc-900 bg-white">
+            </div>
+            <div>
+              <label class="block font-semibold text-zinc-700 mb-1">Fins al dia <span class="font-normal text-zinc-400">(si són diversos)</span></label>
+              <input type="date" id="holTo" class="w-full border border-zinc-200 rounded-xl p-2 outline-none focus:ring-2 focus:ring-zinc-900 bg-white">
+            </div>
+          </div>
+          <div>
+            <label class="block font-semibold text-zinc-700 mb-1">Nom</label>
+            <input type="text" id="holLabel" list="holLabelList" placeholder="Ex: Festa de lliure disposició, Vacances de Nadal..." class="w-full border border-zinc-200 rounded-xl p-2.5 outline-none font-medium focus:ring-2 focus:ring-zinc-900 bg-white">
+            <datalist id="holLabelList">
+              <option value="Festiu"><option value="Festa de lliure disposició"><option value="Pont"><option value="Vacances de Nadal">
+              <option value="Vacances de Setmana Santa"><option value="Festa major"><option value="Jornada intensiva"><option value="Sant Jordi">
+            </datalist>
+          </div>
+          <div class="flex justify-end">
+            <button onclick="addHolidayFromModal()" class="px-4 py-1.5 bg-zinc-900 hover:bg-zinc-800 text-white rounded-xl font-semibold"><i class="fa-solid fa-plus text-[10px] mr-1"></i> Afegir</button>
+          </div>
+        </div>
+        <div id="holidayList" class="space-y-1.5"></div>
+      </div>
+      <div class="px-6 py-3.5 bg-zinc-50 border-t border-zinc-200 flex justify-end text-xs">
+        <button onclick="closeHolidayModal()" class="px-4 py-1.5 bg-zinc-900 hover:bg-zinc-800 text-white rounded-xl font-semibold">Fet</button>
+      </div>
+    </div>
+  </div>
+
   <!-- FITXA IMPRIMIBLE DE LA SdA -->
   <div id="sdaPosterOverlay" class="hidden">
     <div class="poster-toolbar">
@@ -1961,9 +2033,14 @@
       });
       getOtherSlots().filter(s => s.day === dow).forEach(s => todayItems.push({ other: true, slot: s }));
       todayItems.sort((a, b) => (a.slot ? timeToMin(a.slot.start) : 9999) - (b.slot ? timeToMin(b.slot.start) : 9999));
-      const nextIdx = todayItems.findIndex(it => !it.other && it.slot && timeToMin(it.slot.start) > nowMin);
+      const nextIdx = todayItems.findIndex(it => !it.other && it.slot && timeToMin(it.slot.start) > nowMin && !getCancellation(it.slot.id, todayIso, it.gId));
       const noSchedule = groupKeys.length > 0 && groupKeys.every(g => !getGroupDays(groups[g]).length) && !getOtherSlots().length;
-      document.getElementById('homeToday').innerHTML = todayItems.length ? `
+      const todayHol = getHoliday(todayIso);
+      document.getElementById('homeToday').innerHTML = todayHol && todayItems.length ? `
+        <div class="flex flex-wrap items-center justify-between gap-2 text-xs bg-zinc-100 border border-zinc-300 rounded-2xl px-4 py-3" style="background-image:repeating-linear-gradient(135deg, rgba(228,228,231,.7) 0 8px, transparent 8px 16px)">
+          <span class="font-semibold text-zinc-700"><i class="fa-regular fa-calendar-xmark mr-1.5"></i>Avui és <b>${escapeHtml(todayHol.label)}</b>: no hi ha classes.</span>
+          <button onclick="goToTimetable()" class="font-semibold text-zinc-700 bg-white hover:bg-zinc-50 px-2.5 py-1 rounded-lg border border-zinc-300">Veure l'horari</button>
+        </div>` : todayItems.length ? `
         <div class="space-y-2">
           <div class="flex items-center justify-between">
             <h3 class="text-xs font-bold text-zinc-500 uppercase tracking-wider"><i class="fa-solid fa-clipboard-check mr-1.5 text-zinc-400"></i>El teu dia d'avui</h3>
@@ -1973,16 +2050,17 @@
             ${todayItems.map((it, i) => {
               if (it.other) {
                 const s = it.slot, ty = OTHER_SLOT_TYPES[s.type] || OTHER_SLOT_TYPES.altre;
-                const isNowO = timeToMin(s.start) <= nowMin && nowMin < timeToMin(s.end);
+                const cO = getCancellation(s.id, todayIso);
+                const isNowO = !cO && timeToMin(s.start) <= nowMin && nowMin < timeToMin(s.end);
                 return `
-                  <div class="flex items-center gap-3 border border-dashed ${ty.cls} ${isNowO ? 'ring-2 ring-zinc-900/20' : ''} rounded-2xl px-3 py-2.5" style="${ty.stripe ? `background-image:repeating-linear-gradient(135deg, ${ty.stripe} 0 6px, transparent 6px 12px)` : ''}">
+                  <div class="flex items-center gap-3 border border-dashed ${ty.cls} ${isNowO ? 'ring-2 ring-zinc-900/20' : ''} ${cO ? 'opacity-50' : ''} rounded-2xl px-3 py-2.5" style="${ty.stripe ? `background-image:repeating-linear-gradient(135deg, ${ty.stripe} 0 6px, transparent 6px 12px)` : ''}">
                     <div class="w-14 shrink-0 text-center">
                       <div class="text-sm font-black font-mono leading-none">${s.start}</div>
                       <div class="text-[10px] font-mono opacity-60 mt-0.5">${s.end}</div>
                     </div>
                     <div class="flex-1 min-w-0">
                       <div class="text-xs font-bold truncate"><i class="fa-solid ${ty.icon} text-[10px] mr-1 opacity-70"></i>${escapeHtml(entryTitle(s))}${isNowO ? ' <span class="text-[9px] font-black text-white bg-zinc-900 px-1.5 py-0.5 rounded ml-1">ARA</span>' : ''}</div>
-                      <div class="text-[11px] opacity-70 truncate">${ty.label}${s.place ? ' · ' + escapeHtml(s.place) : ''}</div>
+                      <div class="text-[11px] opacity-70 truncate">${cO ? 'No es fa · ' + escapeHtml(cancelReasonLabel(cO)) : ty.label + (s.place ? ' · ' + escapeHtml(s.place) : '')}</div>
                     </div>
                   </div>`;
               }
@@ -1990,6 +2068,18 @@
               const done = !!(grp.sessions && grp.sessions[todayIso]);
               const theme = getGroupPastelTheme(grp);
               const s = it.slot;
+              const cancelled = s ? getCancellation(s.id, todayIso, it.gId) : getCancellations()[`grp:${it.gId}|${todayIso}`];
+              if (cancelled && !done) return `
+                <button onclick="openCancelModal({ slotId: ${s ? `'${s.id}'` : 'null'}, gId: '${it.gId}', iso: '${todayIso}'${s ? '' : ', wholeDay: true'} })" class="flex items-center gap-3 text-left bg-white border border-zinc-200 rounded-2xl px-3 py-2.5 opacity-60 hover:opacity-100 transition">
+                  <div class="w-14 shrink-0 text-center">
+                    <div class="text-sm font-black font-mono text-zinc-400 leading-none line-through">${s ? s.start : '--:--'}</div>
+                    <div class="text-[10px] font-mono text-zinc-300 mt-0.5">${s ? s.end : ''}</div>
+                  </div>
+                  <div class="flex-1 min-w-0">
+                    <span class="text-[11px] font-bold font-mono px-1.5 py-0.5 rounded border ${theme.badgeBg} line-through">${escapeHtml(grp.name)}</span>
+                    <div class="text-[11px] mt-0.5 text-zinc-500 truncate"><i class="fa-solid fa-ban mr-0.5"></i> No es fa · ${escapeHtml(cancelReasonLabel(cancelled))}</div>
+                  </div>
+                </button>`;
               const isNow = s && timeToMin(s.start) <= nowMin && nowMin < timeToMin(s.end);
               const isNext = i === nextIdx && !isNow;
               let f = 0;
@@ -2291,9 +2381,12 @@
       const group = getCurrentGroup();
       const sched = getGroupDays(group);
       const d = isoToDate(window.appState.diariDate);
-      for (let i = 0; i < 14; i++) {
+      for (let i = 0; i < 60; i++) {
         d.setDate(d.getDate() + dir);
-        if (!sched.length || sched.includes(d.getDay())) break;
+        const iso = dateToISO(d);
+        const hasSession = !!(group.sessions && group.sessions[iso]);
+        if (hasSession) break;
+        if ((!sched.length || sched.includes(d.getDay())) && !getClassDayStatus(group, window.appData.activeGroupId, iso).off) break;
       }
       setDiariDate(dateToISO(d));
     };
@@ -2530,7 +2623,9 @@
       const sched = getGroupDays(group);
       const isClassDay = !sched.length || sched.includes(dow);
       const daySlot = getGroupTimetable(group).find(s => s.day === dow);
-      document.getElementById('diariDateLabel').innerHTML = `${formatLongDateCa(iso)}${iso === todayISO() ? ' <span class="ml-1 text-[10px] font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 px-1.5 py-0.5 rounded">AVUI</span>' : ''}${daySlot ? ` <span class="ml-1 text-[11px] font-mono font-semibold text-zinc-500">${daySlot.start}–${daySlot.end}${daySlot.place ? ' · ' + escapeHtml(daySlot.place) : ''}</span>` : ''}${!isClassDay ? ' <span class="ml-1 text-[10px] font-semibold text-zinc-400">(no és dia d\'EF)</span>' : ''}`;
+      const dayStatus = getClassDayStatus(group, window.appData.activeGroupId, iso);
+      const offLabel = dayStatus.holiday ? escapeHtml(dayStatus.holiday.label) : dayStatus.cancel ? 'No es fa · ' + escapeHtml(cancelReasonLabel(dayStatus.cancel)) : '';
+      document.getElementById('diariDateLabel').innerHTML = `${formatLongDateCa(iso)}${iso === todayISO() ? ' <span class="ml-1 text-[10px] font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 px-1.5 py-0.5 rounded">AVUI</span>' : ''}${daySlot ? ` <span class="ml-1 text-[11px] font-mono font-semibold text-zinc-500">${daySlot.start}–${daySlot.end}${daySlot.place ? ' · ' + escapeHtml(daySlot.place) : ''}</span>` : ''}${!isClassDay ? ' <span class="ml-1 text-[10px] font-semibold text-zinc-400">(no és dia d\'EF)</span>' : ''}${dayStatus.off ? ` <span class="ml-1 text-[10px] font-bold text-zinc-600 bg-zinc-100 border border-zinc-300 px-1.5 py-0.5 rounded"><i class="fa-solid ${dayStatus.holiday ? 'fa-calendar-xmark' : 'fa-ban'} mr-0.5"></i>${offLabel}</span>` : ''}`;
 
       const session = getGroupSessions(group)[iso];
       let students = group.students || [];
@@ -2538,6 +2633,21 @@
 
       if (!(group.students || []).length) {
         panel.innerHTML = `<div class="bg-white border border-zinc-200 rounded-2xl p-8 text-center text-xs text-zinc-400">Aquesta classe encara no té alumnes. <button onclick="switchView('roster')" class="underline font-semibold text-zinc-700">Afegeix-los a la llista</button>.</div>`;
+        return;
+      }
+
+      if (!session && dayStatus.off) {
+        panel.innerHTML = `
+          <div class="bg-zinc-100 border border-zinc-300 rounded-2xl p-6 text-center space-y-3" style="background-image:repeating-linear-gradient(135deg, rgba(228,228,231,.7) 0 8px, transparent 8px 16px)">
+            <i class="fa-solid ${dayStatus.holiday ? 'fa-calendar-xmark' : 'fa-ban'} text-2xl text-zinc-400"></i>
+            <p class="text-sm font-semibold text-zinc-700">${dayStatus.holiday ? `Aquest dia és festiu: ${escapeHtml(dayStatus.holiday.label)}.` : `Aquest dia la sessió no es fa: ${escapeHtml(cancelReasonLabel(dayStatus.cancel))}.`}</p>
+            <div class="flex flex-wrap justify-center gap-2">
+              ${dayStatus.cancel ? `<button onclick="openCancelModal({ gId: '${window.appData.activeGroupId}', iso: '${iso}', wholeDay: true })" class="text-xs font-semibold bg-white hover:bg-zinc-50 border border-zinc-300 px-3 py-2 rounded-xl"><i class="fa-solid fa-rotate-left mr-1"></i> Sí que es fa</button>` : ''}
+              <button onclick="moveDiariDate(1)" class="text-xs font-semibold bg-zinc-900 hover:bg-zinc-800 text-white px-3 py-2 rounded-xl">Anar a la sessió següent <i class="fa-solid fa-arrow-right text-[10px] ml-1"></i></button>
+            </div>
+            <button onclick="diariCreateSession()" class="text-[11px] font-semibold text-zinc-500 hover:text-zinc-900 underline">Passar llista igualment</button>
+          </div>
+          ${renderSessionHistory(group, getSessionSortedDates(group))}`;
         return;
       }
 
@@ -2550,6 +2660,7 @@
             <button onclick="diariCreateSession()" class="inline-flex items-center gap-2 bg-zinc-900 hover:bg-zinc-800 text-white text-sm font-bold px-5 py-3 rounded-2xl shadow-subtle transition">
               <i class="fa-solid fa-clipboard-check"></i> Començar la sessió
             </button>
+            <div><button onclick="openCancelModal({ gId: '${window.appData.activeGroupId}', iso: '${iso}', wholeDay: true })" class="text-[11px] font-semibold text-zinc-500 hover:text-zinc-900"><i class="fa-solid fa-ban mr-1"></i>Aquest dia no es fa la sessió</button></div>
           </div>
           ${renderSessionHistory(group, pastDates)}`;
         return;
@@ -3069,7 +3180,8 @@
       const monday = getWeekMonday(ttWeekOffset);
       const days = TT_DAYS.map((d, i) => {
         const date = new Date(monday); date.setDate(monday.getDate() + i);
-        return { ...d, iso: dateToISO(date), date };
+        const iso = dateToISO(date);
+        return { ...d, iso, date, hol: getHoliday(iso) };
       });
       const friday = days[4].date;
       const sameMonth = monday.getMonth() === friday.getMonth();
@@ -3158,9 +3270,11 @@
         const isNow = isToday && timeToMin(s.start) <= nowMin && nowMin < timeToMin(s.end);
         let f = 0;
         if (session) (grp.students || []).forEach(st => { const r = getRecord(session, st.id); if (r.a === 'F' || r.a === 'FJ') f++; });
-        return { session, isToday, isPast, isNow, f };
+        const holiday = getHoliday(iso);
+        const cancel = holiday ? null : getCancellation(s.id, iso, s.gId);
+        return { session, isToday, isPast, isNow: isNow && !holiday && !cancel, f, holiday, cancel };
       };
-      const statusIcon = st => st.session
+      const statusIcon = st => st.holiday ? '' : (st.cancel && !st.session) ? `<span title="${escapeHtml(cancelReasonLabel(st.cancel))}" class="text-[9px] font-bold text-zinc-600 bg-white/80 rounded px-1">no es fa</span>` : st.session
         ? `<span title="Llista passada" class="inline-flex items-center gap-0.5 text-[9px] font-bold text-emerald-700 bg-white/80 rounded px-1"><i class="fa-solid fa-check"></i>${st.f ? ` ${st.f}F` : ''}</span>`
         : (st.isPast ? `<span title="Llista pendent" class="text-[9px] font-bold text-rose-600 bg-white/80 rounded px-1">pendent</span>` : '');
 
@@ -3172,10 +3286,11 @@
           <div class="grid" style="grid-template-columns: 56px repeat(5, 1fr)">
             <div class="bg-zinc-50 border-b border-zinc-200"></div>
             ${days.map(d => `
-              <div class="py-2.5 text-center border-b border-l border-zinc-200 ${d.iso === todayIso ? 'bg-zinc-900 text-white' : 'bg-zinc-50 text-zinc-700'}">
+              <button onclick="onTimetableDayHeader('${d.iso}')" title="${d.hol ? 'Festiu: ' + escapeHtml(d.hol.label) : 'Marcar aquest dia com a festiu'}" class="group/dh py-2.5 text-center border-b border-l border-zinc-200 transition ${d.iso === todayIso ? 'bg-zinc-900 text-white' : d.hol ? 'bg-zinc-200 text-zinc-600' : 'bg-zinc-50 text-zinc-700 hover:bg-zinc-100'}">
                 <div class="text-xs font-bold">${d.l}</div>
-                <div class="text-[10px] ${d.iso === todayIso ? 'text-zinc-300' : 'text-zinc-400'} font-mono">${d.date.toLocaleDateString('ca-ES', { day: '2-digit', month: '2-digit' })}</div>
-              </div>`).join('')}
+                <div class="text-[10px] ${d.iso === todayIso ? 'text-zinc-300' : 'text-zinc-400'} font-mono">${d.date.toLocaleDateString('ca-ES', { day: '2-digit', month: '2-digit' })}${d.hol ? '' : '<span class="print:hidden opacity-0 group-hover/dh:opacity-100 ml-1 font-sans font-semibold">· festiu?</span>'}</div>
+                ${d.hol ? `<div class="text-[10px] font-bold uppercase tracking-wider mt-0.5 truncate px-1"><i class="fa-regular fa-calendar-xmark mr-0.5"></i>${escapeHtml(d.hol.label)}</div>` : ''}
+              </button>`).join('')}
             <div class="relative border-zinc-200" style="height:${height}px">
               ${hours.map(m => `<div class="absolute right-2 text-[10px] font-mono text-zinc-400 -translate-y-1/2" style="top:${yOf(m)}px">${minToTime(m)}</div>`).join('')}
             </div>
@@ -3186,6 +3301,9 @@
               return `
                 <div class="relative border-l border-zinc-200 ${d.iso === todayIso ? 'bg-zinc-50/60' : ''}" style="height:${height}px">
                   ${hours.map(m => `<div class="absolute left-0 right-0 border-t border-zinc-100" style="top:${yOf(m)}px"></div>`).join('')}
+                  ${d.hol ? `<div class="absolute inset-0 z-20 flex items-center justify-center" style="background:repeating-linear-gradient(135deg, rgba(228,228,231,.85) 0 8px, rgba(244,244,245,.85) 8px 16px)">
+                    <span class="bg-white/90 border border-zinc-300 rounded-xl px-3 py-1.5 text-xs font-bold text-zinc-600 text-center shadow-subtle"><i class="fa-regular fa-calendar-xmark mr-1"></i>${escapeHtml(d.hol.label)}</span>
+                  </div>` : ''}
                   ${nowLine}
                   ${daySlots.map(s => {
                     const top = yOf(timeToMin(s.start));
@@ -3197,28 +3315,37 @@
                       const isNowO = d.iso === todayIso && timeToMin(s.start) <= nowMin && nowMin < timeToMin(s.end);
                       const conflictO = getSlotConflicts(s, s.id).length > 0;
                       const short = h < 40;
+                      const cO = d.hol ? null : getCancellation(s.id, d.iso);
                       return `
-                        <button onclick="openSlotModal('__other','${s.id}')" title="${escapeHtml(entryTitle(s))} · ${s.start}–${s.end}" class="absolute rounded-xl border border-dashed ${ty.cls} ${conflictO ? 'ring-2 ring-rose-400' : ''} ${isNowO ? 'ring-2 ring-zinc-900' : ''} overflow-hidden text-left px-2 ${short ? 'py-0.5 flex items-center gap-1.5' : 'py-1.5'} hover:brightness-95 transition" style="top:${top + 1}px;height:${h}px;left:calc(${leftPct}% + 4px);width:calc(${widthPct}% - 8px);${ty.stripe ? `background-image:repeating-linear-gradient(135deg, ${ty.stripe} 0 6px, transparent 6px 12px);` : ''}">
-                          <div class="text-[11px] font-bold leading-tight truncate"><i class="fa-solid ${ty.icon} text-[9px] mr-1 opacity-70"></i>${escapeHtml(entryTitle(s))}</div>
-                          <div class="text-[10px] font-mono opacity-70 ${short ? 'shrink-0' : ''}">${s.start}–${s.end}</div>
-                          ${s.place && h > 50 ? `<div class="text-[10px] opacity-60 truncate">${escapeHtml(s.place)}</div>` : ''}
-                        </button>`;
+                        <div class="absolute rounded-xl border border-dashed ${ty.cls} ${conflictO ? 'ring-2 ring-rose-400' : ''} ${isNowO && !cO ? 'ring-2 ring-zinc-900' : ''} ${cO ? 'opacity-45' : ''} overflow-hidden group/slot" style="top:${top + 1}px;height:${h}px;left:calc(${leftPct}% + 4px);width:calc(${widthPct}% - 8px);${ty.stripe ? `background-image:repeating-linear-gradient(135deg, ${ty.stripe} 0 6px, transparent 6px 12px);` : ''}">
+                          <button onclick="openSlotModal('__other','${s.id}')" title="${escapeHtml(entryTitle(s))} · ${s.start}–${s.end}${cO ? ' · No es fa: ' + escapeHtml(cancelReasonLabel(cO)) : ''}" class="w-full h-full text-left px-2 ${short ? 'py-0.5 flex items-center gap-1.5' : 'py-1.5'} hover:brightness-95 transition">
+                            <div class="text-[11px] font-bold leading-tight truncate ${cO ? 'line-through' : ''}"><i class="fa-solid ${ty.icon} text-[9px] mr-1 opacity-70"></i>${escapeHtml(entryTitle(s))}</div>
+                            <div class="text-[10px] font-mono opacity-70 ${short ? 'shrink-0' : ''}">${cO ? 'no es fa' : `${s.start}–${s.end}`}</div>
+                            ${s.place && h > 50 && !cO ? `<div class="text-[10px] opacity-60 truncate">${escapeHtml(s.place)}</div>` : ''}
+                          </button>
+                          ${!d.hol ? `<button onclick="event.stopPropagation(); openCancelModal({ slotId: '${s.id}', iso: '${d.iso}' })" title="${cO ? 'Sí que es fa' : 'Aquest dia no es fa'}" class="print:hidden absolute ${short ? 'top-0.5' : 'bottom-1'} right-1 w-6 h-5 rounded-lg bg-white/90 hover:bg-white text-zinc-600 opacity-0 group-hover/slot:opacity-100 transition"><i class="fa-solid ${cO ? 'fa-rotate-left' : 'fa-ban'} text-[9px]"></i></button>` : ''}
+                        </div>`;
                     }
                     const theme = getGroupPastelTheme(s.group);
                     const st = slotStatus(s, d.iso);
                     const conflict = getSlotConflicts(s, s.id).length > 0;
+                    const off = !!(st.cancel || st.holiday);
                     return `
-                      <div class="absolute rounded-xl border ${theme.badgeBg} ${conflict ? 'ring-2 ring-rose-400' : ''} ${st.isNow ? 'ring-2 ring-zinc-900 shadow-float' : 'shadow-subtle'} overflow-hidden group/slot" style="top:${top + 1}px;height:${h}px;left:calc(${leftPct}% + 4px);width:calc(${widthPct}% - 8px)">
+                      <div class="absolute rounded-xl border ${theme.badgeBg} ${conflict ? 'ring-2 ring-rose-400' : ''} ${st.isNow ? 'ring-2 ring-zinc-900 shadow-float' : 'shadow-subtle'} ${off ? 'opacity-45 !shadow-none' : ''} overflow-hidden group/slot" style="top:${top + 1}px;height:${h}px;left:calc(${leftPct}% + 4px);width:calc(${widthPct}% - 8px)">
                         <button onclick="openDiariFor('${s.gId}','${d.iso}')" class="w-full h-full text-left px-2 py-1.5 hover:brightness-95 transition">
                           <div class="flex items-start justify-between gap-1">
-                            <span class="text-xs font-extrabold leading-tight truncate">${escapeHtml(s.group.name)}</span>
+                            <span class="text-xs font-extrabold leading-tight truncate ${off ? 'line-through' : ''}">${escapeHtml(s.group.name)}</span>
                             <span class="print:hidden shrink-0">${statusIcon(st)}</span>
                           </div>
                           <div class="text-[10px] font-mono opacity-80">${s.start}–${s.end}</div>
-                          ${s.place && h > 50 ? `<div class="text-[10px] opacity-70 truncate"><i class="fa-solid fa-location-dot mr-0.5"></i>${escapeHtml(s.place)}</div>` : ''}
+                          ${st.cancel ? `<div class="text-[10px] font-semibold truncate"><i class="fa-solid fa-ban mr-0.5"></i>${escapeHtml(cancelReasonLabel(st.cancel))}</div>` : ''}
+                          ${s.place && h > 50 && !off ? `<div class="text-[10px] opacity-70 truncate"><i class="fa-solid fa-location-dot mr-0.5"></i>${escapeHtml(s.place)}</div>` : ''}
                           ${st.isNow ? '<div class="text-[9px] font-black uppercase tracking-wider mt-0.5">Ara</div>' : ''}
                         </button>
-                        <button onclick="event.stopPropagation(); openSlotModal('${s.gId}','${s.id}')" title="Modificar" class="print:hidden absolute bottom-1 right-1 w-6 h-6 rounded-lg bg-white/80 hover:bg-white text-zinc-600 opacity-0 group-hover/slot:opacity-100 transition"><i class="fa-solid fa-pen text-[9px]"></i></button>
+                        <div class="print:hidden absolute bottom-1 right-1 flex gap-1 opacity-0 group-hover/slot:opacity-100 transition">
+                          ${!st.holiday ? `<button onclick="event.stopPropagation(); openCancelModal({ slotId: '${s.id}', gId: '${s.gId}', iso: '${d.iso}' })" title="${st.cancel ? 'Sí que es fa' : 'Aquest dia no es fa'}" class="w-6 h-6 rounded-lg bg-white/90 hover:bg-white text-zinc-600"><i class="fa-solid ${st.cancel ? 'fa-rotate-left' : 'fa-ban'} text-[9px]"></i></button>` : ''}
+                          <button onclick="event.stopPropagation(); openSlotModal('${s.gId}','${s.id}')" title="Modificar l'horari" class="w-6 h-6 rounded-lg bg-white/90 hover:bg-white text-zinc-600"><i class="fa-solid fa-pen text-[9px]"></i></button>
+                        </div>
                       </div>`;
                   }).join('')}
                 </div>`;
@@ -3233,31 +3360,37 @@
             const daySlots = slots.filter(s => s.day === d.n);
             return `
               <div class="bg-white border ${d.iso === todayIso ? 'border-zinc-900' : 'border-zinc-200'} rounded-2xl overflow-hidden shadow-subtle">
-                <div class="px-3 py-2 flex items-center justify-between ${d.iso === todayIso ? 'bg-zinc-900 text-white' : 'bg-zinc-50 text-zinc-700'}">
-                  <span class="text-xs font-bold">${d.l} <span class="font-mono font-normal opacity-60 ml-1">${d.date.toLocaleDateString('ca-ES', { day: '2-digit', month: '2-digit' })}</span></span>
-                  ${d.iso === todayIso ? '<span class="text-[10px] font-bold">AVUI</span>' : ''}
+                <div class="px-3 py-2 flex items-center justify-between gap-2 ${d.iso === todayIso ? 'bg-zinc-900 text-white' : d.hol ? 'bg-zinc-200 text-zinc-600' : 'bg-zinc-50 text-zinc-700'}">
+                  <span class="text-xs font-bold">${d.l} <span class="font-mono font-normal opacity-60 ml-1">${d.date.toLocaleDateString('ca-ES', { day: '2-digit', month: '2-digit' })}</span>${d.iso === todayIso ? ' <span class="text-[10px] font-bold ml-1">AVUI</span>' : ''}</span>
+                  <button onclick="onTimetableDayHeader('${d.iso}')" class="text-[10px] font-bold px-2 py-0.5 rounded-lg ${d.hol ? 'bg-white text-zinc-700' : 'opacity-60 hover:opacity-100 border border-current'}">${d.hol ? `<i class="fa-regular fa-calendar-xmark mr-0.5"></i>${escapeHtml(d.hol.label)}` : 'Festiu?'}</button>
                 </div>
                 ${daySlots.length ? daySlots.map(s => {
                   if (s.kind === 'other') {
                     const ty = OTHER_SLOT_TYPES[s.type] || OTHER_SLOT_TYPES.altre;
+                    const cO = d.hol ? null : getCancellation(s.id, d.iso);
                     return `
-                      <button onclick="openSlotModal('__other','${s.id}')" class="w-full flex items-center gap-2 px-3 py-2 border-t border-zinc-100 text-left">
+                      <div class="flex items-center gap-2 px-3 py-2 border-t border-zinc-100 ${cO || d.hol ? 'opacity-45' : ''}">
                         <span class="font-mono text-[11px] font-bold text-zinc-500 w-[84px] shrink-0">${s.start}–${s.end}</span>
-                        <span class="text-[11px] font-semibold px-1.5 py-0.5 rounded border border-dashed ${ty.cls} truncate"><i class="fa-solid ${ty.icon} text-[9px] mr-1"></i>${escapeHtml(entryTitle(s))}</span>
-                        ${s.place ? `<span class="text-[10px] text-zinc-400 truncate">${escapeHtml(s.place)}</span>` : ''}
-                      </button>`;
+                        <button onclick="openSlotModal('__other','${s.id}')" class="flex-1 min-w-0 text-left truncate">
+                          <span class="text-[11px] font-semibold px-1.5 py-0.5 rounded border border-dashed ${ty.cls} ${cO || d.hol ? 'line-through' : ''}"><i class="fa-solid ${ty.icon} text-[9px] mr-1"></i>${escapeHtml(entryTitle(s))}</span>
+                          ${cO ? '<span class="text-[10px] text-zinc-500 ml-1">no es fa</span>' : s.place ? `<span class="text-[10px] text-zinc-400 ml-1">${escapeHtml(s.place)}</span>` : ''}
+                        </button>
+                        ${!d.hol ? `<button onclick="openCancelModal({ slotId: '${s.id}', iso: '${d.iso}' })" title="${cO ? 'Sí que es fa' : 'Aquest dia no es fa'}" class="p-1.5 text-zinc-300 hover:text-zinc-700"><i class="fa-solid ${cO ? 'fa-rotate-left' : 'fa-ban'} text-[10px]"></i></button>` : ''}
+                      </div>`;
                   }
                   const theme = getGroupPastelTheme(s.group);
                   const st = slotStatus(s, d.iso);
+                  const offM = !!(st.cancel || st.holiday);
                   return `
-                    <div class="flex items-center gap-2 px-3 py-2 border-t border-zinc-100 ${st.isNow ? 'bg-amber-50' : ''}">
+                    <div class="flex items-center gap-2 px-3 py-2 border-t border-zinc-100 ${st.isNow ? 'bg-amber-50' : ''} ${offM ? 'opacity-50' : ''}">
                       <span class="font-mono text-[11px] font-bold text-zinc-700 w-[84px] shrink-0">${s.start}–${s.end}</span>
-                      <button onclick="openDiariFor('${s.gId}','${d.iso}')" class="flex-1 min-w-0 text-left">
-                        <span class="text-[11px] font-bold font-mono px-1.5 py-0.5 rounded border ${theme.badgeBg}">${escapeHtml(s.group.name)}</span>
-                        ${s.place ? `<span class="text-[10px] text-zinc-400 ml-1">${escapeHtml(s.place)}</span>` : ''}
+                      <button onclick="openDiariFor('${s.gId}','${d.iso}')" class="flex-1 min-w-0 text-left truncate">
+                        <span class="text-[11px] font-bold font-mono px-1.5 py-0.5 rounded border ${theme.badgeBg} ${offM ? 'line-through' : ''}">${escapeHtml(s.group.name)}</span>
+                        ${st.cancel ? `<span class="text-[10px] text-zinc-500 ml-1">${escapeHtml(cancelReasonLabel(st.cancel))}</span>` : s.place ? `<span class="text-[10px] text-zinc-400 ml-1">${escapeHtml(s.place)}</span>` : ''}
                         ${st.isNow ? '<span class="ml-1 text-[9px] font-black text-amber-700">ARA</span>' : ''}
                       </button>
                       ${statusIcon(st)}
+                      ${!st.holiday ? `<button onclick="openCancelModal({ slotId: '${s.id}', gId: '${s.gId}', iso: '${d.iso}' })" title="${st.cancel ? 'Sí que es fa' : 'Aquest dia no es fa'}" class="p-1.5 text-zinc-300 hover:text-zinc-700"><i class="fa-solid ${st.cancel ? 'fa-rotate-left' : 'fa-ban'} text-[10px]"></i></button>` : ''}
                       <button onclick="openSlotModal('${s.gId}','${s.id}')" class="p-1.5 text-zinc-300 hover:text-zinc-700"><i class="fa-solid fa-pen text-[10px]"></i></button>
                     </div>`;
                 }).join('') : '<div class="px-3 py-2 border-t border-zinc-100 text-[11px] text-zinc-300 italic">Res a l\'horari</div>'}
@@ -3310,6 +3443,206 @@
             })()}
           </div>
         </div>`;
+    };
+
+    // ================== FESTIUS I SESSIONS ANUL·LADES ==================
+    // appData.holidays = [{ id, from, to, label }]  (dates YYYY-MM-DD, to inclòs)
+    // appData.cancellations = { 'slotId|YYYY-MM-DD' o 'grp:gId|YYYY-MM-DD': { reason, note } }
+
+    const CANCEL_REASONS = [
+      { id: 'sortida', label: 'Sortida / excursió', icon: 'fa-bus' },
+      { id: 'avaluacio', label: 'Avaluació / exàmens', icon: 'fa-file-pen' },
+      { id: 'centre', label: 'Activitat de centre', icon: 'fa-school' },
+      { id: 'vaga', label: 'Vaga', icon: 'fa-hand' },
+      { id: 'absencia', label: 'Absència del docent', icon: 'fa-user-xmark' },
+      { id: 'altres', label: 'Altres', icon: 'fa-circle-info' }
+    ];
+
+    function getHolidays() {
+      const h = window.appData.holidays;
+      return (Array.isArray(h) ? h : (h ? Object.values(h) : [])).filter(Boolean);
+    }
+
+    function getHoliday(iso) {
+      return getHolidays().find(h => iso >= h.from && iso <= (h.to || h.from)) || null;
+    }
+    window.getHoliday = getHoliday;
+
+    function getCancellations() {
+      if (!window.appData.cancellations || typeof window.appData.cancellations !== 'object') window.appData.cancellations = {};
+      return window.appData.cancellations;
+    }
+
+    function cancelReasonLabel(c) {
+      if (!c) return '';
+      const r = CANCEL_REASONS.find(x => x.id === c.reason);
+      return c.note ? (r && r.id !== 'altres' ? `${r.label}: ${c.note}` : c.note) : (r ? r.label : 'Anul·lada');
+    }
+
+    // Anul·lació d'una franja concreta (o de tota la classe aquell dia)
+    function getCancellation(slotId, iso, gId = null) {
+      const all = getCancellations();
+      return (slotId && all[`${slotId}|${iso}`]) || (gId && all[`grp:${gId}|${iso}`]) || null;
+    }
+
+    // Una classe no es fa aquell dia si és festiu o si totes les seves franges estan anul·lades
+    function getClassDayStatus(group, gId, iso) {
+      const hol = getHoliday(iso);
+      if (hol) return { off: true, holiday: hol };
+      const dow = isoToDate(iso).getDay();
+      const slots = getGroupTimetable(group).filter(s => s.day === dow);
+      const grpC = getCancellations()[`grp:${gId}|${iso}`];
+      if (grpC) return { off: true, cancel: grpC };
+      if (slots.length && slots.every(s => getCancellation(s.id, iso))) return { off: true, cancel: getCancellation(slots[0].id, iso) };
+      return { off: false };
+    }
+    window.getClassDayStatus = getClassDayStatus;
+
+    function afterCalendarChange() {
+      saveToStorage();
+      if (window.syncWholeAppToCloud) window.syncWholeAppToCloud();
+      if (window.appState.currentScreen === 'timetable') renderTimetable();
+      if (window.appState.currentScreen === 'home') renderHomeScreen();
+      if (window.appState.currentScreen === 'class' && window.appState.currentView === 'diari') renderDiariView();
+    }
+
+    // ---------- Modal d'anul·lació ----------
+
+    let cancelTarget = null; // { keys: [...], title }
+
+    window.openCancelModal = function(target) {
+      // target: { slotId, gId, iso } → una franja; { gId, iso, wholeDay: true } → tota la classe aquell dia
+      const dateTxt = formatLongDateCa(target.iso);
+      let keys, title;
+      if (target.wholeDay) {
+        const group = window.appData.groups[target.gId];
+        const dow = isoToDate(target.iso).getDay();
+        const slots = getGroupTimetable(group).filter(s => s.day === dow);
+        keys = slots.length ? slots.map(s => `${s.id}|${target.iso}`) : [`grp:${target.gId}|${target.iso}`];
+        title = `${escapeHtml(group.name)} · ${dateTxt}`;
+      } else {
+        keys = [`${target.slotId}|${target.iso}`];
+        const entry = getAllEntries().find(e => e.id === target.slotId);
+        title = `${entry ? escapeHtml(entryTitle(entry)) : ''} · ${dateTxt}${entry ? ` · <span class="font-mono">${entry.start}–${entry.end}</span>` : ''}`;
+      }
+      const existing = keys.map(k => getCancellations()[k]).find(Boolean) || (target.gId ? getCancellations()[`grp:${target.gId}|${target.iso}`] : null);
+      cancelTarget = { keys, gId: target.gId, iso: target.iso };
+      window.appState.cancelReason = existing ? existing.reason : 'sortida';
+      document.getElementById('cancelModalInfo').innerHTML = title;
+      document.getElementById('cancelNote').value = existing ? (existing.note || '') : '';
+      document.getElementById('cancelRestoreBtn').classList.toggle('hidden', !existing);
+      renderCancelReasonChips();
+      document.getElementById('cancelModal').classList.remove('hidden');
+    };
+
+    function renderCancelReasonChips() {
+      document.getElementById('cancelReasonChips').innerHTML = CANCEL_REASONS.map(r => `
+        <button type="button" onclick="setCancelReason('${r.id}')" class="px-2.5 py-1.5 rounded-xl border text-[11px] font-semibold transition ${window.appState.cancelReason === r.id ? 'bg-zinc-900 text-white border-zinc-900' : 'bg-white text-zinc-600 border-zinc-200 hover:border-zinc-400'}"><i class="fa-solid ${r.icon} text-[10px] mr-1"></i>${r.label}</button>
+      `).join('');
+    }
+
+    window.setCancelReason = function(id) {
+      window.appState.cancelReason = id;
+      renderCancelReasonChips();
+    };
+
+    window.closeCancelModal = function() {
+      document.getElementById('cancelModal').classList.add('hidden');
+      cancelTarget = null;
+    };
+
+    window.saveCancelFromModal = function() {
+      if (!cancelTarget) return;
+      const data = { reason: window.appState.cancelReason, note: document.getElementById('cancelNote').value.trim() };
+      cancelTarget.keys.forEach(k => { getCancellations()[k] = { ...data }; });
+      closeCancelModal();
+      afterCalendarChange();
+    };
+
+    window.restoreCancelledFromModal = function() {
+      if (!cancelTarget) return;
+      const all = getCancellations();
+      cancelTarget.keys.forEach(k => delete all[k]);
+      if (cancelTarget.gId) delete all[`grp:${cancelTarget.gId}|${cancelTarget.iso}`];
+      closeCancelModal();
+      afterCalendarChange();
+    };
+
+    // ---------- Modal de festius ----------
+
+    window.openHolidayModal = function(prefillIso = null) {
+      document.getElementById('holFrom').value = prefillIso || '';
+      document.getElementById('holTo').value = '';
+      document.getElementById('holLabel').value = '';
+      renderHolidayList();
+      document.getElementById('holidayModal').classList.remove('hidden');
+      if (prefillIso) document.getElementById('holLabel').focus();
+    };
+
+    window.closeHolidayModal = function() {
+      document.getElementById('holidayModal').classList.add('hidden');
+    };
+
+    function formatHolidayRange(h) {
+      const f = isoToDate(h.from), t = isoToDate(h.to || h.from);
+      const opt = { weekday: 'short', day: 'numeric', month: 'short' };
+      if (!h.to || h.to === h.from) return f.toLocaleDateString('ca-ES', opt);
+      return `${f.toLocaleDateString('ca-ES', { day: 'numeric', month: 'short' })} – ${t.toLocaleDateString('ca-ES', { day: 'numeric', month: 'short' })}`;
+    }
+
+    function renderHolidayList() {
+      const list = getHolidays().slice().sort((a, b) => a.from.localeCompare(b.from));
+      const today = todayISO();
+      document.getElementById('holidayList').innerHTML = list.length ? `
+        <div class="text-[10px] font-bold uppercase tracking-wider text-zinc-400 mb-1">${list.length} festius o períodes</div>
+        ${list.map(h => {
+          const past = (h.to || h.from) < today;
+          const days = Math.round((isoToDate(h.to || h.from) - isoToDate(h.from)) / 86400000) + 1;
+          return `
+            <div class="flex items-center gap-3 bg-white border border-zinc-200 rounded-xl px-3 py-2 ${past ? 'opacity-50' : ''}">
+              <span class="font-mono text-[11px] font-bold text-zinc-700 w-32 shrink-0">${formatHolidayRange(h)}</span>
+              <span class="flex-1 min-w-0 truncate font-semibold text-zinc-800">${escapeHtml(h.label || 'Festiu')}</span>
+              ${days > 1 ? `<span class="text-[10px] font-mono text-zinc-400 shrink-0">${days} dies</span>` : ''}
+              <button onclick="deleteHoliday('${h.id}')" class="p-1 text-zinc-300 hover:text-rose-600"><i class="fa-regular fa-trash-can"></i></button>
+            </div>`;
+        }).join('')}` : '<div class="text-center text-zinc-400 py-4">Encara no has afegit cap festiu.</div>';
+    }
+
+    window.addHolidayFromModal = function() {
+      const from = document.getElementById('holFrom').value;
+      let to = document.getElementById('holTo').value;
+      const label = document.getElementById('holLabel').value.trim() || 'Festiu';
+      if (!from) return alert("Indica la data del festiu.");
+      if (to && to < from) return alert("La data final ha de ser igual o posterior a la inicial.");
+      if (!to) to = from;
+      const list = getHolidays();
+      list.push({ id: 'hol_' + Date.now(), from, to, label });
+      window.appData.holidays = list;
+      document.getElementById('holFrom').value = '';
+      document.getElementById('holTo').value = '';
+      document.getElementById('holLabel').value = '';
+      renderHolidayList();
+      afterCalendarChange();
+    };
+
+    window.deleteHoliday = function(id) {
+      window.appData.holidays = getHolidays().filter(h => h.id !== id);
+      renderHolidayList();
+      afterCalendarChange();
+    };
+
+    // Clic a la capçalera d'un dia de l'horari
+    window.onTimetableDayHeader = function(iso) {
+      const hol = getHoliday(iso);
+      if (hol) {
+        if (hol.from === (hol.to || hol.from)) {
+          if (confirm(`El ${formatLongDateCa(iso)} està marcat com a "${hol.label}". Vols treure aquest festiu?`)) deleteHoliday(hol.id);
+        } else {
+          openHolidayModal();
+        }
+      } else {
+        openHolidayModal(iso);
+      }
     };
 
     // ================== BIBLIOTECA DE SdAs ==================
