@@ -204,7 +204,7 @@
             </div>
           </button>
 
-          <div id="headerBreadcrumb" class="hidden items-center gap-1.5 ml-2 pl-3 border-l border-zinc-200 text-xs">
+          <div id="headerBreadcrumb" class="hidden max-sm:!hidden items-center gap-1.5 ml-2 pl-3 border-l border-zinc-200 text-xs">
             <span class="text-zinc-400 font-medium">Grup:</span>
             <span id="breadcrumbGroupName" class="font-bold text-zinc-900 px-2 py-0.5 rounded-md text-[11px] border font-mono">--</span>
           </div>
@@ -257,22 +257,25 @@
       </div>
 
       <nav id="classSubNav" class="hidden flex items-center space-x-1 border-t border-zinc-100 py-1.5 overflow-x-auto text-[11px] font-semibold">
-        <button id="tabBtnSda" onclick="switchView('sda')" class="px-3 py-1 rounded-md text-zinc-900 bg-zinc-100 transition">
+        <button id="tabBtnSda" onclick="switchView('sda')" class="whitespace-nowrap shrink-0 px-3 py-1 rounded-md text-zinc-900 bg-zinc-100 transition">
           <i class="fa-regular fa-folder-open text-zinc-500 mr-1.5"></i> Qualificació SdA
         </button>
-        <button id="tabBtnRoster" onclick="switchView('roster')" class="px-3 py-1 rounded-md text-zinc-500 hover:text-zinc-900 hover:bg-zinc-50 transition">
+        <button id="tabBtnDiari" onclick="switchView('diari')" class="whitespace-nowrap shrink-0 px-3 py-1 rounded-md text-zinc-500 hover:text-zinc-900 hover:bg-zinc-50 transition">
+          <i class="fa-solid fa-clipboard-check text-zinc-400 mr-1.5"></i> Diari
+        </button>
+        <button id="tabBtnRoster" onclick="switchView('roster')" class="whitespace-nowrap shrink-0 px-3 py-1 rounded-md text-zinc-500 hover:text-zinc-900 hover:bg-zinc-50 transition">
           <i class="fa-solid fa-users text-zinc-400 mr-1.5"></i> Alumnat (<span id="tabStudentCount">0</span>)
         </button>
-        <button id="tabBtnTrim" onclick="switchView('trim')" class="px-3 py-1 rounded-md text-zinc-500 hover:text-zinc-900 hover:bg-zinc-50 transition">
+        <button id="tabBtnTrim" onclick="switchView('trim')" class="whitespace-nowrap shrink-0 px-3 py-1 rounded-md text-zinc-500 hover:text-zinc-900 hover:bg-zinc-50 transition">
           <i class="fa-solid fa-table-cells text-zinc-400 mr-1.5"></i> Resum Trimestral
         </button>
-        <button id="tabBtnFinal" onclick="switchView('final')" class="px-3 py-1 rounded-md text-zinc-500 hover:text-zinc-900 hover:bg-zinc-50 transition">
+        <button id="tabBtnFinal" onclick="switchView('final')" class="whitespace-nowrap shrink-0 px-3 py-1 rounded-md text-zinc-500 hover:text-zinc-900 hover:bg-zinc-50 transition">
           <i class="fa-regular fa-calendar-check text-zinc-400 mr-1.5"></i> Final de Curs
         </button>
-        <button id="tabBtnReport" onclick="switchView('report')" class="px-3 py-1 rounded-md text-zinc-500 hover:text-zinc-900 hover:bg-zinc-50 transition">
+        <button id="tabBtnReport" onclick="switchView('report')" class="whitespace-nowrap shrink-0 px-3 py-1 rounded-md text-zinc-500 hover:text-zinc-900 hover:bg-zinc-50 transition">
           <i class="fa-regular fa-address-card text-zinc-400 mr-1.5"></i> Butlletí
         </button>
-        <button id="tabBtnStats" onclick="switchView('stats')" class="px-3 py-1 rounded-md text-zinc-500 hover:text-zinc-900 hover:bg-zinc-50 transition">
+        <button id="tabBtnStats" onclick="switchView('stats')" class="whitespace-nowrap shrink-0 px-3 py-1 rounded-md text-zinc-500 hover:text-zinc-900 hover:bg-zinc-50 transition">
           <i class="fa-solid fa-chart-pie text-zinc-400 mr-1.5"></i> Analítica
         </button>
       </nav>
@@ -310,6 +313,9 @@
 
       <!-- Continua on ho vas deixar -->
       <div id="homeContinueCard"></div>
+
+      <!-- Classes d'avui -->
+      <div id="homeToday"></div>
 
       <!-- Indicadors del trimestre -->
       <div id="homeKpis" class="grid grid-cols-2 lg:grid-cols-4 gap-3"></div>
@@ -443,6 +449,39 @@
         </div>
       </section>
 
+      <!-- VISTA DIARI: SESSIONS, ASSISTÈNCIA I PRÀCTICA -->
+      <section id="viewDiari" class="space-y-4 hidden">
+        <div class="bg-white border border-zinc-200/90 rounded-2xl p-3 shadow-subtle space-y-3">
+          <div class="flex flex-wrap items-center justify-between gap-2">
+            <div class="inline-flex rounded-xl bg-zinc-100 p-0.5 text-xs font-semibold border border-zinc-200">
+              <button id="diariModeSession" onclick="setDiariMode('session')" class="px-3 py-1.5 rounded-lg transition">Sessió</button>
+              <button id="diariModeSummary" onclick="setDiariMode('summary')" class="px-3 py-1.5 rounded-lg transition">Resum d'assistència</button>
+            </div>
+            <div class="flex items-center gap-1.5 text-[11px]">
+              <span class="font-semibold text-zinc-400">Dies d'EF:</span>
+              <div id="diariScheduleChips" class="flex gap-1"></div>
+            </div>
+          </div>
+
+          <!-- Navegació de dates (només mode sessió) -->
+          <div id="diariDateBar" class="flex flex-wrap items-center gap-2">
+            <div class="flex items-center gap-1">
+              <button onclick="moveDiariDate(-1)" class="w-9 h-9 rounded-xl border border-zinc-200 bg-white hover:bg-zinc-50 text-zinc-600" title="Sessió anterior"><i class="fa-solid fa-chevron-left text-xs"></i></button>
+              <input type="date" id="diariDateInput" onchange="setDiariDate(this.value)" class="h-9 border border-zinc-200 rounded-xl px-2 text-xs font-semibold outline-none focus:ring-2 focus:ring-zinc-900">
+              <button onclick="moveDiariDate(1)" class="w-9 h-9 rounded-xl border border-zinc-200 bg-white hover:bg-zinc-50 text-zinc-600" title="Sessió següent"><i class="fa-solid fa-chevron-right text-xs"></i></button>
+              <button onclick="setDiariDate(todayISO())" class="h-9 px-3 rounded-xl border border-zinc-200 bg-white hover:bg-zinc-50 text-xs font-semibold text-zinc-700">Avui</button>
+            </div>
+            <div id="diariDateLabel" class="text-sm font-bold text-zinc-900"></div>
+          </div>
+        </div>
+
+        <!-- MODE SESSIÓ -->
+        <div id="diariSessionPanel" class="space-y-3"></div>
+
+        <!-- MODE RESUM -->
+        <div id="diariSummaryPanel" class="space-y-3 hidden"></div>
+      </section>
+
       <!-- VISTA 2: ROSTER D'ALUMNAT -->
       <section id="viewRoster" class="space-y-4 hidden">
         <div class="bg-white border border-zinc-200 rounded-2xl p-6 shadow-card space-y-4">
@@ -510,6 +549,8 @@
           </div>
           <div id="trimSdaWeightInputsContainer" class="flex flex-wrap gap-2.5 pt-1"></div>
         </div>
+
+        <div id="trimPracticeBar"></div>
 
         <div class="bg-white border border-zinc-200 rounded-2xl shadow-card overflow-hidden">
           <div class="overflow-x-auto">
@@ -598,6 +639,9 @@
             </div>
             <div id="repDetailsContainer" class="space-y-2 text-xs"></div>
           </div>
+
+          <!-- Assistència i actitud (del diari) -->
+          <div id="repAttendance"></div>
 
           <!-- Observacions pedagògiques -->
           <div class="border-t border-zinc-200 pt-5 space-y-2">
@@ -1253,6 +1297,11 @@
             if (window.appState.currentView === 'final') window.renderFinalView();
             if (window.appState.currentView === 'report') window.renderIndividualReport();
             if (window.appState.currentView === 'stats') window.renderStatsView();
+            if (window.appState.currentView === 'diari') {
+              const ae = document.activeElement;
+              const typing = ae && (ae.tagName === 'TEXTAREA' || ae.tagName === 'INPUT') && document.getElementById('viewDiari').contains(ae);
+              if (!typing) window.renderDiariView();
+            }
           } else if (window.appState?.currentScreen === 'library') {
             window.renderSdaLibrary();
           } else {
@@ -1270,6 +1319,15 @@
       setCloudStatus('syncing');
       const gradeRef = ref(fbDb, `users/${currentAuthUser}/quadern_data/groups/${groupId}/grades/${sdaId}/${studentId}/${gradeKey}`);
       set(gradeRef, val === null ? null : val)
+        .then(() => setCloudStatus('online'))
+        .catch(() => setCloudStatus('offline'));
+    };
+
+    window.syncSessionToCloud = function(groupId, isoDate, sessionData) {
+      if (!currentAuthUser || !fbDb) return;
+      setCloudStatus('syncing');
+      const sRef = ref(fbDb, `users/${currentAuthUser}/quadern_data/groups/${groupId}/sessions/${isoDate}`);
+      set(sRef, sessionData ? JSON.parse(JSON.stringify(sessionData)) : null)
         .then(() => setCloudStatus('online'))
         .catch(() => setCloudStatus('offline'));
     };
@@ -1793,6 +1851,38 @@
         contCard.innerHTML = '';
       }
 
+      // Classes d'avui (segons l'horari del diari)
+      const todayIso = todayISO();
+      const dow = new Date().getDay();
+      const todayGroups = groupKeys.filter(g => (groups[g].schedule || []).includes(dow));
+      const noSchedule = groupKeys.length > 0 && groupKeys.every(g => !(groups[g].schedule || []).length);
+      document.getElementById('homeToday').innerHTML = todayGroups.length ? `
+        <div class="space-y-2">
+          <h3 class="text-xs font-bold text-zinc-500 uppercase tracking-wider"><i class="fa-solid fa-clipboard-check mr-1.5 text-zinc-400"></i>Avui tens classe amb</h3>
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
+            ${todayGroups.map(g => {
+              const grp = groups[g];
+              const done = !!(grp.sessions && grp.sessions[todayIso]);
+              const theme = getGroupPastelTheme(grp);
+              let f = 0;
+              if (done) (grp.students || []).forEach(st => { const r = getRecord(grp.sessions[todayIso], st.id); if (r.a === 'F' || r.a === 'FJ') f++; });
+              return `
+                <button onclick="openDiariFor('${g}')" class="flex items-center gap-3 text-left bg-white border ${done ? 'border-emerald-200' : 'border-zinc-200'} hover:border-zinc-400 rounded-2xl px-3 py-2.5 shadow-subtle transition">
+                  <div class="w-9 h-9 rounded-xl ${theme.avatarBg} flex items-center justify-center text-xs font-bold font-mono shrink-0">${escapeHtml(grp.name.slice(0, 2))}</div>
+                  <div class="flex-1 min-w-0">
+                    <div class="text-xs font-bold text-zinc-900 truncate">${escapeHtml(grp.name)}</div>
+                    <div class="text-[11px] ${done ? 'text-emerald-700' : 'text-zinc-400'}">${done ? `<i class="fa-solid fa-check mr-0.5"></i> Llista passada · ${f} falt${f === 1 ? 'a' : 'es'}` : 'Llista pendent'}</div>
+                  </div>
+                  <span class="text-[11px] font-semibold px-2.5 py-1.5 rounded-xl shrink-0 ${done ? 'bg-zinc-100 text-zinc-700' : 'bg-zinc-900 text-white'}">${done ? 'Obrir' : 'Passar llista'}</span>
+                </button>`;
+            }).join('')}
+          </div>
+        </div>` : (noSchedule ? `
+        <div class="flex flex-wrap items-center justify-between gap-2 text-xs bg-white border border-dashed border-zinc-300 rounded-2xl px-4 py-3">
+          <span class="text-zinc-500"><i class="fa-solid fa-clipboard-check mr-1.5 text-zinc-400"></i>Indica els dies d'EF de cada classe al <b>Diari</b> i aquí veuràs a qui has de passar llista cada dia.</span>
+          <button onclick="openDiariFor('${groupKeys[0]}')" class="font-semibold text-zinc-700 bg-zinc-100 hover:bg-zinc-200 px-2.5 py-1 rounded-lg">Configurar</button>
+        </div>` : '');
+
       // Targetes de classe
       document.getElementById('homeClassesCount').textContent = `${groupKeys.length} classe${groupKeys.length === 1 ? '' : 's'}`;
       grid.innerHTML = groupKeys.map(gId => {
@@ -1863,7 +1953,7 @@
             ${alertsHtml ? `<div class="flex flex-wrap gap-1.5">${alertsHtml}</div>` : ''}
 
             <div class="mt-auto pt-2 border-t border-black/5 grid grid-cols-4 gap-1.5 text-[11px] font-semibold">
-              <button onclick="openClassView('${gId}','roster')" class="flex flex-col items-center gap-0.5 py-1.5 rounded-xl bg-white/80 hover:bg-white border border-zinc-200/70 text-zinc-700 transition"><i class="fa-solid fa-users text-zinc-400"></i>Llista</button>
+              <button onclick="openDiariFor('${gId}')" class="flex flex-col items-center gap-0.5 py-1.5 rounded-xl bg-white/80 hover:bg-white border border-zinc-200/70 text-zinc-700 transition"><i class="fa-solid fa-clipboard-check text-zinc-400"></i>Diari</button>
               <button onclick="openClassView('${gId}','trim')" class="flex flex-col items-center gap-0.5 py-1.5 rounded-xl bg-white/80 hover:bg-white border border-zinc-200/70 text-zinc-700 transition"><i class="fa-solid fa-table-cells text-zinc-400"></i>Resum</button>
               <button onclick="openClassView('${gId}','report')" class="flex flex-col items-center gap-0.5 py-1.5 rounded-xl bg-white/80 hover:bg-white border border-zinc-200/70 text-zinc-700 transition"><i class="fa-regular fa-address-card text-zinc-400"></i>Butlletins</button>
               <button onclick="${firstPending ? `openSdaFromHome('${gId}','${firstPending.sda.id}')` : `enterClass('${gId}')`}" class="flex flex-col items-center gap-0.5 py-1.5 rounded-xl ${theme.btnBg} transition"><i class="fa-solid fa-pen-to-square"></i>Qualificar</button>
@@ -1958,6 +2048,601 @@
       }).join('');
       document.getElementById('homeProgramacio').innerHTML = progHtml;
     };
+
+    // ================== DIARI: SESSIONS, ASSISTÈNCIA I PRÀCTICA ==================
+    // Model: group.sessions[YYYY-MM-DD] = { trim, sdaId, note, records: { stId: { a, p, pos, neg, obs } } }
+    //   a (assistència): 'P' present (per defecte), 'F' falta, 'FJ' falta justificada, 'R' retard
+    //   p (pràctica):    null fa pràctica, 'NP' no fa pràctica, 'SR' sense roba/material, 'L' lesió o exempció justificada
+    // Els alumnes sense registre en una sessió existent compten com a presents i fent pràctica.
+
+    const ATT_CODES = {
+      P:  { label: 'Present', short: 'P', on: 'bg-emerald-600 text-white border-emerald-600' },
+      F:  { label: 'Falta', short: 'F', on: 'bg-rose-600 text-white border-rose-600' },
+      R:  { label: 'Retard', short: 'R', on: 'bg-amber-500 text-white border-amber-500' },
+      FJ: { label: 'Falta justificada', short: 'FJ', on: 'bg-sky-600 text-white border-sky-600' }
+    };
+    const PRACTICE_CODES = {
+      NP: { label: 'No fa pràctica', short: 'No pràct.', icon: 'fa-person-walking', on: 'bg-rose-100 text-rose-800 border-rose-300' },
+      SR: { label: 'Sense roba / material', short: 'Roba', icon: 'fa-shirt', on: 'bg-orange-100 text-orange-800 border-orange-300' },
+      L:  { label: 'Lesió / exempció justificada', short: 'Lesió', icon: 'fa-kit-medical', on: 'bg-sky-100 text-sky-800 border-sky-300' }
+    };
+    const WEEKDAYS = [{ n: 1, s: 'Dl' }, { n: 2, s: 'Dt' }, { n: 3, s: 'Dc' }, { n: 4, s: 'Dj' }, { n: 5, s: 'Dv' }];
+    const DEFAULT_MIN_PRACTICE = 80;
+
+    function todayISO() {
+      const d = new Date();
+      return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+    }
+    window.todayISO = todayISO;
+
+    function isoToDate(iso) { return new Date(iso + 'T12:00:00'); }
+    function dateToISO(d) { return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`; }
+
+    function formatLongDateCa(iso) {
+      const d = isoToDate(iso);
+      const txt = d.toLocaleDateString('ca-ES', { weekday: 'long', day: 'numeric', month: 'long' });
+      return txt.charAt(0).toUpperCase() + txt.slice(1);
+    }
+
+    function getGroupSessions(group) {
+      if (!group.sessions || typeof group.sessions !== 'object') group.sessions = {};
+      return group.sessions;
+    }
+
+    function getRecord(session, stId) {
+      const recs = session && session.records;
+      return (recs && recs[stId]) || {};
+    }
+
+    function getSessionSortedDates(group, trim = null) {
+      const sessions = getGroupSessions(group);
+      return Object.keys(sessions).filter(d => trim === null || sessions[d].trim === trim).sort();
+    }
+
+    // Estadístiques d'assistència i pràctica d'un alumne (trim = null → tot el curs)
+    function getStudentAttendanceStats(group, stId, trim = null) {
+      const sessions = getGroupSessions(group);
+      const st = { total: 0, P: 0, F: 0, FJ: 0, R: 0, NP: 0, SR: 0, L: 0, pos: 0, neg: 0, practiced: 0, eligible: 0, pct: null, obs: [] };
+      Object.keys(sessions).sort().forEach(date => {
+        const s = sessions[date];
+        if (trim !== null && s.trim !== trim) return;
+        const rec = getRecord(s, stId);
+        const a = rec.a || 'P';
+        const p = rec.p || null;
+        st.total++;
+        st[a] = (st[a] || 0) + 1;
+        if ((a === 'P' || a === 'R') && p) st[p] = (st[p] || 0) + 1;
+        st.pos += rec.pos || 0;
+        st.neg += rec.neg || 0;
+        const justified = a === 'FJ' || ((a === 'P' || a === 'R') && p === 'L');
+        if (!justified) {
+          st.eligible++;
+          if ((a === 'P' || a === 'R') && !p) st.practiced++;
+        }
+        if (rec.obs) st.obs.push({ date, text: rec.obs });
+      });
+      st.pct = st.eligible > 0 ? (st.practiced / st.eligible) * 100 : null;
+      return st;
+    }
+
+    function getMinPractice(group) {
+      return group.minPracticePct !== undefined ? group.minPracticePct : DEFAULT_MIN_PRACTICE;
+    }
+
+    function practicePctBadge(pct, min) {
+      if (pct === null) return '<span class="text-zinc-300">—</span>';
+      const ok = pct >= min;
+      return `<span class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-bold font-mono ring-1 ring-inset ${ok ? 'bg-emerald-50 text-emerald-700 ring-emerald-200' : 'bg-rose-50 text-rose-700 ring-rose-200'}">${Math.round(pct)}%</span>`;
+    }
+
+    // ---------- Estat i navegació ----------
+
+    if (!window.appState.diariDate) window.appState.diariDate = todayISO();
+    if (!window.appState.diariMode) window.appState.diariMode = 'session';
+
+    window.setDiariMode = function(mode) {
+      window.appState.diariMode = mode;
+      renderDiariView();
+    };
+
+    window.setDiariDate = function(iso) {
+      if (!iso) return;
+      window.appState.diariDate = iso;
+      window.appState.diariOpenObs = null;
+      renderDiariView();
+    };
+
+    // Salta al dia anterior/següent que tingui EF segons l'horari (o ±1 dia si no hi ha horari)
+    window.moveDiariDate = function(dir) {
+      const group = getCurrentGroup();
+      const sched = group.schedule || [];
+      const d = isoToDate(window.appState.diariDate);
+      for (let i = 0; i < 14; i++) {
+        d.setDate(d.getDate() + dir);
+        if (!sched.length || sched.includes(d.getDay())) break;
+      }
+      setDiariDate(dateToISO(d));
+    };
+
+    window.toggleScheduleDay = function(n) {
+      const group = getCurrentGroup();
+      const sched = new Set(group.schedule || []);
+      sched.has(n) ? sched.delete(n) : sched.add(n);
+      group.schedule = Array.from(sched).sort();
+      saveToStorage();
+      if (window.syncGroupEntityToCloud) window.syncGroupEntityToCloud(window.appData.activeGroupId);
+      renderDiariView();
+      if (window.appState.currentScreen === 'home') renderHomeScreen();
+    };
+
+    window.openDiariFor = function(gId, iso = null) {
+      enterClass(gId);
+      window.appState.diariDate = iso || todayISO();
+      window.appState.diariMode = 'session';
+      switchView('diari');
+    };
+
+    // ---------- Edició de la sessió ----------
+
+    function ensureSession(group, iso) {
+      const sessions = getGroupSessions(group);
+      if (!sessions[iso]) {
+        const trimSdas = (group.sdas || []).filter(s => s.trim === window.appState.currentTrim);
+        const selVal = (document.getElementById('sdaSelect') || {}).value;
+        const sda = trimSdas.find(s => s.id === selVal) || trimSdas[0];
+        sessions[iso] = { trim: window.appState.currentTrim, sdaId: sda ? sda.id : '', note: '', records: {} };
+      }
+      if (!sessions[iso].records || typeof sessions[iso].records !== 'object') sessions[iso].records = {};
+      return sessions[iso];
+    }
+
+    let sessionSyncTimer = null;
+    function persistSession(iso, immediate = true) {
+      saveToStorage();
+      const gId = window.appData.activeGroupId;
+      const run = () => {
+        const group = window.appData.groups[gId];
+        if (window.syncSessionToCloud) window.syncSessionToCloud(gId, iso, (group.sessions || {})[iso] || null);
+      };
+      clearTimeout(sessionSyncTimer);
+      if (immediate) run(); else sessionSyncTimer = setTimeout(run, 700);
+    }
+
+    function updateRecord(stId, mutator, rerender = true) {
+      const group = getCurrentGroup();
+      const iso = window.appState.diariDate;
+      const session = ensureSession(group, iso);
+      const rec = { ...(session.records[stId] || {}) };
+      mutator(rec);
+      // Neteja: no guardem valors per defecte
+      if (rec.a === 'P') delete rec.a;
+      if (!rec.p) delete rec.p;
+      if (!rec.pos) delete rec.pos;
+      if (!rec.neg) delete rec.neg;
+      if (!rec.obs) delete rec.obs;
+      if (Object.keys(rec).length) session.records[stId] = rec;
+      else delete session.records[stId];
+      persistSession(iso, rerender);
+      if (rerender) renderDiariView();
+    }
+
+    window.diariSetAttendance = function(stId, code) {
+      updateRecord(stId, rec => {
+        rec.a = code;
+        if (code === 'F' || code === 'FJ') delete rec.p;
+      });
+    };
+
+    window.diariTogglePractice = function(stId, code) {
+      updateRecord(stId, rec => {
+        rec.p = rec.p === code ? null : code;
+        if (rec.p && (rec.a === 'F' || rec.a === 'FJ')) rec.a = 'P';
+      });
+    };
+
+    window.diariAttitude = function(stId, kind, delta) {
+      updateRecord(stId, rec => { rec[kind] = Math.max(0, (rec[kind] || 0) + delta); });
+    };
+
+    window.diariToggleObs = function(stId) {
+      window.appState.diariOpenObs = window.appState.diariOpenObs === stId ? null : stId;
+      renderDiariView();
+      const ta = document.getElementById(`diariObs_${stId}`);
+      if (ta) ta.focus();
+    };
+
+    window.diariSetObs = function(stId, text) {
+      updateRecord(stId, rec => { rec.obs = text.trim() ? text : ''; }, false);
+      const ind = document.getElementById(`diariObsInd_${stId}`);
+      if (ind) ind.classList.toggle('hidden', !text.trim());
+    };
+
+    window.diariCreateSession = function() {
+      const group = getCurrentGroup();
+      ensureSession(group, window.appState.diariDate);
+      persistSession(window.appState.diariDate);
+      renderDiariView();
+    };
+
+    window.diariAllPresent = function() {
+      const group = getCurrentGroup();
+      const session = ensureSession(group, window.appState.diariDate);
+      Object.keys(session.records).forEach(stId => {
+        const rec = session.records[stId];
+        delete rec.a;
+        if (!Object.keys(rec).length) delete session.records[stId];
+      });
+      persistSession(window.appState.diariDate);
+      renderDiariView();
+    };
+
+    window.diariSetSessionField = function(field, value) {
+      const group = getCurrentGroup();
+      const session = ensureSession(group, window.appState.diariDate);
+      session[field] = field === 'trim' ? parseInt(value) : value;
+      persistSession(window.appState.diariDate, field !== 'note');
+      if (field !== 'note') renderDiariView();
+    };
+
+    window.diariDeleteSession = function() {
+      const group = getCurrentGroup();
+      const iso = window.appState.diariDate;
+      if (!confirm(`Vols eliminar el registre de la sessió del ${formatLongDateCa(iso)}? (Les notes posades a la graella es mantenen.)`)) return;
+      delete getGroupSessions(group)[iso];
+      persistSession(iso);
+      renderDiariView();
+    };
+
+    // Nota ràpida d'un OA des de la sessió (escriu a la mateixa graella de la SdA)
+    window.diariSetEvalKey = function(value) {
+      window.appState.diariEvalKey = value;
+      renderDiariView();
+    };
+
+    window.diariSetGrade = function(sdaId, stId, key, inputEl) {
+      let raw = inputEl.value.trim().replace(',', '.');
+      const shortcuts = { e: 4, n: 3, a: 2, p: 1 };
+      if (shortcuts[raw.toLowerCase()] !== undefined) raw = String(shortcuts[raw.toLowerCase()]);
+      let val = null;
+      if (raw !== '') {
+        let num = parseFloat(raw);
+        if (isNaN(num) || num < 0) num = 0;
+        if (num > 4) num = 4;
+        val = Math.round(num * 100) / 100;
+      }
+      inputEl.value = val === null ? '' : val;
+      const group = getCurrentGroup();
+      if (!group.grades) group.grades = {};
+      if (!group.grades[sdaId]) group.grades[sdaId] = {};
+      if (!group.grades[sdaId][stId]) group.grades[sdaId][stId] = {};
+      if (val === null) delete group.grades[sdaId][stId][key];
+      else group.grades[sdaId][stId][key] = val;
+      saveToStorage();
+      if (window.syncGradeToCloud) window.syncGradeToCloud(window.appData.activeGroupId, sdaId, stId, key, val);
+      inputEl.className = `diari-grade w-14 h-9 text-center rounded-lg font-mono text-xs outline-none border border-zinc-200 focus:ring-2 focus:ring-zinc-900 ${getScoreColorClass(val)}`;
+    };
+
+    window.diariGradeKeydown = function(e, idx) {
+      if (e.key === 'Enter' || e.key === 'ArrowDown') {
+        e.preventDefault();
+        const next = document.querySelector(`input.diari-grade[data-idx="${idx + 1}"]`);
+        if (next) { next.focus(); next.select(); } else e.target.blur();
+      } else if (e.key === 'ArrowUp') {
+        e.preventDefault();
+        const prev = document.querySelector(`input.diari-grade[data-idx="${idx - 1}"]`);
+        if (prev) { prev.focus(); prev.select(); }
+      }
+    };
+
+    // Marca la penalització de mínim de pràctica segons el % del trimestre
+    window.applyPracticeMinimum = function(trim) {
+      const group = getCurrentGroup();
+      const min = getMinPractice(group);
+      const students = group.students || [];
+      const below = students.filter(st => {
+        const s = getStudentAttendanceStats(group, st.id, trim);
+        return s.pct !== null && s.pct < min;
+      });
+      const msg = below.length
+        ? `${below.length} alumne${below.length === 1 ? '' : 's'} no arriba${below.length === 1 ? '' : 'n'} al ${min}% de pràctica al ${trim}r trimestre:\n\n${below.map(s => '· ' + s.name).join('\n')}\n\nVols marcar-los com a "< Mínim"? (A la resta se'ls traurà la marca.)`
+        : `Tot l'alumnat arriba al ${min}% de pràctica al ${trim}r trimestre. Vols treure totes les marques de "< Mínim" d'aquest trimestre?`;
+      if (!confirm(msg.replace('2r', '2n'))) return;
+      if (!group.attendancePenalty) group.attendancePenalty = { 1: {}, 2: {}, 3: {} };
+      group.attendancePenalty[trim] = {};
+      below.forEach(st => { group.attendancePenalty[trim][st.id] = true; });
+      saveToStorage();
+      if (window.syncGroupEntityToCloud) window.syncGroupEntityToCloud(window.appData.activeGroupId);
+      if (window.appState.currentView === 'trim') renderTrimView();
+      else renderDiariView();
+    };
+
+    window.setMinPractice = function(value) {
+      const group = getCurrentGroup();
+      const v = Math.max(0, Math.min(100, parseFloat(value) || 0));
+      group.minPracticePct = v;
+      saveToStorage();
+      if (window.syncGroupEntityToCloud) window.syncGroupEntityToCloud(window.appData.activeGroupId);
+      if (window.appState.currentView === 'trim') renderTrimView();
+      else renderDiariView();
+    };
+
+    // ---------- Render ----------
+
+    window.renderDiariView = function() {
+      const group = getCurrentGroup();
+      const mode = window.appState.diariMode;
+      const sched = group.schedule || [];
+
+      document.getElementById('diariModeSession').className = `px-3 py-1.5 rounded-lg transition ${mode === 'session' ? 'bg-white text-zinc-900 shadow-subtle font-bold' : 'text-zinc-500 hover:text-zinc-900'}`;
+      document.getElementById('diariModeSummary').className = `px-3 py-1.5 rounded-lg transition ${mode === 'summary' ? 'bg-white text-zinc-900 shadow-subtle font-bold' : 'text-zinc-500 hover:text-zinc-900'}`;
+      document.getElementById('diariScheduleChips').innerHTML = WEEKDAYS.map(w => `
+        <button onclick="toggleScheduleDay(${w.n})" class="w-8 h-7 rounded-lg text-[11px] font-bold border transition ${sched.includes(w.n) ? 'bg-zinc-900 text-white border-zinc-900' : 'bg-white text-zinc-400 border-zinc-200 hover:border-zinc-400'}">${w.s}</button>
+      `).join('');
+      document.getElementById('diariDateBar').classList.toggle('hidden', mode !== 'session');
+      document.getElementById('diariSessionPanel').classList.toggle('hidden', mode !== 'session');
+      document.getElementById('diariSummaryPanel').classList.toggle('hidden', mode !== 'summary');
+
+      if (mode === 'summary') renderDiariSummary(group);
+      else renderDiariSession(group);
+    };
+
+    function renderDiariSession(group) {
+      const iso = window.appState.diariDate;
+      const panel = document.getElementById('diariSessionPanel');
+      document.getElementById('diariDateInput').value = iso;
+      const dow = isoToDate(iso).getDay();
+      const sched = group.schedule || [];
+      const isClassDay = !sched.length || sched.includes(dow);
+      document.getElementById('diariDateLabel').innerHTML = `${formatLongDateCa(iso)}${iso === todayISO() ? ' <span class="ml-1 text-[10px] font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 px-1.5 py-0.5 rounded">AVUI</span>' : ''}${!isClassDay ? ' <span class="ml-1 text-[10px] font-semibold text-zinc-400">(no és dia d\'EF)</span>' : ''}`;
+
+      const session = getGroupSessions(group)[iso];
+      let students = group.students || [];
+      if (window.appState.searchFilter) students = students.filter(s => s.name.toLowerCase().includes(window.appState.searchFilter));
+
+      if (!(group.students || []).length) {
+        panel.innerHTML = `<div class="bg-white border border-zinc-200 rounded-2xl p-8 text-center text-xs text-zinc-400">Aquesta classe encara no té alumnes. <button onclick="switchView('roster')" class="underline font-semibold text-zinc-700">Afegeix-los a la llista</button>.</div>`;
+        return;
+      }
+
+      if (!session) {
+        const pastDates = getSessionSortedDates(group);
+        panel.innerHTML = `
+          <div class="bg-white border border-dashed border-zinc-300 rounded-2xl p-6 text-center space-y-3">
+            <p class="text-sm font-semibold text-zinc-700">Encara no has passat llista aquest dia.</p>
+            <p class="text-xs text-zinc-400">Tothom comença com a present i fent pràctica: només cal marcar les excepcions.</p>
+            <button onclick="diariCreateSession()" class="inline-flex items-center gap-2 bg-zinc-900 hover:bg-zinc-800 text-white text-sm font-bold px-5 py-3 rounded-2xl shadow-subtle transition">
+              <i class="fa-solid fa-clipboard-check"></i> Començar la sessió
+            </button>
+          </div>
+          ${renderSessionHistory(group, pastDates)}`;
+        return;
+      }
+
+      const trimSdas = (group.sdas || []).filter(s => s.trim === session.trim);
+      const sda = (group.sdas || []).find(s => s.id === session.sdaId);
+      const evalOptions = [];
+      if (sda) {
+        OFFICIAL_CES.forEach(ce => {
+          const conf = sda.competences && sda.competences[ce.id];
+          if (!conf || !conf.active) return;
+          if (conf.oas && conf.oas.length) conf.oas.forEach(oa => evalOptions.push({ key: `${ce.id}_${oa.id}`, label: `${ce.id} · ${oa.label || oa.id}` }));
+          else evalOptions.push({ key: `${ce.id}_direct`, label: `${ce.id} · avaluació directa` });
+        });
+      }
+      const evalKey = evalOptions.some(o => o.key === window.appState.diariEvalKey) ? window.appState.diariEvalKey : '';
+
+      // Comptadors
+      const all = group.students || [];
+      const c = { P: 0, F: 0, FJ: 0, R: 0, NP: 0, SR: 0, L: 0 };
+      all.forEach(st => {
+        const r = getRecord(session, st.id);
+        c[r.a || 'P']++;
+        if (r.p && (r.a || 'P') !== 'F' && r.a !== 'FJ') c[r.p]++;
+      });
+      const practicing = all.length - c.F - c.FJ - c.NP - c.SR - c.L;
+      const counter = (n, label, cls) => `<div class="flex-1 min-w-[70px] rounded-xl border ${cls} px-2 py-1.5 text-center"><div class="text-lg font-black font-mono leading-none">${n}</div><div class="text-[10px] font-semibold mt-0.5">${label}</div></div>`;
+
+      const minP = getMinPractice(group);
+      const rows = students.map((st, idx) => {
+        const r = getRecord(session, st.id);
+        const a = r.a || 'P';
+        const absent = a === 'F' || a === 'FJ';
+        const stats = getStudentAttendanceStats(group, st.id, session.trim);
+        const gradeVal = evalKey && group.grades && group.grades[sda.id] && group.grades[sda.id][st.id] && group.grades[sda.id][st.id][evalKey] !== undefined ? group.grades[sda.id][st.id][evalKey] : '';
+        const obsOpen = window.appState.diariOpenObs === st.id;
+
+        return `
+          <div class="px-3 py-2.5 ${absent ? 'bg-rose-50/40' : ''}">
+            <div class="flex flex-col lg:flex-row lg:items-center gap-2">
+              <div class="flex items-center gap-2 min-w-0 lg:w-56 shrink-0">
+                <span class="text-[10px] font-mono text-zinc-400 w-5 text-right shrink-0">${idx + 1}</span>
+                <div class="min-w-0">
+                  <div class="text-xs font-bold text-zinc-900 truncate">${escapeHtml(st.name)}</div>
+                  <div class="text-[10px] text-zinc-400 flex items-center gap-1.5">Pràctica T${session.trim}: ${practicePctBadge(stats.pct, minP)}${stats.pos || stats.neg ? `<span class="font-mono">+${stats.pos} / −${stats.neg}</span>` : ''}</div>
+                </div>
+              </div>
+
+              <div class="flex flex-wrap items-center gap-1.5 lg:flex-1">
+                <div class="flex gap-1">
+                  ${Object.keys(ATT_CODES).map(code => `
+                    <button onclick="diariSetAttendance(${st.id}, '${code}')" title="${ATT_CODES[code].label}" class="min-w-[38px] h-9 px-2 rounded-xl border text-xs font-black transition ${a === code ? ATT_CODES[code].on : 'bg-white text-zinc-400 border-zinc-200 hover:border-zinc-400'}">${ATT_CODES[code].short}</button>
+                  `).join('')}
+                </div>
+                <div class="flex gap-1 ${absent ? 'opacity-30 pointer-events-none' : ''}">
+                  ${Object.keys(PRACTICE_CODES).map(code => `
+                    <button onclick="diariTogglePractice(${st.id}, '${code}')" title="${PRACTICE_CODES[code].label}" class="h-9 px-2 rounded-xl border text-[10px] font-bold transition inline-flex items-center gap-1 ${r.p === code ? PRACTICE_CODES[code].on : 'bg-white text-zinc-400 border-zinc-200 hover:border-zinc-400'}"><i class="fa-solid ${PRACTICE_CODES[code].icon} hidden sm:inline"></i><span>${PRACTICE_CODES[code].short}</span></button>
+                  `).join('')}
+                </div>
+                <div class="flex items-center gap-1">
+                  <button onclick="diariAttitude(${st.id}, 'neg', 1)" oncontextmenu="event.preventDefault(); diariAttitude(${st.id}, 'neg', -1)" title="Actitud negativa (clic dret o mantenir per restar)" class="h-9 min-w-[38px] px-2 rounded-xl border text-xs font-black transition ${r.neg ? 'bg-rose-600 text-white border-rose-600' : 'bg-white text-zinc-400 border-zinc-200 hover:border-zinc-400'}">−${r.neg > 1 ? r.neg : ''}</button>
+                  <button onclick="diariAttitude(${st.id}, 'pos', 1)" oncontextmenu="event.preventDefault(); diariAttitude(${st.id}, 'pos', -1)" title="Actitud positiva (clic dret per restar)" class="h-9 min-w-[38px] px-2 rounded-xl border text-xs font-black transition ${r.pos ? 'bg-emerald-600 text-white border-emerald-600' : 'bg-white text-zinc-400 border-zinc-200 hover:border-zinc-400'}">+${r.pos > 1 ? r.pos : ''}</button>
+                  ${r.pos || r.neg ? `<button onclick="updateRecordReset(${st.id})" title="Esborrar actitud d'avui" class="h-9 px-1.5 text-zinc-300 hover:text-zinc-600"><i class="fa-solid fa-rotate-left text-[10px]"></i></button>` : ''}
+                </div>
+                <button onclick="diariToggleObs(${st.id})" title="Observació" class="relative h-9 w-9 rounded-xl border transition ${obsOpen ? 'bg-zinc-900 text-white border-zinc-900' : 'bg-white text-zinc-400 border-zinc-200 hover:border-zinc-400'}">
+                  <i class="fa-regular fa-comment-dots text-xs"></i>
+                  <span id="diariObsInd_${st.id}" class="${r.obs ? '' : 'hidden'} absolute -top-1 -right-1 w-2.5 h-2.5 rounded-full bg-amber-500 border-2 border-white"></span>
+                </button>
+                ${evalKey ? `
+                  <input type="text" inputmode="decimal" value="${gradeVal}" data-idx="${idx}" placeholder="nota"
+                    onfocus="this.select()" onkeydown="diariGradeKeydown(event, ${idx})" onblur="diariSetGrade('${sda.id}', ${st.id}, '${evalKey}', this)"
+                    class="diari-grade w-14 h-9 text-center rounded-lg font-mono text-xs outline-none border border-zinc-200 focus:ring-2 focus:ring-zinc-900 ${getScoreColorClass(gradeVal)}">` : ''}
+              </div>
+            </div>
+            ${obsOpen ? `
+              <textarea id="diariObs_${st.id}" rows="2" oninput="diariSetObs(${st.id}, this.value)" placeholder="Observació d'avui per a ${escapeHtml(st.name.split(',')[1] ? st.name.split(',')[1].trim() : st.name)}..." class="mt-2 w-full lg:ml-56 lg:w-[calc(100%-14rem)] plan-textarea"></textarea>` : ''}
+          </div>`;
+      }).join('');
+
+      panel.innerHTML = `
+        <div class="bg-white border border-zinc-200/90 rounded-2xl p-3 shadow-subtle space-y-3">
+          <div class="flex flex-wrap gap-2">
+            ${counter(c.P + c.R, 'presents', 'border-emerald-200 bg-emerald-50 text-emerald-800')}
+            ${counter(c.F + c.FJ, 'faltes', 'border-rose-200 bg-rose-50 text-rose-800')}
+            ${counter(c.R, 'retards', 'border-amber-200 bg-amber-50 text-amber-800')}
+            ${counter(practicing, 'fan pràctica', 'border-zinc-200 bg-zinc-50 text-zinc-800')}
+          </div>
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-2 text-xs">
+            <div class="flex items-center gap-2">
+              <span class="font-semibold text-zinc-400 shrink-0">Trim.</span>
+              <select onchange="diariSetSessionField('trim', this.value)" class="flex-1 bg-zinc-50 border border-zinc-200 rounded-xl px-2 py-1.5 font-semibold outline-none">
+                ${[1, 2, 3].map(t => `<option value="${t}" ${session.trim === t ? 'selected' : ''}>${t}${['', 'r', 'n', 'r'][t]} trimestre</option>`).join('')}
+              </select>
+            </div>
+            <div class="flex items-center gap-2">
+              <span class="font-semibold text-zinc-400 shrink-0">SdA</span>
+              <select onchange="diariSetSessionField('sdaId', this.value)" class="flex-1 min-w-0 bg-zinc-50 border border-zinc-200 rounded-xl px-2 py-1.5 font-semibold outline-none">
+                <option value="">— Cap —</option>
+                ${trimSdas.map(s => `<option value="${s.id}" ${s.id === session.sdaId ? 'selected' : ''}>${escapeHtml(s.title)}</option>`).join('')}
+              </select>
+            </div>
+            <div class="flex items-center gap-2">
+              <span class="font-semibold text-zinc-400 shrink-0">Avaluar</span>
+              <select onchange="diariSetEvalKey(this.value)" ${!evalOptions.length ? 'disabled' : ''} class="flex-1 min-w-0 bg-zinc-50 border border-zinc-200 rounded-xl px-2 py-1.5 font-semibold outline-none disabled:opacity-50">
+                <option value="">${evalOptions.length ? 'No posar notes avui' : 'Tria una SdA per posar notes'}</option>
+                ${evalOptions.map(o => `<option value="${o.key}" ${o.key === evalKey ? 'selected' : ''}>${escapeHtml(o.label)}</option>`).join('')}
+              </select>
+            </div>
+          </div>
+          <input type="text" value="${escapeHtml(session.note || '')}" oninput="diariSetSessionField('note', this.value)" placeholder="Què s'ha treballat avui? (opcional)" class="w-full bg-zinc-50 border border-zinc-200 rounded-xl px-3 py-2 text-xs outline-none focus:ring-2 focus:ring-zinc-900 focus:bg-white">
+          <div class="flex flex-wrap items-center justify-between gap-2 text-[11px]">
+            <span class="text-zinc-400"><i class="fa-regular fa-lightbulb mr-1"></i>Tothom és present per defecte: marca només les excepcions. ${evalKey ? 'Nota: escriu 0–4 o e/n/a/p i prem Enter.' : ''}</span>
+            <div class="flex gap-1.5">
+              <button onclick="diariAllPresent()" class="px-2.5 py-1.5 rounded-lg bg-zinc-100 hover:bg-zinc-200 font-semibold text-zinc-700">Tothom present</button>
+              <button onclick="diariDeleteSession()" class="px-2.5 py-1.5 rounded-lg text-zinc-400 hover:text-rose-600 hover:bg-rose-50 font-semibold">Eliminar sessió</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="bg-white border border-zinc-200 rounded-2xl shadow-card overflow-hidden divide-y divide-zinc-100">
+          ${rows || '<div class="p-6 text-center text-xs text-zinc-400">Cap alumne coincideix amb la cerca.</div>'}
+        </div>
+        ${renderSessionHistory(group, getSessionSortedDates(group))}`;
+
+      if (window.appState.diariOpenObs !== null && window.appState.diariOpenObs !== undefined) {
+        const ta = document.getElementById(`diariObs_${window.appState.diariOpenObs}`);
+        if (ta) ta.value = getRecord(session, window.appState.diariOpenObs).obs || '';
+      }
+    }
+
+    window.updateRecordReset = function(stId) {
+      updateRecord(stId, rec => { rec.pos = 0; rec.neg = 0; });
+    };
+
+    function renderSessionHistory(group, dates) {
+      if (!dates.length) return '';
+      const sessions = getGroupSessions(group);
+      const n = (group.students || []).length;
+      const items = dates.slice().reverse().slice(0, 30).map(d => {
+        const s = sessions[d];
+        let f = 0, np = 0;
+        (group.students || []).forEach(st => {
+          const r = getRecord(s, st.id);
+          if (r.a === 'F' || r.a === 'FJ') f++;
+          else if (r.p) np++;
+        });
+        const sda = (group.sdas || []).find(x => x.id === s.sdaId);
+        const active = d === window.appState.diariDate;
+        return `
+          <button onclick="setDiariDate('${d}')" class="w-full flex items-center gap-3 px-3 py-2 text-left text-xs transition ${active ? 'bg-zinc-900 text-white' : 'hover:bg-zinc-50'}">
+            <span class="font-mono font-bold w-20 shrink-0">${isoToDate(d).toLocaleDateString('ca-ES', { day: '2-digit', month: '2-digit' })} <span class="font-normal ${active ? 'text-zinc-400' : 'text-zinc-400'}">${isoToDate(d).toLocaleDateString('ca-ES', { weekday: 'short' })}</span></span>
+            <span class="flex-1 min-w-0 truncate ${active ? 'text-zinc-200' : 'text-zinc-600'}">${escapeHtml(s.note || (sda ? sda.title : 'Sessió'))}</span>
+            <span class="font-mono text-[10px] shrink-0 ${f ? (active ? 'text-rose-300' : 'text-rose-600') : (active ? 'text-zinc-400' : 'text-zinc-400')}">${f} falt.</span>
+            <span class="font-mono text-[10px] shrink-0 w-14 text-right ${np ? (active ? 'text-amber-300' : 'text-amber-600') : (active ? 'text-zinc-400' : 'text-zinc-400')}">${np} no pr.</span>
+          </button>`;
+      }).join('');
+      return `
+        <div class="space-y-2">
+          <h4 class="text-xs font-bold text-zinc-500 uppercase tracking-wider">Sessions registrades <span class="font-mono font-normal text-zinc-400">${dates.length}</span></h4>
+          <div class="bg-white border border-zinc-200 rounded-2xl overflow-hidden divide-y divide-zinc-100">${items}</div>
+        </div>`;
+    }
+
+    function renderDiariSummary(group) {
+      const panel = document.getElementById('diariSummaryPanel');
+      const trim = window.appState.currentTrim;
+      const min = getMinPractice(group);
+      const nSessions = getSessionSortedDates(group, trim).length;
+      let students = group.students || [];
+      if (window.appState.searchFilter) students = students.filter(s => s.name.toLowerCase().includes(window.appState.searchFilter));
+
+      const rows = students.map((st, idx) => {
+        const s = getStudentAttendanceStats(group, st.id, trim);
+        const penalized = isStudentPenalized(group, trim, st.id);
+        const below = s.pct !== null && s.pct < min;
+        const lastObs = s.obs.slice(-2).reverse();
+        return `
+          <tr class="hover:bg-zinc-50/70 align-top ${below ? 'bg-rose-50/30' : ''}">
+            <td class="py-2 px-3 text-center text-zinc-400 font-mono">${idx + 1}</td>
+            <td class="py-2 px-3 font-semibold text-zinc-800 min-w-[170px]">${escapeHtml(st.name)}
+              ${penalized ? '<span class="ml-1 text-[9px] font-bold text-rose-700 bg-rose-50 border border-rose-200 px-1 rounded">&lt; Mínim</span>' : ''}
+              ${lastObs.map(o => `<div class="text-[10px] font-normal text-zinc-500 mt-0.5"><span class="font-mono text-zinc-400">${isoToDate(o.date).toLocaleDateString('ca-ES', { day: '2-digit', month: '2-digit' })}</span> ${escapeHtml(o.text)}</div>`).join('')}
+            </td>
+            <td class="py-2 px-2 text-center font-mono ${s.F ? 'text-rose-600 font-bold' : 'text-zinc-400'}">${s.F}</td>
+            <td class="py-2 px-2 text-center font-mono text-zinc-500">${s.FJ}</td>
+            <td class="py-2 px-2 text-center font-mono ${s.R ? 'text-amber-600 font-bold' : 'text-zinc-400'}">${s.R}</td>
+            <td class="py-2 px-2 text-center font-mono ${s.NP ? 'text-rose-600 font-bold' : 'text-zinc-400'}">${s.NP}</td>
+            <td class="py-2 px-2 text-center font-mono ${s.SR ? 'text-orange-600 font-bold' : 'text-zinc-400'}">${s.SR}</td>
+            <td class="py-2 px-2 text-center font-mono text-zinc-500">${s.L}</td>
+            <td class="py-2 px-2 text-center">${practicePctBadge(s.pct, min)}</td>
+            <td class="py-2 px-2 text-center font-mono text-xs"><span class="text-emerald-600 font-bold">+${s.pos}</span> <span class="text-rose-600 font-bold">−${s.neg}</span></td>
+          </tr>`;
+      }).join('');
+
+      panel.innerHTML = `
+        <div class="bg-white border border-zinc-200/90 rounded-2xl p-3 shadow-subtle flex flex-wrap items-center justify-between gap-3 text-xs">
+          <div>
+            <div class="font-bold text-zinc-900">${trim}${['', 'r', 'n', 'r'][trim]} trimestre · ${nSessions} sessions registrades</div>
+            <div class="text-[11px] text-zinc-400">Les faltes justificades i les lesions no compten per al % de pràctica.</div>
+          </div>
+          <div class="flex flex-wrap items-center gap-2">
+            <label class="flex items-center gap-1.5 font-semibold text-zinc-600">Mínim de pràctica
+              <input type="number" min="0" max="100" value="${min}" onchange="setMinPractice(this.value)" class="w-14 text-center font-mono font-bold bg-white border border-zinc-300 rounded-lg p-1 outline-none focus:ring-2 focus:ring-zinc-900">%
+            </label>
+            <button onclick="applyPracticeMinimum(${trim})" class="inline-flex items-center gap-1.5 bg-zinc-900 hover:bg-zinc-800 text-white font-semibold px-3 py-1.5 rounded-xl"><i class="fa-solid fa-person-running text-[10px]"></i> Aplicar a la nota del trimestre</button>
+          </div>
+        </div>
+        <div class="bg-white border border-zinc-200 rounded-2xl shadow-card overflow-hidden">
+          <div class="overflow-x-auto">
+            <table class="w-full text-left text-xs">
+              <thead class="bg-zinc-900 text-white text-[11px]">
+                <tr>
+                  <th class="py-2.5 px-3 w-10 text-center">#</th>
+                  <th class="py-2.5 px-3">Alumne/a · últimes observacions</th>
+                  <th class="py-2.5 px-2 text-center" title="Faltes">F</th>
+                  <th class="py-2.5 px-2 text-center" title="Faltes justificades">FJ</th>
+                  <th class="py-2.5 px-2 text-center" title="Retards">R</th>
+                  <th class="py-2.5 px-2 text-center" title="No fa pràctica">No pr.</th>
+                  <th class="py-2.5 px-2 text-center" title="Sense roba o material">S. roba</th>
+                  <th class="py-2.5 px-2 text-center" title="Lesió o exempció justificada">Lesió</th>
+                  <th class="py-2.5 px-2 text-center">% Pràctica</th>
+                  <th class="py-2.5 px-2 text-center">Actitud</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-zinc-100">${rows || '<tr><td colspan="10" class="p-6 text-center text-zinc-400">Cap alumne.</td></tr>'}</tbody>
+            </table>
+          </div>
+        </div>`;
+    }
 
     // ================== BIBLIOTECA DE SdAs ==================
 
@@ -2675,6 +3360,7 @@
       if (window.appState.currentView === 'sda') renderSdaGrid();
       if (window.appState.currentView === 'trim') renderTrimView();
       if (window.appState.currentView === 'final') renderFinalView();
+      if (window.appState.currentView === 'diari') renderDiariView();
     };
 
     // ================== GRAELLA SdA ==================
@@ -2981,18 +3667,19 @@
       if (window.appState.currentView === 'sda') renderSdaGrid();
       if (window.appState.currentView === 'trim') renderTrimView();
       if (window.appState.currentView === 'stats') renderStatsView();
+      if (window.appState.currentView === 'diari') renderDiariView();
     };
 
     window.switchView = function(view) {
       window.appState.currentView = view;
-      ['sda', 'roster', 'trim', 'final', 'report', 'stats'].forEach(id => {
+      ['sda', 'diari', 'roster', 'trim', 'final', 'report', 'stats'].forEach(id => {
         const btn = document.getElementById(`tabBtn${id.charAt(0).toUpperCase() + id.slice(1)}`);
         const sec = document.getElementById(`view${id.charAt(0).toUpperCase() + id.slice(1)}`);
         if (id === view) {
-          if (btn) btn.className = "px-3 py-1 rounded-md text-zinc-900 bg-zinc-100 transition";
+          if (btn) btn.className = "whitespace-nowrap shrink-0 px-3 py-1 rounded-md text-zinc-900 bg-zinc-100 transition";
           if (sec) sec.classList.remove('hidden');
         } else {
-          if (btn) btn.className = "px-3 py-1 rounded-md text-zinc-500 hover:text-zinc-900 hover:bg-zinc-50 transition";
+          if (btn) btn.className = "whitespace-nowrap shrink-0 px-3 py-1 rounded-md text-zinc-500 hover:text-zinc-900 hover:bg-zinc-50 transition";
           if (sec) sec.classList.add('hidden');
         }
       });
@@ -3002,6 +3689,7 @@
       if (view === 'final') renderFinalView();
       if (view === 'report') renderIndividualReport();
       if (view === 'stats') initStatsView();
+      if (view === 'diari') renderDiariView();
     };
 
     // ================== ALUMNAT ==================
@@ -3515,6 +4203,16 @@
       }
 
       let rowsHtml = '';
+      const hasDiari = getSessionSortedDates(curGroup, window.appState.currentTrim).length > 0;
+      const practiceBar = document.getElementById('trimPracticeBar');
+      if (practiceBar) {
+        practiceBar.innerHTML = hasDiari ? `
+          <div class="bg-white border border-zinc-200/90 rounded-2xl p-3 shadow-subtle flex flex-wrap items-center justify-between gap-2 text-xs">
+            <span class="text-zinc-600"><i class="fa-solid fa-clipboard-check text-zinc-400 mr-1.5"></i>El diari té <b>${getSessionSortedDates(curGroup, window.appState.currentTrim).length} sessions</b> aquest trimestre. Mínim de pràctica: <b>${getMinPractice(curGroup)}%</b>.</span>
+            <button onclick="applyPracticeMinimum(${window.appState.currentTrim})" class="inline-flex items-center gap-1.5 bg-zinc-900 hover:bg-zinc-800 text-white font-semibold px-3 py-1.5 rounded-xl"><i class="fa-solid fa-person-running text-[10px]"></i> Marcar "&lt; Mínim" segons el diari</button>
+          </div>` : '';
+      }
+
       students.forEach((st, idx) => {
         const isPenalized = !!curGroup.attendancePenalty?.[window.appState.currentTrim]?.[st.id];
 
@@ -3526,6 +4224,7 @@
               <i class="fa-solid fa-person-running text-[10px]"></i>
               <span>${isPenalized ? '< Mínim' : 'Assolit'}</span>
             </button>
+            ${hasDiari ? `<div class="mt-1" title="% de pràctica segons el diari">${practicePctBadge(getStudentAttendanceStats(curGroup, st.id, window.appState.currentTrim).pct, getMinPractice(curGroup))}</div>` : ''}
           </td>`;
 
         trimSdas.forEach(sda => {
@@ -3758,6 +4457,34 @@
       sel.innerHTML = curGroup.students.map(s => `<option value="${s.id}">${s.name}</option>`).join('');
     }
 
+    function renderReportAttendance(group, st) {
+      const box = document.getElementById('repAttendance');
+      if (!getSessionSortedDates(group).length) { box.innerHTML = ''; return; }
+      const min = getMinPractice(group);
+      const rows = [1, 2, 3].map(t => ({ label: `${t}${['', 'r', 'n', 'r'][t]} trim.`, s: getStudentAttendanceStats(group, st.id, t) }))
+        .filter(r => r.s.total > 0);
+      rows.push({ label: 'Curs', s: getStudentAttendanceStats(group, st.id, null), total: true });
+      box.innerHTML = `
+        <div class="border-t border-zinc-200 pt-5 space-y-2">
+          <h4 class="text-xs font-bold text-zinc-700 uppercase tracking-wider">Assistència, pràctica i actitud</h4>
+          <div class="overflow-x-auto">
+            <table class="w-full text-xs text-center border border-zinc-200 rounded-xl overflow-hidden">
+              <thead class="bg-zinc-50 text-zinc-500 text-[11px]">
+                <tr><th class="py-1.5 px-2 text-left">Període</th><th class="px-2">Sessions</th><th class="px-2">Faltes</th><th class="px-2">Just.</th><th class="px-2">Retards</th><th class="px-2">No pràctica</th><th class="px-2">Sense roba</th><th class="px-2">% Pràctica</th><th class="px-2">Actitud</th></tr>
+              </thead>
+              <tbody class="divide-y divide-zinc-100 font-mono">
+                ${rows.map(r => `<tr class="${r.total ? 'font-bold bg-zinc-50/60' : ''}">
+                  <td class="py-1.5 px-2 text-left font-sans font-semibold text-zinc-700">${r.label}</td>
+                  <td>${r.s.total}</td><td>${r.s.F}</td><td>${r.s.FJ}</td><td>${r.s.R}</td><td>${r.s.NP}</td><td>${r.s.SR}</td>
+                  <td>${practicePctBadge(r.s.pct, min)}</td>
+                  <td><span class="text-emerald-600">+${r.s.pos}</span> <span class="text-rose-600">−${r.s.neg}</span></td>
+                </tr>`).join('')}
+              </tbody>
+            </table>
+          </div>
+        </div>`;
+    }
+
     window.renderIndividualReport = function() {
       const curGroup = getCurrentGroup();
       const sel = document.getElementById('reportStudentSelect');
@@ -3767,6 +4494,7 @@
       renderObservationPhraseBank();
 
       if (!st) {
+        document.getElementById('repAttendance').innerHTML = '';
         document.getElementById('repStudentName').textContent = "Cap alumne seleccionat";
         document.getElementById('repDetailsContainer').innerHTML = "";
         document.getElementById('repObsTextarea').value = '';
@@ -3776,6 +4504,7 @@
       }
 
       document.getElementById('repStudentName').textContent = st.name;
+      renderReportAttendance(curGroup, st);
       document.getElementById('repGroupLabel').textContent = `Classe: ${curGroup.name} | Matèria: Educació Física | LOMLOE`;
       document.getElementById('repSchoolYear').textContent = getSchoolYearLabel();
       document.getElementById('repIssueDate').textContent = new Date().toLocaleDateString('ca-ES');
@@ -4696,6 +5425,7 @@
         ...OFFICIAL_CES.flatMap(ce => [`${ce.id} ${ce.short}`, `Nivell ${ce.id}`]),
         `Nota final (${methodLabel})`, 'Nivell final',
         'Mín. pràctica no assolit',
+        'Sessions', 'Faltes', 'Faltes just.', 'Retards', 'No fa pràctica', 'Sense roba', '% pràctica (curs)', 'Actitud +', 'Actitud -',
         'Observacions',
         'Grup'
       ];
@@ -4714,6 +5444,8 @@
           ...ces.flatMap(s => [num(s), lvlCode(s)]),
           num(finalScore), lvlCode(finalScore),
           txt(penalizedTrims),
+          ...(() => { const a = getStudentAttendanceStats(curGroup, st.id, null);
+            return [a.total, a.F, a.FJ, a.R, a.NP, a.SR, num(a.pct), a.pos, a.neg]; })(),
           txt(obs.replace(/\r?\n/g, ' ')),
           txt(curGroup.name)
         ].join(';');
