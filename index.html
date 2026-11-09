@@ -7,7 +7,7 @@
   
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700;800&family=Roboto+Slab:wght@600;700;800&display=swap" rel="stylesheet">
   
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
@@ -49,6 +49,103 @@
       .no-print { display: none !important; }
       body { background: white !important; }
       .print-page-break { page-break-before: always; }
+    }
+
+    /* ===== Editor SdA ===== */
+    .sda-tab-btn { padding: 6px 10px; border-radius: 10px; color: #71717a; white-space: nowrap; transition: all .15s; }
+    .sda-tab-btn:hover { color: #18181b; background: #f4f4f5; }
+    .sda-tab-btn.active { color: #fff; background: #18181b; }
+    .plan-textarea { width: 100%; border: 1px solid #e4e4e7; border-radius: 12px; padding: 8px 10px; font-size: 12px; outline: none; resize: vertical; background: #fff; }
+    .plan-textarea:focus { box-shadow: 0 0 0 2px #18181b; }
+    .plan-chip { display: inline-flex; align-items: center; cursor: pointer; user-select: none; }
+    .plan-chip input { display: none; }
+    .plan-chip span { padding: 4px 10px; border-radius: 999px; border: 1px solid #e4e4e7; background: #fff; color: #52525b; font-weight: 600; font-size: 11px; transition: all .15s; }
+    .plan-chip:hover span { border-color: #a1a1aa; }
+    .plan-chip input:checked + span { background: #18181b; color: #fff; border-color: #18181b; }
+
+    /* ===== Fitxa imprimible (pòster) ===== */
+    #sdaPosterOverlay.hidden { display: none; }
+    #sdaPosterOverlay { position: fixed; inset: 0; z-index: 70; overflow: auto; background: #27272a; padding: 64px 16px 32px; }
+    .poster-toolbar { position: fixed; top: 0; left: 0; right: 0; z-index: 71; display: flex; flex-wrap: wrap; gap: 8px; align-items: center; padding: 10px 16px; background: rgba(24,24,27,.95); color: #e4e4e7; font-size: 12px; font-family: 'Plus Jakarta Sans', sans-serif; }
+    .pt-group { display: flex; align-items: center; gap: 4px; padding-left: 8px; border-left: 1px solid #3f3f46; }
+    .pt-group > span { color: #a1a1aa; margin-right: 2px; }
+    .pt-btn { padding: 6px 10px; border-radius: 10px; background: #3f3f46; color: #f4f4f5; font-weight: 600; display: inline-flex; align-items: center; gap: 6px; }
+    .pt-btn:hover { background: #52525b; }
+    .pt-opt.active { background: #f4f4f5; color: #18181b; }
+    .pt-primary { background: #e0a93b; color: #111827; margin-left: auto; }
+    .pt-primary:hover { background: #f0bb4f; }
+    #sdaPosterScaler { margin: 0 auto; width: fit-content; }
+
+    .sp { --bg:#0e1834; --card:#132045; --card2:#18264f; --border:#2b3d70; --text:#dbe3f5; --muted:#93a0c2; --head:#ffffff; --gold:#e8ad3c; --gold-soft:rgba(232,173,60,.15); --pill-bg:rgba(255,255,255,.04);
+      width: 1400px; background: var(--bg); color: var(--text); font-family: 'Plus Jakarta Sans', system-ui, sans-serif; font-size: 11px; line-height: 1.45; padding: 30px 34px 22px; box-sizing: border-box; }
+    .sp.sp-light { --bg:#ffffff; --card:#f7f8fc; --card2:#eef1f8; --border:#d5dbea; --text:#25304d; --muted:#5f6b8a; --head:#0e1834; --gold:#b9781a; --gold-soft:rgba(185,120,26,.12); --pill-bg:#fff; }
+    .sp * { box-sizing: border-box; }
+    .sp b, .sp strong { color: var(--head); font-weight: 700; }
+    .sp-serif { font-family: 'Roboto Slab', Georgia, serif; }
+    .sp-head { display: flex; align-items: center; gap: 22px; }
+    .sp-logo { width: 62px; height: 62px; border-radius: 999px; border: 2.5px solid var(--gold); color: var(--gold); display: flex; align-items: center; justify-content: center; font-family: 'Roboto Slab', serif; font-weight: 800; font-size: 20px; flex-shrink: 0; }
+    .sp-kicker { color: var(--gold); font-weight: 800; letter-spacing: .22em; font-size: 10.5px; text-transform: uppercase; }
+    .sp-title { font-family: 'Roboto Slab', Georgia, serif; font-weight: 800; color: var(--head); font-size: 34px; line-height: 1.08; margin: 4px 0 2px; }
+    .sp-title .gold { color: var(--gold); }
+    .sp-sub { color: var(--muted); font-size: 12.5px; margin-top: 6px; }
+    .sp-badges { margin-left: auto; display: flex; flex-direction: column; gap: 8px; align-items: flex-end; flex-shrink: 0; }
+    .sp-badge { border: 1.5px solid var(--gold); color: var(--head); border-radius: 999px; padding: 4px 14px; font-weight: 700; font-size: 11px; white-space: nowrap; }
+    .sp-rule { height: 2px; background: var(--gold); opacity: .85; margin: 18px 0 14px; }
+    .sp-flow { display: flex; align-items: stretch; gap: 0; margin-bottom: 14px; }
+    .sp-flow-step { flex: 1; background: var(--card); border: 1px solid var(--border); border-radius: 6px; padding: 9px 10px; text-align: center; }
+    .sp-flow-step .t { color: var(--gold); font-weight: 800; letter-spacing: .14em; font-size: 9.5px; text-transform: uppercase; }
+    .sp-flow-step .d { color: var(--head); font-size: 11px; margin-top: 2px; }
+    .sp-flow-arrow { color: var(--gold); font-weight: 900; display: flex; align-items: center; padding: 0 9px; font-size: 16px; }
+    .sp-grid4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; }
+    .sp-grid3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-top: 14px; }
+    .sp-card { background: var(--card); border: 1px solid var(--border); border-radius: 8px; padding: 14px 15px; }
+    .sp-card.gold { border-color: var(--gold); border-width: 1.5px; }
+    .sp-num { color: var(--gold); font-weight: 800; font-size: 10px; letter-spacing: .1em; }
+    .sp-h2 { font-family: 'Roboto Slab', Georgia, serif; font-weight: 800; color: var(--head); font-size: 17px; line-height: 1.2; margin: 2px 0 10px; padding-bottom: 8px; border-bottom: 1px solid var(--border); }
+    .sp-card.gold .sp-h2 { color: var(--gold); border-bottom: none; padding-bottom: 0; }
+    .sp-h3 { color: var(--gold); font-weight: 800; letter-spacing: .12em; font-size: 9.5px; text-transform: uppercase; margin: 12px 0 5px; }
+    .sp-h3:first-of-type { margin-top: 4px; }
+    .sp-list { list-style: none; margin: 0; padding: 0; }
+    .sp-list li { position: relative; padding-left: 13px; margin-bottom: 4px; }
+    .sp-list li::before { content: '◆'; color: var(--gold); position: absolute; left: 0; top: 0; font-size: 7.5px; line-height: 16px; }
+    .sp-pills { display: flex; flex-wrap: wrap; gap: 5px; }
+    .sp-pill { border: 1px solid var(--border); background: var(--pill-bg); border-radius: 999px; padding: 2px 9px; font-size: 10px; color: var(--text); }
+    .sp-pill.g { border-color: var(--gold); color: var(--head); }
+    .sp-stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; margin: 4px 0 6px; }
+    .sp-stat { border: 1px solid var(--border); border-radius: 6px; text-align: center; padding: 6px 2px; }
+    .sp-stat .n { font-family: 'Roboto Slab', serif; color: var(--gold); font-size: 21px; font-weight: 800; line-height: 1.1; }
+    .sp-stat .l { color: var(--muted); font-size: 9px; }
+    .sp-ce { border-left: 3px solid var(--gold); padding: 3px 0 3px 9px; margin: 9px 0; }
+    .sp-ce-name { color: var(--head); font-weight: 700; font-size: 11.5px; display: flex; justify-content: space-between; gap: 6px; }
+    .sp-ce-name .w { color: var(--gold); font-family: 'JetBrains Mono', monospace; font-size: 10.5px; flex-shrink: 0; }
+    .sp-ce .crit { font-size: 10.3px; margin-top: 3px; }
+    .sp-ce .crit .c { color: var(--gold); font-weight: 800; font-family: 'JetBrains Mono', monospace; margin-right: 3px; }
+    .sp-oa { font-size: 10.3px; color: var(--muted); margin-top: 3px; }
+    .sp-bar { display: flex; height: 22px; border-radius: 5px; overflow: hidden; margin: 4px 0 6px; }
+    .sp-bar div { display: flex; align-items: center; justify-content: center; color: #0e1834; font-weight: 800; font-size: 10px; white-space: nowrap; overflow: hidden; }
+    .sp-legend { font-size: 10px; color: var(--muted); }
+    .sp-phase { margin-bottom: 9px; }
+    .sp-phase-name { display: flex; justify-content: space-between; color: var(--head); font-weight: 800; font-size: 11px; border-bottom: 1px dashed var(--border); padding-bottom: 2px; margin-bottom: 4px; }
+    .sp-phase-name span:last-child { color: var(--gold); font-family: 'JetBrains Mono', monospace; font-size: 10px; }
+    .sp-act-title { color: var(--head); font-weight: 700; }
+    .sp-act-ses { color: var(--gold); font-family: 'JetBrains Mono', monospace; font-size: 9.5px; margin-left: 3px; }
+    .sp-q-kicker { color: var(--muted); font-weight: 800; letter-spacing: .14em; font-size: 9.5px; text-transform: uppercase; }
+    .sp-equation { margin-top: 14px; background: var(--gold); border-radius: 6px; padding: 12px 20px; display: flex; justify-content: center; align-items: center; gap: 14px; flex-wrap: wrap; font-family: 'Roboto Slab', Georgia, serif; font-weight: 800; color: #0e1834; font-size: 16px; }
+    .sp-equation .res { background: #0e1834; color: var(--gold); border-radius: 4px; padding: 5px 14px; }
+    .sp-light .sp-equation .res { color: #f4c66b; }
+    .sp-foot { display: flex; justify-content: space-between; color: var(--muted); font-size: 10px; margin-top: 14px; padding-top: 8px; border-top: 1px solid var(--border); }
+    .sp-foot b { color: var(--gold); }
+    .sp-empty { color: var(--muted); font-style: italic; }
+
+    @media print {
+      * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+      body.poster-mode > *:not(#sdaPosterOverlay) { display: none !important; }
+      body.poster-mode #sdaPosterOverlay { position: static !important; padding: 0 !important; background: none !important; overflow: visible !important; }
+      body.poster-mode .poster-toolbar { display: none !important; }
+      body.poster-mode #sdaPosterScaler { zoom: 1 !important; margin: 0 auto !important; }
+      body.poster-mode .sp { zoom: var(--print-zoom, 0.8); }
+      body.poster-mode.poster-dark, html.poster-dark { background: #0e1834 !important; }
+      .sp-ce, .sp-phase { break-inside: avoid; }
     }
   </style>
 </head>
@@ -139,16 +236,17 @@
             <button onclick="openThresholdsModal()" title="Configurar Escala LOMLOE" class="p-1.5 text-zinc-500 hover:text-zinc-900 hover:bg-zinc-100 rounded-lg text-xs transition">
               <i class="fa-solid fa-sliders"></i>
             </button>
-            <button onclick="resetDefaultData()" title="Restablir dades originals" class="p-1.5 text-zinc-400 hover:text-zinc-900 hover:bg-zinc-100 rounded-lg text-xs transition">
-              <i class="fa-solid fa-rotate-left"></i>
-            </button>
             <button onclick="exportBackupJSON()" title="Còpia de Seguretat (JSON)" class="p-1.5 text-zinc-400 hover:text-zinc-900 hover:bg-zinc-100 rounded-lg text-xs transition">
-              <i class="fa-solid fa-arrow-down-to-line"></i>
+              <i class="fa-solid fa-download"></i>
             </button>
             <label title="Restaurar fitxer JSON" class="p-1.5 text-zinc-400 hover:text-zinc-900 hover:bg-zinc-100 rounded-lg text-xs transition cursor-pointer">
-              <i class="fa-solid fa-arrow-up-from-line"></i>
+              <i class="fa-solid fa-upload"></i>
               <input type="file" id="backupFileInput" accept=".json" onchange="importBackupJSON(event)" class="hidden">
             </label>
+            <span class="w-px h-4 bg-zinc-200 mx-1"></span>
+            <button onclick="resetDefaultData()" title="Esborrar-ho tot i carregar dades de mostra" class="p-1.5 text-zinc-300 hover:text-rose-600 hover:bg-rose-50 rounded-lg text-xs transition">
+              <i class="fa-solid fa-trash-arrow-up"></i>
+            </button>
           </div>
         </div>
       </div>
@@ -238,6 +336,9 @@
             </select>
             <button onclick="openSdaModal(false)" class="inline-flex items-center gap-1 text-xs font-semibold text-zinc-600 hover:text-zinc-900 bg-zinc-100 hover:bg-zinc-200/70 px-2.5 py-1.5 rounded-xl transition">
               <i class="fa-solid fa-pen text-[10px]"></i> Editar SdA
+            </button>
+            <button onclick="openSdaPoster()" class="inline-flex items-center gap-1.5 text-xs font-semibold text-amber-900 bg-amber-100 hover:bg-amber-200 border border-amber-300 px-2.5 py-1.5 rounded-xl transition" title="Veure i imprimir la fitxa de la SdA">
+              <i class="fa-solid fa-print text-[10px]"></i> Fitxa SdA
             </button>
             <button onclick="deleteSdaFromToolbar()" class="inline-flex items-center gap-1 text-xs font-semibold text-rose-600 hover:text-rose-700 bg-rose-50 hover:bg-rose-100 border border-rose-200 px-2.5 py-1.5 rounded-xl transition" title="Eliminar aquesta SdA">
               <i class="fa-regular fa-trash-can text-[10px]"></i> Eliminar
@@ -408,7 +509,7 @@
             <div>
               <span class="text-[11px] font-bold text-zinc-400 uppercase tracking-wider">Informe Competencial LOMLOE</span>
               <h3 id="repStudentName" class="text-2xl font-black text-zinc-900 tracking-tight mt-0.5">Alumne</h3>
-              <p id="repGroupLabel" class="text-xs text-zinc-500 mt-1 font-medium">1r i 2n d'ESO | Matèria: Educació Física</p>
+              <p id="repGroupLabel" class="text-xs text-zinc-500 mt-1 font-medium">Matèria: Educació Física</p>
             </div>
             <div class="text-right">
               <span class="text-[11px] font-semibold text-zinc-400 block uppercase">Nivell Global</span>
@@ -425,14 +526,20 @@
 
           <!-- Observacions pedagògiques -->
           <div class="border-t border-zinc-200 pt-5 space-y-2">
-            <h4 class="text-xs font-bold text-zinc-700 uppercase tracking-wider">Observacions i Valoració Docent</h4>
-            <div class="p-4 bg-zinc-50 border border-zinc-200 rounded-2xl min-h-[90px] text-xs text-zinc-600 italic">
-              L'alumne/a demostra una progressió favorable en l'adquisició dels hàbits d'activitat física, presa de decisions estratègiques i autonomia motriu, complint amb els criteris d'avaluació establerts.
+            <div class="flex items-center justify-between">
+              <h4 class="text-xs font-bold text-zinc-700 uppercase tracking-wider">Observacions i Valoració Docent</h4>
+              <span id="repObsSavedMsg" class="no-print text-[10px] font-semibold text-emerald-600 opacity-0 transition">Desat ✓</span>
             </div>
+            <div class="no-print space-y-1.5">
+              <span class="text-[10px] font-semibold text-zinc-400 uppercase tracking-wider">Frases ràpides (clica per afegir):</span>
+              <div id="repObsPhraseBank" class="flex flex-wrap gap-1.5"></div>
+            </div>
+            <textarea id="repObsTextarea" rows="4" oninput="onObservationInput()" placeholder="Escriu aquí les observacions d'aquest alumne/a..." class="no-print w-full p-3 bg-zinc-50 border border-zinc-200 rounded-2xl text-xs text-zinc-700 outline-none focus:ring-2 focus:ring-zinc-900 focus:bg-white resize-y"></textarea>
+            <div id="repObsPrint" class="hidden print:block p-4 border border-zinc-200 rounded-2xl min-h-[90px] text-xs text-zinc-700 whitespace-pre-wrap"></div>
           </div>
 
           <div class="hidden print:flex justify-between items-center pt-10 text-xs border-t border-zinc-200 text-zinc-500">
-            <div>Data d'emissió: <span class="font-mono text-zinc-700">Curs 2026-2027</span></div>
+            <div>Curs: <span id="repSchoolYear" class="font-mono text-zinc-700">--</span> · Data d'emissió: <span id="repIssueDate" class="font-mono text-zinc-700">--</span></div>
             <div>Signatura del docent d'Educació Física</div>
           </div>
         </div>
@@ -693,65 +800,281 @@
     </div>
   </div>
 
-  <!-- MODAL CONFIGURAR SdA (AMB SELECTOR DE TRIMESTRE I BOTÓ D'ELIMINAR) -->
-  <div id="sdaModal" class="fixed inset-0 bg-zinc-950/40 backdrop-blur-xs z-50 flex items-center justify-center p-4 hidden no-print">
-    <div class="bg-white rounded-3xl shadow-card max-w-3xl w-full max-h-[90vh] flex flex-col overflow-hidden border border-zinc-200">
+  <!-- MODAL CONFIGURAR SdA (PROGRAMACIÓ COMPLETA + QUALIFICACIÓ) -->
+  <div id="sdaModal" class="fixed inset-0 bg-zinc-950/40 backdrop-blur-xs z-50 flex items-center justify-center p-2 sm:p-4 hidden no-print">
+    <div class="bg-white rounded-3xl shadow-card max-w-5xl w-full max-h-[94vh] flex flex-col overflow-hidden border border-zinc-200">
       <div class="px-6 py-4 bg-zinc-900 text-white flex justify-between items-center">
-        <h3 class="text-sm font-bold">Configuració de la Situació d'Aprenentatge (SdA)</h3>
+        <h3 class="text-sm font-bold flex items-center gap-2">
+          <i class="fa-regular fa-folder-open text-zinc-400"></i> Situació d'Aprenentatge (SdA)
+        </h3>
         <button onclick="closeSdaModal()" class="text-zinc-400 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
       </div>
-      <div class="p-6 overflow-y-auto space-y-5 flex-1 text-xs">
-        <div class="grid grid-cols-1 sm:grid-cols-4 gap-3">
-          <div class="sm:col-span-2">
-            <label class="block font-semibold text-zinc-700 mb-1">Títol de la SdA</label>
-            <input type="text" id="modalSdaTitle" class="w-full text-sm border border-zinc-200 rounded-xl p-2.5 outline-none font-semibold">
-          </div>
-          <div>
-            <label class="block font-semibold text-zinc-700 mb-1">Trimestre</label>
-            <select id="modalSdaTrim" class="w-full text-sm border border-zinc-200 rounded-xl p-2.5 outline-none font-semibold bg-white cursor-pointer focus:ring-2 focus:ring-zinc-900">
-              <option value="1">1r Trimestre</option>
-              <option value="2">2n Trimestre</option>
-              <option value="3">3r Trimestre</option>
-            </select>
-          </div>
-          <div>
-            <label class="block font-semibold text-zinc-800 mb-1">Pes al Trimestre (%)</label>
-            <input type="number" id="modalSdaTrimWeight" value="50" min="0" max="100" class="w-full text-sm border border-zinc-200 rounded-xl p-2.5 text-center font-mono font-bold">
-          </div>
-        </div>
 
-        <div class="bg-zinc-50 border border-zinc-200 p-3.5 rounded-2xl space-y-2">
-          <div class="flex justify-between items-center">
-            <span class="font-bold text-zinc-700 text-[11px] uppercase tracking-wider">A quins grups s'aplica?</span>
-            <div class="flex gap-2 text-[11px]">
-              <button type="button" onclick="selectAllModalGroups(true)" class="font-semibold text-zinc-900 hover:underline">Totes</button>
-              <span class="text-zinc-300">|</span>
-              <button type="button" onclick="selectAllModalGroups(false)" class="font-semibold text-zinc-400 hover:underline">Cap</button>
+      <nav id="sdaModalTabs" class="flex items-center gap-1 px-3 py-2 bg-zinc-50 border-b border-zinc-200 overflow-x-auto text-[11px] font-semibold">
+        <button type="button" data-tab="basics" onclick="switchSdaModalTab('basics')" class="sda-tab-btn">1 · Dades bàsiques</button>
+        <button type="button" data-tab="context" onclick="switchSdaModalTab('context')" class="sda-tab-btn">2 · Context i justificació</button>
+        <button type="button" data-tab="ces" onclick="switchSdaModalTab('ces')" class="sda-tab-btn">3 · Competències i qualificació</button>
+        <button type="button" data-tab="sabers" onclick="switchSdaModalTab('sabers')" class="sda-tab-btn">4 · Sabers i metodologia</button>
+        <button type="button" data-tab="activitats" onclick="switchSdaModalTab('activitats')" class="sda-tab-btn">5 · Seqüència d'activitats</button>
+        <button type="button" data-tab="avaluacio" onclick="switchSdaModalTab('avaluacio')" class="sda-tab-btn">6 · DUA, avaluació i producte</button>
+      </nav>
+
+      <div class="p-5 sm:p-6 overflow-y-auto flex-1 text-xs">
+
+        <!-- PESTANYA 1: DADES BÀSIQUES -->
+        <div data-panel="basics" class="sda-tab-panel space-y-5">
+          <div class="grid grid-cols-1 sm:grid-cols-4 gap-3">
+            <div class="sm:col-span-2">
+              <label class="block font-semibold text-zinc-700 mb-1">Títol de la SdA</label>
+              <input type="text" id="modalSdaTitle" placeholder="Ex: Ens posem en forma!" class="w-full text-sm border border-zinc-200 rounded-xl p-2.5 outline-none font-semibold focus:ring-2 focus:ring-zinc-900">
+            </div>
+            <div>
+              <label class="block font-semibold text-zinc-700 mb-1">Trimestre</label>
+              <select id="modalSdaTrim" class="w-full text-sm border border-zinc-200 rounded-xl p-2.5 outline-none font-semibold bg-white cursor-pointer focus:ring-2 focus:ring-zinc-900">
+                <option value="1">1r Trimestre</option>
+                <option value="2">2n Trimestre</option>
+                <option value="3">3r Trimestre</option>
+              </select>
+            </div>
+            <div>
+              <label class="block font-semibold text-zinc-800 mb-1">Pes al Trimestre (%)</label>
+              <input type="number" id="modalSdaTrimWeight" value="50" min="0" max="100" class="w-full text-sm border border-zinc-200 rounded-xl p-2.5 text-center font-mono font-bold">
             </div>
           </div>
-          <div id="modalTargetGroupsContainer" class="flex flex-wrap gap-2 pt-1"></div>
+
+          <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+            <div>
+              <label class="block font-semibold text-zinc-700 mb-1">Nivell / curs</label>
+              <input type="text" id="plan_nivell" placeholder="Ex: 1r ESO" class="w-full border border-zinc-200 rounded-xl p-2.5 outline-none font-medium focus:ring-2 focus:ring-zinc-900">
+            </div>
+            <div>
+              <label class="block font-semibold text-zinc-700 mb-1">Nº de sessions</label>
+              <input type="number" id="plan_sessions" min="0" placeholder="Auto" class="w-full border border-zinc-200 rounded-xl p-2.5 text-center font-mono font-bold outline-none focus:ring-2 focus:ring-zinc-900">
+            </div>
+            <div>
+              <label class="block font-semibold text-zinc-700 mb-1">Data d'inici</label>
+              <input type="date" id="plan_dataInici" class="w-full border border-zinc-200 rounded-xl p-2 outline-none focus:ring-2 focus:ring-zinc-900">
+            </div>
+            <div>
+              <label class="block font-semibold text-zinc-700 mb-1">Data de final</label>
+              <input type="date" id="plan_dataFi" class="w-full border border-zinc-200 rounded-xl p-2 outline-none focus:ring-2 focus:ring-zinc-900">
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div>
+              <label class="block font-semibold text-zinc-700 mb-1">Centre <span class="font-normal text-zinc-400">(comú a totes les SdAs)</span></label>
+              <input type="text" id="settings_centre" class="w-full border border-zinc-200 rounded-xl p-2.5 outline-none font-medium focus:ring-2 focus:ring-zinc-900">
+            </div>
+            <div>
+              <label class="block font-semibold text-zinc-700 mb-1">Docent(s)</label>
+              <input type="text" id="plan_docents" placeholder="Ex: Departament d'Educació Física" class="w-full border border-zinc-200 rounded-xl p-2.5 outline-none font-medium focus:ring-2 focus:ring-zinc-900">
+            </div>
+          </div>
+
+          <div class="bg-zinc-50 border border-zinc-200 p-3.5 rounded-2xl space-y-2">
+            <div class="flex justify-between items-center">
+              <span class="font-bold text-zinc-700 text-[11px] uppercase tracking-wider">A quins grups s'aplica?</span>
+              <div class="flex gap-2 text-[11px]">
+                <button type="button" onclick="selectAllModalGroups(true)" class="font-semibold text-zinc-900 hover:underline">Totes</button>
+                <span class="text-zinc-300">|</span>
+                <button type="button" onclick="selectAllModalGroups(false)" class="font-semibold text-zinc-400 hover:underline">Cap</button>
+              </div>
+            </div>
+            <div id="modalTargetGroupsContainer" class="flex flex-wrap gap-2 pt-1"></div>
+          </div>
+          <p class="text-[11px] text-zinc-400"><i class="fa-regular fa-lightbulb mr-1"></i>Als camps de text llargs, <b>cada línia es converteix en un punt</b> a la fitxa impresa. Pots posar <b>**paraules**</b> entre dos asteriscs per destacar-les.</p>
         </div>
 
-        <div class="border-t border-zinc-200 pt-4 space-y-3">
+        <!-- PESTANYA 2: CONTEXT I JUSTIFICACIÓ -->
+        <div data-panel="context" class="sda-tab-panel space-y-4 hidden">
+          <div>
+            <label class="block font-semibold text-zinc-700 mb-1">Pregunta generadora / lema <span class="font-normal text-zinc-400">(surt destacada a la capçalera)</span></label>
+            <input type="text" id="plan_pregunta" placeholder="Ex: Com puc estar en forma tota la vida?" class="w-full border border-zinc-200 rounded-xl p-2.5 outline-none font-medium focus:ring-2 focus:ring-zinc-900">
+          </div>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+            <div>
+              <label class="block font-semibold text-zinc-700 mb-1">Situació / repte inicial</label>
+              <textarea id="plan_repte" rows="5" placeholder="Descriu la situació o el repte que es planteja a l'alumnat..." class="plan-textarea"></textarea>
+            </div>
+            <div>
+              <label class="block font-semibold text-zinc-700 mb-1">Justificació</label>
+              <textarea id="plan_justificacio" rows="5" placeholder="Per què aquesta SdA? Relació amb el currículum, l'entorn i els interessos de l'alumnat..." class="plan-textarea"></textarea>
+            </div>
+          </div>
+          <div>
+            <label class="block font-semibold text-zinc-700 mb-1">Context del grup-classe</label>
+            <textarea id="plan_contextGrup" rows="3" placeholder="Característiques del grup, coneixements previs, necessitats..." class="plan-textarea"></textarea>
+          </div>
+          <div>
+            <span class="block font-semibold text-zinc-700 mb-1.5">Vectors del currículum</span>
+            <div id="plan_chips_vectors" class="flex flex-wrap gap-1.5"></div>
+          </div>
+          <div>
+            <span class="block font-semibold text-zinc-700 mb-1.5">Competències clau</span>
+            <div id="plan_chips_clau" class="flex flex-wrap gap-1.5"></div>
+          </div>
+          <div>
+            <span class="block font-semibold text-zinc-700 mb-1.5">ODS relacionats <span class="font-normal text-zinc-400">(opcional)</span></span>
+            <div id="plan_chips_ods" class="flex flex-wrap gap-1.5"></div>
+          </div>
+        </div>
+
+        <!-- PESTANYA 3: COMPETÈNCIES I QUALIFICACIÓ -->
+        <div data-panel="ces" class="sda-tab-panel space-y-3 hidden">
           <div class="flex items-center justify-between">
-            <span class="font-bold text-zinc-800 text-[11px] uppercase tracking-wider">Competències Específiques &amp; OAs</span>
+            <span class="font-bold text-zinc-800 text-[11px] uppercase tracking-wider">Competències Específiques, criteris i OAs</span>
             <span id="modalWeightSumBadge" class="text-xs font-mono font-bold px-2 py-0.5 rounded-md">Total: 0%</span>
           </div>
+          <p class="text-[11px] text-zinc-400">Aquesta part defineix com es qualifica la SdA a la graella i també surt a la fitxa impresa.</p>
           <div id="modalCeCardsContainer" class="space-y-3.5"></div>
         </div>
+
+        <!-- PESTANYA 4: SABERS I METODOLOGIA -->
+        <div data-panel="sabers" class="sda-tab-panel space-y-5 hidden">
+          <div>
+            <div class="flex items-center justify-between mb-1.5">
+              <span class="font-semibold text-zinc-700">Sabers <span class="font-normal text-zinc-400">(per blocs del Decret 175/2022)</span></span>
+              <button type="button" onclick="addPlanSaberRow()" class="text-zinc-900 hover:text-zinc-600 font-semibold flex items-center gap-1"><i class="fa-solid fa-plus text-[10px]"></i> Afegir saber</button>
+            </div>
+            <div id="plan_sabersList" class="space-y-2"></div>
+          </div>
+          <div>
+            <span class="block font-semibold text-zinc-700 mb-1.5">Metodologies</span>
+            <div id="plan_chips_metodologies" class="flex flex-wrap gap-1.5"></div>
+          </div>
+          <div>
+            <span class="block font-semibold text-zinc-700 mb-1.5">Agrupaments</span>
+            <div id="plan_chips_agrupaments" class="flex flex-wrap gap-1.5"></div>
+          </div>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+            <div>
+              <label class="block font-semibold text-zinc-700 mb-1">Estratègies metodològiques</label>
+              <textarea id="plan_metodologiaText" rows="4" placeholder="Com s'organitzaran les sessions, rols, feedback..." class="plan-textarea"></textarea>
+            </div>
+            <div>
+              <label class="block font-semibold text-zinc-700 mb-1">Connexions interdisciplinars</label>
+              <textarea id="plan_connexions" rows="4" placeholder="Ex: Biologia (aparell locomotor), Tecnologia (apps de registre)..." class="plan-textarea"></textarea>
+            </div>
+          </div>
+        </div>
+
+        <!-- PESTANYA 5: SEQÜÈNCIA D'ACTIVITATS -->
+        <div data-panel="activitats" class="sda-tab-panel space-y-3 hidden">
+          <div class="flex items-center justify-between">
+            <span class="font-semibold text-zinc-700">Activitats per fases</span>
+            <div class="flex items-center gap-3">
+              <span id="plan_activitatsSessionsBadge" class="text-[11px] font-mono font-bold text-zinc-500 bg-zinc-100 px-2 py-0.5 rounded-md">0 sessions</span>
+              <button type="button" onclick="addPlanActivityRow()" class="text-zinc-900 hover:text-zinc-600 font-semibold flex items-center gap-1"><i class="fa-solid fa-plus text-[10px]"></i> Afegir activitat</button>
+            </div>
+          </div>
+          <div id="plan_activitatsList" class="space-y-2.5"></div>
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-3 pt-2 border-t border-zinc-100">
+            <div>
+              <label class="block font-semibold text-zinc-700 mb-1">Materials</label>
+              <textarea id="plan_materials" rows="3" placeholder="Pilotes, cons, pulsòmetres..." class="plan-textarea"></textarea>
+            </div>
+            <div>
+              <label class="block font-semibold text-zinc-700 mb-1">Espais</label>
+              <textarea id="plan_espais" rows="3" placeholder="Gimnàs, pista exterior, parc..." class="plan-textarea"></textarea>
+            </div>
+            <div>
+              <label class="block font-semibold text-zinc-700 mb-1">Recursos digitals</label>
+              <textarea id="plan_tic" rows="3" placeholder="Classroom, Kahoot, apps..." class="plan-textarea"></textarea>
+            </div>
+          </div>
+        </div>
+
+        <!-- PESTANYA 6: DUA, AVALUACIÓ I PRODUCTE -->
+        <div data-panel="avaluacio" class="sda-tab-panel space-y-4 hidden">
+          <div>
+            <span class="block font-bold text-zinc-800 text-[11px] uppercase tracking-wider mb-2">Disseny Universal per a l'Aprenentatge (DUA)</span>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+              <div>
+                <label class="block font-semibold text-zinc-700 mb-1">Implicació <span class="font-normal text-zinc-400">(el perquè)</span></label>
+                <textarea id="plan_duaImplicacio" rows="4" placeholder="Motivació, elecció, reptes graduats..." class="plan-textarea"></textarea>
+              </div>
+              <div>
+                <label class="block font-semibold text-zinc-700 mb-1">Representació <span class="font-normal text-zinc-400">(el què)</span></label>
+                <textarea id="plan_duaRepresentacio" rows="4" placeholder="Demostracions, vídeos, fitxes visuals..." class="plan-textarea"></textarea>
+              </div>
+              <div>
+                <label class="block font-semibold text-zinc-700 mb-1">Acció i expressió <span class="font-normal text-zinc-400">(el com)</span></label>
+                <textarea id="plan_duaAccio" rows="4" placeholder="Diferents maneres de demostrar l'aprenentatge..." class="plan-textarea"></textarea>
+              </div>
+            </div>
+          </div>
+          <div>
+            <label class="block font-semibold text-zinc-700 mb-1">Mesures i suports addicionals / intensius</label>
+            <textarea id="plan_mesures" rows="2" placeholder="Adaptacions per a alumnat amb NESE, exempcions parcials, rols alternatius..." class="plan-textarea"></textarea>
+          </div>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2 border-t border-zinc-100">
+            <div class="space-y-3">
+              <div>
+                <span class="block font-semibold text-zinc-700 mb-1.5">Instruments d'avaluació</span>
+                <div id="plan_chips_instruments" class="flex flex-wrap gap-1.5"></div>
+              </div>
+              <div>
+                <span class="block font-semibold text-zinc-700 mb-1.5">Moments i agents</span>
+                <div id="plan_chips_moments" class="flex flex-wrap gap-1.5"></div>
+              </div>
+              <div>
+                <label class="block font-semibold text-zinc-700 mb-1">Notes sobre l'avaluació</label>
+                <textarea id="plan_avaluacioText" rows="3" placeholder="Com i quan s'aplicaran els instruments..." class="plan-textarea"></textarea>
+              </div>
+            </div>
+            <div class="space-y-3">
+              <div>
+                <label class="block font-semibold text-zinc-700 mb-1">Producte final <span class="font-normal text-zinc-400">(títol curt)</span></label>
+                <input type="text" id="plan_producteTitol" placeholder="Ex: El meu pla d'entrenament" class="w-full border border-zinc-200 rounded-xl p-2.5 outline-none font-semibold focus:ring-2 focus:ring-zinc-900">
+              </div>
+              <div>
+                <label class="block font-semibold text-zinc-700 mb-1">Descripció del producte final</label>
+                <textarea id="plan_producte" rows="6" placeholder="Què elaborarà o demostrarà l'alumnat al final de la SdA..." class="plan-textarea"></textarea>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
-      <div class="px-6 py-3.5 bg-zinc-50 border-t border-zinc-200 flex justify-between items-center text-xs">
+
+      <div class="px-4 sm:px-6 py-3.5 bg-zinc-50 border-t border-zinc-200 flex flex-wrap gap-2 justify-between items-center text-xs">
         <div>
           <button type="button" id="modalDeleteSdaBtn" onclick="deleteCurrentEditingSda()" class="hidden px-3.5 py-1.5 bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 rounded-xl font-semibold transition">
             <i class="fa-regular fa-trash-can mr-1.5"></i> Eliminar SdA
           </button>
         </div>
-        <div class="flex gap-2">
+        <div class="flex flex-wrap gap-2">
           <button type="button" onclick="closeSdaModal()" class="px-3.5 py-1.5 border border-zinc-300 rounded-xl font-semibold text-zinc-600">Cancel·lar</button>
-          <button type="button" onclick="saveSdaFromModal()" class="px-4 py-1.5 bg-zinc-900 hover:bg-zinc-800 text-white rounded-xl font-semibold">Desar SdA</button>
+          <button type="button" onclick="saveSdaFromModal()" class="px-4 py-1.5 bg-white hover:bg-zinc-100 border border-zinc-300 text-zinc-900 rounded-xl font-semibold">Desar</button>
+          <button type="button" onclick="saveSdaFromModal(true)" class="px-4 py-1.5 bg-zinc-900 hover:bg-zinc-800 text-white rounded-xl font-semibold"><i class="fa-solid fa-print mr-1.5 text-[10px]"></i>Desar i veure fitxa</button>
         </div>
       </div>
     </div>
+  </div>
+
+  <!-- FITXA IMPRIMIBLE DE LA SdA -->
+  <div id="sdaPosterOverlay" class="hidden">
+    <div class="poster-toolbar">
+      <button type="button" onclick="closeSdaPoster()" class="pt-btn"><i class="fa-solid fa-arrow-left"></i> Tornar</button>
+      <div class="pt-group">
+        <span>Tema:</span>
+        <button type="button" data-theme="dark" onclick="setPosterOption('theme','dark')" class="pt-btn pt-opt">Fosc</button>
+        <button type="button" data-theme="light" onclick="setPosterOption('theme','light')" class="pt-btn pt-opt">Clar (estalvi de tinta)</button>
+      </div>
+      <div class="pt-group">
+        <span>Paper:</span>
+        <button type="button" data-paper="A4" onclick="setPosterOption('paper','A4')" class="pt-btn pt-opt">A4</button>
+        <button type="button" data-paper="A3" onclick="setPosterOption('paper','A3')" class="pt-btn pt-opt">A3</button>
+      </div>
+      <div class="pt-group">
+        <span>Encaix:</span>
+        <button type="button" data-fit="width" onclick="setPosterOption('fit','width')" class="pt-btn pt-opt">Amplada (lletra gran)</button>
+        <button type="button" data-fit="page" onclick="setPosterOption('fit','page')" class="pt-btn pt-opt">1 sola pàgina</button>
+      </div>
+      <button type="button" onclick="editSdaFromPoster()" class="pt-btn"><i class="fa-solid fa-pen"></i> Editar</button>
+      <button type="button" onclick="printSdaPoster()" class="pt-btn pt-primary"><i class="fa-solid fa-print"></i> Imprimir / PDF</button>
+    </div>
+    <div id="sdaPosterScaler"><div id="sdaPoster"></div></div>
   </div>
 
   <!-- ================= LÒGICA FIREBASE DIRECTA ================= -->
@@ -846,12 +1169,15 @@
           if (!window.appData.criteriaCatalog) {
             window.appData.criteriaCatalog = JSON.parse(JSON.stringify(DEFAULT_CURRICULAR_CRITERIA_CATALOG));
           }
+          if (window.applyCloudThresholds) window.applyCloudThresholds(window.appData);
           localStorage.setItem('EF_COMPETENCIAL_DATA_V10', JSON.stringify(window.appData));
-          
+
           if (window.appState?.currentScreen === 'class') {
             if (window.appState.currentView === 'sda') window.renderSdaGrid();
             if (window.appState.currentView === 'trim') window.renderTrimView();
             if (window.appState.currentView === 'final') window.renderFinalView();
+            if (window.appState.currentView === 'report') window.renderIndividualReport();
+            if (window.appState.currentView === 'stats') window.renderStatsView();
           } else {
             window.renderHomeScreen();
           }
@@ -867,6 +1193,15 @@
       setCloudStatus('syncing');
       const gradeRef = ref(fbDb, `users/${currentAuthUser}/quadern_data/groups/${groupId}/grades/${sdaId}/${studentId}/${gradeKey}`);
       set(gradeRef, val === null ? null : val)
+        .then(() => setCloudStatus('online'))
+        .catch(() => setCloudStatus('offline'));
+    };
+
+    window.syncObservationToCloud = function(groupId, studentId, text) {
+      if (!currentAuthUser || !fbDb) return;
+      setCloudStatus('syncing');
+      const obsRef = ref(fbDb, `users/${currentAuthUser}/quadern_data/groups/${groupId}/observations/${studentId}`);
+      set(obsRef, text)
         .then(() => setCloudStatus('online'))
         .catch(() => setCloudStatus('offline'));
     };
@@ -977,10 +1312,33 @@
       return { ...DEFAULT_THRESHOLDS };
     }
 
-    function saveThresholdsToStorage(th) {
-      gradeThresholds = th;
-      localStorage.setItem('EF_COMPETENCIAL_THRESHOLDS_V1', JSON.stringify(gradeThresholds));
+    function isValidThresholds(th) {
+      return th && [th.epa, th.as, th.an, th.ae].every(v => typeof v === 'number' && !isNaN(v))
+        && th.epa < th.as && th.as < th.an && th.an < th.ae;
     }
+
+    // Desa els llindars en local i dins de appData (perquè viatgin al núvol amb la resta de dades)
+    function saveThresholdsToStorage(th, syncCloud = false) {
+      gradeThresholds = { epa: th.epa, as: th.as, an: th.an, ae: th.ae };
+      localStorage.setItem('EF_COMPETENCIAL_THRESHOLDS_V1', JSON.stringify(gradeThresholds));
+      if (window.appData) {
+        window.appData.thresholds = { ...gradeThresholds };
+        saveToStorage();
+        if (syncCloud && window.syncWholeAppToCloud) window.syncWholeAppToCloud();
+      }
+    }
+
+    // Cridat des de la sincronització amb Firebase quan arriben dades del núvol
+    window.applyCloudThresholds = function(cloudData) {
+      if (cloudData && isValidThresholds(cloudData.thresholds)) {
+        gradeThresholds = { ...cloudData.thresholds };
+        localStorage.setItem('EF_COMPETENCIAL_THRESHOLDS_V1', JSON.stringify(gradeThresholds));
+      } else if (cloudData) {
+        // El núvol encara no té llindars: hi pugem els d'aquest dispositiu
+        cloudData.thresholds = { ...gradeThresholds };
+        if (window.syncWholeAppToCloud) setTimeout(() => window.syncWholeAppToCloud(), 0);
+      }
+    };
 
     const ORIGINAL_DEMO_DATA = {
       activeGroupId: "1esoA",
@@ -1005,6 +1363,45 @@
               trim: 1,
               title: "HÀBITS SALUDABLES I CONDICIÓ FÍSICA",
               trimWeight: 100,
+              plan: {
+                nivell: "1r ESO", docents: "Departament d'Educació Física", sessions: 10,
+                pregunta: "Com puc cuidar el meu cos i estar en forma tota la vida?",
+                repte: "L'institut organitza una **setmana de la salut** i el nostre grup ha de crear un pla d'activitat física per als companys.\nPer fer-ho, primer hem de conèixer com funciona el nostre cos i quina és la nostra condició física.",
+                justificacio: "Treballa la **CE1** (estil de vida actiu i saludable), eix de tota la matèria.\nPrimer contacte amb l'EF de secundària: cal crear rutines d'escalfament, higiene i esforç.\nConnecta amb la vida quotidiana de l'alumnat: oci actiu, descans i alimentació.",
+                contextGrup: "Grup de 1r d'ESO heterogeni, procedent de diferents escoles.\nNivells de condició física molt diversos i poca experiència en l'autoavaluació.",
+                vectors: ["Aprenentatges competencials", "Benestar emocional", "Perspectiva de gènere"],
+                clau: ["CPSAA · Personal, social i d'aprendre a aprendre", "CMCT · Matemàtica, ciència i tecnologia", "CD · Digital"],
+                ods: ["3 Salut i benestar", "4 Educació de qualitat"],
+                sabers: [
+                  { bloc: "Vida activa i saludable", text: "Escalfament general: objectius, fases i autonomia en la seva execució." },
+                  { bloc: "Vida activa i saludable", text: "Capacitats físiques bàsiques i proves de valoració de la condició física." },
+                  { bloc: "Vida activa i saludable", text: "Hàbits saludables: hidratació, descans i higiene després de l'activitat." },
+                  { bloc: "Valors, autoregulació emocional i interacció social", text: "Esforç, superació personal i respecte a les diferències de nivell." }
+                ],
+                metodologies: ["Aprenentatge cooperatiu", "Treball per estacions", "Ludificació"],
+                agrupaments: ["Individual", "Parelles", "Petit grup"],
+                metodologiaText: "Circuits per estacions amb fitxes visuals i rols rotatius (executant, observador, cronometrador).\nFeedback constant i registre de progrés al quadern.",
+                connexions: "Biologia i Geologia: aparell locomotor i cardiorespiratori.\nMatemàtiques: càlcul de la freqüència cardíaca i gràfiques de progrés.",
+                activitats: [
+                  { fase: "inici", titol: "Què sé del meu cos?", sessions: 1, descripcio: "Pluja d'idees i qüestionari inicial sobre hàbits saludables." },
+                  { fase: "desenvolupament", titol: "Escalfem amb sentit", sessions: 2, descripcio: "Aprenem les fases de l'escalfament i el dirigim en petits grups." },
+                  { fase: "desenvolupament", titol: "Circuit de capacitats", sessions: 3, descripcio: "Estacions de força, resistència, velocitat i flexibilitat amb control de pulsacions." },
+                  { fase: "aplicacio", titol: "Test de condició física", sessions: 2, descripcio: "Valoració per parelles i registre dels resultats." },
+                  { fase: "tancament", titol: "El meu pla saludable", sessions: 2, descripcio: "Disseny i presentació del pla d'activitat física per a la setmana de la salut." }
+                ],
+                materials: "Cons, cordes, matalassos, cronòmetres i fitxes d'estacions.",
+                espais: "Gimnàs i pista exterior.",
+                tic: "Google Classroom per al quadern digital.\nApp de cronòmetre i registre de pulsacions.",
+                duaImplicacio: "L'alumnat tria el nivell de dificultat de cada estació.\nReptes personals de millora, no de comparació.",
+                duaRepresentacio: "Demostració, vídeo curt i fitxa amb pictogrames a cada estació.",
+                duaAccio: "El pla final es pot presentar en pòster, vídeo o exposició oral.",
+                mesures: "Rols alternatius (cronometrador, àrbitre, registrador) per a l'alumnat amb exempció parcial.",
+                instruments: ["Rúbrica", "Test de condició física", "Quadern / diari d'aprenentatge", "Llista de control"],
+                moments: ["Avaluació inicial", "Avaluació formativa", "Autoavaluació", "Coavaluació"],
+                avaluacioText: "Llista de control de l'escalfament a cada sessió.\nRúbrica del pla saludable (producte final) compartida des del primer dia.",
+                producteTitol: "El meu pla saludable",
+                producte: "Cada grup dissenya un **pla d'activitat física setmanal** amb escalfament, activitats i hàbits saludables.\nEl presenten a la classe i el comparteixen per a la setmana de la salut de l'institut."
+              },
               competences: {
                 CE1: {
                   active: true, weight: 70, curricularCriteria: "1.1 - 1.2",
@@ -1036,6 +1433,13 @@
 
     if (!window.appData.criteriaCatalog) {
       window.appData.criteriaCatalog = JSON.parse(JSON.stringify(DEFAULT_CURRICULAR_CRITERIA_CATALOG));
+      saveToStorage();
+    }
+
+    if (isValidThresholds(window.appData.thresholds)) {
+      gradeThresholds = { ...window.appData.thresholds };
+    } else {
+      window.appData.thresholds = { ...gradeThresholds };
       saveToStorage();
     }
 
@@ -1303,7 +1707,8 @@
                   trim: sda.trim,
                   title: sda.title,
                   trimWeight: sda.trimWeight,
-                  competences: JSON.parse(JSON.stringify(sda.competences || {}))
+                  competences: JSON.parse(JSON.stringify(sda.competences || {})),
+                  plan: JSON.parse(JSON.stringify(sda.plan || {}))
                 });
               }
             });
@@ -1454,7 +1859,7 @@
     // ================== CÀLCULS I NIVELLS ==================
 
     function getLevel(val) {
-      if (val === null || val === undefined || isNaN(val) || val <= 0) return { code: "—", badge: "bg-zinc-100 text-zinc-400 ring-zinc-200" };
+      if (val === null || val === undefined || isNaN(val)) return { code: "—", badge: "bg-zinc-100 text-zinc-400 ring-zinc-200" };
       const th = gradeThresholds;
       if (val < th.epa) return { code: "NA", badge: "bg-rose-50 text-rose-700 ring-rose-200 font-bold" };
       if (val < th.as) return { code: "EPA", badge: "bg-amber-50 text-amber-800 ring-amber-200 font-bold" };
@@ -1474,11 +1879,11 @@
       return 'bg-emerald-100/80 text-emerald-950 font-bold';
     }
 
-    function getStudentCeScoreInSda(sda, stId, ceId) {
+    function getStudentCeScoreInSda(sda, stId, ceId, group = null) {
       if (!sda || !sda.competences) return null;
       const conf = sda.competences[ceId];
       if (!conf || !conf.active) return null;
-      const curGroup = getCurrentGroup();
+      const curGroup = group || getCurrentGroup();
       const sdaGrades = (curGroup.grades && curGroup.grades[sda.id] && curGroup.grades[sda.id][stId]) || {};
 
       if (conf.oas && conf.oas.length > 0) {
@@ -1497,7 +1902,7 @@
       }
     }
 
-    function getStudentOverallSdaScore(sda, stId) {
+    function getStudentOverallSdaScore(sda, stId, group = null) {
       if (!sda || !sda.competences) return null;
       let totalWeightedScore = 0;
       let totalActiveWeight = 0;
@@ -1505,7 +1910,7 @@
       OFFICIAL_CES.forEach(ce => {
         const conf = sda.competences[ce.id];
         if (conf && conf.active) {
-          const score = getStudentCeScoreInSda(sda, stId, ce.id);
+          const score = getStudentCeScoreInSda(sda, stId, ce.id, group);
           const weight = conf.weight || 0;
           if (score !== null) {
             totalWeightedScore += score * (weight / 100);
@@ -1518,16 +1923,43 @@
       return (totalWeightedScore * 100) / totalActiveWeight;
     }
 
+    // Nota que s'assigna quan l'alumne no arriba al mínim de pràctica (per sota d'EPA → NA)
+    const PENALTY_SCORE = 0.90;
+
+    function isStudentPenalized(group, trimNum, stId) {
+      return !!(group && group.attendancePenalty && group.attendancePenalty[trimNum] && group.attendancePenalty[trimNum][stId]);
+    }
+
+    // Mitjana d'una CE per a un alumne (tot el curs o un sol trimestre).
+    // Si l'alumne té la penalització de pràctica en un trimestre, les SdAs d'aquell
+    // trimestre compten amb la nota de penalització, igual que al càlcul per trimestres.
+    function getStudentCeAvg(stId, ceId, group = null, trimNum = null) {
+      const curGroup = group || getCurrentGroup();
+      let sum = 0, c = 0;
+      (curGroup.sdas || []).forEach(sda => {
+        if (trimNum !== null && sda.trim !== trimNum) return;
+        const conf = sda.competences && sda.competences[ceId];
+        if (!conf || !conf.active) return;
+        if (isStudentPenalized(curGroup, sda.trim, stId)) {
+          sum += PENALTY_SCORE; c++;
+          return;
+        }
+        const sc = getStudentCeScoreInSda(sda, stId, ceId, curGroup);
+        if (sc !== null) { sum += sc; c++; }
+      });
+      return c > 0 ? sum / c : null;
+    }
+
     function getStudentTrimScoreByTrim(stId, trimNum, group = null) {
       const curGroup = group || getCurrentGroup();
-      if (curGroup.attendancePenalty?.[trimNum]?.[stId]) return 0.90;
+      if (isStudentPenalized(curGroup, trimNum, stId)) return PENALTY_SCORE;
 
       const trimSdas = (curGroup.sdas || []).filter(s => s.trim === trimNum);
       if (trimSdas.length === 0) return null;
 
       let weightedSum = 0, totalWeight = 0;
       trimSdas.forEach(sda => {
-        const sc = getStudentOverallSdaScore(sda, stId);
+        const sc = getStudentOverallSdaScore(sda, stId, curGroup);
         const w = sda.trimWeight !== undefined ? sda.trimWeight : (100 / trimSdas.length);
         if (sc !== null) { weightedSum += sc * (w / 100); totalWeight += w; }
       });
@@ -1557,13 +1989,8 @@
         const weights = curGroup.finalCeWeights || DEFAULT_FINAL_CE_WEIGHTS;
         let totalWeighted = 0, activeWeight = 0;
         OFFICIAL_CES.forEach(ce => {
-          let sum = 0, c = 0;
-          (curGroup.sdas || []).forEach(sda => {
-            const sc = getStudentCeScoreInSda(sda, stId, ce.id);
-            if (sc !== null) { sum += sc; c++; }
-          });
-          if (c > 0) {
-            const avg = sum / c;
+          const avg = getStudentCeAvg(stId, ce.id, curGroup);
+          if (avg !== null) {
             const w = weights[ce.id] !== undefined ? weights[ce.id] : 20;
             totalWeighted += avg * (w / 100);
             activeWeight += w;
@@ -2040,6 +2467,7 @@
 
       if (isNew) {
         window.appState.editingSdaId = null;
+        window.appState.editingSdaOriginal = null;
         sda = { id: 'sda_' + Date.now(), trim: window.appState.currentTrim, title: '', trimWeight: 50, competences: {} };
         if (delBtn) delBtn.classList.add('hidden');
       } else {
@@ -2047,6 +2475,9 @@
         sda = (curGroup.sdas || []).find(s => s.id === sdaId);
         if (!sda) { openSdaModal(true); return; }
         window.appState.editingSdaId = sda.id;
+        // Guardem títol i trimestre originals per trobar la mateixa SdA a les altres classes
+        // (les SdAs importades tenen un identificador diferent a cada classe)
+        window.appState.editingSdaOriginal = { title: sda.title, trim: sda.trim };
         if (delBtn) delBtn.classList.remove('hidden');
       }
 
@@ -2055,6 +2486,8 @@
       document.getElementById('modalSdaTrimWeight').value = sda.trimWeight !== undefined ? sda.trimWeight : 50;
       renderModalTargetGroups(isNew ? null : sda.title, sda.trim || window.appState.currentTrim);
       renderModalCeCards(sda);
+      fillPlanEditor(sda.plan);
+      switchSdaModalTab('basics');
       document.getElementById('sdaModal').classList.remove('hidden');
     };
 
@@ -2207,7 +2640,7 @@
       }
     };
 
-    window.saveSdaFromModal = function() {
+    window.saveSdaFromModal = function(openPosterAfter = false) {
       let targetGroupIds = Array.from(document.querySelectorAll('.target-group-checkbox:checked')).map(cb => cb.value);
       
       if (targetGroupIds.length === 0) {
@@ -2228,6 +2661,8 @@
       const trimWeight = trimWeightInput ? (parseFloat(trimWeightInput.value) || 0) : 50;
       
       const competences = {};
+      const plan = collectPlanFromEditor();
+      const centreChanged = saveCentreFromEditor();
 
       OFFICIAL_CES.forEach(ce => {
         const chk = document.getElementById(`check_${ce.id}`);
@@ -2261,20 +2696,28 @@
       const isEditing = !!window.appState.editingSdaId;
       const sdaIdToUse = isEditing ? window.appState.editingSdaId : ('sda_' + Date.now() + '_' + Math.floor(Math.random() * 1000));
 
+      let activeGroupSdaId = null;
       targetGroupIds.forEach(gId => {
         const grp = window.appData.groups[gId];
         if (!grp) return;
         if (!Array.isArray(grp.sdas)) grp.sdas = [];
 
-        let targetSda = isEditing ? grp.sdas.find(s => s.id === sdaIdToUse) : null;
-        
+        let targetSda = null;
+        if (isEditing) {
+          const orig = window.appState.editingSdaOriginal;
+          targetSda = grp.sdas.find(s => s.id === sdaIdToUse)
+            || (orig ? grp.sdas.find(s => s.title === orig.title && s.trim === orig.trim) : null);
+        }
+
         if (!targetSda) {
+          const alreadyUsed = grp.sdas.some(s => s.id === sdaIdToUse);
           targetSda = {
-            id: sdaIdToUse,
+            id: alreadyUsed ? ('sda_' + Date.now() + '_' + Math.floor(Math.random() * 1000)) : sdaIdToUse,
             trim: selectedTrim,
             title: title,
             trimWeight: trimWeight,
-            competences: JSON.parse(JSON.stringify(competences))
+            competences: JSON.parse(JSON.stringify(competences)),
+            plan: JSON.parse(JSON.stringify(plan))
           };
           grp.sdas.push(targetSda);
         } else {
@@ -2282,12 +2725,15 @@
           targetSda.title = title;
           targetSda.trimWeight = trimWeight;
           targetSda.competences = JSON.parse(JSON.stringify(competences));
+          targetSda.plan = JSON.parse(JSON.stringify(plan));
         }
 
-        if (window.syncGroupEntityToCloud) window.syncGroupEntityToCloud(gId);
+        if (gId === window.appData.activeGroupId) activeGroupSdaId = targetSda.id;
+        if (!centreChanged && window.syncGroupEntityToCloud) window.syncGroupEntityToCloud(gId);
       });
 
       saveToStorage();
+      if (centreChanged && window.syncWholeAppToCloud) window.syncWholeAppToCloud();
       closeSdaModal();
 
       if (window.appState.currentScreen === 'class') {
@@ -2296,12 +2742,21 @@
         } else {
           populateSdaSelect();
           const sel = document.getElementById('sdaSelect');
-          if (sel) sel.value = sdaIdToUse;
+          if (sel) sel.value = activeGroupSdaId || sdaIdToUse;
           renderSdaGrid();
           renderTrimView();
         }
+        if (activeGroupSdaId) {
+          const sel = document.getElementById('sdaSelect');
+          if (sel) { sel.value = activeGroupSdaId; renderSdaGrid(); }
+        }
       } else {
         renderHomeScreen();
+      }
+
+      if (openPosterAfter) {
+        if (activeGroupSdaId) openSdaPoster(activeGroupSdaId);
+        else alert("La SdA s'ha desat, però no s'aplica a la classe oberta. Entra a una de les classes on s'aplica per veure'n la fitxa.");
       }
     };
 
@@ -2439,12 +2894,7 @@
         });
 
         OFFICIAL_CES.forEach(ce => {
-          let ceSum = 0, count = 0;
-          trimSdas.forEach(sda => {
-            const sc = getStudentCeScoreInSda(sda, st.id, ce.id);
-            if (sc !== null) { ceSum += sc; count++; }
-          });
-          const avg = count > 0 ? (ceSum / count) : null;
+          const avg = getStudentCeAvg(st.id, ce.id, curGroup, window.appState.currentTrim);
           const lvl = getLevel(avg);
 
           rowsHtml += `<td class="py-2 px-2 text-center border-l border-zinc-100 bg-zinc-50/30">
@@ -2615,12 +3065,7 @@
           });
         } else {
           OFFICIAL_CES.forEach(ce => {
-            let sum = 0, c = 0;
-            (curGroup.sdas || []).forEach(sda => {
-              const sc = getStudentCeScoreInSda(sda, st.id, ce.id);
-              if (sc !== null) { sum += sc; c++; }
-            });
-            const avg = c > 0 ? sum / c : null;
+            const avg = getStudentCeAvg(st.id, ce.id, curGroup);
             const lvl = getLevel(avg);
 
             html += `<td class="py-2 px-3 text-center border-l border-zinc-100">
@@ -2675,26 +3120,37 @@
       const stId = parseInt(sel.value);
       const st = (curGroup.students || []).find(s => s.id === stId);
 
+      renderObservationPhraseBank();
+
       if (!st) {
         document.getElementById('repStudentName').textContent = "Cap alumne seleccionat";
         document.getElementById('repDetailsContainer').innerHTML = "";
+        document.getElementById('repObsTextarea').value = '';
+        document.getElementById('repObsTextarea').disabled = true;
+        document.getElementById('repObsPrint').textContent = '';
         return;
       }
 
       document.getElementById('repStudentName').textContent = st.name;
-      document.getElementById('repGroupLabel').textContent = `Classe: ${curGroup.name} | 1r i 2n d'ESO | LOMLOE`;
+      document.getElementById('repGroupLabel').textContent = `Classe: ${curGroup.name} | Matèria: Educació Física | LOMLOE`;
+      document.getElementById('repSchoolYear').textContent = getSchoolYearLabel();
+      document.getElementById('repIssueDate').textContent = new Date().toLocaleDateString('ca-ES');
+
+      const obsText = (curGroup.observations && curGroup.observations[st.id]) || '';
+      const obsArea = document.getElementById('repObsTextarea');
+      obsArea.disabled = false;
+      if (document.activeElement !== obsArea || obsArea.dataset.stId !== String(st.id)) {
+        obsArea.value = obsText;
+      }
+      obsArea.dataset.stId = String(st.id);
+      document.getElementById('repObsPrint').textContent = obsText || '—';
 
       let ceValues = [];
       let detailsHtml = '';
 
       OFFICIAL_CES.forEach(ce => {
-        let sum = 0, c = 0;
-        (curGroup.sdas || []).forEach(sda => {
-          const sc = getStudentCeScoreInSda(sda, st.id, ce.id);
-          if (sc !== null) { sum += sc; c++; }
-        });
-        const avg = c > 0 ? sum / c : 0;
-        ceValues.push(avg);
+        const avg = getStudentCeAvg(st.id, ce.id, curGroup);
+        ceValues.push(avg !== null ? avg : 0);
         const lvl = getLevel(avg);
 
         detailsHtml += `
@@ -2704,7 +3160,7 @@
               <div class="text-[11px] text-zinc-400">${ce.short}</div>
             </div>
             <div class="text-right">
-              <span class="font-bold font-mono text-zinc-900 mr-2 text-xs">${avg > 0 ? avg.toFixed(2) : '—'}</span>
+              <span class="font-bold font-mono text-zinc-900 mr-2 text-xs">${avg !== null ? avg.toFixed(2) : '—'}</span>
               <span class="inline-flex items-center text-[10px] font-bold px-2 py-0.5 rounded ring-1 ring-inset ${lvl.badge}">${lvl.code}</span>
             </div>
           </div>
@@ -2750,6 +3206,583 @@
           plugins: { legend: { display: false } }
         }
       });
+    };
+
+
+    // ================== PROGRAMACIÓ COMPLETA DE LA SdA ==================
+
+    const PLAN_VECTORS = [
+      'Aprenentatges competencials', 'Perspectiva de gènere', 'Universalitat del currículum',
+      'Qualitat de l\'educació de les llengües', 'Ciutadania democràtica i consciència global', 'Benestar emocional'
+    ];
+    const PLAN_COMPETENCIES_CLAU = [
+      'CCL · Comunicació lingüística', 'CP · Plurilingüe', 'CMCT · Matemàtica, ciència i tecnologia', 'CD · Digital',
+      'CPSAA · Personal, social i d\'aprendre a aprendre', 'CC · Ciutadana', 'CE · Emprenedora', 'CCEC · Consciència i expressió culturals'
+    ];
+    const PLAN_ODS = [
+      '1 Fi de la pobresa', '2 Fam zero', '3 Salut i benestar', '4 Educació de qualitat', '5 Igualtat de gènere',
+      '6 Aigua neta', '7 Energia neta', '8 Treball digne', '9 Indústria i innovació', '10 Reducció de desigualtats',
+      '11 Ciutats sostenibles', '12 Consum responsable', '13 Acció climàtica', '14 Vida submarina',
+      '15 Vida terrestre', '16 Pau i justícia', '17 Aliances'
+    ];
+    const PLAN_BLOCS_SABERS = [
+      'Vida activa i saludable',
+      'Resolució de problemes en situacions motrius',
+      'Activitats motrius lúdiques, culturals i expressives',
+      'Interacció amb l\'entorn en el temps de lleure',
+      'Valors, autoregulació emocional i interacció social'
+    ];
+    const PLAN_METODOLOGIES = [
+      'Aprenentatge cooperatiu', 'Model d\'Educació Esportiva', 'Comprensió del joc (TGfU)', 'Ludificació',
+      'Descobriment guiat', 'Resolució de problemes', 'Assignació de tasques', 'Treball per estacions',
+      'Aprenentatge servei', 'Educació d\'aventura', 'Classe invertida', 'Responsabilitat personal i social (Hellison)', 'Autoconstrucció de materials'
+    ];
+    const PLAN_AGRUPAMENTS = ['Individual', 'Parelles', 'Petit grup', 'Gran grup', 'Grups heterogenis', 'Equips estables'];
+    const PLAN_INSTRUMENTS = [
+      'Rúbrica', 'Llista de control', 'Observació sistemàtica', 'Registre anecdòtic', 'Prova pràctica', 'Test de condició física',
+      'Quadern / diari d\'aprenentatge', 'Portafoli', 'Qüestionari', 'Vídeo / gravació', 'Diana d\'avaluació', 'Producte final'
+    ];
+    const PLAN_MOMENTS = ['Avaluació inicial', 'Avaluació formativa', 'Avaluació final', 'Autoavaluació', 'Coavaluació', 'Heteroavaluació'];
+    const PLAN_FASES = [
+      { id: 'inici', name: 'Inici', desc: 'Motivació i coneixements previs' },
+      { id: 'desenvolupament', name: 'Desenvolupament', desc: 'Adquisició i pràctica' },
+      { id: 'aplicacio', name: 'Aplicació', desc: 'Transferència i repte' },
+      { id: 'tancament', name: 'Tancament', desc: 'Producte final i reflexió' }
+    ];
+    const PLAN_TEXT_FIELDS = [
+      'nivell', 'dataInici', 'dataFi', 'docents', 'pregunta', 'repte', 'justificacio', 'contextGrup',
+      'metodologiaText', 'connexions', 'materials', 'espais', 'tic',
+      'duaImplicacio', 'duaRepresentacio', 'duaAccio', 'mesures', 'avaluacioText', 'producteTitol', 'producte'
+    ];
+    const PLAN_CHIP_FIELDS = {
+      vectors: PLAN_VECTORS, clau: PLAN_COMPETENCIES_CLAU, ods: PLAN_ODS,
+      metodologies: PLAN_METODOLOGIES, agrupaments: PLAN_AGRUPAMENTS,
+      instruments: PLAN_INSTRUMENTS, moments: PLAN_MOMENTS
+    };
+    const CE_POSTER_COLORS = { CE1: '#7cc4ec', CE2: '#6fd0a8', CE3: '#c4a3f0', CE4: '#f2c46b', CE5: '#f4a0b4' };
+    const DEFAULT_CENTRE = 'Institut Ciutat de Balaguer';
+
+    function getSettings() {
+      if (!window.appData.settings) window.appData.settings = {};
+      if (window.appData.settings.centre === undefined) window.appData.settings.centre = DEFAULT_CENTRE;
+      return window.appData.settings;
+    }
+
+    function escapeHtml(str) {
+      return String(str ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+    }
+
+    // Escapa i converteix **text** en negreta
+    function richText(str) {
+      return escapeHtml(str).replace(/\*\*(.+?)\*\*/g, '<b>$1</b>');
+    }
+
+    // Cada línia d'un camp de text es converteix en un punt de llista
+    function textToBullets(str) {
+      const lines = String(str || '').split(/\r?\n/).map(l => l.replace(/^\s*[-•·*◆]\s+/, '').trim()).filter(Boolean);
+      if (!lines.length) return '';
+      return `<ul class="sp-list">${lines.map(l => `<li>${richText(l)}</li>`).join('')}</ul>`;
+    }
+
+    function formatDateCa(iso) {
+      if (!iso) return '';
+      const d = new Date(iso + 'T00:00:00');
+      return isNaN(d) ? '' : d.toLocaleDateString('ca-ES', { day: 'numeric', month: 'short' });
+    }
+
+    // ---------- Editor (modal) ----------
+
+    window.switchSdaModalTab = function(tab) {
+      document.querySelectorAll('#sdaModalTabs .sda-tab-btn').forEach(b => b.classList.toggle('active', b.dataset.tab === tab));
+      document.querySelectorAll('#sdaModal .sda-tab-panel').forEach(p => p.classList.toggle('hidden', p.dataset.panel !== tab));
+    };
+
+    function renderPlanChips(field, selected) {
+      const cont = document.getElementById(`plan_chips_${field}`);
+      if (!cont) return;
+      const sel = new Set(selected || []);
+      cont.innerHTML = PLAN_CHIP_FIELDS[field].map(opt => `
+        <label class="plan-chip"><input type="checkbox" name="plan_${field}" value="${escapeHtml(opt)}" ${sel.has(opt) ? 'checked' : ''}><span>${escapeHtml(opt)}</span></label>
+      `).join('');
+    }
+
+    window.addPlanSaberRow = function(saber = null) {
+      const list = document.getElementById('plan_sabersList');
+      const row = document.createElement('div');
+      row.className = 'plan-saber-row flex flex-col sm:flex-row gap-2 bg-zinc-50 border border-zinc-200 rounded-xl p-2';
+      row.innerHTML = `
+        <select class="plan-saber-bloc sm:w-64 border border-zinc-200 rounded-lg p-1.5 bg-white text-[11px] font-semibold outline-none">
+          ${PLAN_BLOCS_SABERS.map(b => `<option value="${escapeHtml(b)}">${escapeHtml(b)}</option>`).join('')}
+        </select>
+        <input type="text" class="plan-saber-text flex-1 border border-zinc-200 rounded-lg p-1.5 bg-white text-xs outline-none" placeholder="Ex: Escalfament general i específic, autonomia en la seva execució">
+        <button type="button" onclick="this.parentElement.remove()" class="text-zinc-400 hover:text-rose-500 px-2"><i class="fa-regular fa-trash-can"></i></button>
+      `;
+      list.appendChild(row);
+      if (saber) {
+        row.querySelector('.plan-saber-bloc').value = PLAN_BLOCS_SABERS.includes(saber.bloc) ? saber.bloc : PLAN_BLOCS_SABERS[0];
+        row.querySelector('.plan-saber-text').value = saber.text || '';
+      } else {
+        row.querySelector('.plan-saber-text').focus();
+      }
+    };
+
+    window.addPlanActivityRow = function(act = null) {
+      const list = document.getElementById('plan_activitatsList');
+      const row = document.createElement('div');
+      row.className = 'plan-act-row bg-zinc-50 border border-zinc-200 rounded-xl p-2.5 space-y-2';
+      row.innerHTML = `
+        <div class="flex flex-wrap gap-2 items-center">
+          <select class="plan-act-fase border border-zinc-200 rounded-lg p-1.5 bg-white text-[11px] font-semibold outline-none">
+            ${PLAN_FASES.map(f => `<option value="${f.id}">${f.name}</option>`).join('')}
+          </select>
+          <input type="text" class="plan-act-titol flex-1 min-w-[160px] border border-zinc-200 rounded-lg p-1.5 bg-white text-xs font-semibold outline-none" placeholder="Títol de l'activitat">
+          <div class="flex items-center gap-1">
+            <input type="number" min="0" step="0.5" class="plan-act-ses w-14 border border-zinc-200 rounded-lg p-1.5 bg-white text-xs text-center font-mono font-bold outline-none" oninput="updatePlanSessionsBadge()">
+            <span class="text-[11px] text-zinc-400">ses.</span>
+          </div>
+          <button type="button" onclick="this.closest('.plan-act-row').remove(); updatePlanSessionsBadge();" class="text-zinc-400 hover:text-rose-500 px-1"><i class="fa-regular fa-trash-can"></i></button>
+        </div>
+        <textarea rows="2" class="plan-act-desc plan-textarea" placeholder="Descripció breu: què fan, com s'organitzen..."></textarea>
+      `;
+      list.appendChild(row);
+      if (act) {
+        row.querySelector('.plan-act-fase').value = act.fase || 'desenvolupament';
+        row.querySelector('.plan-act-titol').value = act.titol || '';
+        row.querySelector('.plan-act-ses').value = act.sessions ?? '';
+        row.querySelector('.plan-act-desc').value = act.descripcio || '';
+      } else {
+        const prev = list.querySelectorAll('.plan-act-fase');
+        if (prev.length > 1) row.querySelector('.plan-act-fase').value = prev[prev.length - 2].value;
+        row.querySelector('.plan-act-ses').value = 1;
+        row.querySelector('.plan-act-titol').focus();
+      }
+      updatePlanSessionsBadge();
+    };
+
+    window.updatePlanSessionsBadge = function() {
+      let total = 0;
+      document.querySelectorAll('#plan_activitatsList .plan-act-ses').forEach(i => total += parseFloat(i.value) || 0);
+      const badge = document.getElementById('plan_activitatsSessionsBadge');
+      if (badge) badge.textContent = `${total} sessions`;
+    };
+
+    function fillPlanEditor(plan) {
+      plan = plan || {};
+      PLAN_TEXT_FIELDS.forEach(f => {
+        const el = document.getElementById(`plan_${f}`);
+        if (el) el.value = plan[f] || '';
+      });
+      document.getElementById('plan_sessions').value = plan.sessions ?? '';
+      document.getElementById('settings_centre').value = getSettings().centre || '';
+      Object.keys(PLAN_CHIP_FIELDS).forEach(f => renderPlanChips(f, plan[f]));
+
+      document.getElementById('plan_sabersList').innerHTML = '';
+      (plan.sabers || []).forEach(s => addPlanSaberRow(s));
+
+      document.getElementById('plan_activitatsList').innerHTML = '';
+      (plan.activitats || []).forEach(a => addPlanActivityRow(a));
+      updatePlanSessionsBadge();
+    }
+
+    function collectPlanFromEditor() {
+      const plan = {};
+      PLAN_TEXT_FIELDS.forEach(f => {
+        const el = document.getElementById(`plan_${f}`);
+        plan[f] = el ? el.value.trim() : '';
+      });
+      const ses = parseFloat(document.getElementById('plan_sessions').value);
+      plan.sessions = isNaN(ses) ? null : ses;
+      Object.keys(PLAN_CHIP_FIELDS).forEach(f => {
+        plan[f] = Array.from(document.querySelectorAll(`input[name="plan_${f}"]:checked`)).map(cb => cb.value);
+      });
+      plan.sabers = Array.from(document.querySelectorAll('#plan_sabersList .plan-saber-row'))
+        .map(r => ({ bloc: r.querySelector('.plan-saber-bloc').value, text: r.querySelector('.plan-saber-text').value.trim() }))
+        .filter(s => s.text);
+      plan.activitats = Array.from(document.querySelectorAll('#plan_activitatsList .plan-act-row'))
+        .map(r => ({
+          fase: r.querySelector('.plan-act-fase').value,
+          titol: r.querySelector('.plan-act-titol').value.trim(),
+          sessions: parseFloat(r.querySelector('.plan-act-ses').value) || 0,
+          descripcio: r.querySelector('.plan-act-desc').value.trim()
+        }))
+        .filter(a => a.titol || a.descripcio);
+      return plan;
+    }
+
+    function saveCentreFromEditor() {
+      const el = document.getElementById('settings_centre');
+      if (!el) return;
+      const settings = getSettings();
+      if (settings.centre !== el.value.trim()) {
+        settings.centre = el.value.trim();
+        return true;
+      }
+      return false;
+    }
+
+    // ---------- Fitxa imprimible ----------
+
+    let posterSdaRef = null; // { groupId, sdaId }
+    const posterOptions = loadPosterOptions();
+
+    function loadPosterOptions() {
+      try { return { theme: 'dark', paper: 'A4', fit: 'width', ...JSON.parse(localStorage.getItem('EF_POSTER_OPTIONS') || '{}') }; }
+      catch (e) { return { theme: 'dark', paper: 'A4', fit: 'width' }; }
+    }
+
+    window.openSdaPoster = function(sdaId = null) {
+      const curGroup = getCurrentGroup();
+      const id = sdaId || document.getElementById('sdaSelect').value;
+      const sda = (curGroup.sdas || []).find(s => s.id === id);
+      if (!sda) return alert("No hi ha cap SdA seleccionada.");
+      posterSdaRef = { groupId: window.appData.activeGroupId, sdaId: sda.id };
+      document.getElementById('sdaPosterOverlay').classList.remove('hidden');
+      document.body.classList.add('poster-mode');
+      document.body.style.overflow = 'hidden';
+      renderSdaPoster();
+    };
+
+    window.closeSdaPoster = function() {
+      document.getElementById('sdaPosterOverlay').classList.add('hidden');
+      document.body.classList.remove('poster-mode', 'poster-dark');
+      document.documentElement.classList.remove('poster-dark');
+      document.body.style.overflow = '';
+      posterSdaRef = null;
+    };
+
+    window.editSdaFromPoster = function() {
+      if (!posterSdaRef) return;
+      const sdaId = posterSdaRef.sdaId;
+      closeSdaPoster();
+      document.getElementById('sdaSelect').value = sdaId;
+      openSdaModal(false);
+    };
+
+    window.setPosterOption = function(key, value) {
+      posterOptions[key] = value;
+      try { localStorage.setItem('EF_POSTER_OPTIONS', JSON.stringify(posterOptions)); } catch (e) {}
+      renderSdaPoster();
+    };
+
+    function applyPosterOptions() {
+      document.querySelectorAll('.poster-toolbar [data-theme]').forEach(b => b.classList.toggle('active', b.dataset.theme === posterOptions.theme));
+      document.querySelectorAll('.poster-toolbar [data-paper]').forEach(b => b.classList.toggle('active', b.dataset.paper === posterOptions.paper));
+      document.querySelectorAll('.poster-toolbar [data-fit]').forEach(b => b.classList.toggle('active', b.dataset.fit === posterOptions.fit));
+      const dark = posterOptions.theme === 'dark';
+      document.body.classList.toggle('poster-dark', dark);
+      document.documentElement.classList.toggle('poster-dark', dark);
+
+      // Mida de pàgina i escala d'impressió (el pòster es dissenya a 1400 px d'amplada)
+      const pageWidthPx = posterOptions.paper === 'A3' ? 1587 : 1122;
+      const pageHeightPx = posterOptions.paper === 'A3' ? 1120 : 791;
+      let printZoom = pageWidthPx / 1400;
+      if (posterOptions.fit === 'page') {
+        const sp = document.querySelector('#sdaPoster .sp');
+        const scaler = document.getElementById('sdaPosterScaler');
+        const screenZoom = parseFloat(scaler && scaler.style.zoom) || 1;
+        const posterHeight = sp ? sp.getBoundingClientRect().height / screenZoom : 0;
+        if (posterHeight > 0) printZoom = Math.min(printZoom, (pageHeightPx * 0.96) / posterHeight);
+      }
+      let pageStyle = document.getElementById('posterPageStyle');
+      if (!pageStyle) {
+        pageStyle = document.createElement('style');
+        pageStyle.id = 'posterPageStyle';
+        document.head.appendChild(pageStyle);
+      }
+      pageStyle.textContent = `@media print { @page { size: ${posterOptions.paper} landscape; margin: 0; } body.poster-mode .sp { zoom: ${printZoom.toFixed(3)}; } }`;
+      fitPosterToScreen();
+    }
+
+    function fitPosterToScreen() {
+      const scaler = document.getElementById('sdaPosterScaler');
+      if (!scaler) return;
+      const available = window.innerWidth - 32;
+      scaler.style.zoom = Math.min(1, available / 1400);
+    }
+    window.addEventListener('resize', () => { if (posterSdaRef) fitPosterToScreen(); });
+
+    window.printSdaPoster = function() {
+      applyPosterOptions();
+      setTimeout(() => window.print(), 150);
+    };
+
+    function getSdaTotalSessions(plan) {
+      if (plan.sessions) return plan.sessions;
+      const sum = (plan.activitats || []).reduce((acc, a) => acc + (a.sessions || 0), 0);
+      return sum || null;
+    }
+
+    function getGroupsSharingSda(sda) {
+      return Object.values(window.appData.groups || {})
+        .filter(g => (g.sdas || []).some(s => s.title === sda.title && s.trim === sda.trim))
+        .map(g => g.name);
+    }
+
+    function renderSdaPoster() {
+      if (!posterSdaRef) return;
+      const group = window.appData.groups[posterSdaRef.groupId];
+      const sda = group && (group.sdas || []).find(s => s.id === posterSdaRef.sdaId);
+      if (!sda) { closeSdaPoster(); return; }
+      applyPosterOptions();
+
+      const plan = sda.plan || {};
+      const settings = getSettings();
+      const comps = sda.competences || {};
+      const activeCes = OFFICIAL_CES.filter(ce => comps[ce.id] && comps[ce.id].active);
+      const totalSessions = getSdaTotalSessions(plan);
+      const groupsNames = getGroupsSharingSda(sda);
+      const nCriteris = activeCes.reduce((acc, ce) => acc + (comps[ce.id].curricularCriteria || '').split(/[-,\s]+/).filter(Boolean).length, 0);
+      const nOas = activeCes.reduce((acc, ce) => acc + (comps[ce.id].oas || []).length, 0);
+      const empty = (txt = 'Pendent de completar') => `<p class="sp-empty">${txt}</p>`;
+      const pills = (arr, gold = false) => (arr && arr.length) ? `<div class="sp-pills">${arr.map(p => `<span class="sp-pill ${gold ? 'g' : ''}">${escapeHtml(p)}</span>`).join('')}</div>` : '';
+      const section = (title, body) => body ? `<div class="sp-h3">${title}</div>${body}` : '';
+
+      // Capçalera
+      const titleWords = (sda.title || 'Situació d\'aprenentatge').trim().split(/\s+/);
+      const splitAt = Math.max(1, Math.ceil(titleWords.length / 2));
+      const titleHtml = titleWords.length > 2
+        ? `${escapeHtml(titleWords.slice(0, splitAt).join(' '))} <span class="gold">${escapeHtml(titleWords.slice(splitAt).join(' '))}</span>`
+        : `<span class="gold">${escapeHtml(titleWords.join(' '))}</span>`;
+      const subParts = ['Educació Física', plan.nivell, groupsNames.length ? groupsNames.join(', ') : group.name, settings.centre, 'Decret 175/2022 (LOMLOE)'].filter(Boolean);
+      const dates = [formatDateCa(plan.dataInici), formatDateCa(plan.dataFi)].filter(Boolean).join(' – ');
+
+      // Flux superior
+      const phasesUsed = PLAN_FASES.map(f => {
+        const acts = (plan.activitats || []).filter(a => a.fase === f.id);
+        return { ...f, acts, ses: acts.reduce((a, b) => a + (b.sessions || 0), 0) };
+      });
+      const hasActs = phasesUsed.some(p => p.acts.length);
+      const flowSteps = hasActs
+        ? phasesUsed.filter(p => p.acts.length).map(p => ({ t: p.name, d: `${p.desc} · ${p.ses || '–'} ses.` }))
+        : [
+            { t: 'Repte', d: 'situació inicial' }, { t: 'Competències', d: `${activeCes.length} CE · ${nCriteris} criteris` },
+            { t: 'Sabers', d: `${(plan.sabers || []).length} sabers` }, { t: 'Activitats', d: 'seqüència didàctica' }, { t: 'Producte', d: plan.producteTitol || 'producte final' }
+          ];
+      if (plan.producteTitol && hasActs) flowSteps.push({ t: 'Producte final', d: plan.producteTitol });
+      const flowHtml = flowSteps.map((s, i) => `
+        ${i > 0 ? '<div class="sp-flow-arrow">➜</div>' : ''}
+        <div class="sp-flow-step"><div class="t">${escapeHtml(s.t)}</div><div class="d">${escapeHtml(s.d)}</div></div>
+      `).join('');
+
+      // Columna 1: context
+      const col1 = `
+        <div class="sp-card">
+          <div class="sp-num">1</div>
+          <div class="sp-h2">Context i justificació</div>
+          ${section('Situació / repte', textToBullets(plan.repte))}
+          ${section('Justificació', textToBullets(plan.justificacio))}
+          ${section('Context del grup', textToBullets(plan.contextGrup))}
+          ${section('Vectors del currículum', pills(plan.vectors))}
+          ${section('Competències clau', pills((plan.clau || []).map(c => c.split(' · ')[0]), true))}
+          ${section('ODS', pills((plan.ods || []).map(o => 'ODS ' + o)))}
+          ${!plan.repte && !plan.justificacio && !plan.contextGrup ? empty() : ''}
+        </div>`;
+
+      // Columna 2: competències
+      const totalW = activeCes.reduce((a, ce) => a + (comps[ce.id].weight || 0), 0) || 1;
+      const barHtml = activeCes.length ? `
+        <div class="sp-bar">${activeCes.map(ce => {
+          const w = comps[ce.id].weight || 0;
+          return w > 0 ? `<div style="width:${(w / totalW) * 100}%;background:${CE_POSTER_COLORS[ce.id]}">${ce.id} · ${w}%</div>` : '';
+        }).join('')}</div>
+        <div class="sp-legend">Pes de cada competència en la qualificació de la SdA</div>` : '';
+      const cesHtml = activeCes.map(ce => {
+        const conf = comps[ce.id];
+        const codes = (conf.curricularCriteria || '').split(/[-,\s]+/).filter(Boolean);
+        const catalog = getCriteriaForCe(ce.id);
+        const crits = codes.map(code => {
+          const c = catalog.find(x => x.code === code);
+          const label = c ? c.label.replace(new RegExp('^' + code.replace('.', '\\.') + '\\.?\\s*'), '') : '';
+          return `<div class="crit"><span class="c">${escapeHtml(code)}</span>${escapeHtml(label)}</div>`;
+        }).join('');
+        const oas = (conf.oas || []).filter(o => o.label).map(o => `<div class="sp-oa">◇ ${escapeHtml(o.label)} <span style="color:var(--gold)">(${o.weight || 0}%)</span></div>`).join('');
+        return `<div class="sp-ce" style="border-color:${CE_POSTER_COLORS[ce.id]}">
+          <div class="sp-ce-name"><span>${escapeHtml(ce.name)}</span><span class="w">${conf.weight || 0}%</span></div>
+          ${crits}${oas}
+        </div>`;
+      }).join('');
+      const col2 = `
+        <div class="sp-card">
+          <div class="sp-num">2</div>
+          <div class="sp-h2">Competències i criteris</div>
+          <div class="sp-stats">
+            <div class="sp-stat"><div class="n">${totalSessions ?? '–'}</div><div class="l">sessions</div></div>
+            <div class="sp-stat"><div class="n">${activeCes.length}</div><div class="l">comp. específ.</div></div>
+            <div class="sp-stat"><div class="n">${nCriteris}</div><div class="l">criteris</div></div>
+            <div class="sp-stat"><div class="n">${nOas}</div><div class="l">objectius</div></div>
+          </div>
+          ${barHtml}
+          ${cesHtml || empty('Cap competència activada')}
+        </div>`;
+
+      // Columna 3: sabers i metodologia
+      const sabersByBloc = PLAN_BLOCS_SABERS.map(b => ({ bloc: b, items: (plan.sabers || []).filter(s => s.bloc === b) })).filter(x => x.items.length);
+      const sabersHtml = sabersByBloc.map(x => `
+        <div style="margin-bottom:6px"><div style="color:var(--head);font-weight:700;font-size:10.5px;margin-bottom:2px">${escapeHtml(x.bloc)}</div>
+        <ul class="sp-list">${x.items.map(s => `<li>${richText(s.text)}</li>`).join('')}</ul></div>
+      `).join('');
+      const col3 = `
+        <div class="sp-card">
+          <div class="sp-num">3</div>
+          <div class="sp-h2">Sabers i metodologia</div>
+          ${section('Sabers', sabersHtml || empty())}
+          ${section('Metodologies', pills(plan.metodologies, true))}
+          ${section('Agrupaments', pills(plan.agrupaments))}
+          ${section('Estratègies', textToBullets(plan.metodologiaText))}
+          ${section('Connexions interdisciplinars', textToBullets(plan.connexions))}
+        </div>`;
+
+      // Columna 4: seqüència
+      const seqHtml = phasesUsed.filter(p => p.acts.length).map(p => `
+        <div class="sp-phase">
+          <div class="sp-phase-name"><span>${escapeHtml(p.name)}</span><span>${p.ses ? p.ses + ' ses.' : ''}</span></div>
+          <ul class="sp-list">${p.acts.map(a => `
+            <li><span class="sp-act-title">${richText(a.titol || 'Activitat')}</span>${a.sessions ? `<span class="sp-act-ses">${a.sessions}s</span>` : ''}${a.descripcio ? `<br>${richText(a.descripcio).replace(/\r?\n/g, '<br>')}` : ''}</li>
+          `).join('')}</ul>
+        </div>`).join('');
+      const col4 = `
+        <div class="sp-card">
+          <div class="sp-num">4</div>
+          <div class="sp-h2">Seqüència d'activitats</div>
+          ${seqHtml || empty()}
+          ${section('Materials', textToBullets(plan.materials))}
+          ${section('Espais', textToBullets(plan.espais))}
+          ${section('Recursos digitals', textToBullets(plan.tic))}
+        </div>`;
+
+      // Fila inferior: preguntes clau
+      const duaHtml = [
+        plan.duaImplicacio ? `<div class="sp-h3">Implicació · el perquè</div>${textToBullets(plan.duaImplicacio)}` : '',
+        plan.duaRepresentacio ? `<div class="sp-h3">Representació · el què</div>${textToBullets(plan.duaRepresentacio)}` : '',
+        plan.duaAccio ? `<div class="sp-h3">Acció i expressió · el com</div>${textToBullets(plan.duaAccio)}` : '',
+        plan.mesures ? `<div class="sp-h3">Suports addicionals</div>${textToBullets(plan.mesures)}` : ''
+      ].join('');
+      const th = gradeThresholds;
+      const avaluacioHtml = `
+        ${section('Instruments', pills(plan.instruments, true))}
+        ${section('Moments i agents', pills(plan.moments))}
+        ${textToBullets(plan.avaluacioText) ? `<div style="margin-top:8px">${textToBullets(plan.avaluacioText)}</div>` : ''}
+        <div class="sp-h3">Escala de qualificació</div>
+        <div class="sp-pills">
+          <span class="sp-pill">NA &lt; ${th.epa}</span><span class="sp-pill">EPA ≥ ${th.epa}</span>
+          <span class="sp-pill">AS ≥ ${th.as}</span><span class="sp-pill">AN ≥ ${th.an}</span><span class="sp-pill g">AE ≥ ${th.ae}</span>
+        </div>`;
+      const bottom = `
+        <div class="sp-grid3">
+          <div class="sp-card gold">
+            <div class="sp-q-kicker">Pregunta 1</div>
+            <div class="sp-h2">Com aprendrà tothom? (DUA)</div>
+            ${duaHtml || empty()}
+          </div>
+          <div class="sp-card gold">
+            <div class="sp-q-kicker">Pregunta 2</div>
+            <div class="sp-h2">Com sabrem que ho han après?</div>
+            ${avaluacioHtml}
+          </div>
+          <div class="sp-card gold">
+            <div class="sp-q-kicker">Pregunta 3</div>
+            <div class="sp-h2">Què produirà l'alumnat?</div>
+            ${plan.producteTitol ? `<div style="font-family:'Roboto Slab',serif;font-weight:800;color:var(--head);font-size:14px;margin-bottom:6px">${escapeHtml(plan.producteTitol)}</div>` : ''}
+            ${textToBullets(plan.producte) || (plan.producteTitol ? '' : empty())}
+          </div>
+        </div>`;
+
+      const mainMethod = (plan.metodologies || [])[0] || 'Metodologia activa';
+      const equation = `
+        <div class="sp-equation">
+          <span>Repte</span><span>+</span><span>${escapeHtml(mainMethod)}</span><span>+</span><span>DUA</span><span>+</span><span>Sabers</span><span>=</span>
+          <span class="res">${escapeHtml(plan.producteTitol || 'Aprenentatge competencial')}</span>
+        </div>`;
+
+      document.getElementById('sdaPoster').innerHTML = `
+        <div class="sp ${posterOptions.theme === 'light' ? 'sp-light' : ''}">
+          <div class="sp-head">
+            <div class="sp-logo">EF</div>
+            <div style="min-width:0">
+              <div class="sp-kicker">Situació d'aprenentatge · Educació Física</div>
+              <div class="sp-title">${titleHtml}</div>
+              ${plan.pregunta ? `<div class="sp-serif" style="color:var(--head);font-size:17px;font-weight:700;margin-top:4px">${escapeHtml(plan.pregunta)}</div>` : ''}
+              <div class="sp-sub">${subParts.map(escapeHtml).join(' · ')}</div>
+            </div>
+            <div class="sp-badges">
+              <span class="sp-badge">${['','1r','2n','3r'][sda.trim] || sda.trim} trimestre${dates ? ' · ' + escapeHtml(dates) : ''}</span>
+              <span class="sp-badge">${totalSessions ? totalSessions + ' sessions' : 'Sessions per definir'}</span>
+            </div>
+          </div>
+          <div class="sp-rule"></div>
+          <div class="sp-flow">${flowHtml}</div>
+          <div class="sp-grid4">${col1}${col2}${col3}${col4}</div>
+          ${bottom}
+          ${equation}
+          <div class="sp-foot">
+            <span>${escapeHtml(settings.centre || '')}${settings.centre ? ' · ' : ''}Curs ${getSchoolYearLabel()} · Programació de la SdA</span>
+            <span>${plan.docents ? `<b>Docent:</b> ${escapeHtml(plan.docents)}` : ''}</span>
+          </div>
+        </div>`;
+      applyPosterOptions();
+    }
+
+    // ================== OBSERVACIONS DEL BUTLLETÍ ==================
+
+    const OBSERVATION_PHRASES = [
+      "Mostra una actitud molt positiva i participativa a les sessions.",
+      "Ha millorat clarament la seva condició física al llarg del trimestre.",
+      "Treballa bé en equip i respecta els companys i les normes.",
+      "Cal que porti el material i la roba adequada de manera regular.",
+      "Ha de millorar la constància i l'esforç a les activitats pràctiques.",
+      "Hauria de participar més activament a les sessions pràctiques.",
+      "Demostra autonomia i bona presa de decisions en situacions de joc.",
+      "Es recomana mantenir l'activitat física fora de l'horari escolar."
+    ];
+
+    function getSchoolYearLabel() {
+      const now = new Date();
+      const y = now.getFullYear();
+      // A partir de setembre comença un curs nou
+      return now.getMonth() >= 8 ? `${y}-${y + 1}` : `${y - 1}-${y}`;
+    }
+
+    function renderObservationPhraseBank() {
+      const bank = document.getElementById('repObsPhraseBank');
+      if (!bank || bank.dataset.ready) return;
+      bank.innerHTML = OBSERVATION_PHRASES.map((p, i) => `
+        <button type="button" onclick="appendObservationPhrase(${i})" class="text-[10px] font-medium text-zinc-600 bg-white border border-zinc-200 hover:border-zinc-400 hover:text-zinc-900 px-2 py-1 rounded-lg transition text-left">
+          + ${p}
+        </button>
+      `).join('');
+      bank.dataset.ready = '1';
+    }
+
+    window.appendObservationPhrase = function(idx) {
+      const area = document.getElementById('repObsTextarea');
+      if (area.disabled) return;
+      const phrase = OBSERVATION_PHRASES[idx];
+      area.value = area.value.trim() ? `${area.value.trim()} ${phrase}` : phrase;
+      area.focus();
+      onObservationInput();
+    };
+
+    let observationSaveTimer = null;
+    window.onObservationInput = function() {
+      const area = document.getElementById('repObsTextarea');
+      const stId = parseInt(area.dataset.stId);
+      if (isNaN(stId)) return;
+      const groupId = window.appData.activeGroupId;
+      const curGroup = getCurrentGroup();
+      if (!curGroup.observations) curGroup.observations = {};
+      const text = area.value;
+      if (text.trim()) curGroup.observations[stId] = text;
+      else delete curGroup.observations[stId];
+      document.getElementById('repObsPrint').textContent = text || '—';
+      saveToStorage();
+
+      clearTimeout(observationSaveTimer);
+      observationSaveTimer = setTimeout(() => {
+        if (window.syncObservationToCloud) window.syncObservationToCloud(groupId, stId, text.trim() ? text : null);
+        const msg = document.getElementById('repObsSavedMsg');
+        msg.classList.remove('opacity-0');
+        setTimeout(() => msg.classList.add('opacity-0'), 1200);
+      }, 800);
     };
 
     window.initStatsView = function() {
@@ -2827,32 +3860,23 @@
           if (scopeType === 'sda') {
             const sda = (grp.sdas || []).find(s => s.title === selectedSdaTitle && s.trim === window.appState.currentTrim);
             if (sda) {
-              score = getStudentOverallSdaScore(sda, st.id);
+              score = getStudentOverallSdaScore(sda, st.id, grp);
               OFFICIAL_CES.forEach(ce => {
-                const scCe = getStudentCeScoreInSda(sda, st.id, ce.id);
+                const scCe = getStudentCeScoreInSda(sda, st.id, ce.id, grp);
                 if (scCe !== null) ceScoresAgg[ce.id].push(scCe);
               });
             }
           } else if (scopeType === 'trim') {
             score = getStudentTrimScore(st.id, grp);
-            const trimSdas = (grp.sdas || []).filter(s => s.trim === window.appState.currentTrim);
             OFFICIAL_CES.forEach(ce => {
-              let ceSum = 0, count = 0;
-              trimSdas.forEach(sda => {
-                const sc = getStudentCeScoreInSda(sda, st.id, ce.id);
-                if (sc !== null) { ceSum += sc; count++; }
-              });
-              if (count > 0) ceScoresAgg[ce.id].push(ceSum / count);
+              const avg = getStudentCeAvg(st.id, ce.id, grp, window.appState.currentTrim);
+              if (avg !== null) ceScoresAgg[ce.id].push(avg);
             });
           } else if (scopeType === 'course') {
             score = getStudentCourseFinalScore(st.id, grp);
             OFFICIAL_CES.forEach(ce => {
-              let sum = 0, c = 0;
-              (grp.sdas || []).forEach(sda => {
-                const sc = getStudentCeScoreInSda(sda, st.id, ce.id);
-                if (sc !== null) { sum += sc; c++; }
-              });
-              if (c > 0) ceScoresAgg[ce.id].push(sum / c);
+              const avg = getStudentCeAvg(st.id, ce.id, grp);
+              if (avg !== null) ceScoresAgg[ce.id].push(avg);
             });
           }
 
@@ -2863,12 +3887,12 @@
       });
 
       const totalStudents = studentScores.length;
-      const globalAvg = totalStudents > 0 ? (studentScores.reduce((a, b) => a + b, 0) / totalStudents) : 0;
+      const globalAvg = totalStudents > 0 ? (studentScores.reduce((a, b) => a + b, 0) / totalStudents) : null;
       const successStudents = studentScores.filter(s => s >= gradeThresholds.as).length;
       const successRate = totalStudents > 0 ? ((successStudents / totalStudents) * 100).toFixed(1) : "0.0";
       const globalLvl = getLevel(globalAvg);
 
-      document.getElementById('kpiAvgVal').textContent = globalAvg > 0 ? globalAvg.toFixed(2) : "—";
+      document.getElementById('kpiAvgVal').textContent = globalAvg !== null ? globalAvg.toFixed(2) : "—";
       document.getElementById('kpiAvgLvl').textContent = globalLvl.code;
       document.getElementById('kpiAvgLvl').className = `text-[10px] font-bold px-1.5 py-0.5 rounded ring-1 ring-inset ${globalLvl.badge}`;
       document.getElementById('kpiSuccessRate').textContent = `${successRate}%`;
@@ -2954,7 +3978,7 @@
         data: {
           labels: OFFICIAL_CES.map(c => c.id),
           datasets: [{
-            data: ceAvgs.map(c => c.avg ? c.avg.toFixed(2) : 0),
+            data: ceAvgs.map(c => c.avg !== null ? Number(c.avg.toFixed(2)) : 0),
             backgroundColor: 'rgba(24, 24, 27, 0.8)',
             borderRadius: 6
           }]
@@ -3013,13 +4037,45 @@
       }).join('');
     }
 
+    // CSV pensat per a l'Excel en català/castellà: separador ";", coma decimal i BOM perquè surtin bé els accents
     window.exportCSV = function() {
       const curGroup = getCurrentGroup();
-      let csv = `Alumne,Qualificacio_Final_${curGroup.finalMethod === 'trim' ? 'Trimestres' : 'Competencies'},Grup\n`;
-      (curGroup.students || []).forEach(st => {
-        const sc = getStudentCourseFinalScore(st.id, curGroup);
-        csv += `"${st.name}",${sc !== null ? sc.toFixed(2) : ""},"${curGroup.name}"\n`;
+      const num = v => (v === null || v === undefined || isNaN(v)) ? '' : v.toFixed(2).replace('.', ',');
+      const txt = v => `"${String(v ?? '').replace(/"/g, '""')}"`;
+      const methodLabel = (curGroup.finalMethod || 'trim') === 'trim' ? 'per trimestres' : 'per competències';
+
+      const header = [
+        'Alumne/a',
+        '1r Trim', 'Nivell T1',
+        '2n Trim', 'Nivell T2',
+        '3r Trim', 'Nivell T3',
+        ...OFFICIAL_CES.flatMap(ce => [`${ce.id} ${ce.short}`, `Nivell ${ce.id}`]),
+        `Nota final (${methodLabel})`, 'Nivell final',
+        'Mín. pràctica no assolit',
+        'Observacions',
+        'Grup'
+      ];
+
+      const rows = (curGroup.students || []).map(st => {
+        const trims = [1, 2, 3].map(t => getStudentTrimScoreByTrim(st.id, t, curGroup));
+        const ces = OFFICIAL_CES.map(ce => getStudentCeAvg(st.id, ce.id, curGroup));
+        const finalScore = getStudentCourseFinalScore(st.id, curGroup);
+        const penalizedTrims = [1, 2, 3].filter(t => isStudentPenalized(curGroup, t, st.id)).map(t => `T${t}`).join(' ');
+        const obs = (curGroup.observations && curGroup.observations[st.id]) || '';
+        const lvlCode = v => { const c = getLevel(v).code; return c === '—' ? '' : c; };
+
+        return [
+          txt(st.name),
+          ...trims.flatMap(s => [num(s), lvlCode(s)]),
+          ...ces.flatMap(s => [num(s), lvlCode(s)]),
+          num(finalScore), lvlCode(finalScore),
+          txt(penalizedTrims),
+          txt(obs.replace(/\r?\n/g, ' ')),
+          txt(curGroup.name)
+        ].join(';');
       });
+
+      const csv = '﻿' + [header.map(txt).join(';'), ...rows].join('\r\n');
       const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
       const a = document.createElement("a");
       a.href = URL.createObjectURL(blob);
@@ -3055,7 +4111,7 @@
         return;
       }
 
-      saveThresholdsToStorage({ epa, as, an, ae });
+      saveThresholdsToStorage({ epa, as, an, ae }, true);
       closeThresholdsModal();
       if (window.appState.currentScreen === 'class') {
         if (window.appState.currentView === 'sda') renderSdaGrid();
@@ -3067,12 +4123,22 @@
     };
 
     window.resetDefaultData = function() {
-      if (confirm("Vols restablir les dades de mostra originals?")) {
-        window.appData = JSON.parse(JSON.stringify(ORIGINAL_DEMO_DATA));
-        saveToStorage();
-        if (window.syncWholeAppToCloud) window.syncWholeAppToCloud();
-        goToHome();
+      const answer = prompt(
+        "ATENCIÓ: s'esborraran TOTES les classes, alumnes i notes (també al núvol) i es carregaran les dades de mostra.\n\n" +
+        "Abans es descarregarà automàticament una còpia de seguretat.\n\n" +
+        "Per confirmar-ho, escriu ESBORRAR:"
+      );
+      if (answer === null) return;
+      if (answer.trim().toUpperCase() !== 'ESBORRAR') {
+        alert("No s'ha esborrat res.");
+        return;
       }
+      exportBackupJSON();
+      window.appData = JSON.parse(JSON.stringify(ORIGINAL_DEMO_DATA));
+      window.appData.thresholds = { ...gradeThresholds };
+      saveToStorage();
+      if (window.syncWholeAppToCloud) window.syncWholeAppToCloud();
+      goToHome();
     };
 
     window.exportBackupJSON = function() {
@@ -3087,20 +4153,24 @@
       reader.onload = function(evt) {
         try {
           const imported = JSON.parse(evt.target.result);
-          if (imported.appData) {
-            window.appData = imported.appData;
-            if (imported.gradeThresholds) saveThresholdsToStorage(imported.gradeThresholds);
-          } else {
-            window.appData = imported;
-          }
+          window.appData = imported.appData ? imported.appData : imported;
           if (!window.appData.criteriaCatalog) {
             window.appData.criteriaCatalog = JSON.parse(JSON.stringify(DEFAULT_CURRICULAR_CRITERIA_CATALOG));
           }
+          const importedTh = isValidThresholds(window.appData.thresholds) ? window.appData.thresholds
+            : (isValidThresholds(imported.gradeThresholds) ? imported.gradeThresholds : gradeThresholds);
+          saveThresholdsToStorage(importedTh);
           saveToStorage();
           if (window.syncWholeAppToCloud) window.syncWholeAppToCloud();
           goToHome();
         } catch (err) { alert("JSON invàlid."); }
+        e.target.value = '';
       };
+      if (!e.target.files || !e.target.files[0]) return;
+      if (!confirm("Restaurar aquesta còpia substituirà TOTES les dades actuals (també al núvol). Vols continuar?")) {
+        e.target.value = '';
+        return;
+      }
       reader.readAsText(e.target.files[0]);
     };
 
