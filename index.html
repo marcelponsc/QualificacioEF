@@ -224,6 +224,11 @@
             </button>
           </div>
 
+          <button onclick="goToSdaLibrary()" id="sdaLibNavBtn" title="Totes les situacions d'aprenentatge" class="inline-flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1.5 rounded-xl border border-amber-300 bg-amber-50 text-amber-900 hover:bg-amber-100 shadow-subtle transition">
+            <i class="fa-regular fa-folder-open text-[11px]"></i>
+            <span class="hidden sm:inline">SdAs</span>
+          </button>
+
           <button onclick="goToHome()" id="homeNavBtn" class="hidden sm:inline-flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1.5 rounded-xl border border-zinc-200/80 bg-white text-zinc-700 hover:bg-zinc-50 shadow-subtle transition">
             <i class="fa-solid fa-house text-zinc-400 text-[10px]"></i>
             <span class="hidden sm:inline">Inici</span>
@@ -325,10 +330,50 @@
       <div class="space-y-3">
         <div class="flex items-center justify-between">
           <h3 class="text-xs font-bold text-zinc-500 uppercase tracking-wider"><i class="fa-regular fa-calendar mr-1.5 text-zinc-400"></i>Programació del curs</h3>
-          <span class="text-[11px] text-zinc-400">Totes les SdAs per trimestre</span>
+          <button onclick="goToSdaLibrary()" class="text-[11px] font-semibold text-zinc-500 hover:text-zinc-900 transition">Veure totes les SdAs <i class="fa-solid fa-arrow-right text-[9px] ml-0.5"></i></button>
         </div>
         <div id="homeProgramacio" class="grid grid-cols-1 lg:grid-cols-3 gap-3"></div>
       </div>
+    </section>
+
+    <!-- BIBLIOTECA DE SITUACIONS D'APRENENTATGE -->
+    <section id="screenSdaLibrary" class="hidden space-y-5">
+      <div class="flex flex-col lg:flex-row lg:items-end justify-between gap-3 border-b border-zinc-200/70 pb-4">
+        <div>
+          <button onclick="goToHome()" class="text-xs font-semibold text-zinc-400 hover:text-zinc-900 transition"><i class="fa-solid fa-arrow-left text-[10px] mr-1"></i>Inici</button>
+          <h2 class="text-xl font-extrabold tracking-tight text-zinc-900 mt-0.5">Situacions d'Aprenentatge</h2>
+          <p id="libSummary" class="text-xs text-zinc-500 mt-0.5"></p>
+        </div>
+        <div class="flex flex-wrap items-center gap-2">
+          <button onclick="openSdaFromLibraryNew()" class="inline-flex items-center gap-1.5 bg-zinc-900 hover:bg-zinc-800 text-white text-xs font-semibold px-3.5 py-2 rounded-xl shadow-subtle transition">
+            <i class="fa-solid fa-plus text-[10px]"></i> Nova SdA
+          </button>
+        </div>
+      </div>
+
+      <!-- Filtres -->
+      <div class="bg-white border border-zinc-200/90 rounded-2xl p-3 shadow-subtle flex flex-col md:flex-row md:items-center gap-2.5">
+        <div class="relative flex-1">
+          <i class="fa-solid fa-magnifying-glass absolute left-3 top-2.5 text-zinc-400 text-[11px]"></i>
+          <input type="text" id="libSearch" oninput="renderSdaLibrary()" placeholder="Cerca per títol, pregunta, producte, sabers..." class="w-full pl-8 pr-3 py-2 bg-zinc-50 border border-zinc-200 rounded-xl text-xs outline-none focus:ring-2 focus:ring-zinc-900 focus:bg-white font-medium">
+        </div>
+        <div class="flex flex-wrap items-center gap-2">
+          <div id="libTrimFilter" class="inline-flex rounded-xl bg-zinc-100 p-0.5 text-xs font-semibold border border-zinc-200">
+            <button data-trim="all" onclick="setLibFilter('trim','all')" class="px-2.5 py-1.5 rounded-lg transition">Totes</button>
+            <button data-trim="1" onclick="setLibFilter('trim','1')" class="px-2.5 py-1.5 rounded-lg transition">T1</button>
+            <button data-trim="2" onclick="setLibFilter('trim','2')" class="px-2.5 py-1.5 rounded-lg transition">T2</button>
+            <button data-trim="3" onclick="setLibFilter('trim','3')" class="px-2.5 py-1.5 rounded-lg transition">T3</button>
+          </div>
+          <select id="libGroupFilter" onchange="setLibFilter('group', this.value)" class="bg-zinc-50 border border-zinc-200 text-xs font-semibold text-zinc-800 rounded-xl px-2.5 py-2 outline-none cursor-pointer"></select>
+          <select id="libCeFilter" onchange="setLibFilter('ce', this.value)" class="bg-zinc-50 border border-zinc-200 text-xs font-semibold text-zinc-800 rounded-xl px-2.5 py-2 outline-none cursor-pointer"></select>
+          <div class="inline-flex rounded-xl bg-zinc-100 p-0.5 text-xs border border-zinc-200">
+            <button data-view="cards" onclick="setLibFilter('view','cards')" title="Vista de targetes" class="px-2.5 py-1.5 rounded-lg transition"><i class="fa-solid fa-grip"></i></button>
+            <button data-view="table" onclick="setLibFilter('view','table')" title="Vista de taula" class="px-2.5 py-1.5 rounded-lg transition"><i class="fa-solid fa-list"></i></button>
+          </div>
+        </div>
+      </div>
+
+      <div id="libContent"></div>
     </section>
 
     <!-- ZONA DE TREBALL DE LA CLASSE -->
@@ -1208,6 +1253,8 @@
             if (window.appState.currentView === 'final') window.renderFinalView();
             if (window.appState.currentView === 'report') window.renderIndividualReport();
             if (window.appState.currentView === 'stats') window.renderStatsView();
+          } else if (window.appState?.currentScreen === 'library') {
+            window.renderSdaLibrary();
           } else {
             window.renderHomeScreen();
           }
@@ -1531,6 +1578,7 @@
 
     window.goToHome = function() {
       window.appState.currentScreen = 'home';
+      document.getElementById('screenSdaLibrary').classList.add('hidden');
       document.getElementById('screenHome').classList.remove('hidden');
       document.getElementById('screenClassWorkspace').classList.add('hidden');
       document.getElementById('headerBreadcrumb').classList.add('hidden');
@@ -1544,6 +1592,7 @@
       saveToStorage();
       window.appState.currentScreen = 'class';
       
+      document.getElementById('screenSdaLibrary').classList.add('hidden');
       document.getElementById('screenHome').classList.add('hidden');
       document.getElementById('screenClassWorkspace').classList.remove('hidden');
       document.getElementById('headerBreadcrumb').classList.remove('hidden');
@@ -1908,6 +1957,276 @@
           </div>`;
       }).join('');
       document.getElementById('homeProgramacio').innerHTML = progHtml;
+    };
+
+    // ================== BIBLIOTECA DE SdAs ==================
+
+    const libFilters = (() => {
+      try { return { trim: 'all', group: 'all', ce: 'all', view: 'cards', ...JSON.parse(localStorage.getItem('EF_LIB_FILTERS') || '{}') }; }
+      catch (e) { return { trim: 'all', group: 'all', ce: 'all', view: 'cards' }; }
+    })();
+
+    // Agrupa les còpies d'una mateixa SdA a diferents classes (mateix títol i trimestre)
+    function collectLibrarySdas() {
+      const map = new Map();
+      Object.keys(window.appData.groups || {}).forEach(gId => {
+        const group = window.appData.groups[gId];
+        (group.sdas || []).forEach(sda => {
+          const key = `${sda.title}||${sda.trim}`;
+          if (!map.has(key)) map.set(key, { key, title: sda.title, trim: sda.trim, copies: [] });
+          map.get(key).copies.push({ gId, group, sda });
+        });
+      });
+      return Array.from(map.values()).map(item => {
+        // La còpia amb la programació més completa és la de referència
+        const best = item.copies.slice().sort((a, b) => getPlanCompleteness(b.sda.plan) - getPlanCompleteness(a.sda.plan))[0];
+        return { ...item, ref: best, plan: best.sda.plan || {}, competences: best.sda.competences || {} };
+      });
+    }
+
+    function findLibraryItem(key) {
+      return collectLibrarySdas().find(i => i.key === key);
+    }
+
+    window.goToSdaLibrary = function() {
+      window.appState.currentScreen = 'library';
+      document.getElementById('screenHome').classList.add('hidden');
+      document.getElementById('screenClassWorkspace').classList.add('hidden');
+      document.getElementById('screenSdaLibrary').classList.remove('hidden');
+      document.getElementById('headerBreadcrumb').classList.add('hidden');
+      document.getElementById('classSubNav').classList.add('hidden');
+      window.scrollTo(0, 0);
+      renderSdaLibrary();
+    };
+
+    window.setLibFilter = function(key, value) {
+      libFilters[key] = value;
+      try { localStorage.setItem('EF_LIB_FILTERS', JSON.stringify(libFilters)); } catch (e) {}
+      renderSdaLibrary();
+    };
+
+    function libKeyAttr(key) {
+      return escapeHtml(JSON.stringify(key));
+    }
+
+    window.libOpenPoster = function(key) {
+      const item = findLibraryItem(key);
+      if (item) openPosterFromHome(item.ref.gId, item.ref.sda.id);
+    };
+
+    window.libEdit = function(key) {
+      const item = findLibraryItem(key);
+      if (!item) return;
+      window.appData.activeGroupId = item.ref.gId;
+      openSdaModal(false, item.ref.sda.id);
+    };
+
+    window.libDuplicate = function(key) {
+      const item = findLibraryItem(key);
+      if (!item) return;
+      window.appData.activeGroupId = item.ref.gId;
+      openSdaModal(false, item.ref.sda.id);
+      // Convertim l'edició en una SdA nova amb el mateix contingut
+      window.appState.editingSdaId = null;
+      window.appState.editingSdaOriginal = null;
+      document.getElementById('modalSdaTitle').value = `${item.title} (còpia)`;
+      document.getElementById('modalDeleteSdaBtn').classList.add('hidden');
+      renderModalTargetGroups(null, item.trim);
+      document.getElementById('modalSdaTitle').focus();
+    };
+
+    window.libDelete = function(key) {
+      const item = findLibraryItem(key);
+      if (!item) return;
+      let gradedStudents = 0;
+      item.copies.forEach(c => {
+        const g = (c.group.grades && c.group.grades[c.sda.id]) || {};
+        gradedStudents += Object.values(g).filter(st => st && Object.keys(st).length).length;
+      });
+      const classes = item.copies.map(c => c.group.name).join(', ');
+      const msg = `Vols eliminar la SdA "${item.title}" de ${item.copies.length === 1 ? 'la classe' : 'les classes'} ${classes}?` +
+        (gradedStudents ? `\n\nATENCIÓ: s'esborraran les notes de ${gradedStudents} alumne${gradedStudents === 1 ? '' : 's'}.` : '');
+      if (!confirm(msg)) return;
+      item.copies.forEach(c => {
+        c.group.sdas = (c.group.sdas || []).filter(s => s.id !== c.sda.id);
+        if (c.group.grades) delete c.group.grades[c.sda.id];
+        if (window.syncGroupEntityToCloud) window.syncGroupEntityToCloud(c.gId);
+      });
+      saveToStorage();
+      renderSdaLibrary();
+    };
+
+    window.openSdaFromLibraryNew = function() {
+      openSdaModal(true);
+    };
+
+    function libMatchesSearch(item, term) {
+      if (!term) return true;
+      const p = item.plan;
+      const hay = [
+        item.title, p.pregunta, p.repte, p.producteTitol, p.nivell,
+        ...(p.sabers || []).map(s => s.text), ...(p.activitats || []).map(a => a.titol),
+        ...(p.metodologies || []), ...item.copies.map(c => c.group.name)
+      ].filter(Boolean).join(' ').toLowerCase();
+      return term.split(/\s+/).every(t => hay.includes(t));
+    }
+
+    window.renderSdaLibrary = function() {
+      const content = document.getElementById('libContent');
+      if (!content) return;
+      const groups = window.appData.groups || {};
+      const all = collectLibrarySdas();
+
+      // Opcions dels selectors
+      const groupSel = document.getElementById('libGroupFilter');
+      if (libFilters.group !== 'all' && !groups[libFilters.group]) libFilters.group = 'all';
+      groupSel.innerHTML = `<option value="all">Totes les classes</option>` +
+        Object.keys(groups).map(g => `<option value="${g}">${escapeHtml(groups[g].name)}</option>`).join('');
+      groupSel.value = libFilters.group;
+      const ceSel = document.getElementById('libCeFilter');
+      ceSel.innerHTML = `<option value="all">Totes les CE</option>` + OFFICIAL_CES.map(ce => `<option value="${ce.id}">${ce.id} · ${ce.short}</option>`).join('');
+      ceSel.value = libFilters.ce;
+      document.querySelectorAll('#libTrimFilter [data-trim]').forEach(b => {
+        b.className = `px-2.5 py-1.5 rounded-lg transition ${b.dataset.trim === String(libFilters.trim) ? 'bg-white text-zinc-900 shadow-subtle font-bold' : 'text-zinc-500 hover:text-zinc-900'}`;
+      });
+      document.querySelectorAll('#screenSdaLibrary [data-view]').forEach(b => {
+        b.className = `px-2.5 py-1.5 rounded-lg transition ${b.dataset.view === libFilters.view ? 'bg-white text-zinc-900 shadow-subtle' : 'text-zinc-500 hover:text-zinc-900'}`;
+      });
+
+      const term = (document.getElementById('libSearch').value || '').toLowerCase().trim();
+      const items = all.filter(item =>
+        (libFilters.trim === 'all' || String(item.trim) === String(libFilters.trim)) &&
+        (libFilters.group === 'all' || item.copies.some(c => c.gId === libFilters.group)) &&
+        (libFilters.ce === 'all' || (item.competences[libFilters.ce] && item.competences[libFilters.ce].active)) &&
+        libMatchesSearch(item, term)
+      ).sort((a, b) => a.trim - b.trim);
+
+      const totalSessions = all.reduce((acc, i) => acc + (getSdaTotalSessions(i.plan) || 0), 0);
+      document.getElementById('libSummary').textContent =
+        `${all.length} SdA${all.length === 1 ? '' : 's'} creades · ${[1, 2, 3].map(t => `T${t}: ${all.filter(i => i.trim === t).length}`).join(' · ')}${totalSessions ? ` · ${totalSessions} sessions programades` : ''}`;
+
+      if (!all.length) {
+        content.innerHTML = `
+          <div class="bg-white border border-dashed border-zinc-300 rounded-3xl p-10 text-center space-y-3">
+            <i class="fa-regular fa-folder-open text-3xl text-zinc-300"></i>
+            <p class="text-sm font-semibold text-zinc-700">Encara no has creat cap situació d'aprenentatge.</p>
+            <button onclick="openSdaFromLibraryNew()" class="inline-flex items-center gap-1.5 bg-zinc-900 hover:bg-zinc-800 text-white text-xs font-semibold px-4 py-2 rounded-xl"><i class="fa-solid fa-plus text-[10px]"></i> Crear la primera SdA</button>
+          </div>`;
+        return;
+      }
+      if (!items.length) {
+        content.innerHTML = `<div class="bg-white border border-zinc-200 rounded-2xl p-8 text-center text-xs text-zinc-400">Cap SdA coincideix amb els filtres.</div>`;
+        return;
+      }
+
+      const ceChips = (item, small = false) => OFFICIAL_CES.filter(ce => item.competences[ce.id] && item.competences[ce.id].active).map(ce => {
+        const t = CE_COLOR_THEMES[ce.id];
+        return `<span class="inline-flex items-center gap-1 ${small ? 'text-[9px] px-1.5' : 'text-[10px] px-2'} py-0.5 rounded-md font-bold border ${t.header}" title="${escapeHtml(ce.name)}">${ce.id}<span class="font-mono font-semibold opacity-70">${item.competences[ce.id].weight || 0}%</span></span>`;
+      }).join('');
+
+      const groupRows = item => item.copies.map(c => {
+        const p = getSdaProgress(c.group, c.sda);
+        return `
+          <button onclick="openSdaFromHome('${c.gId}','${c.sda.id}')" title="Obrir la graella de ${escapeHtml(c.group.name)}" class="w-full flex items-center gap-2 text-left rounded-lg px-1.5 py-1 hover:bg-zinc-50 transition">
+            <span class="text-[9px] font-bold font-mono px-1.5 py-0.5 rounded border shrink-0 ${getGroupPastelTheme(c.group).badgeBg}">${escapeHtml(c.group.name)}</span>
+            <div class="flex-1">${progressBar(p.pct)}</div>
+            <span class="text-[10px] font-mono text-zinc-400 w-8 text-right shrink-0">${p.total ? p.pct + '%' : '—'}</span>
+          </button>`;
+      }).join('');
+
+      const actions = (item, compact = false) => {
+        const k = libKeyAttr(item.key);
+        const btn = (fn, icon, label, cls = 'text-zinc-600 hover:text-zinc-900 hover:bg-zinc-100') =>
+          `<button onclick='${fn}(${k})' title="${label}" class="inline-flex items-center gap-1 px-2 py-1.5 rounded-lg text-[11px] font-semibold transition ${cls}"><i class="${icon} text-[10px]"></i>${compact ? '' : `<span class="hidden sm:inline">${label}</span>`}</button>`;
+        return btn('libOpenPoster', 'fa-solid fa-print', 'Fitxa', 'text-amber-800 bg-amber-50 hover:bg-amber-100') +
+          btn('libEdit', 'fa-solid fa-pen', 'Editar') +
+          btn('libDuplicate', 'fa-regular fa-copy', 'Duplicar') +
+          btn('libDelete', 'fa-regular fa-trash-can', 'Eliminar', 'text-zinc-400 hover:text-rose-600 hover:bg-rose-50');
+      };
+
+      if (libFilters.view === 'table') {
+        content.innerHTML = `
+          <div class="bg-white border border-zinc-200 rounded-2xl shadow-card overflow-hidden">
+            <div class="overflow-x-auto">
+              <table class="w-full text-left text-xs">
+                <thead class="bg-zinc-900 text-white">
+                  <tr>
+                    <th class="py-2.5 px-3 w-12 text-center">Trim</th>
+                    <th class="py-2.5 px-3 min-w-[220px]">Situació d'aprenentatge</th>
+                    <th class="py-2.5 px-3 text-center">Ses.</th>
+                    <th class="py-2.5 px-3">Competències</th>
+                    <th class="py-2.5 px-3 min-w-[200px]">Classes · notes posades</th>
+                    <th class="py-2.5 px-3 text-center">Programació</th>
+                    <th class="py-2.5 px-3 text-right">Accions</th>
+                  </tr>
+                </thead>
+                <tbody class="divide-y divide-zinc-100">
+                  ${items.map(item => {
+                    const comp = getPlanCompleteness(item.plan);
+                    return `<tr class="hover:bg-zinc-50/60 align-top">
+                      <td class="py-2.5 px-3 text-center font-mono font-bold text-zinc-500">T${item.trim}</td>
+                      <td class="py-2.5 px-3">
+                        <div class="font-bold text-zinc-900">${escapeHtml(item.title)}</div>
+                        ${item.plan.pregunta ? `<div class="text-[11px] text-zinc-500 italic mt-0.5">${escapeHtml(item.plan.pregunta)}</div>` : ''}
+                      </td>
+                      <td class="py-2.5 px-3 text-center font-mono">${getSdaTotalSessions(item.plan) || '—'}</td>
+                      <td class="py-2.5 px-3"><div class="flex flex-wrap gap-1">${ceChips(item, true)}</div></td>
+                      <td class="py-1.5 px-2">${groupRows(item)}</td>
+                      <td class="py-2.5 px-3 text-center"><span class="font-mono font-bold ${comp >= 75 ? 'text-emerald-600' : comp > 0 ? 'text-amber-600' : 'text-zinc-400'}">${comp}%</span></td>
+                      <td class="py-2 px-3"><div class="flex justify-end gap-0.5">${actions(item, true)}</div></td>
+                    </tr>`;
+                  }).join('')}
+                </tbody>
+              </table>
+            </div>
+          </div>`;
+        return;
+      }
+
+      // Vista de targetes, agrupades per trimestre
+      content.innerHTML = [1, 2, 3].map(t => {
+        const list = items.filter(i => i.trim === t);
+        if (!list.length) return '';
+        return `
+          <div class="space-y-3 mb-6">
+            <h3 class="text-xs font-bold text-zinc-500 uppercase tracking-wider">${t}${['', 'r', 'n', 'r'][t]} trimestre <span class="font-mono font-normal text-zinc-400 ml-1">${list.length}</span></h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+              ${list.map(item => {
+                const plan = item.plan;
+                const ses = getSdaTotalSessions(plan);
+                const comp = getPlanCompleteness(plan);
+                const nActs = (plan.activitats || []).length;
+                return `
+                  <div class="bg-white border border-zinc-200/90 rounded-3xl shadow-card hover:shadow-float transition flex flex-col overflow-hidden">
+                    <div class="bg-[#0e1834] text-white px-4 py-3.5">
+                      <div class="flex items-center justify-between text-[10px] font-bold uppercase tracking-[0.18em] text-[#e8ad3c]">
+                        <span>SdA · T${item.trim}</span>
+                        <span class="font-mono tracking-normal text-zinc-300 normal-case">${ses ? ses + ' sessions' : 'sessions per definir'}</span>
+                      </div>
+                      <div class="text-[15px] font-extrabold leading-tight mt-1.5" style="font-family:'Roboto Slab',Georgia,serif">${escapeHtml(item.title)}</div>
+                      ${plan.pregunta ? `<div class="text-[11px] text-zinc-300 mt-1 italic">${escapeHtml(plan.pregunta)}</div>` : ''}
+                    </div>
+                    <div class="p-4 space-y-3 flex-1 flex flex-col">
+                      <div class="flex flex-wrap gap-1">${ceChips(item) || '<span class="text-[11px] text-zinc-400 italic">Sense competències</span>'}</div>
+                      ${plan.producteTitol ? `<div class="text-[11px] text-zinc-600"><span class="font-bold text-zinc-400 uppercase tracking-wider text-[9px] mr-1">Producte</span>${escapeHtml(plan.producteTitol)}</div>` : ''}
+                      ${(plan.metodologies || []).length ? `<div class="flex flex-wrap gap-1">${plan.metodologies.slice(0, 3).map(m => `<span class="text-[10px] px-2 py-0.5 rounded-full bg-zinc-100 text-zinc-600 font-medium">${escapeHtml(m)}</span>`).join('')}${plan.metodologies.length > 3 ? `<span class="text-[10px] text-zinc-400">+${plan.metodologies.length - 3}</span>` : ''}</div>` : ''}
+                      <div>
+                        <div class="flex items-center justify-between text-[10px] font-bold uppercase tracking-wider text-zinc-400 mb-1">
+                          <span>Programació</span><span class="font-mono normal-case tracking-normal">${comp}%${nActs ? ` · ${nActs} activitats` : ''}</span>
+                        </div>
+                        ${progressBar(comp)}
+                      </div>
+                      <div>
+                        <div class="text-[10px] font-bold uppercase tracking-wider text-zinc-400 mb-0.5">Classes · notes posades</div>
+                        ${groupRows(item)}
+                      </div>
+                      <div class="mt-auto pt-2 border-t border-zinc-100 flex flex-wrap gap-1">${actions(item)}</div>
+                    </div>
+                  </div>`;
+              }).join('')}
+            </div>
+          </div>`;
+      }).join('');
     };
 
     // ================== GESTIÓ DE CLASSES ==================
@@ -2781,7 +3100,7 @@
       openSdaModal(true);
     };
 
-    window.openSdaModal = function(isNew) {
+    window.openSdaModal = function(isNew, sdaIdOverride = null) {
       const curGroup = getCurrentGroup();
       let sda;
       const delBtn = document.getElementById('modalDeleteSdaBtn');
@@ -2792,7 +3111,7 @@
         sda = { id: 'sda_' + Date.now(), trim: window.appState.currentTrim, title: '', trimWeight: 50, competences: {} };
         if (delBtn) delBtn.classList.add('hidden');
       } else {
-        const sdaId = document.getElementById('sdaSelect').value;
+        const sdaId = sdaIdOverride || document.getElementById('sdaSelect').value;
         sda = (curGroup.sdas || []).find(s => s.id === sdaId);
         if (!sda) { openSdaModal(true); return; }
         window.appState.editingSdaId = sda.id;
@@ -3071,6 +3390,8 @@
           const sel = document.getElementById('sdaSelect');
           if (sel) { sel.value = activeGroupSdaId; renderSdaGrid(); }
         }
+      } else if (window.appState.currentScreen === 'library') {
+        renderSdaLibrary();
       } else {
         renderHomeScreen();
       }
@@ -3101,6 +3422,8 @@
         renderTrimView();
         if (window.appState.currentView === 'final') renderFinalView();
         if (window.appState.currentView === 'stats') renderStatsView();
+        if (window.appState.currentScreen === 'library') renderSdaLibrary();
+        if (window.appState.currentScreen === 'home') renderHomeScreen();
       }
     };
 
