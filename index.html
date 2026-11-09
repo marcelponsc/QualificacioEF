@@ -184,7 +184,7 @@
   <!-- ================= CAPÇALERA ================= -->
   <header class="bg-white/90 backdrop-blur-md border-b border-zinc-200/80 sticky top-0 z-40 no-print">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      <div class="flex items-center justify-between h-14 gap-4">
+      <div class="flex items-center justify-between h-14 gap-2 sm:gap-4">
         
         <div class="flex items-center gap-3">
           <button onclick="goToHome()" class="flex items-center gap-2.5 text-left group">
@@ -197,10 +197,10 @@
             </div>
             <div class="flex flex-col">
               <div class="flex items-center gap-1.5">
-                <span class="text-xs font-black tracking-tight text-zinc-900 group-hover:text-zinc-600 transition">EF COMPETENCIAL</span>
-                <span class="text-[9px] font-bold text-zinc-600 bg-zinc-100 px-1.5 py-0.5 rounded tracking-wider uppercase border border-zinc-200/60">PRO</span>
+                <span class="text-xs font-black tracking-tight text-zinc-900 group-hover:text-zinc-600 transition whitespace-nowrap">EF COMPETENCIAL</span>
+                <span class="hidden sm:inline text-[9px] font-bold text-zinc-600 bg-zinc-100 px-1.5 py-0.5 rounded tracking-wider uppercase border border-zinc-200/60">PRO</span>
               </div>
-              <span class="text-[9px] font-medium text-zinc-400 -mt-0.5">Avaluació Educació Física LOMLOE</span>
+              <span class="hidden sm:block text-[9px] font-medium text-zinc-400 -mt-0.5">Avaluació Educació Física LOMLOE</span>
             </div>
           </button>
 
@@ -213,23 +213,23 @@
         <div class="flex items-center gap-2">
           <div id="cloudStatusBadge" class="flex items-center gap-1.5 text-[11px] font-medium px-2.5 py-1 rounded-xl border bg-zinc-50 border-zinc-200 text-zinc-600">
             <span id="cloudStatusDot" class="w-2 h-2 rounded-full bg-emerald-500"></span>
-            <span id="cloudStatusText" class="font-mono text-[10px] font-semibold">Local (Actiu)</span>
+            <span id="cloudStatusText" class="hidden sm:inline font-mono text-[10px] font-semibold">Local (Actiu)</span>
           </div>
 
-          <div class="flex items-center gap-2 bg-zinc-100 pl-3 pr-2 py-1 rounded-xl border border-zinc-200 text-xs">
+          <div class="flex items-center gap-2 bg-zinc-100 pl-2 sm:pl-3 pr-1 sm:pr-2 py-1 rounded-xl border border-zinc-200 text-xs">
             <i class="fa-solid fa-user-check text-emerald-600 text-[11px]"></i>
-            <span id="headerUserLabel" class="font-bold text-zinc-800">Docent</span>
+            <span id="headerUserLabel" class="hidden sm:inline font-bold text-zinc-800 max-w-[120px] truncate">Docent</span>
             <button onclick="logoutActiveUser()" title="Tancar Sessió" class="text-zinc-400 hover:text-rose-600 p-1 transition ml-1">
               <i class="fa-solid fa-arrow-right-from-bracket"></i>
             </button>
           </div>
 
-          <button onclick="goToHome()" id="homeNavBtn" class="inline-flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1.5 rounded-xl border border-zinc-200/80 bg-white text-zinc-700 hover:bg-zinc-50 shadow-subtle transition">
+          <button onclick="goToHome()" id="homeNavBtn" class="hidden sm:inline-flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1.5 rounded-xl border border-zinc-200/80 bg-white text-zinc-700 hover:bg-zinc-50 shadow-subtle transition">
             <i class="fa-solid fa-house text-zinc-400 text-[10px]"></i>
             <span class="hidden sm:inline">Inici</span>
           </button>
 
-          <div class="flex items-center pl-1 border-l border-zinc-200 gap-1">
+          <div class="flex items-center pl-1 border-l border-zinc-200 gap-0 sm:gap-1">
             <button onclick="openCriteriaModal()" title="Gestionar Catàleg de Criteris LOMLOE" class="p-1.5 text-zinc-500 hover:text-zinc-900 hover:bg-zinc-100 rounded-lg text-xs transition">
               <i class="fa-solid fa-list-check"></i>
             </button>
@@ -278,19 +278,24 @@
   <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-5">
 
     <!-- PANTALLA D'INICI (HUB DE CLASSES) -->
-    <section id="screenHome" class="space-y-6">
-      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-zinc-200/70 pb-4">
+    <section id="screenHome" class="space-y-5">
+      <div class="flex flex-col lg:flex-row lg:items-end justify-between gap-3 border-b border-zinc-200/70 pb-4">
         <div>
           <div class="flex items-center gap-2 text-xs font-semibold text-zinc-400">
             <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
-            <span>Curs Actiu · Gestor de Classes LOMLOE</span>
+            <span id="homeSchoolYearLabel">Curs actiu</span>
           </div>
-          <h2 class="text-xl font-extrabold tracking-tight text-zinc-900 mt-0.5">Tauler de Classes</h2>
+          <h2 id="homeGreeting" class="text-xl font-extrabold tracking-tight text-zinc-900 mt-0.5">Tauler de Classes</h2>
         </div>
 
-        <div class="flex items-center gap-2">
+        <div class="flex flex-wrap items-center gap-2">
+          <div class="inline-flex rounded-xl bg-zinc-100 p-0.5 text-xs font-semibold border border-zinc-200">
+            <button id="homeTrimBtn1" onclick="setHomeTrim(1)" class="px-3 py-1.5 rounded-lg transition">1r Trim</button>
+            <button id="homeTrimBtn2" onclick="setHomeTrim(2)" class="px-3 py-1.5 rounded-lg transition">2n Trim</button>
+            <button id="homeTrimBtn3" onclick="setHomeTrim(3)" class="px-3 py-1.5 rounded-lg transition">3r Trim</button>
+          </div>
           <button onclick="openGlobalSdaModal()" class="inline-flex items-center gap-1.5 bg-white hover:bg-zinc-50 border border-zinc-200/90 text-zinc-700 text-xs font-semibold px-3 py-2 rounded-xl shadow-subtle transition">
-            <i class="fa-solid fa-sliders text-zinc-400 text-[10px]"></i> Programar SdA
+            <i class="fa-regular fa-folder-open text-zinc-400 text-[10px]"></i> Nova SdA
           </button>
           <button onclick="openNewGroupModal()" class="inline-flex items-center gap-1.5 bg-zinc-900 hover:bg-zinc-800 text-white text-xs font-semibold px-3.5 py-2 rounded-xl shadow-subtle transition">
             <i class="fa-solid fa-plus text-[10px]"></i> Nova Classe
@@ -298,7 +303,32 @@
         </div>
       </div>
 
-      <div id="homeClassesGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"></div>
+      <!-- Continua on ho vas deixar -->
+      <div id="homeContinueCard"></div>
+
+      <!-- Indicadors del trimestre -->
+      <div id="homeKpis" class="grid grid-cols-2 lg:grid-cols-4 gap-3"></div>
+
+      <!-- Classes -->
+      <div class="space-y-3">
+        <div class="flex items-center justify-between">
+          <h3 class="text-xs font-bold text-zinc-500 uppercase tracking-wider"><i class="fa-solid fa-users mr-1.5 text-zinc-400"></i>Les meves classes</h3>
+          <span id="homeClassesCount" class="text-[11px] font-mono text-zinc-400"></span>
+        </div>
+        <div id="homeClassesGrid" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4"></div>
+      </div>
+
+      <!-- Pendents -->
+      <div id="homeTodoSection" class="space-y-3"></div>
+
+      <!-- Programació del curs -->
+      <div class="space-y-3">
+        <div class="flex items-center justify-between">
+          <h3 class="text-xs font-bold text-zinc-500 uppercase tracking-wider"><i class="fa-regular fa-calendar mr-1.5 text-zinc-400"></i>Programació del curs</h3>
+          <span class="text-[11px] text-zinc-400">Totes les SdAs per trimestre</span>
+        </div>
+        <div id="homeProgramacio" class="grid grid-cols-1 lg:grid-cols-3 gap-3"></div>
+      </div>
     </section>
 
     <!-- ZONA DE TREBALL DE LA CLASSE -->
@@ -1510,6 +1540,7 @@
 
     window.enterClass = function(groupId) {
       window.appData.activeGroupId = groupId;
+      rememberLastVisit({ gId: groupId });
       saveToStorage();
       window.appState.currentScreen = 'class';
       
@@ -1534,62 +1565,349 @@
       setTrim(window.appState.currentTrim);
     };
 
-    window.renderHomeScreen = function() {
-      const groupKeys = Object.keys(window.appData.groups || {});
-      const grid = document.getElementById('homeClassesGrid');
+    // ================== PANTALLA D'INICI ==================
 
+    const LEVEL_BAR_COLORS = { NA: 'bg-rose-400', EPA: 'bg-amber-400', AS: 'bg-sky-400', AN: 'bg-indigo-400', AE: 'bg-emerald-400' };
+
+    function getSdaInputKeys(sda) {
+      const keys = [];
+      OFFICIAL_CES.forEach(ce => {
+        const conf = sda.competences && sda.competences[ce.id];
+        if (!conf || !conf.active) return;
+        if (conf.oas && conf.oas.length) conf.oas.forEach(oa => keys.push(`${ce.id}_${oa.id}`));
+        else keys.push(`${ce.id}_direct`);
+      });
+      return keys;
+    }
+
+    // Quantes caselles de la graella estan omplertes (els alumnes penalitzats compten com a fets)
+    function getSdaProgress(group, sda) {
+      const keys = getSdaInputKeys(sda);
+      const students = group.students || [];
+      const total = keys.length * students.length;
+      let filled = 0, studentsPending = 0;
+      students.forEach(st => {
+        const g = (group.grades && group.grades[sda.id] && group.grades[sda.id][st.id]) || {};
+        const penalized = isStudentPenalized(group, sda.trim, st.id);
+        const n = penalized ? keys.length : keys.filter(k => g[k] !== undefined && g[k] !== null && g[k] !== '').length;
+        filled += n;
+        if (n < keys.length) studentsPending++;
+      });
+      return { filled, total, studentsPending, pct: total > 0 ? Math.round((filled / total) * 100) : 0 };
+    }
+
+    function getClassTrimSummary(group, trim) {
+      const students = group.students || [];
+      const sdas = (group.sdas || []).filter(s => s.trim === trim);
+      const counts = { NA: 0, EPA: 0, AS: 0, AN: 0, AE: 0 };
+      const naStudents = [];
+      let sum = 0, n = 0;
+      students.forEach(st => {
+        const sc = getStudentTrimScoreByTrim(st.id, trim, group);
+        if (sc === null) return;
+        const code = getLevel(sc).code;
+        if (counts[code] !== undefined) counts[code]++;
+        if (code === 'NA') naStudents.push(st);
+        sum += sc; n++;
+      });
+      let filled = 0, total = 0;
+      const sdaRows = sdas.map(sda => {
+        const p = getSdaProgress(group, sda);
+        filled += p.filled; total += p.total;
+        return { sda, progress: p };
+      });
+      const weightSum = sdas.reduce((a, s) => a + (s.trimWeight !== undefined ? s.trimWeight : 0), 0);
+      return {
+        avg: n > 0 ? sum / n : null, graded: n, counts, naStudents, sdaRows, weightSum,
+        progressPct: total > 0 ? Math.round((filled / total) * 100) : null, filled, total
+      };
+    }
+
+    function rememberLastVisit(patch) {
+      try {
+        const prev = JSON.parse(localStorage.getItem('EF_LAST_VISIT') || '{}');
+        localStorage.setItem('EF_LAST_VISIT', JSON.stringify({ ...prev, ...patch, at: Date.now() }));
+      } catch (e) {}
+    }
+
+    function getLastVisit() {
+      try { return JSON.parse(localStorage.getItem('EF_LAST_VISIT') || 'null'); } catch (e) { return null; }
+    }
+
+    window.setHomeTrim = function(t) {
+      setTrim(t);
+      renderHomeScreen();
+    };
+
+    window.openSdaFromHome = function(gId, sdaId) {
+      const grp = window.appData.groups[gId];
+      const sda = grp && (grp.sdas || []).find(s => s.id === sdaId);
+      if (!sda) return enterClass(gId);
+      window.appState.currentTrim = sda.trim;
+      enterClass(gId);
+      const sel = document.getElementById('sdaSelect');
+      sel.value = sdaId;
+      renderSdaGrid();
+    };
+
+    window.openClassView = function(gId, view) {
+      enterClass(gId);
+      switchView(view);
+    };
+
+    window.openPosterFromHome = function(gId, sdaId) {
+      window.appData.activeGroupId = gId;
+      saveToStorage();
+      openSdaPoster(sdaId);
+    };
+
+    window.editSdaFromHome = function(gId, sdaId) {
+      openSdaFromHome(gId, sdaId);
+      openSdaModal(false);
+    };
+
+    function getPlanCompleteness(plan) {
+      plan = plan || {};
+      const checks = [
+        !!plan.repte, !!plan.justificacio, (plan.sabers || []).length > 0, (plan.metodologies || []).length > 0,
+        (plan.activitats || []).length > 0, !!(plan.duaImplicacio || plan.duaRepresentacio || plan.duaAccio),
+        (plan.instruments || []).length > 0, !!plan.producteTitol
+      ];
+      return Math.round((checks.filter(Boolean).length / checks.length) * 100);
+    }
+
+    function progressBar(pct, extraClass = '') {
+      const color = pct >= 100 ? 'bg-emerald-500' : pct >= 50 ? 'bg-sky-500' : pct > 0 ? 'bg-amber-500' : 'bg-zinc-300';
+      return `<div class="h-1.5 rounded-full bg-zinc-200/80 overflow-hidden ${extraClass}"><div class="h-full ${color} rounded-full" style="width:${Math.min(100, pct)}%"></div></div>`;
+    }
+
+    window.renderHomeScreen = function() {
+      const trim = window.appState.currentTrim;
+      const groups = window.appData.groups || {};
+      const groupKeys = Object.keys(groups);
+      const grid = document.getElementById('homeClassesGrid');
+      if (!grid) return;
+
+      // Capçalera
+      const hour = new Date().getHours();
+      const salutacio = hour < 14 ? 'Bon dia' : hour < 20 ? 'Bona tarda' : 'Bon vespre';
+      const userLabel = (document.getElementById('headerUserLabel') || {}).textContent || '';
+      document.getElementById('homeGreeting').textContent = `${salutacio}${userLabel && userLabel !== 'Docent' ? ', ' + userLabel : ''}`;
+      document.getElementById('homeSchoolYearLabel').textContent = `Curs ${getSchoolYearLabel()} · ${trim}${['', 'r', 'n', 'r'][trim]} trimestre`;
+      [1, 2, 3].forEach(n => {
+        const b = document.getElementById(`homeTrimBtn${n}`);
+        if (b) b.className = n === trim ? 'px-3 py-1.5 rounded-lg transition bg-white text-zinc-900 shadow-subtle font-bold' : 'px-3 py-1.5 rounded-lg transition text-zinc-500 hover:text-zinc-900';
+      });
+
+      const summaries = {};
+      groupKeys.forEach(gId => { summaries[gId] = getClassTrimSummary(groups[gId], trim); });
+
+      // Indicadors globals
+      const totalStudents = groupKeys.reduce((a, g) => a + (groups[g].students || []).length, 0);
+      const uniqueSdas = new Set();
+      groupKeys.forEach(g => (groups[g].sdas || []).filter(s => s.trim === trim).forEach(s => uniqueSdas.add(s.title)));
+      const allFilled = groupKeys.reduce((a, g) => a + summaries[g].filled, 0);
+      const allTotal = groupKeys.reduce((a, g) => a + summaries[g].total, 0);
+      const globalPct = allTotal > 0 ? Math.round((allFilled / allTotal) * 100) : null;
+      const totalNa = groupKeys.reduce((a, g) => a + summaries[g].naStudents.length, 0);
+      const kpi = (icon, label, value, sub, tone = 'text-zinc-900') => `
+        <div class="bg-white border border-zinc-200/90 rounded-2xl p-3.5 shadow-subtle">
+          <div class="flex items-center justify-between text-[11px] font-semibold text-zinc-400"><span>${label}</span><i class="${icon}"></i></div>
+          <div class="text-2xl font-black font-mono mt-1 ${tone}">${value}</div>
+          <div class="text-[11px] text-zinc-400 mt-0.5">${sub}</div>
+        </div>`;
+      document.getElementById('homeKpis').innerHTML =
+        kpi('fa-solid fa-user-graduate', 'Alumnes', totalStudents, `${groupKeys.length} classe${groupKeys.length === 1 ? '' : 's'}`) +
+        kpi('fa-regular fa-folder-open', `SdAs del ${trim}r trim.`.replace('2r', '2n'), uniqueSdas.size, uniqueSdas.size ? 'programades' : 'cap de programada') +
+        kpi('fa-solid fa-pen-to-square', 'Notes posades', globalPct === null ? '—' : `${globalPct}%`, globalPct === null ? 'sense SdAs ni alumnes' : `${allFilled} de ${allTotal} caselles`, globalPct === 100 ? 'text-emerald-600' : 'text-zinc-900') +
+        kpi('fa-solid fa-triangle-exclamation', 'Alumnes amb NA', totalNa, 'nota del trimestre', totalNa > 0 ? 'text-rose-600' : 'text-emerald-600');
+
+      // Continua on ho vas deixar
+      const last = getLastVisit();
+      const contCard = document.getElementById('homeContinueCard');
+      if (last && groups[last.gId]) {
+        const g = groups[last.gId];
+        const theme = getGroupPastelTheme(g);
+        const sda = (g.sdas || []).find(s => s.id === last.sdaId);
+        const p = sda ? getSdaProgress(g, sda) : null;
+        contCard.innerHTML = `
+          <button onclick="${sda ? `openSdaFromHome('${last.gId}','${sda.id}')` : `enterClass('${last.gId}')`}" class="w-full text-left flex items-center gap-3 bg-zinc-900 hover:bg-zinc-800 text-white rounded-2xl px-4 py-3 shadow-subtle transition group">
+            <div class="w-9 h-9 rounded-xl ${theme.avatarBg} flex items-center justify-center text-xs font-bold font-mono shrink-0">${escapeHtml(g.name.slice(0, 2))}</div>
+            <div class="flex-1 min-w-0">
+              <div class="text-[10px] font-bold uppercase tracking-wider text-zinc-400">Continua on ho vas deixar</div>
+              <div class="text-sm font-bold truncate">${escapeHtml(g.name)}${sda ? ` · ${escapeHtml(sda.title)}` : ''}</div>
+              ${p ? `<div class="flex items-center gap-2 mt-1"><div class="flex-1 max-w-[220px]">${progressBar(p.pct)}</div><span class="text-[10px] font-mono text-zinc-400">${p.pct}% qualificat</span></div>` : ''}
+            </div>
+            <span class="text-xs font-semibold bg-white/10 group-hover:bg-white/20 px-3 py-1.5 rounded-xl shrink-0">Continuar <i class="fa-solid fa-arrow-right text-[9px] ml-1"></i></span>
+          </button>`;
+      } else {
+        contCard.innerHTML = '';
+      }
+
+      // Targetes de classe
+      document.getElementById('homeClassesCount').textContent = `${groupKeys.length} classe${groupKeys.length === 1 ? '' : 's'}`;
       grid.innerHTML = groupKeys.map(gId => {
-        const group = window.appData.groups[gId];
-        const studentCount = (group.students || []).length;
-        const currentTrimSdas = (group.sdas || []).filter(s => s.trim === window.appState.currentTrim);
-        const activeSda = currentTrimSdas[0] || null;
+        const group = groups[gId];
         const theme = getGroupPastelTheme(group);
+        const s = summaries[gId];
+        const studentCount = (group.students || []).length;
+        const avgLvl = getLevel(s.avg);
+        const firstPending = s.sdaRows.find(r => r.progress.pct < 100) || s.sdaRows[0];
+
+        const distTotal = Object.values(s.counts).reduce((a, b) => a + b, 0);
+        const distBar = distTotal > 0
+          ? `<div class="flex h-2 rounded-full overflow-hidden bg-zinc-200/70">${Object.keys(s.counts).map(k => s.counts[k] ? `<div class="${LEVEL_BAR_COLORS[k]}" style="width:${(s.counts[k] / distTotal) * 100}%" title="${k}: ${s.counts[k]}"></div>` : '').join('')}</div>
+             <div class="flex flex-wrap gap-x-2.5 gap-y-0.5 mt-1 text-[10px] font-semibold text-zinc-500">${Object.keys(s.counts).map(k => `<span class="inline-flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full ${LEVEL_BAR_COLORS[k]}"></span>${k} ${s.counts[k]}</span>`).join('')}</div>`
+          : `<div class="text-[11px] text-zinc-400 italic">Encara no hi ha notes aquest trimestre.</div>`;
+
+        const sdaList = s.sdaRows.length ? s.sdaRows.map(({ sda, progress }) => `
+          <div class="flex items-center gap-2 group/sda">
+            <button onclick="openSdaFromHome('${gId}','${sda.id}')" class="flex-1 min-w-0 text-left rounded-lg px-2 py-1.5 hover:bg-white transition">
+              <div class="flex items-center justify-between gap-2 text-[11px]">
+                <span class="font-semibold text-zinc-800 truncate">${escapeHtml(sda.title)}</span>
+                <span class="font-mono text-zinc-400 shrink-0">${progress.total ? progress.pct + '%' : '—'}</span>
+              </div>
+              ${progressBar(progress.pct, 'mt-1')}
+            </button>
+            <button onclick="openPosterFromHome('${gId}','${sda.id}')" title="Fitxa de la SdA" class="p-1.5 text-zinc-400 hover:text-amber-700 hover:bg-white rounded-lg transition shrink-0"><i class="fa-solid fa-print text-[11px]"></i></button>
+          </div>`).join('')
+          : `<button onclick="enterClass('${gId}'); openSdaModal(true);" class="w-full text-[11px] text-zinc-500 hover:text-zinc-900 border border-dashed border-zinc-300 rounded-lg py-2 transition"><i class="fa-solid fa-plus text-[9px] mr-1"></i>Crear una SdA per a aquest trimestre</button>`;
+
+        const alerts = [];
+        if (studentCount === 0) alerts.push({ tone: 'amber', icon: 'fa-user-plus', text: 'Sense alumnes', action: `openClassView('${gId}','roster')` });
+        if (s.naStudents.length) alerts.push({ tone: 'rose', icon: 'fa-triangle-exclamation', text: `${s.naStudents.length} amb NA`, action: `openClassView('${gId}','trim')` });
+        if (s.sdaRows.length && Math.round(s.weightSum) !== 100) alerts.push({ tone: 'amber', icon: 'fa-scale-unbalanced', text: `Pesos SdA: ${s.weightSum}%`, action: `openClassView('${gId}','trim')` });
+        const alertsHtml = alerts.map(a => `<button onclick="${a.action}" class="inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-md bg-${a.tone}-50 text-${a.tone}-700 border border-${a.tone}-200 hover:bg-${a.tone}-100 transition"><i class="fa-solid ${a.icon}"></i>${a.text}</button>`).join('');
 
         return `
-          <div class="rounded-3xl border ${theme.cardBorder} ${theme.cardBg} p-5 shadow-card hover:shadow-float transition flex flex-col justify-between">
-            <div class="space-y-3.5">
-              <div class="flex items-start justify-between">
-                <div class="flex items-center gap-2.5">
-                  <div class="w-10 h-10 rounded-2xl ${theme.avatarBg} flex items-center justify-center text-xs font-bold font-mono shadow-subtle border border-black/5">
-                    ${group.name.slice(0, 2)}
-                  </div>
-                  <div>
-                    <h4 class="text-sm font-bold text-zinc-900 leading-tight">${group.name}</h4>
-                    <span class="text-[11px] text-zinc-500 font-medium">${studentCount} alumnes registrats</span>
-                  </div>
+          <div class="rounded-3xl border ${theme.cardBorder} ${theme.cardBg} p-4 shadow-card hover:shadow-float transition flex flex-col gap-3">
+            <div class="flex items-start justify-between gap-2">
+              <button onclick="enterClass('${gId}')" class="flex items-center gap-2.5 text-left min-w-0">
+                <div class="w-10 h-10 rounded-2xl ${theme.avatarBg} flex items-center justify-center text-xs font-bold font-mono shadow-subtle border border-black/5 shrink-0">${escapeHtml(group.name.slice(0, 2))}</div>
+                <div class="min-w-0">
+                  <h4 class="text-sm font-bold text-zinc-900 leading-tight truncate">${escapeHtml(group.name)}</h4>
+                  <span class="text-[11px] text-zinc-500 font-medium">${studentCount} alumnes · ${s.sdaRows.length} SdA${s.sdaRows.length === 1 ? '' : 's'} al trimestre</span>
                 </div>
-
-                <div class="flex items-center gap-1">
-                  <button onclick="event.stopPropagation(); openEditGroupModal('${gId}')" title="Modificar classe i color" class="text-zinc-500 hover:text-zinc-900 p-1.5 hover:bg-white/80 rounded-xl transition">
-                    <i class="fa-solid fa-pen text-xs"></i>
-                  </button>
-                  <button onclick="event.stopPropagation(); deleteGroup('${gId}')" title="Eliminar classe" class="text-zinc-400 hover:text-rose-600 p-1.5 hover:bg-white/80 rounded-xl transition">
-                    <i class="fa-regular fa-trash-can text-xs"></i>
-                  </button>
-                </div>
-              </div>
-
-              <div class="bg-white/80 backdrop-blur-xs rounded-2xl p-3 border border-zinc-200/60 space-y-1.5">
-                <div class="flex items-center justify-between text-xs">
-                  <span class="text-zinc-700 font-semibold truncate max-w-[170px]">
-                    <i class="fa-regular fa-folder text-zinc-400 mr-1"></i> ${activeSda ? activeSda.title : 'Sense SdA activa'}
-                  </span>
-                  <span class="text-[11px] font-mono text-zinc-400">${(group.sdas || []).length} SdA(s)</span>
-                </div>
+              </button>
+              <div class="flex items-center gap-0.5 shrink-0">
+                <button onclick="event.stopPropagation(); openEditGroupModal('${gId}')" title="Modificar classe i color" class="text-zinc-500 hover:text-zinc-900 p-1.5 hover:bg-white/80 rounded-xl transition"><i class="fa-solid fa-pen text-xs"></i></button>
+                <button onclick="event.stopPropagation(); deleteGroup('${gId}')" title="Eliminar classe" class="text-zinc-400 hover:text-rose-600 p-1.5 hover:bg-white/80 rounded-xl transition"><i class="fa-regular fa-trash-can text-xs"></i></button>
               </div>
             </div>
 
-            <div class="pt-4 mt-3 border-t border-black/5 flex items-center justify-between gap-2">
-              <button onclick="enterClass('${gId}'); switchView('roster');" class="inline-flex items-center gap-1.5 text-xs font-semibold text-zinc-700 bg-white/90 hover:bg-white px-3 py-1.5 rounded-xl border border-zinc-200/80 shadow-subtle transition">
-                <i class="fa-solid fa-users text-zinc-400 text-[10px]"></i> Llista
-              </button>
-              <button onclick="enterClass('${gId}')" class="inline-flex items-center gap-1 text-xs font-bold ${theme.btnBg} px-4 py-1.5 rounded-xl shadow-subtle transition">
-                Qualificar <i class="fa-solid fa-arrow-right text-[9px] ml-0.5"></i>
-              </button>
+            <div class="bg-white/80 rounded-2xl p-3 border border-zinc-200/60 space-y-2">
+              <div class="flex items-center justify-between">
+                <span class="text-[10px] font-bold uppercase tracking-wider text-zinc-400">Nota mitjana del trimestre</span>
+                <span class="flex items-center gap-1.5">
+                  <span class="font-mono font-black text-sm text-zinc-900">${s.avg !== null ? s.avg.toFixed(2) : '—'}</span>
+                  <span class="inline-flex px-1.5 py-0.5 rounded text-[10px] font-bold ring-1 ring-inset ${avgLvl.badge}">${avgLvl.code}</span>
+                </span>
+              </div>
+              ${distBar}
             </div>
-          </div>
-        `;
+
+            <div class="bg-white/60 rounded-2xl p-1.5 border border-zinc-200/60 space-y-0.5">
+              <div class="px-2 pt-1 text-[10px] font-bold uppercase tracking-wider text-zinc-400">SdAs · qualificació</div>
+              ${sdaList}
+            </div>
+
+            ${alertsHtml ? `<div class="flex flex-wrap gap-1.5">${alertsHtml}</div>` : ''}
+
+            <div class="mt-auto pt-2 border-t border-black/5 grid grid-cols-4 gap-1.5 text-[11px] font-semibold">
+              <button onclick="openClassView('${gId}','roster')" class="flex flex-col items-center gap-0.5 py-1.5 rounded-xl bg-white/80 hover:bg-white border border-zinc-200/70 text-zinc-700 transition"><i class="fa-solid fa-users text-zinc-400"></i>Llista</button>
+              <button onclick="openClassView('${gId}','trim')" class="flex flex-col items-center gap-0.5 py-1.5 rounded-xl bg-white/80 hover:bg-white border border-zinc-200/70 text-zinc-700 transition"><i class="fa-solid fa-table-cells text-zinc-400"></i>Resum</button>
+              <button onclick="openClassView('${gId}','report')" class="flex flex-col items-center gap-0.5 py-1.5 rounded-xl bg-white/80 hover:bg-white border border-zinc-200/70 text-zinc-700 transition"><i class="fa-regular fa-address-card text-zinc-400"></i>Butlletins</button>
+              <button onclick="${firstPending ? `openSdaFromHome('${gId}','${firstPending.sda.id}')` : `enterClass('${gId}')`}" class="flex flex-col items-center gap-0.5 py-1.5 rounded-xl ${theme.btnBg} transition"><i class="fa-solid fa-pen-to-square"></i>Qualificar</button>
+            </div>
+          </div>`;
+      }).join('') + `
+        <button onclick="openNewGroupModal()" class="rounded-3xl border-2 border-dashed border-zinc-300 hover:border-zinc-400 hover:bg-white/60 text-zinc-400 hover:text-zinc-700 p-6 min-h-[180px] flex flex-col items-center justify-center gap-2 transition">
+          <i class="fa-solid fa-plus text-lg"></i><span class="text-xs font-semibold">Afegir una classe</span>
+        </button>`;
+
+      // Pendents
+      const todos = [];
+      groupKeys.forEach(gId => {
+        const g = groups[gId];
+        summaries[gId].sdaRows.forEach(({ sda, progress }) => {
+          if (progress.total > 0 && progress.pct < 100) {
+            todos.push({ prio: progress.pct === 0 ? 2 : 1, icon: 'fa-pen-to-square', tone: 'sky',
+              text: `<b>${escapeHtml(g.name)}</b> · ${escapeHtml(sda.title)}: falten notes de ${progress.studentsPending} alumne${progress.studentsPending === 1 ? '' : 's'}`,
+              btn: 'Qualificar', action: `openSdaFromHome('${gId}','${sda.id}')` });
+          }
+        });
+        if (summaries[gId].naStudents.length) {
+          const names = summaries[gId].naStudents.slice(0, 3).map(s => escapeHtml(s.name.split(',')[1] ? s.name.split(',')[1].trim() + ' ' + s.name.split(',')[0].split(' ')[0] : s.name)).join(', ');
+          const extra = summaries[gId].naStudents.length > 3 ? ` i ${summaries[gId].naStudents.length - 3} més` : '';
+          todos.push({ prio: 0, icon: 'fa-triangle-exclamation', tone: 'rose',
+            text: `<b>${escapeHtml(g.name)}</b> · NA al trimestre: ${names}${extra}`, btn: 'Veure resum', action: `openClassView('${gId}','trim')` });
+        }
+      });
+      const seenTitles = new Set();
+      groupKeys.forEach(gId => (groups[gId].sdas || []).filter(s => s.trim === trim).forEach(sda => {
+        if (seenTitles.has(sda.title)) return;
+        seenTitles.add(sda.title);
+        const comp = getPlanCompleteness(sda.plan);
+        if (comp < 75) todos.push({ prio: 3, icon: 'fa-file-lines', tone: 'amber',
+          text: `${escapeHtml(sda.title)}: programació completada al ${comp}%`, btn: 'Completar', action: `editSdaFromHome('${gId}','${sda.id}')` });
+      }));
+      todos.sort((a, b) => a.prio - b.prio);
+      const todoSection = document.getElementById('homeTodoSection');
+      todoSection.innerHTML = todos.length ? `
+        <div class="flex items-center justify-between">
+          <h3 class="text-xs font-bold text-zinc-500 uppercase tracking-wider"><i class="fa-solid fa-list-check mr-1.5 text-zinc-400"></i>Pendents del trimestre</h3>
+          <span class="text-[11px] font-mono text-zinc-400">${todos.length}</span>
+        </div>
+        <div class="bg-white border border-zinc-200/90 rounded-2xl shadow-subtle divide-y divide-zinc-100 overflow-hidden">
+          ${todos.slice(0, 8).map(t => `
+            <div class="flex items-center gap-3 px-3.5 py-2.5 text-xs">
+              <span class="w-7 h-7 rounded-lg bg-${t.tone}-50 text-${t.tone}-600 flex items-center justify-center shrink-0"><i class="fa-solid ${t.icon} text-[11px]"></i></span>
+              <span class="flex-1 min-w-0 text-zinc-600">${t.text}</span>
+              <button onclick="${t.action}" class="shrink-0 text-[11px] font-semibold text-zinc-700 bg-zinc-100 hover:bg-zinc-200 px-2.5 py-1 rounded-lg transition">${t.btn}</button>
+            </div>`).join('')}
+          ${todos.length > 8 ? `<div class="px-3.5 py-2 text-[11px] text-zinc-400">i ${todos.length - 8} pendents més…</div>` : ''}
+        </div>` : (groupKeys.length ? `
+        <div class="flex items-center gap-2 text-xs font-semibold text-emerald-700 bg-emerald-50 border border-emerald-200 rounded-2xl px-4 py-3">
+          <i class="fa-solid fa-circle-check"></i> Tot al dia en aquest trimestre!
+        </div>` : '');
+
+      // Programació del curs
+      const progHtml = [1, 2, 3].map(t => {
+        const byTitle = new Map();
+        groupKeys.forEach(gId => (groups[gId].sdas || []).filter(s => s.trim === t).forEach(sda => {
+          if (!byTitle.has(sda.title)) byTitle.set(sda.title, { sda, gId, groups: [] });
+          byTitle.get(sda.title).groups.push(groups[gId]);
+        }));
+        const items = Array.from(byTitle.values());
+        const isCurrent = t === trim;
+        return `
+          <div class="rounded-2xl border ${isCurrent ? 'border-zinc-900 bg-white shadow-card' : 'border-zinc-200 bg-white/70'} p-3 space-y-2">
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-bold ${isCurrent ? 'text-zinc-900' : 'text-zinc-500'}">${t}${['', 'r', 'n', 'r'][t]} trimestre</span>
+              <span class="text-[10px] font-mono text-zinc-400">${items.length} SdA${items.length === 1 ? '' : 's'}</span>
+            </div>
+            ${items.length ? items.map(({ sda, gId, groups: gs }) => {
+              const plan = sda.plan || {};
+              const ses = getSdaTotalSessions(plan);
+              const comp = getPlanCompleteness(plan);
+              return `
+                <div class="rounded-xl border border-zinc-200/80 bg-zinc-50/60 p-2.5">
+                  <div class="flex items-start justify-between gap-2">
+                    <div class="min-w-0">
+                      <div class="text-xs font-bold text-zinc-900 truncate" title="${escapeHtml(sda.title)}">${escapeHtml(sda.title)}</div>
+                      <div class="text-[10px] text-zinc-400 mt-0.5">${ses ? ses + ' sessions · ' : ''}programació ${comp}%</div>
+                    </div>
+                    <div class="flex items-center gap-0.5 shrink-0">
+                      <button onclick="editSdaFromHome('${gId}','${sda.id}')" title="Editar la SdA" class="p-1.5 text-zinc-400 hover:text-zinc-900 hover:bg-white rounded-lg transition"><i class="fa-solid fa-pen text-[10px]"></i></button>
+                      <button onclick="openPosterFromHome('${gId}','${sda.id}')" title="Fitxa imprimible" class="p-1.5 text-zinc-400 hover:text-amber-700 hover:bg-white rounded-lg transition"><i class="fa-solid fa-print text-[10px]"></i></button>
+                    </div>
+                  </div>
+                  <div class="flex flex-wrap gap-1 mt-1.5">${gs.map(g => `<span class="text-[9px] font-bold font-mono px-1.5 py-0.5 rounded border ${getGroupPastelTheme(g).badgeBg}">${escapeHtml(g.name)}</span>`).join('')}</div>
+                </div>`;
+            }).join('') : `<div class="text-[11px] text-zinc-400 italic py-2">Cap SdA programada.</div>`}
+          </div>`;
       }).join('');
+      document.getElementById('homeProgramacio').innerHTML = progHtml;
     };
 
     // ================== GESTIÓ DE CLASSES ==================
@@ -2047,7 +2365,10 @@
       const trimSdas = (curGroup.sdas || []).filter(s => s.trim === window.appState.currentTrim);
       const sel = document.getElementById('sdaSelect');
       let sda = trimSdas.find(s => s.id === sel.value) || trimSdas[0];
-      if (sda) sel.value = sda.id;
+      if (sda) {
+        sel.value = sda.id;
+        rememberLastVisit({ gId: window.appData.activeGroupId, sdaId: sda.id });
+      }
 
       const head = document.getElementById('sdaGridHead');
       const body = document.getElementById('sdaGridBody');
