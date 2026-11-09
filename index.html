@@ -140,6 +140,8 @@
     @media print {
       * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
       body.poster-mode > *:not(#sdaPosterOverlay) { display: none !important; }
+      body.print-horari main > section:not(#screenTimetable), body.print-horari .tt-noprint, body.print-horari #loginOverlay { display: none !important; }
+      body.print-horari main { max-width: none !important; padding: 0 !important; }
       body.poster-mode #sdaPosterOverlay { position: static !important; padding: 0 !important; background: none !important; overflow: visible !important; }
       body.poster-mode .poster-toolbar { display: none !important; }
       body.poster-mode #sdaPosterScaler { zoom: 1 !important; margin: 0 auto !important; }
@@ -223,6 +225,11 @@
               <i class="fa-solid fa-arrow-right-from-bracket"></i>
             </button>
           </div>
+
+          <button onclick="goToTimetable()" id="ttNavBtn" title="Horari setmanal" class="inline-flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1.5 rounded-xl border border-zinc-200/80 bg-white text-zinc-700 hover:bg-zinc-50 shadow-subtle transition">
+            <i class="fa-regular fa-calendar text-[11px] text-zinc-400"></i>
+            <span class="hidden sm:inline">Horari</span>
+          </button>
 
           <button onclick="goToSdaLibrary()" id="sdaLibNavBtn" title="Totes les situacions d'aprenentatge" class="inline-flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1.5 rounded-xl border border-amber-300 bg-amber-50 text-amber-900 hover:bg-amber-100 shadow-subtle transition">
             <i class="fa-regular fa-folder-open text-[11px]"></i>
@@ -382,6 +389,39 @@
       <div id="libContent"></div>
     </section>
 
+    <!-- HORARI SETMANAL -->
+    <section id="screenTimetable" class="hidden space-y-5">
+      <div class="flex flex-col lg:flex-row lg:items-end justify-between gap-3 border-b border-zinc-200/70 pb-4 tt-noprint">
+        <div>
+          <button onclick="goToHome()" class="text-xs font-semibold text-zinc-400 hover:text-zinc-900 transition"><i class="fa-solid fa-arrow-left text-[10px] mr-1"></i>Inici</button>
+          <h2 class="text-xl font-extrabold tracking-tight text-zinc-900 mt-0.5">Horari setmanal</h2>
+          <p id="ttSummary" class="text-xs text-zinc-500 mt-0.5"></p>
+        </div>
+        <div class="flex flex-wrap items-center gap-2">
+          <div class="flex items-center gap-1">
+            <button onclick="moveTtWeek(-1)" class="w-9 h-9 rounded-xl border border-zinc-200 bg-white hover:bg-zinc-50 text-zinc-600" title="Setmana anterior"><i class="fa-solid fa-chevron-left text-xs"></i></button>
+            <button onclick="moveTtWeek(0)" id="ttWeekLabel" class="h-9 px-3 rounded-xl border border-zinc-200 bg-white hover:bg-zinc-50 text-xs font-semibold text-zinc-700 min-w-[150px]">Aquesta setmana</button>
+            <button onclick="moveTtWeek(1)" class="w-9 h-9 rounded-xl border border-zinc-200 bg-white hover:bg-zinc-50 text-zinc-600" title="Setmana següent"><i class="fa-solid fa-chevron-right text-xs"></i></button>
+          </div>
+          <button onclick="printTimetable()" class="inline-flex items-center gap-1.5 bg-white hover:bg-zinc-50 border border-zinc-200/90 text-zinc-700 text-xs font-semibold px-3 py-2 rounded-xl shadow-subtle transition">
+            <i class="fa-solid fa-print text-zinc-400 text-[10px]"></i> Imprimir
+          </button>
+          <button onclick="openSlotModal()" class="inline-flex items-center gap-1.5 bg-zinc-900 hover:bg-zinc-800 text-white text-xs font-semibold px-3.5 py-2 rounded-xl shadow-subtle transition">
+            <i class="fa-solid fa-plus text-[10px]"></i> Afegir a l'horari
+          </button>
+        </div>
+      </div>
+
+      <div class="hidden print:block">
+        <h2 class="text-lg font-extrabold text-zinc-900">Horari d'Educació Física</h2>
+        <p id="ttPrintSub" class="text-xs text-zinc-500"></p>
+      </div>
+
+      <div id="ttLegacyNotice"></div>
+      <div id="ttGrid"></div>
+      <div id="ttList" class="tt-noprint"></div>
+    </section>
+
     <!-- ZONA DE TREBALL DE LA CLASSE -->
     <div id="screenClassWorkspace" class="hidden space-y-5">
       <div class="flex flex-wrap items-center justify-between gap-3 bg-white border border-zinc-200/80 px-3.5 py-2.5 rounded-2xl shadow-subtle no-print">
@@ -458,7 +498,7 @@
               <button id="diariModeSummary" onclick="setDiariMode('summary')" class="px-3 py-1.5 rounded-lg transition">Resum d'assistència</button>
             </div>
             <div class="flex items-center gap-1.5 text-[11px]">
-              <span class="font-semibold text-zinc-400">Dies d'EF:</span>
+              <span class="font-semibold text-zinc-400">Horari:</span>
               <div id="diariScheduleChips" class="flex gap-1"></div>
             </div>
           </div>
@@ -1171,6 +1211,59 @@
     </div>
   </div>
 
+  <!-- MODAL FRANJA HORÀRIA -->
+  <div id="slotModal" class="fixed inset-0 bg-zinc-950/40 backdrop-blur-xs z-50 flex items-center justify-center p-4 hidden no-print">
+    <div class="bg-white rounded-3xl shadow-card max-w-md w-full overflow-hidden border border-zinc-200">
+      <div class="px-6 py-4 bg-zinc-900 text-white flex justify-between items-center">
+        <h3 id="slotModalTitle" class="text-sm font-bold flex items-center gap-2"><i class="fa-regular fa-clock text-zinc-400"></i> Classe a l'horari</h3>
+        <button onclick="closeSlotModal()" class="text-zinc-400 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div class="p-6 space-y-4 text-xs">
+        <div>
+          <span class="block font-semibold text-zinc-700 mb-1">Tipus</span>
+          <div id="slotTypeChips" class="grid grid-cols-5 gap-1.5"></div>
+        </div>
+        <div id="slotLabelWrap" class="hidden">
+          <label class="block font-semibold text-zinc-700 mb-1">Descripció <span class="font-normal text-zinc-400">(opcional)</span></label>
+          <input type="text" id="slotLabel" class="w-full text-sm border border-zinc-200 rounded-xl p-2.5 outline-none font-semibold focus:ring-2 focus:ring-zinc-900">
+        </div>
+        <div id="slotGroupWrap">
+          <label class="block font-semibold text-zinc-700 mb-1">Classe</label>
+          <select id="slotGroup" class="w-full text-sm border border-zinc-200 rounded-xl p-2.5 outline-none font-semibold bg-white focus:ring-2 focus:ring-zinc-900"></select>
+        </div>
+        <div>
+          <span class="block font-semibold text-zinc-700 mb-1">Dia</span>
+          <div id="slotDayChips" class="grid grid-cols-5 gap-1.5"></div>
+        </div>
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block font-semibold text-zinc-700 mb-1">Inici</label>
+            <input type="time" id="slotStart" step="300" onchange="onSlotStartChange()" class="w-full text-sm border border-zinc-200 rounded-xl p-2.5 outline-none font-mono font-bold focus:ring-2 focus:ring-zinc-900">
+          </div>
+          <div>
+            <label class="block font-semibold text-zinc-700 mb-1">Final</label>
+            <input type="time" id="slotEnd" step="300" class="w-full text-sm border border-zinc-200 rounded-xl p-2.5 outline-none font-mono font-bold focus:ring-2 focus:ring-zinc-900">
+          </div>
+        </div>
+        <div>
+          <label class="block font-semibold text-zinc-700 mb-1">Lloc <span class="font-normal text-zinc-400">(opcional)</span></label>
+          <input type="text" id="slotPlace" list="slotPlaceList" placeholder="Ex: Gimnàs, Pista exterior..." class="w-full text-sm border border-zinc-200 rounded-xl p-2.5 outline-none font-medium focus:ring-2 focus:ring-zinc-900">
+          <datalist id="slotPlaceList"></datalist>
+        </div>
+        <div id="slotConflictMsg" class="hidden text-[11px] font-semibold text-amber-800 bg-amber-50 border border-amber-200 rounded-xl px-3 py-2"></div>
+      </div>
+      <div class="px-6 py-3.5 bg-zinc-50 border-t border-zinc-200 flex justify-between items-center text-xs">
+        <div>
+          <button id="slotDeleteBtn" onclick="deleteSlotFromModal()" class="hidden px-3 py-1.5 bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 rounded-xl font-semibold"><i class="fa-regular fa-trash-can mr-1"></i> Treure</button>
+        </div>
+        <div class="flex gap-2">
+          <button onclick="closeSlotModal()" class="px-3.5 py-1.5 border border-zinc-300 rounded-xl font-semibold text-zinc-600">Cancel·lar</button>
+          <button onclick="saveSlotFromModal()" class="px-4 py-1.5 bg-zinc-900 hover:bg-zinc-800 text-white rounded-xl font-semibold">Desar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- FITXA IMPRIMIBLE DE LA SdA -->
   <div id="sdaPosterOverlay" class="hidden">
     <div class="poster-toolbar">
@@ -1304,6 +1397,8 @@
             }
           } else if (window.appState?.currentScreen === 'library') {
             window.renderSdaLibrary();
+          } else if (window.appState?.currentScreen === 'timetable') {
+            window.renderTimetable();
           } else {
             window.renderHomeScreen();
           }
@@ -1637,6 +1732,7 @@
     window.goToHome = function() {
       window.appState.currentScreen = 'home';
       document.getElementById('screenSdaLibrary').classList.add('hidden');
+      document.getElementById('screenTimetable').classList.add('hidden');
       document.getElementById('screenHome').classList.remove('hidden');
       document.getElementById('screenClassWorkspace').classList.add('hidden');
       document.getElementById('headerBreadcrumb').classList.add('hidden');
@@ -1651,6 +1747,7 @@
       window.appState.currentScreen = 'class';
       
       document.getElementById('screenSdaLibrary').classList.add('hidden');
+      document.getElementById('screenTimetable').classList.add('hidden');
       document.getElementById('screenHome').classList.add('hidden');
       document.getElementById('screenClassWorkspace').classList.remove('hidden');
       document.getElementById('headerBreadcrumb').classList.remove('hidden');
@@ -1851,27 +1948,64 @@
         contCard.innerHTML = '';
       }
 
-      // Classes d'avui (segons l'horari del diari)
+      // Classes d'avui (segons l'horari)
       const todayIso = todayISO();
       const dow = new Date().getDay();
-      const todayGroups = groupKeys.filter(g => (groups[g].schedule || []).includes(dow));
-      const noSchedule = groupKeys.length > 0 && groupKeys.every(g => !(groups[g].schedule || []).length);
-      document.getElementById('homeToday').innerHTML = todayGroups.length ? `
+      const nowD = new Date();
+      const nowMin = nowD.getHours() * 60 + nowD.getMinutes();
+      const todayItems = [];
+      groupKeys.forEach(g => {
+        const grp = groups[g];
+        getGroupTimetable(grp).filter(s => s.day === dow).forEach(s => todayItems.push({ gId: g, grp, slot: s }));
+        if ((grp.schedule || []).includes(dow) && !getGroupTimetable(grp).some(s => s.day === dow)) todayItems.push({ gId: g, grp, slot: null });
+      });
+      getOtherSlots().filter(s => s.day === dow).forEach(s => todayItems.push({ other: true, slot: s }));
+      todayItems.sort((a, b) => (a.slot ? timeToMin(a.slot.start) : 9999) - (b.slot ? timeToMin(b.slot.start) : 9999));
+      const nextIdx = todayItems.findIndex(it => !it.other && it.slot && timeToMin(it.slot.start) > nowMin);
+      const noSchedule = groupKeys.length > 0 && groupKeys.every(g => !getGroupDays(groups[g]).length) && !getOtherSlots().length;
+      document.getElementById('homeToday').innerHTML = todayItems.length ? `
         <div class="space-y-2">
-          <h3 class="text-xs font-bold text-zinc-500 uppercase tracking-wider"><i class="fa-solid fa-clipboard-check mr-1.5 text-zinc-400"></i>Avui tens classe amb</h3>
+          <div class="flex items-center justify-between">
+            <h3 class="text-xs font-bold text-zinc-500 uppercase tracking-wider"><i class="fa-solid fa-clipboard-check mr-1.5 text-zinc-400"></i>El teu dia d'avui</h3>
+            <button onclick="goToTimetable()" class="text-[11px] font-semibold text-zinc-500 hover:text-zinc-900">Veure l'horari <i class="fa-solid fa-arrow-right text-[9px] ml-0.5"></i></button>
+          </div>
           <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
-            ${todayGroups.map(g => {
-              const grp = groups[g];
+            ${todayItems.map((it, i) => {
+              if (it.other) {
+                const s = it.slot, ty = OTHER_SLOT_TYPES[s.type] || OTHER_SLOT_TYPES.altre;
+                const isNowO = timeToMin(s.start) <= nowMin && nowMin < timeToMin(s.end);
+                return `
+                  <div class="flex items-center gap-3 border border-dashed ${ty.cls} ${isNowO ? 'ring-2 ring-zinc-900/20' : ''} rounded-2xl px-3 py-2.5" style="${ty.stripe ? `background-image:repeating-linear-gradient(135deg, ${ty.stripe} 0 6px, transparent 6px 12px)` : ''}">
+                    <div class="w-14 shrink-0 text-center">
+                      <div class="text-sm font-black font-mono leading-none">${s.start}</div>
+                      <div class="text-[10px] font-mono opacity-60 mt-0.5">${s.end}</div>
+                    </div>
+                    <div class="flex-1 min-w-0">
+                      <div class="text-xs font-bold truncate"><i class="fa-solid ${ty.icon} text-[10px] mr-1 opacity-70"></i>${escapeHtml(entryTitle(s))}${isNowO ? ' <span class="text-[9px] font-black text-white bg-zinc-900 px-1.5 py-0.5 rounded ml-1">ARA</span>' : ''}</div>
+                      <div class="text-[11px] opacity-70 truncate">${ty.label}${s.place ? ' · ' + escapeHtml(s.place) : ''}</div>
+                    </div>
+                  </div>`;
+              }
+              const grp = it.grp;
               const done = !!(grp.sessions && grp.sessions[todayIso]);
               const theme = getGroupPastelTheme(grp);
+              const s = it.slot;
+              const isNow = s && timeToMin(s.start) <= nowMin && nowMin < timeToMin(s.end);
+              const isNext = i === nextIdx && !isNow;
               let f = 0;
               if (done) (grp.students || []).forEach(st => { const r = getRecord(grp.sessions[todayIso], st.id); if (r.a === 'F' || r.a === 'FJ') f++; });
               return `
-                <button onclick="openDiariFor('${g}')" class="flex items-center gap-3 text-left bg-white border ${done ? 'border-emerald-200' : 'border-zinc-200'} hover:border-zinc-400 rounded-2xl px-3 py-2.5 shadow-subtle transition">
-                  <div class="w-9 h-9 rounded-xl ${theme.avatarBg} flex items-center justify-center text-xs font-bold font-mono shrink-0">${escapeHtml(grp.name.slice(0, 2))}</div>
+                <button onclick="openDiariFor('${it.gId}')" class="flex items-center gap-3 text-left bg-white border ${isNow ? 'border-zinc-900 ring-2 ring-zinc-900/10' : done ? 'border-emerald-200' : 'border-zinc-200'} hover:border-zinc-400 rounded-2xl px-3 py-2.5 shadow-subtle transition">
+                  <div class="w-14 shrink-0 text-center">
+                    <div class="text-sm font-black font-mono text-zinc-900 leading-none">${s ? s.start : '--:--'}</div>
+                    <div class="text-[10px] font-mono text-zinc-400 mt-0.5">${s ? s.end : ''}</div>
+                  </div>
                   <div class="flex-1 min-w-0">
-                    <div class="text-xs font-bold text-zinc-900 truncate">${escapeHtml(grp.name)}</div>
-                    <div class="text-[11px] ${done ? 'text-emerald-700' : 'text-zinc-400'}">${done ? `<i class="fa-solid fa-check mr-0.5"></i> Llista passada · ${f} falt${f === 1 ? 'a' : 'es'}` : 'Llista pendent'}</div>
+                    <div class="flex items-center gap-1.5">
+                      <span class="text-[11px] font-bold font-mono px-1.5 py-0.5 rounded border ${theme.badgeBg} truncate">${escapeHtml(grp.name)}</span>
+                      ${isNow ? '<span class="text-[9px] font-black text-white bg-zinc-900 px-1.5 py-0.5 rounded">ARA</span>' : isNext ? '<span class="text-[9px] font-black text-zinc-600 bg-zinc-100 px-1.5 py-0.5 rounded">SEGÜENT</span>' : ''}
+                    </div>
+                    <div class="text-[11px] mt-0.5 ${done ? 'text-emerald-700' : 'text-zinc-400'} truncate">${done ? `<i class="fa-solid fa-check mr-0.5"></i> Llista passada · ${f} falt${f === 1 ? 'a' : 'es'}` : 'Llista pendent'}${s && s.place ? ` · ${escapeHtml(s.place)}` : ''}</div>
                   </div>
                   <span class="text-[11px] font-semibold px-2.5 py-1.5 rounded-xl shrink-0 ${done ? 'bg-zinc-100 text-zinc-700' : 'bg-zinc-900 text-white'}">${done ? 'Obrir' : 'Passar llista'}</span>
                 </button>`;
@@ -1879,8 +2013,8 @@
           </div>
         </div>` : (noSchedule ? `
         <div class="flex flex-wrap items-center justify-between gap-2 text-xs bg-white border border-dashed border-zinc-300 rounded-2xl px-4 py-3">
-          <span class="text-zinc-500"><i class="fa-solid fa-clipboard-check mr-1.5 text-zinc-400"></i>Indica els dies d'EF de cada classe al <b>Diari</b> i aquí veuràs a qui has de passar llista cada dia.</span>
-          <button onclick="openDiariFor('${groupKeys[0]}')" class="font-semibold text-zinc-700 bg-zinc-100 hover:bg-zinc-200 px-2.5 py-1 rounded-lg">Configurar</button>
+          <span class="text-zinc-500"><i class="fa-regular fa-calendar mr-1.5 text-zinc-400"></i>Afegeix el dia i l'hora de les teves classes i aquí veuràs a qui toca passar llista cada dia.</span>
+          <button onclick="goToTimetable()" class="font-semibold text-zinc-700 bg-zinc-100 hover:bg-zinc-200 px-2.5 py-1 rounded-lg">Crear l'horari</button>
         </div>` : '');
 
       // Targetes de classe
@@ -2155,7 +2289,7 @@
     // Salta al dia anterior/següent que tingui EF segons l'horari (o ±1 dia si no hi ha horari)
     window.moveDiariDate = function(dir) {
       const group = getCurrentGroup();
-      const sched = group.schedule || [];
+      const sched = getGroupDays(group);
       const d = isoToDate(window.appState.diariDate);
       for (let i = 0; i < 14; i++) {
         d.setDate(d.getDate() + dir);
@@ -2371,13 +2505,15 @@
     window.renderDiariView = function() {
       const group = getCurrentGroup();
       const mode = window.appState.diariMode;
-      const sched = group.schedule || [];
+      const slots = getGroupTimetable(group).slice().sort((a, b) => a.day - b.day || timeToMin(a.start) - timeToMin(b.start));
+      const legacyDays = (group.schedule || []).filter(d => !slots.some(s => s.day === d));
 
       document.getElementById('diariModeSession').className = `px-3 py-1.5 rounded-lg transition ${mode === 'session' ? 'bg-white text-zinc-900 shadow-subtle font-bold' : 'text-zinc-500 hover:text-zinc-900'}`;
       document.getElementById('diariModeSummary').className = `px-3 py-1.5 rounded-lg transition ${mode === 'summary' ? 'bg-white text-zinc-900 shadow-subtle font-bold' : 'text-zinc-500 hover:text-zinc-900'}`;
-      document.getElementById('diariScheduleChips').innerHTML = WEEKDAYS.map(w => `
-        <button onclick="toggleScheduleDay(${w.n})" class="w-8 h-7 rounded-lg text-[11px] font-bold border transition ${sched.includes(w.n) ? 'bg-zinc-900 text-white border-zinc-900' : 'bg-white text-zinc-400 border-zinc-200 hover:border-zinc-400'}">${w.s}</button>
-      `).join('');
+      document.getElementById('diariScheduleChips').innerHTML =
+        slots.map(s => `<button onclick="openSlotModal('${window.appData.activeGroupId}','${s.id}')" class="h-7 px-2 rounded-lg text-[11px] font-semibold border bg-white text-zinc-700 border-zinc-200 hover:border-zinc-400">${TT_DAYS.find(d => d.n === s.day).s} <span class="font-mono">${s.start}</span></button>`).join('') +
+        legacyDays.map(d => `<button onclick="openSlotModal(null, null, { gId: '${window.appData.activeGroupId}', day: ${d} })" title="Falta l'hora" class="h-7 px-2 rounded-lg text-[11px] font-semibold border bg-amber-50 text-amber-800 border-amber-200">${TT_DAYS.find(x => x.n === d).s} ?</button>`).join('') +
+        `<button onclick="openSlotModal(null, null, { gId: '${window.appData.activeGroupId}' })" class="h-7 px-2 rounded-lg text-[11px] font-semibold border border-dashed border-zinc-300 text-zinc-500 hover:text-zinc-900"><i class="fa-solid fa-plus text-[9px]"></i> Hora</button>`;
       document.getElementById('diariDateBar').classList.toggle('hidden', mode !== 'session');
       document.getElementById('diariSessionPanel').classList.toggle('hidden', mode !== 'session');
       document.getElementById('diariSummaryPanel').classList.toggle('hidden', mode !== 'summary');
@@ -2391,9 +2527,10 @@
       const panel = document.getElementById('diariSessionPanel');
       document.getElementById('diariDateInput').value = iso;
       const dow = isoToDate(iso).getDay();
-      const sched = group.schedule || [];
+      const sched = getGroupDays(group);
       const isClassDay = !sched.length || sched.includes(dow);
-      document.getElementById('diariDateLabel').innerHTML = `${formatLongDateCa(iso)}${iso === todayISO() ? ' <span class="ml-1 text-[10px] font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 px-1.5 py-0.5 rounded">AVUI</span>' : ''}${!isClassDay ? ' <span class="ml-1 text-[10px] font-semibold text-zinc-400">(no és dia d\'EF)</span>' : ''}`;
+      const daySlot = getGroupTimetable(group).find(s => s.day === dow);
+      document.getElementById('diariDateLabel').innerHTML = `${formatLongDateCa(iso)}${iso === todayISO() ? ' <span class="ml-1 text-[10px] font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 px-1.5 py-0.5 rounded">AVUI</span>' : ''}${daySlot ? ` <span class="ml-1 text-[11px] font-mono font-semibold text-zinc-500">${daySlot.start}–${daySlot.end}${daySlot.place ? ' · ' + escapeHtml(daySlot.place) : ''}</span>` : ''}${!isClassDay ? ' <span class="ml-1 text-[10px] font-semibold text-zinc-400">(no és dia d\'EF)</span>' : ''}`;
 
       const session = getGroupSessions(group)[iso];
       let students = group.students || [];
@@ -2644,6 +2781,537 @@
         </div>`;
     }
 
+    // ================== HORARI SETMANAL ==================
+    // Model: group.timetable = [{ id, day (1=dl … 5=dv), start 'HH:MM', end 'HH:MM', place }]
+    // group.schedule (antic: només dies) es manté per compatibilitat.
+
+    const TT_DAYS = [
+      { n: 1, s: 'Dl', l: 'Dilluns' }, { n: 2, s: 'Dt', l: 'Dimarts' }, { n: 3, s: 'Dc', l: 'Dimecres' },
+      { n: 4, s: 'Dj', l: 'Dijous' }, { n: 5, s: 'Dv', l: 'Divendres' }
+    ];
+
+    function timeToMin(t) {
+      if (!t || !/^\d{1,2}:\d{2}$/.test(t)) return null;
+      const [h, m] = t.split(':').map(Number);
+      return h * 60 + m;
+    }
+    function minToTime(m) {
+      return `${String(Math.floor(m / 60)).padStart(2, '0')}:${String(m % 60).padStart(2, '0')}`;
+    }
+
+    function getGroupTimetable(group) {
+      return Array.isArray(group.timetable) ? group.timetable.filter(Boolean) : (group.timetable ? Object.values(group.timetable).filter(Boolean) : []);
+    }
+
+    // Dies amb EF d'una classe: els de l'horari + els antics sense hora
+    function getGroupDays(group) {
+      const days = new Set((group.schedule || []).filter(Boolean));
+      getGroupTimetable(group).forEach(s => days.add(s.day));
+      return Array.from(days).sort();
+    }
+    window.getGroupDays = getGroupDays;
+
+    function getAllSlots() {
+      const out = [];
+      Object.keys(window.appData.groups || {}).forEach(gId => {
+        const group = window.appData.groups[gId];
+        getGroupTimetable(group).forEach(slot => out.push({ ...slot, gId, group }));
+      });
+      return out.sort((a, b) => a.day - b.day || (timeToMin(a.start) || 0) - (timeToMin(b.start) || 0));
+    }
+
+    function getSlotsForDate(iso) {
+      const dow = isoToDate(iso).getDay();
+      return getAllSlots().filter(s => s.day === dow);
+    }
+
+    // Franges que no són classes d'EF (guàrdies, pati, reunions...)
+    function getOtherSlots() {
+      const o = window.appData.otherSlots;
+      return Array.isArray(o) ? o.filter(Boolean) : (o ? Object.values(o).filter(Boolean) : []);
+    }
+
+    // Totes les franges de l'horari: classes (kind 'class') i altres (kind 'other')
+    function getAllEntries() {
+      return [
+        ...getAllSlots().map(s => ({ ...s, kind: 'class' })),
+        ...getOtherSlots().map(s => ({ ...s, kind: 'other' }))
+      ].sort((a, b) => a.day - b.day || (timeToMin(a.start) || 0) - (timeToMin(b.start) || 0));
+    }
+
+    function entryTitle(e) {
+      if (e.kind === 'class') return e.group.name;
+      return e.label || (OTHER_SLOT_TYPES[e.type] || OTHER_SLOT_TYPES.altre).label;
+    }
+
+    function getSlotConflicts(slot, ignoreId) {
+      const s = timeToMin(slot.start), e = timeToMin(slot.end);
+      return getAllEntries().filter(o => o.id !== ignoreId && o.day === slot.day && timeToMin(o.start) < e && timeToMin(o.end) > s);
+    }
+
+    // ---------- Navegació ----------
+
+    let ttWeekOffset = 0;
+
+    function getWeekMonday(offset = 0) {
+      const d = new Date();
+      d.setHours(12, 0, 0, 0);
+      const dow = d.getDay() || 7;
+      // Dissabte i diumenge mostren la setmana següent
+      d.setDate(d.getDate() - dow + 1 + (dow >= 6 ? 7 : 0) + offset * 7);
+      return d;
+    }
+
+    window.goToTimetable = function() {
+      window.appState.currentScreen = 'timetable';
+      ['screenHome', 'screenClassWorkspace', 'screenSdaLibrary'].forEach(id => document.getElementById(id).classList.add('hidden'));
+      document.getElementById('screenTimetable').classList.remove('hidden');
+      document.getElementById('headerBreadcrumb').classList.add('hidden');
+      document.getElementById('classSubNav').classList.add('hidden');
+      ttWeekOffset = 0;
+      window.scrollTo(0, 0);
+      renderTimetable();
+    };
+
+    window.moveTtWeek = function(dir) {
+      ttWeekOffset = dir === 0 ? 0 : ttWeekOffset + dir;
+      renderTimetable();
+    };
+
+    window.printTimetable = function() {
+      document.body.classList.add('print-horari');
+      let st = document.getElementById('ttPageStyle');
+      if (!st) { st = document.createElement('style'); st.id = 'ttPageStyle'; document.head.appendChild(st); }
+      st.textContent = '@media print { @page { size: A4 landscape; margin: 10mm; } }';
+      setTimeout(() => {
+        window.print();
+        setTimeout(() => document.body.classList.remove('print-horari'), 500);
+      }, 100);
+    };
+
+    // ---------- Modal ----------
+
+    const OTHER_SLOT_TYPES = {
+      guardia: { label: 'Guàrdia', icon: 'fa-shield-halved', cls: 'bg-zinc-100 text-zinc-800 border-zinc-300', stripe: 'rgba(113,113,122,.10)', placeholder: 'Ex: Guàrdia de passadís' },
+      pati:    { label: 'Pati', icon: 'fa-tree', cls: 'bg-lime-50 text-lime-900 border-lime-300', stripe: 'rgba(101,163,13,.10)', placeholder: 'Ex: Guàrdia de pati' },
+      reunio:  { label: 'Reunió', icon: 'fa-people-group', cls: 'bg-violet-50 text-violet-900 border-violet-300', stripe: null, placeholder: 'Ex: Reunió de departament' },
+      altre:   { label: 'Altres', icon: 'fa-thumbtack', cls: 'bg-stone-50 text-stone-800 border-stone-300', stripe: null, placeholder: 'Ex: Atenció a famílies, coordinació...' }
+    };
+
+    let editingSlot = null; // { kind: 'class'|'other', gId, id } o null
+
+    window.openSlotModal = function(gId = null, slotId = null, preset = {}) {
+      const groups = window.appData.groups || {};
+      const sel = document.getElementById('slotGroup');
+      sel.innerHTML = Object.keys(groups).map(g => `<option value="${g}">${escapeHtml(groups[g].name)}</option>`).join('');
+
+      const places = new Set();
+      getAllEntries().forEach(s => { if (s.place) places.add(s.place); });
+      ['Gimnàs', 'Pista exterior', 'Pavelló', 'Sala de professors', 'Pati'].forEach(p => places.add(p));
+      document.getElementById('slotPlaceList').innerHTML = Array.from(places).map(p => `<option value="${escapeHtml(p)}">`).join('');
+
+      let slot = null, kind = preset.type && preset.type !== 'class' ? 'other' : 'class';
+      if (gId === '__other' && slotId) {
+        slot = getOtherSlots().find(s => s.id === slotId);
+        kind = 'other';
+      } else if (gId && slotId) {
+        slot = getGroupTimetable(groups[gId]).find(s => s.id === slotId);
+        kind = 'class';
+      }
+      editingSlot = slot ? { kind, gId: kind === 'class' ? gId : null, id: slotId } : null;
+
+      if (kind === 'class' && !Object.keys(groups).length && !preset.type) kind = 'other';
+      window.appState.slotType = slot ? (kind === 'class' ? 'class' : slot.type) : (preset.type || (kind === 'class' ? 'class' : 'guardia'));
+
+      const last = getAllEntries().slice(-1)[0];
+      if (Object.keys(groups).length) sel.value = kind === 'class' && slot ? gId : (gId && gId !== '__other' ? gId : (preset.gId || (window.appState.currentScreen === 'class' ? window.appData.activeGroupId : Object.keys(groups)[0])));
+      document.getElementById('slotLabel').value = slot && kind === 'other' ? (slot.label || '') : '';
+      window.appState.slotDay = slot ? slot.day : (preset.day || 1);
+      document.getElementById('slotStart').value = slot ? slot.start : (preset.start || '08:00');
+      document.getElementById('slotEnd').value = slot ? slot.end : (preset.end || '09:00');
+      document.getElementById('slotPlace').value = slot ? (slot.place || '') : (preset.place || (kind === 'class' && last && last.kind === 'class' ? last.place : '') || '');
+      document.getElementById('slotDeleteBtn').classList.toggle('hidden', !slot);
+      renderSlotTypeChips();
+      renderSlotDayChips();
+      checkSlotConflicts();
+      document.getElementById('slotModal').classList.remove('hidden');
+    };
+
+    function renderSlotTypeChips() {
+      const t = window.appState.slotType;
+      const types = [{ id: 'class', label: 'Classe d\'EF', icon: 'fa-person-running' }, ...Object.keys(OTHER_SLOT_TYPES).map(k => ({ id: k, ...OTHER_SLOT_TYPES[k] }))];
+      // Un cop creada, no es pot canviar entre classe i altres
+      const locked = editingSlot ? editingSlot.kind : null;
+      document.getElementById('slotTypeChips').innerHTML = types.map(x => {
+        const disabled = locked && ((locked === 'class') !== (x.id === 'class'));
+        return `<button type="button" ${disabled ? 'disabled' : ''} onclick="setSlotType('${x.id}')" class="py-2 px-1 rounded-xl border text-[11px] font-bold transition flex flex-col items-center gap-0.5 disabled:opacity-30 ${t === x.id ? 'bg-zinc-900 text-white border-zinc-900' : 'bg-white text-zinc-500 border-zinc-200 hover:border-zinc-400'}"><i class="fa-solid ${x.icon}"></i>${x.label}</button>`;
+      }).join('');
+      const isClass = t === 'class';
+      document.getElementById('slotGroupWrap').classList.toggle('hidden', !isClass);
+      document.getElementById('slotLabelWrap').classList.toggle('hidden', isClass);
+      if (!isClass) document.getElementById('slotLabel').placeholder = OTHER_SLOT_TYPES[t].placeholder;
+      const what = isClass ? 'classe' : OTHER_SLOT_TYPES[t].label.toLowerCase();
+      document.getElementById('slotModalTitle').innerHTML = `<i class="fa-regular fa-clock text-zinc-400"></i> ${editingSlot ? 'Modificar' : 'Afegir'} ${isClass ? 'classe' : what} a l'horari`;
+    }
+
+    window.setSlotType = function(t) {
+      if (t === 'class' && !Object.keys(window.appData.groups || {}).length) return alert("Primer crea alguna classe.");
+      window.appState.slotType = t;
+      renderSlotTypeChips();
+    };
+
+    function renderSlotDayChips() {
+      document.getElementById('slotDayChips').innerHTML = TT_DAYS.map(d => `
+        <button type="button" onclick="setSlotDay(${d.n})" class="py-2 rounded-xl border text-xs font-bold transition ${window.appState.slotDay === d.n ? 'bg-zinc-900 text-white border-zinc-900' : 'bg-white text-zinc-500 border-zinc-200 hover:border-zinc-400'}">${d.s}</button>
+      `).join('');
+    }
+
+    window.setSlotDay = function(n) {
+      window.appState.slotDay = n;
+      renderSlotDayChips();
+      checkSlotConflicts();
+    };
+
+    window.onSlotStartChange = function() {
+      const s = timeToMin(document.getElementById('slotStart').value);
+      const e = timeToMin(document.getElementById('slotEnd').value);
+      if (s !== null && (e === null || e <= s)) document.getElementById('slotEnd').value = minToTime(Math.min(s + 60, 23 * 60 + 55));
+      checkSlotConflicts();
+    };
+
+    function checkSlotConflicts() {
+      const msg = document.getElementById('slotConflictMsg');
+      const slot = { day: window.appState.slotDay, start: document.getElementById('slotStart').value, end: document.getElementById('slotEnd').value };
+      if (timeToMin(slot.start) === null || timeToMin(slot.end) === null) { msg.classList.add('hidden'); return; }
+      const conf = getSlotConflicts(slot, editingSlot && editingSlot.id);
+      msg.classList.toggle('hidden', !conf.length);
+      msg.innerHTML = conf.length ? `<i class="fa-solid fa-triangle-exclamation mr-1"></i>Se solapa amb ${conf.map(c => `${escapeHtml(entryTitle(c))} (${c.start}–${c.end})`).join(', ')}.` : '';
+    }
+    document.addEventListener('change', e => { if (e.target && e.target.id === 'slotEnd') checkSlotConflicts(); });
+
+    window.closeSlotModal = function() {
+      document.getElementById('slotModal').classList.add('hidden');
+      editingSlot = null;
+    };
+
+    function afterTimetableChange(gIds, otherChanged = false) {
+      saveToStorage();
+      if (otherChanged && window.syncWholeAppToCloud) window.syncWholeAppToCloud();
+      else gIds.forEach(g => { if (window.syncGroupEntityToCloud) window.syncGroupEntityToCloud(g); });
+      if (window.appState.currentScreen === 'timetable') renderTimetable();
+      if (window.appState.currentScreen === 'home') renderHomeScreen();
+      if (window.appState.currentScreen === 'class' && window.appState.currentView === 'diari') renderDiariView();
+    }
+
+    window.saveSlotFromModal = function() {
+      const type = window.appState.slotType;
+      const start = document.getElementById('slotStart').value;
+      const end = document.getElementById('slotEnd').value;
+      const place = document.getElementById('slotPlace').value.trim();
+      const day = window.appState.slotDay;
+      if (timeToMin(start) === null || timeToMin(end) === null) return alert("Indica l'hora d'inici i de final.");
+      if (timeToMin(end) <= timeToMin(start)) return alert("L'hora de final ha de ser posterior a la d'inici.");
+      const id = editingSlot ? editingSlot.id : 'sl_' + Date.now();
+
+      if (type !== 'class') {
+        const label = document.getElementById('slotLabel').value.trim();
+        const list = getOtherSlots().filter(s => s.id !== id);
+        list.push({ id, type, label, day, start, end, place });
+        list.sort((a, b) => a.day - b.day || timeToMin(a.start) - timeToMin(b.start));
+        window.appData.otherSlots = list;
+        closeSlotModal();
+        afterTimetableChange([], true);
+        return;
+      }
+
+      const gId = document.getElementById('slotGroup').value;
+      const touched = new Set([gId]);
+      if (editingSlot) {
+        const oldGroup = window.appData.groups[editingSlot.gId];
+        oldGroup.timetable = getGroupTimetable(oldGroup).filter(s => s.id !== editingSlot.id);
+        touched.add(editingSlot.gId);
+      }
+      const group = window.appData.groups[gId];
+      group.timetable = getGroupTimetable(group);
+      group.timetable.push({ id, day, start, end, place });
+      group.timetable.sort((a, b) => a.day - b.day || timeToMin(a.start) - timeToMin(b.start));
+      // Si aquest dia estava a l'horari antic sense hora, ja no cal
+      if (Array.isArray(group.schedule)) group.schedule = group.schedule.filter(d => d !== day);
+
+      closeSlotModal();
+      afterTimetableChange(Array.from(touched));
+    };
+
+    window.deleteSlotFromModal = function() {
+      if (!editingSlot) return;
+      if (editingSlot.kind === 'other') {
+        window.appData.otherSlots = getOtherSlots().filter(s => s.id !== editingSlot.id);
+        closeSlotModal();
+        afterTimetableChange([], true);
+        return;
+      }
+      const group = window.appData.groups[editingSlot.gId];
+      group.timetable = getGroupTimetable(group).filter(s => s.id !== editingSlot.id);
+      const gId = editingSlot.gId;
+      closeSlotModal();
+      afterTimetableChange([gId]);
+    };
+
+    window.removeLegacyDay = function(gId, day) {
+      const group = window.appData.groups[gId];
+      group.schedule = (group.schedule || []).filter(d => d !== day);
+      afterTimetableChange([gId]);
+    };
+
+    // ---------- Render ----------
+
+    window.renderTimetable = function() {
+      const monday = getWeekMonday(ttWeekOffset);
+      const days = TT_DAYS.map((d, i) => {
+        const date = new Date(monday); date.setDate(monday.getDate() + i);
+        return { ...d, iso: dateToISO(date), date };
+      });
+      const friday = days[4].date;
+      const sameMonth = monday.getMonth() === friday.getMonth();
+      const rangeTxt = sameMonth
+        ? `${monday.getDate()}–${friday.getDate()} ${friday.toLocaleDateString('ca-ES', { month: 'long' })}`
+        : `${monday.toLocaleDateString('ca-ES', { day: 'numeric', month: 'short' })} – ${friday.toLocaleDateString('ca-ES', { day: 'numeric', month: 'short' })}`;
+      document.getElementById('ttWeekLabel').textContent = ttWeekOffset === 0 ? `Aquesta setmana · ${rangeTxt}` : rangeTxt;
+
+      const slots = getAllEntries();
+      const groups = window.appData.groups || {};
+      const fmtH = mins => (mins / 60).toLocaleString('ca-ES', { maximumFractionDigits: 1 });
+      const minsOf = list => list.reduce((a, s) => a + (timeToMin(s.end) - timeToMin(s.start)), 0);
+      const classSlots = slots.filter(s => s.kind === 'class');
+      const nGroups = new Set(classSlots.map(s => s.gId)).size;
+      const summaryParts = [];
+      if (classSlots.length) summaryParts.push(`${fmtH(minsOf(classSlots))} h de classe (${classSlots.length} sessions · ${nGroups} classe${nGroups === 1 ? '' : 's'})`);
+      Object.keys(OTHER_SLOT_TYPES).forEach(t => {
+        const l = slots.filter(s => s.kind === 'other' && s.type === t);
+        if (l.length) summaryParts.push(`${fmtH(minsOf(l))} h ${t === 'reunio' ? 'de reunions' : t === 'altre' ? 'd\'altres' : 'de ' + OTHER_SLOT_TYPES[t].label.toLowerCase()}`);
+      });
+      if (slots.length) summaryParts.push(`Total: ${fmtH(minsOf(slots))} h`);
+      document.getElementById('ttSummary').textContent = slots.length ? summaryParts.join(' · ') : 'Encara no has afegit res a l\'horari.';
+      document.getElementById('ttPrintSub').textContent = `${getSettings().centre || ''} · Curs ${getSchoolYearLabel()}`;
+
+      // Avís de classes amb dies però sense hora (versió anterior)
+      const legacy = [];
+      Object.keys(groups).forEach(gId => (groups[gId].schedule || []).forEach(day => legacy.push({ gId, day })));
+      document.getElementById('ttLegacyNotice').innerHTML = legacy.length ? `
+        <div class="bg-amber-50 border border-amber-200 rounded-2xl p-3 text-xs space-y-2 tt-noprint">
+          <div class="font-semibold text-amber-900"><i class="fa-regular fa-clock mr-1"></i>Aquests dies d'EF encara no tenen hora:</div>
+          <div class="flex flex-wrap gap-1.5">${legacy.map(l => `
+            <span class="inline-flex items-center gap-1 bg-white border border-amber-200 rounded-lg pl-2 pr-1 py-0.5">
+              <b>${escapeHtml(groups[l.gId].name)}</b> · ${TT_DAYS.find(d => d.n === l.day)?.s || l.day}
+              <button onclick="openSlotModal(null, null, { gId: '${l.gId}', day: ${l.day} })" class="ml-1 px-1.5 py-0.5 rounded bg-amber-100 hover:bg-amber-200 font-semibold text-amber-900">Afegir hora</button>
+              <button onclick="removeLegacyDay('${l.gId}', ${l.day})" title="Treure aquest dia" class="px-1 text-amber-400 hover:text-rose-600"><i class="fa-solid fa-xmark"></i></button>
+            </span>`).join('')}
+          </div>
+        </div>` : '';
+
+      const grid = document.getElementById('ttGrid');
+      if (!slots.length) {
+        grid.innerHTML = `
+          <div class="bg-white border border-dashed border-zinc-300 rounded-3xl p-10 text-center space-y-3">
+            <i class="fa-regular fa-calendar text-3xl text-zinc-300"></i>
+            <p class="text-sm font-semibold text-zinc-700">Afegeix el dia i l'hora de les classes, guàrdies, pati i reunions i es generarà el teu horari.</p>
+            <button onclick="openSlotModal()" class="inline-flex items-center gap-1.5 bg-zinc-900 hover:bg-zinc-800 text-white text-xs font-semibold px-4 py-2 rounded-xl"><i class="fa-solid fa-plus text-[10px]"></i> Afegir la primera classe</button>
+          </div>`;
+        document.getElementById('ttList').innerHTML = '';
+        return;
+      }
+
+      const now = new Date();
+      const todayIso = todayISO();
+      const nowMin = now.getHours() * 60 + now.getMinutes();
+      let minStart = Math.min(...slots.map(s => timeToMin(s.start)));
+      let maxEnd = Math.max(...slots.map(s => timeToMin(s.end)));
+      minStart = Math.floor(minStart / 60) * 60;
+      maxEnd = Math.ceil(maxEnd / 60) * 60;
+      const PX = 1.15; // píxels per minut
+      const PAD = 10;  // marge superior/inferior perquè les hores no quedin tallades
+      const height = (maxEnd - minStart) * PX + PAD * 2;
+      const yOf = m => (m - minStart) * PX + PAD;
+
+      // Carrils per a classes que se solapen el mateix dia
+      const laneInfo = {};
+      TT_DAYS.forEach(d => {
+        const ds = slots.filter(s => s.day === d.n).sort((a, b) => timeToMin(a.start) - timeToMin(b.start));
+        const laneEnds = [];
+        ds.forEach(s => {
+          let lane = laneEnds.findIndex(end => end <= timeToMin(s.start));
+          if (lane === -1) { lane = laneEnds.length; laneEnds.push(0); }
+          laneEnds[lane] = timeToMin(s.end);
+          laneInfo[s.id] = { lane };
+        });
+        ds.forEach(s => {
+          const overl = ds.filter(o => timeToMin(o.start) < timeToMin(s.end) && timeToMin(o.end) > timeToMin(s.start));
+          laneInfo[s.id].lanes = Math.max(...overl.map(o => laneInfo[o.id].lane)) + 1;
+        });
+      });
+
+      const slotStatus = (s, iso) => {
+        const grp = groups[s.gId];
+        const session = grp.sessions && grp.sessions[iso];
+        const isToday = iso === todayIso;
+        const isPast = iso < todayIso || (isToday && timeToMin(s.end) <= nowMin);
+        const isNow = isToday && timeToMin(s.start) <= nowMin && nowMin < timeToMin(s.end);
+        let f = 0;
+        if (session) (grp.students || []).forEach(st => { const r = getRecord(session, st.id); if (r.a === 'F' || r.a === 'FJ') f++; });
+        return { session, isToday, isPast, isNow, f };
+      };
+      const statusIcon = st => st.session
+        ? `<span title="Llista passada" class="inline-flex items-center gap-0.5 text-[9px] font-bold text-emerald-700 bg-white/80 rounded px-1"><i class="fa-solid fa-check"></i>${st.f ? ` ${st.f}F` : ''}</span>`
+        : (st.isPast ? `<span title="Llista pendent" class="text-[9px] font-bold text-rose-600 bg-white/80 rounded px-1">pendent</span>` : '');
+
+      // Graella (pantalles grans i impressió)
+      const hours = [];
+      for (let m = minStart; m <= maxEnd; m += 60) hours.push(m);
+      const desktop = `
+        <div class="hidden md:block print:block bg-white border border-zinc-200 rounded-3xl shadow-card overflow-hidden">
+          <div class="grid" style="grid-template-columns: 56px repeat(5, 1fr)">
+            <div class="bg-zinc-50 border-b border-zinc-200"></div>
+            ${days.map(d => `
+              <div class="py-2.5 text-center border-b border-l border-zinc-200 ${d.iso === todayIso ? 'bg-zinc-900 text-white' : 'bg-zinc-50 text-zinc-700'}">
+                <div class="text-xs font-bold">${d.l}</div>
+                <div class="text-[10px] ${d.iso === todayIso ? 'text-zinc-300' : 'text-zinc-400'} font-mono">${d.date.toLocaleDateString('ca-ES', { day: '2-digit', month: '2-digit' })}</div>
+              </div>`).join('')}
+            <div class="relative border-zinc-200" style="height:${height}px">
+              ${hours.map(m => `<div class="absolute right-2 text-[10px] font-mono text-zinc-400 -translate-y-1/2" style="top:${yOf(m)}px">${minToTime(m)}</div>`).join('')}
+            </div>
+            ${days.map(d => {
+              const daySlots = slots.filter(s => s.day === d.n);
+              const nowLine = d.iso === todayIso && nowMin > minStart && nowMin < maxEnd
+                ? `<div class="absolute left-0 right-0 border-t-2 border-rose-500 z-10 print:hidden" style="top:${yOf(nowMin)}px"><span class="absolute -left-1 -top-[5px] w-2 h-2 rounded-full bg-rose-500"></span></div>` : '';
+              return `
+                <div class="relative border-l border-zinc-200 ${d.iso === todayIso ? 'bg-zinc-50/60' : ''}" style="height:${height}px">
+                  ${hours.map(m => `<div class="absolute left-0 right-0 border-t border-zinc-100" style="top:${yOf(m)}px"></div>`).join('')}
+                  ${nowLine}
+                  ${daySlots.map(s => {
+                    const top = yOf(timeToMin(s.start));
+                    const li = laneInfo[s.id] || { lane: 0, lanes: 1 };
+                    const leftPct = (li.lane / li.lanes) * 100, widthPct = 100 / li.lanes;
+                    const h = Math.max(22, (timeToMin(s.end) - timeToMin(s.start)) * PX - 3);
+                    if (s.kind === 'other') {
+                      const ty = OTHER_SLOT_TYPES[s.type] || OTHER_SLOT_TYPES.altre;
+                      const isNowO = d.iso === todayIso && timeToMin(s.start) <= nowMin && nowMin < timeToMin(s.end);
+                      const conflictO = getSlotConflicts(s, s.id).length > 0;
+                      const short = h < 40;
+                      return `
+                        <button onclick="openSlotModal('__other','${s.id}')" title="${escapeHtml(entryTitle(s))} · ${s.start}–${s.end}" class="absolute rounded-xl border border-dashed ${ty.cls} ${conflictO ? 'ring-2 ring-rose-400' : ''} ${isNowO ? 'ring-2 ring-zinc-900' : ''} overflow-hidden text-left px-2 ${short ? 'py-0.5 flex items-center gap-1.5' : 'py-1.5'} hover:brightness-95 transition" style="top:${top + 1}px;height:${h}px;left:calc(${leftPct}% + 4px);width:calc(${widthPct}% - 8px);${ty.stripe ? `background-image:repeating-linear-gradient(135deg, ${ty.stripe} 0 6px, transparent 6px 12px);` : ''}">
+                          <div class="text-[11px] font-bold leading-tight truncate"><i class="fa-solid ${ty.icon} text-[9px] mr-1 opacity-70"></i>${escapeHtml(entryTitle(s))}</div>
+                          <div class="text-[10px] font-mono opacity-70 ${short ? 'shrink-0' : ''}">${s.start}–${s.end}</div>
+                          ${s.place && h > 50 ? `<div class="text-[10px] opacity-60 truncate">${escapeHtml(s.place)}</div>` : ''}
+                        </button>`;
+                    }
+                    const theme = getGroupPastelTheme(s.group);
+                    const st = slotStatus(s, d.iso);
+                    const conflict = getSlotConflicts(s, s.id).length > 0;
+                    return `
+                      <div class="absolute rounded-xl border ${theme.badgeBg} ${conflict ? 'ring-2 ring-rose-400' : ''} ${st.isNow ? 'ring-2 ring-zinc-900 shadow-float' : 'shadow-subtle'} overflow-hidden group/slot" style="top:${top + 1}px;height:${h}px;left:calc(${leftPct}% + 4px);width:calc(${widthPct}% - 8px)">
+                        <button onclick="openDiariFor('${s.gId}','${d.iso}')" class="w-full h-full text-left px-2 py-1.5 hover:brightness-95 transition">
+                          <div class="flex items-start justify-between gap-1">
+                            <span class="text-xs font-extrabold leading-tight truncate">${escapeHtml(s.group.name)}</span>
+                            <span class="print:hidden shrink-0">${statusIcon(st)}</span>
+                          </div>
+                          <div class="text-[10px] font-mono opacity-80">${s.start}–${s.end}</div>
+                          ${s.place && h > 50 ? `<div class="text-[10px] opacity-70 truncate"><i class="fa-solid fa-location-dot mr-0.5"></i>${escapeHtml(s.place)}</div>` : ''}
+                          ${st.isNow ? '<div class="text-[9px] font-black uppercase tracking-wider mt-0.5">Ara</div>' : ''}
+                        </button>
+                        <button onclick="event.stopPropagation(); openSlotModal('${s.gId}','${s.id}')" title="Modificar" class="print:hidden absolute bottom-1 right-1 w-6 h-6 rounded-lg bg-white/80 hover:bg-white text-zinc-600 opacity-0 group-hover/slot:opacity-100 transition"><i class="fa-solid fa-pen text-[9px]"></i></button>
+                      </div>`;
+                  }).join('')}
+                </div>`;
+            }).join('')}
+          </div>
+        </div>`;
+
+      // Llista per dies (mòbil)
+      const mobile = `
+        <div class="md:hidden print:hidden space-y-3">
+          ${days.map(d => {
+            const daySlots = slots.filter(s => s.day === d.n);
+            return `
+              <div class="bg-white border ${d.iso === todayIso ? 'border-zinc-900' : 'border-zinc-200'} rounded-2xl overflow-hidden shadow-subtle">
+                <div class="px-3 py-2 flex items-center justify-between ${d.iso === todayIso ? 'bg-zinc-900 text-white' : 'bg-zinc-50 text-zinc-700'}">
+                  <span class="text-xs font-bold">${d.l} <span class="font-mono font-normal opacity-60 ml-1">${d.date.toLocaleDateString('ca-ES', { day: '2-digit', month: '2-digit' })}</span></span>
+                  ${d.iso === todayIso ? '<span class="text-[10px] font-bold">AVUI</span>' : ''}
+                </div>
+                ${daySlots.length ? daySlots.map(s => {
+                  if (s.kind === 'other') {
+                    const ty = OTHER_SLOT_TYPES[s.type] || OTHER_SLOT_TYPES.altre;
+                    return `
+                      <button onclick="openSlotModal('__other','${s.id}')" class="w-full flex items-center gap-2 px-3 py-2 border-t border-zinc-100 text-left">
+                        <span class="font-mono text-[11px] font-bold text-zinc-500 w-[84px] shrink-0">${s.start}–${s.end}</span>
+                        <span class="text-[11px] font-semibold px-1.5 py-0.5 rounded border border-dashed ${ty.cls} truncate"><i class="fa-solid ${ty.icon} text-[9px] mr-1"></i>${escapeHtml(entryTitle(s))}</span>
+                        ${s.place ? `<span class="text-[10px] text-zinc-400 truncate">${escapeHtml(s.place)}</span>` : ''}
+                      </button>`;
+                  }
+                  const theme = getGroupPastelTheme(s.group);
+                  const st = slotStatus(s, d.iso);
+                  return `
+                    <div class="flex items-center gap-2 px-3 py-2 border-t border-zinc-100 ${st.isNow ? 'bg-amber-50' : ''}">
+                      <span class="font-mono text-[11px] font-bold text-zinc-700 w-[84px] shrink-0">${s.start}–${s.end}</span>
+                      <button onclick="openDiariFor('${s.gId}','${d.iso}')" class="flex-1 min-w-0 text-left">
+                        <span class="text-[11px] font-bold font-mono px-1.5 py-0.5 rounded border ${theme.badgeBg}">${escapeHtml(s.group.name)}</span>
+                        ${s.place ? `<span class="text-[10px] text-zinc-400 ml-1">${escapeHtml(s.place)}</span>` : ''}
+                        ${st.isNow ? '<span class="ml-1 text-[9px] font-black text-amber-700">ARA</span>' : ''}
+                      </button>
+                      ${statusIcon(st)}
+                      <button onclick="openSlotModal('${s.gId}','${s.id}')" class="p-1.5 text-zinc-300 hover:text-zinc-700"><i class="fa-solid fa-pen text-[10px]"></i></button>
+                    </div>`;
+                }).join('') : '<div class="px-3 py-2 border-t border-zinc-100 text-[11px] text-zinc-300 italic">Res a l\'horari</div>'}
+              </div>`;
+          }).join('')}
+        </div>`;
+
+      grid.innerHTML = desktop + mobile;
+
+      // Llista per classes (per gestionar)
+      document.getElementById('ttList').innerHTML = `
+        <div class="space-y-2">
+          <h3 class="text-xs font-bold text-zinc-500 uppercase tracking-wider">Hores per classe i altres franges</h3>
+          <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-2">
+            ${Object.keys(groups).map(gId => {
+              const g = groups[gId];
+              const gs = getGroupTimetable(g).slice().sort((a, b) => a.day - b.day || timeToMin(a.start) - timeToMin(b.start));
+              const mins = gs.reduce((a, s) => a + timeToMin(s.end) - timeToMin(s.start), 0);
+              return `
+                <div class="bg-white border border-zinc-200 rounded-2xl p-3 space-y-2">
+                  <div class="flex items-center justify-between">
+                    <span class="text-xs font-bold font-mono px-2 py-0.5 rounded border ${getGroupPastelTheme(g).badgeBg}">${escapeHtml(g.name)}</span>
+                    <span class="text-[10px] font-mono text-zinc-400">${gs.length} ses. · ${(mins / 60).toLocaleString('ca-ES', { maximumFractionDigits: 1 })} h/setm.</span>
+                  </div>
+                  <div class="flex flex-wrap gap-1.5">
+                    ${gs.map(s => `<button onclick="openSlotModal('${gId}','${s.id}')" class="text-[11px] font-semibold bg-zinc-50 hover:bg-zinc-100 border border-zinc-200 rounded-lg px-2 py-1 text-zinc-700">${TT_DAYS.find(d => d.n === s.day).s} ${s.start}–${s.end}</button>`).join('')}
+                    <button onclick="openSlotModal(null, null, { gId: '${gId}' })" class="text-[11px] font-semibold text-zinc-400 hover:text-zinc-900 border border-dashed border-zinc-300 rounded-lg px-2 py-1"><i class="fa-solid fa-plus text-[9px]"></i> Afegir</button>
+                  </div>
+                </div>`;
+            }).join('')}
+            ${(() => {
+              const others = getOtherSlots().slice().sort((a, b) => a.day - b.day || timeToMin(a.start) - timeToMin(b.start));
+              const mins = others.reduce((a, s) => a + timeToMin(s.end) - timeToMin(s.start), 0);
+              return `
+                <div class="bg-white border border-dashed border-zinc-300 rounded-2xl p-3 space-y-2">
+                  <div class="flex items-center justify-between">
+                    <span class="text-xs font-bold text-zinc-700"><i class="fa-solid fa-shield-halved text-zinc-400 mr-1"></i>Guàrdies, pati i reunions</span>
+                    <span class="text-[10px] font-mono text-zinc-400">${others.length} franges · ${fmtH(mins)} h/setm.</span>
+                  </div>
+                  <div class="flex flex-wrap gap-1.5">
+                    ${others.map(s => {
+                      const ty = OTHER_SLOT_TYPES[s.type] || OTHER_SLOT_TYPES.altre;
+                      return `<button onclick="openSlotModal('__other','${s.id}')" class="text-[11px] font-semibold border border-dashed ${ty.cls} rounded-lg px-2 py-1"><i class="fa-solid ${ty.icon} text-[9px] mr-1"></i>${TT_DAYS.find(d => d.n === s.day).s} ${s.start}–${s.end}${s.label ? ' · ' + escapeHtml(s.label) : ''}</button>`;
+                    }).join('')}
+                  </div>
+                  <div class="flex flex-wrap gap-1.5 pt-1">
+                    ${Object.keys(OTHER_SLOT_TYPES).map(t => `<button onclick="openSlotModal(null, null, { type: '${t}' })" class="text-[11px] font-semibold text-zinc-500 hover:text-zinc-900 border border-zinc-200 hover:border-zinc-400 rounded-lg px-2 py-1"><i class="fa-solid fa-plus text-[9px] mr-0.5"></i>${OTHER_SLOT_TYPES[t].label}</button>`).join('')}
+                  </div>
+                </div>`;
+            })()}
+          </div>
+        </div>`;
+    };
+
     // ================== BIBLIOTECA DE SdAs ==================
 
     const libFilters = (() => {
@@ -2677,6 +3345,7 @@
       window.appState.currentScreen = 'library';
       document.getElementById('screenHome').classList.add('hidden');
       document.getElementById('screenClassWorkspace').classList.add('hidden');
+      document.getElementById('screenTimetable').classList.add('hidden');
       document.getElementById('screenSdaLibrary').classList.remove('hidden');
       document.getElementById('headerBreadcrumb').classList.add('hidden');
       document.getElementById('classSubNav').classList.add('hidden');
