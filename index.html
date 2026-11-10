@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="ca" class="h-full bg-zinc-50/60 antialiased selection:bg-zinc-900 selection:text-white">
 <head>
@@ -214,22 +213,14 @@
         <p class="text-xs text-zinc-500">Inicia sessió per sincronitzar les teves classes i notes al núvol.</p>
       </div>
 
-      <form onsubmit="handleAuthSubmit(event)" class="space-y-4 text-xs">
-        <div>
-          <label class="block font-semibold text-zinc-700 mb-1">Nom d'usuari</label>
-          <input type="text" id="authUsernameInput" required autocomplete="username" class="w-full border border-zinc-200 rounded-xl p-3 outline-none font-medium focus:ring-2 focus:ring-zinc-900 text-sm">
-        </div>
-        <div>
-          <label class="block font-semibold text-zinc-700 mb-1">Contrasenya</label>
-          <input type="password" id="authPasswordInput" required autocomplete="current-password" placeholder="••••••••" class="w-full border border-zinc-200 rounded-xl p-3 outline-none font-medium focus:ring-2 focus:ring-zinc-900 text-sm">
-        </div>
-        
-        <div id="authErrorMsg" class="hidden text-[11px] text-rose-600 font-semibold bg-rose-50 border border-rose-200 p-2.5 rounded-xl text-center"></div>
-
-        <button type="submit" class="w-full bg-zinc-900 hover:bg-zinc-800 text-white font-bold py-3 rounded-xl transition shadow-subtle text-sm">
-          Entrar al Quadern &rarr;
+      <div class="space-y-3 text-xs">
+        <button id="googleSignInBtn" onclick="signInWithGoogle()" class="w-full flex items-center justify-center gap-3 bg-white hover:bg-zinc-50 border border-zinc-300 text-zinc-800 font-bold py-3 rounded-xl transition shadow-subtle text-sm disabled:opacity-50">
+          <svg viewBox="0 0 48 48" class="w-5 h-5"><path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3C33.7 32.7 29.3 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.8 1.2 7.9 3.1l5.7-5.7C34 6.1 29.3 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20 20-8.9 20-20c0-1.3-.1-2.4-.4-3.5z"/><path fill="#FF3D00" d="M6.3 14.7l6.6 4.8C14.7 15.1 19 12 24 12c3.1 0 5.8 1.2 7.9 3.1l5.7-5.7C34 6.1 29.3 4 24 4 16.3 4 9.7 8.3 6.3 14.7z"/><path fill="#4CAF50" d="M24 44c5.2 0 9.9-2 13.4-5.2l-6.2-5.2C29.2 35.1 26.7 36 24 36c-5.3 0-9.7-3.3-11.3-8l-6.5 5C9.5 39.6 16.2 44 24 44z"/><path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3c-.8 2.2-2.2 4.2-4.1 5.6l6.2 5.2C37 39.2 44 34 44 24c0-1.3-.1-2.4-.4-3.5z"/></svg>
+          Entrar amb Google
         </button>
-      </form>
+        <p class="text-center text-[11px] text-zinc-400">Fes servir el teu compte de l'XTEC. Les dades només les podràs veure tu.</p>
+        <div id="authErrorMsg" class="hidden text-[11px] text-rose-600 font-semibold bg-rose-50 border border-rose-200 p-2.5 rounded-xl text-center"></div>
+      </div>
     </div>
   </div>
 
@@ -1703,7 +1694,8 @@
   <!-- ================= LÒGICA FIREBASE DIRECTA ================= -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-    import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+    import { getDatabase, ref, set, get, onValue } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+    import { getAuth, GoogleAuthProvider, signInWithPopup, signInWithRedirect, getRedirectResult, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 
     const FIREBASE_CONFIG = {
       apiKey: "AIzaSyB9no7A0vKk9HQH1CS58mFmyLQSsj4rD1U",
@@ -1718,7 +1710,10 @@
 
     let fbApp = initializeApp(FIREBASE_CONFIG);
     let fbDb = getDatabase(fbApp);
+    const fbAuth = getAuth(fbApp);
     let currentAuthUser = null;
+    // La contrasenya antiga ja no s'utilitza: l'esborrem del dispositiu
+    try { localStorage.removeItem('EF_AUTH_PASS'); } catch (e) {}
 
     function setCloudStatus(state) {
       const dot = document.getElementById('cloudStatusDot');
@@ -1736,49 +1731,97 @@
       }
     }
 
-    window.handleAuthSubmit = function(e) {
-      e.preventDefault();
-      const user = document.getElementById('authUsernameInput').value.trim();
-      const pass = document.getElementById('authPasswordInput').value.trim();
+    function showAuthError(msg) {
       const errBox = document.getElementById('authErrorMsg');
+      errBox.innerHTML = msg;
+      errBox.classList.remove('hidden');
+      const btn = document.getElementById('googleSignInBtn');
+      if (btn) btn.disabled = false;
+    }
 
-      if (pass.length < 4) {
-        errBox.textContent = "La contrasenya ha de tenir com a mínim 4 caràcters.";
-        errBox.classList.remove('hidden');
-        return;
+    function authErrorMessage(err) {
+      const code = (err && err.code) || '';
+      if (code === 'auth/unauthorized-domain') return `Aquest domini encara no està autoritzat a Firebase. Afegeix <b>${location.hostname}</b> a Authentication → Settings → Authorized domains.`;
+      if (code === 'auth/operation-not-allowed') return "L'inici de sessió amb Google no està activat a Firebase (Authentication → Sign-in method → Google).";
+      if (code === 'auth/popup-closed-by-user' || code === 'auth/cancelled-popup-request') return "Has tancat la finestra de Google abans d'acabar.";
+      if (code === 'auth/network-request-failed') return "No hi ha connexió a internet.";
+      if (location.protocol === 'file:') return "L'inici de sessió amb Google no funciona obrint el fitxer directament. Obre l'app des de la seva adreça de GitHub Pages.";
+      return `No s'ha pogut iniciar sessió (${escapeAuth(code || (err && err.message) || 'error')}).`;
+    }
+    function escapeAuth(s) { return String(s).replace(/[<>&]/g, c => ({ '<': '&lt;', '>': '&gt;', '&': '&amp;' }[c])); }
+
+    window.signInWithGoogle = async function() {
+      const btn = document.getElementById('googleSignInBtn');
+      if (btn) btn.disabled = true;
+      document.getElementById('authErrorMsg').classList.add('hidden');
+      const provider = new GoogleAuthProvider();
+      provider.setCustomParameters({ prompt: 'select_account' });
+      try {
+        await signInWithPopup(fbAuth, provider);
+      } catch (err) {
+        if (err && (err.code === 'auth/popup-blocked' || err.code === 'auth/operation-not-supported-in-this-environment')) {
+          try { await signInWithRedirect(fbAuth, provider); return; } catch (e2) { showAuthError(authErrorMessage(e2)); return; }
+        }
+        showAuthError(authErrorMessage(err));
       }
-
-      if (user.toLowerCase() === "docent" && pass !== "ef2026") {
-        errBox.textContent = "Contrasenya incorrecta per a aquest usuari.";
-        errBox.classList.remove('hidden');
-        return;
-      }
-
-      errBox.classList.add('hidden');
-      localStorage.setItem('EF_AUTH_USER', user);
-      localStorage.setItem('EF_AUTH_PASS', pass);
-      loginUserSession(user);
     };
 
     window.logoutActiveUser = function() {
-      localStorage.removeItem('EF_AUTH_USER');
-      localStorage.removeItem('EF_AUTH_PASS');
-      location.reload();
+      if (!confirm("Vols tancar la sessió en aquest dispositiu?")) return;
+      signOut(fbAuth).finally(() => location.reload());
     };
 
     function checkActiveSession() {
-      const savedUser = localStorage.getItem('EF_AUTH_USER');
-      if (savedUser) {
-        loginUserSession(savedUser);
-      } else {
-        document.getElementById('loginOverlay').classList.remove('hidden');
+      getRedirectResult(fbAuth).catch(err => showAuthError(authErrorMessage(err)));
+      onAuthStateChanged(fbAuth, user => {
+        if (user) loginUserSession(user);
+        else document.getElementById('loginOverlay').classList.remove('hidden');
+      });
+    }
+
+    // Primer inici amb Google: copia les dades de l'usuari antic (nom d'usuari) al compte nou
+    async function migrateLegacyDataIfNeeded(uid) {
+      const newRef = ref(fbDb, `users/${uid}/quadern_data`);
+      try {
+        const snap = await get(newRef);
+        if (snap.exists()) return;
+      } catch (e) { return; }
+
+      const tryCopy = async (legacyName) => {
+        const key = String(legacyName || '').toLowerCase().replace(/[^a-z0-9]/g, '_');
+        if (!key) return false;
+        try {
+          const old = await get(ref(fbDb, `users/${key}/quadern_data`));
+          if (old.exists() && old.val() && old.val().groups) {
+            await set(newRef, old.val());
+            return true;
+          }
+        } catch (e) {}
+        return false;
+      };
+
+      let legacy = null;
+      try { legacy = localStorage.getItem('EF_AUTH_USER'); } catch (e) {}
+      if (legacy && await tryCopy(legacy)) {
+        alert(`Les dades de l'usuari "${legacy}" s'han copiat al teu compte de Google.`);
+        return;
+      }
+      const asked = prompt("És el primer cop que entres amb Google.\n\nSi abans entraves amb un nom d'usuari, escriu-lo per recuperar les teves dades del núvol.\nSi no, deixa-ho buit i es faran servir les dades d'aquest dispositiu.", legacy || '');
+      if (asked && asked.trim()) {
+        if (await tryCopy(asked.trim())) alert(`Les dades de l'usuari "${asked.trim()}" s'han copiat al teu compte de Google.`);
+        else alert(`No he trobat dades per a l'usuari "${asked.trim()}". Es faran servir les dades d'aquest dispositiu.`);
       }
     }
 
-    function loginUserSession(username) {
-      currentAuthUser = username.toLowerCase().replace(/[^a-z0-9]/g, '_');
+    async function loginUserSession(user) {
+      currentAuthUser = user.uid;
       document.getElementById('loginOverlay').classList.add('hidden');
-      document.getElementById('headerUserLabel').textContent = username;
+      const label = user.displayName || user.email || 'Docent';
+      document.getElementById('headerUserLabel').textContent = label;
+      document.getElementById('headerUserLabel').title = user.email || '';
+      setCloudStatus('syncing');
+      await migrateLegacyDataIfNeeded(user.uid);
+      try { localStorage.removeItem('EF_AUTH_USER'); } catch (e) {}
       connectToUserCloud(currentAuthUser);
     }
 
@@ -7446,11 +7489,7 @@
       });
 
       const csv = '﻿' + [header.map(txt).join(';'), ...rows].join('\r\n');
-      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-      const a = document.createElement("a");
-      a.href = URL.createObjectURL(blob);
-      a.download = `Resum_Final_${curGroup.name.replace(/\s+/g, '_')}.csv`;
-      a.click();
+      saveFileToDevice(`Resum_Final_${curGroup.name.replace(/\s+/g, '_')}.csv`, csv, 'text/csv');
     };
 
     window.openThresholdsModal = function() { 
@@ -7511,11 +7550,61 @@
       goToHome();
     };
 
+    // Desa un fitxer al dispositiu. A l'iPad/iPhone obre el menú de compartir (Desa a Fitxers, Correu...).
+    // A l'ordinador el descarrega. Si res d'això funciona, mostra el contingut per copiar-lo.
+    window.saveFileToDevice = async function(fileName, content, mime) {
+      const blob = new Blob([content], { type: mime });
+      const isAppleTouch = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+      if (isAppleTouch && navigator.canShare) {
+        try {
+          const file = new File([blob], fileName, { type: mime });
+          if (navigator.canShare({ files: [file] })) {
+            await navigator.share({ files: [file], title: fileName });
+            return;
+          }
+        } catch (err) {
+          if (err && err.name === 'AbortError') return; // l'usuari ha tancat el menú
+        }
+      }
+      try {
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = fileName;
+        a.rel = 'noopener';
+        a.style.display = 'none';
+        document.body.appendChild(a);
+        a.click();
+        setTimeout(() => { a.remove(); URL.revokeObjectURL(url); }, 4000);
+        if (isAppleTouch) setTimeout(() => showFileFallback(fileName, content), 1500);
+      } catch (e) {
+        showFileFallback(fileName, content);
+      }
+    };
+
+    function showFileFallback(fileName, content) {
+      let box = document.getElementById('fileFallbackModal');
+      if (!box) {
+        box = document.createElement('div');
+        box.id = 'fileFallbackModal';
+        box.className = 'fixed inset-0 bg-zinc-950/40 z-[80] flex items-center justify-center p-4 no-print';
+        document.body.appendChild(box);
+      }
+      box.innerHTML = `
+        <div class="bg-white rounded-3xl max-w-lg w-full p-5 space-y-3 text-xs shadow-card">
+          <div class="flex items-center justify-between"><b class="text-sm">No s'ha descarregat?</b><button onclick="document.getElementById('fileFallbackModal').remove()" class="text-zinc-400 hover:text-zinc-900"><i class="fa-solid fa-xmark"></i></button></div>
+          <p class="text-zinc-500">Copia aquest text i enganxa'l en una nota o un correu per tenir la còpia (<b>${fileName}</b>).</p>
+          <textarea readonly class="w-full h-40 font-mono text-[10px] border border-zinc-200 rounded-xl p-2">${content.replace(/&/g, '&amp;').replace(/</g, '&lt;')}</textarea>
+          <div class="flex justify-end gap-2">
+            <button onclick="navigator.clipboard.writeText(this.closest('div.bg-white').querySelector('textarea').value).then(() => this.textContent = 'Copiat ✓')" class="px-3 py-1.5 bg-zinc-900 text-white rounded-xl font-semibold">Copiar</button>
+            <button onclick="document.getElementById('fileFallbackModal').remove()" class="px-3 py-1.5 border border-zinc-300 rounded-xl font-semibold">Tancar</button>
+          </div>
+        </div>`;
+    }
+
     window.exportBackupJSON = function() {
-      const a = document.createElement('a');
-      a.href = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify({ appData: window.appData, gradeThresholds }, null, 2));
-      a.download = `Backup_EF_${new Date().toISOString().slice(0, 10)}.json`;
-      a.click();
+      const json = JSON.stringify({ appData: window.appData, gradeThresholds }, null, 2);
+      return saveFileToDevice(`Backup_EF_${new Date().toISOString().slice(0, 10)}.json`, json, 'application/json');
     };
 
     window.importBackupJSON = function(e) {
