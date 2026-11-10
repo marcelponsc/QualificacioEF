@@ -1765,7 +1765,11 @@
       onValue(userBranchRef, (snapshot) => {
         const cloudData = snapshot.val();
         if (cloudData && cloudData.groups) {
+          // La classe oberta és d'aquest dispositiu: no la sobreescrivim amb la que hi hagi al núvol
+          const localActive = window.appData && window.appData.activeGroupId;
           window.appData = cloudData;
+          if (localActive && cloudData.groups[localActive]) window.appData.activeGroupId = localActive;
+          else if (!cloudData.groups[window.appData.activeGroupId]) window.appData.activeGroupId = Object.keys(cloudData.groups)[0];
           if (!window.appData.criteriaCatalog) {
             window.appData.criteriaCatalog = JSON.parse(JSON.stringify(DEFAULT_CURRICULAR_CRITERIA_CATALOG));
           }
