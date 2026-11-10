@@ -142,6 +142,8 @@
       body.poster-mode > *:not(#sdaPosterOverlay) { display: none !important; }
       body.print-horari main > section:not(#screenTimetable), body.print-horari .tt-noprint, body.print-horari #loginOverlay { display: none !important; }
       body.print-horari main { max-width: none !important; padding: 0 !important; }
+      body.print-planif main > section:not(#screenClassWorkspace), body.print-planif #screenClassWorkspace > *:not(#viewPlanif), body.print-planif #viewPlanif > div:first-child, body.print-planif .planif-noprint, body.print-planif #loginOverlay { display: none !important; }
+      body.print-planif main { max-width: none !important; padding: 0 !important; }
       body.poster-mode #sdaPosterOverlay { position: static !important; padding: 0 !important; background: none !important; overflow: visible !important; }
       body.poster-mode .poster-toolbar { display: none !important; }
       body.poster-mode #sdaPosterScaler { zoom: 1 !important; margin: 0 auto !important; }
@@ -269,6 +271,9 @@
         </button>
         <button id="tabBtnDiari" onclick="switchView('diari')" class="whitespace-nowrap shrink-0 px-3 py-1 rounded-md text-zinc-500 hover:text-zinc-900 hover:bg-zinc-50 transition">
           <i class="fa-solid fa-clipboard-check text-zinc-400 mr-1.5"></i> Diari
+        </button>
+        <button id="tabBtnPlanif" onclick="switchView('planif')" class="whitespace-nowrap shrink-0 px-3 py-1 rounded-md text-zinc-500 hover:text-zinc-900 hover:bg-zinc-50 transition">
+          <i class="fa-regular fa-calendar-check text-zinc-400 mr-1.5"></i> Planificació
         </button>
         <button id="tabBtnRoster" onclick="switchView('roster')" class="whitespace-nowrap shrink-0 px-3 py-1 rounded-md text-zinc-500 hover:text-zinc-900 hover:bg-zinc-50 transition">
           <i class="fa-solid fa-users text-zinc-400 mr-1.5"></i> Alumnat (<span id="tabStudentCount">0</span>)
@@ -523,6 +528,31 @@
 
         <!-- MODE RESUM -->
         <div id="diariSummaryPanel" class="space-y-3 hidden"></div>
+      </section>
+
+      <!-- VISTA PLANIFICACIÓ DE SESSIONS -->
+      <section id="viewPlanif" class="space-y-4 hidden">
+        <div class="bg-white border border-zinc-200/90 rounded-2xl p-3 shadow-subtle flex flex-wrap items-center justify-between gap-2">
+          <div class="flex flex-wrap items-center gap-2">
+            <div class="inline-flex rounded-xl bg-zinc-100 p-0.5 text-xs font-semibold border border-zinc-200">
+              <button id="planifRangeNext" onclick="setPlanifRange('next')" class="px-3 py-1.5 rounded-lg transition">Properes</button>
+              <button id="planifRangePast" onclick="setPlanifRange('past')" class="px-3 py-1.5 rounded-lg transition">Fetes</button>
+            </div>
+            <span id="planifSummary" class="text-[11px] text-zinc-500"></span>
+          </div>
+          <div class="flex flex-wrap gap-2">
+            <button onclick="openDistributeModal()" class="inline-flex items-center gap-1.5 bg-white hover:bg-zinc-50 border border-zinc-200 text-zinc-700 text-xs font-semibold px-3 py-2 rounded-xl shadow-subtle transition">
+              <i class="fa-solid fa-wand-magic-sparkles text-amber-500 text-[10px]"></i> Repartir una SdA
+            </button>
+            <button onclick="printPlanif()" class="inline-flex items-center gap-1.5 bg-white hover:bg-zinc-50 border border-zinc-200 text-zinc-700 text-xs font-semibold px-3 py-2 rounded-xl shadow-subtle transition">
+              <i class="fa-solid fa-print text-zinc-400 text-[10px]"></i> Imprimir
+            </button>
+          </div>
+        </div>
+        <div class="hidden print:block">
+          <h2 id="planifPrintTitle" class="text-lg font-extrabold text-zinc-900"></h2>
+        </div>
+        <div id="planifList" class="space-y-4"></div>
       </section>
 
       <!-- VISTA 2: ROSTER D'ALUMNAT -->
@@ -1336,6 +1366,106 @@
     </div>
   </div>
 
+  <!-- MODAL PLA DE SESSIÓ -->
+  <div id="sessionPlanModal" class="fixed inset-0 bg-zinc-950/40 backdrop-blur-xs z-50 flex items-center justify-center p-2 sm:p-4 hidden no-print">
+    <div class="bg-white rounded-3xl shadow-card max-w-2xl w-full max-h-[94vh] flex flex-col overflow-hidden border border-zinc-200">
+      <div class="px-6 py-4 bg-zinc-900 text-white flex justify-between items-center">
+        <div class="min-w-0">
+          <h3 class="text-sm font-bold flex items-center gap-2"><i class="fa-regular fa-calendar-check text-zinc-400"></i> Pla de la sessió</h3>
+          <div id="spmInfo" class="text-[11px] text-zinc-400 mt-0.5 truncate"></div>
+        </div>
+        <button onclick="closeSessionPlanModal()" class="text-zinc-400 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div class="p-5 sm:p-6 space-y-4 text-xs overflow-y-auto">
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div>
+            <label class="block font-semibold text-zinc-700 mb-1">SdA</label>
+            <select id="spmSda" onchange="onSpmSdaChange()" class="w-full border border-zinc-200 rounded-xl p-2.5 outline-none font-semibold bg-white focus:ring-2 focus:ring-zinc-900"></select>
+          </div>
+          <div>
+            <label class="block font-semibold text-zinc-700 mb-1">Activitat de la SdA</label>
+            <select id="spmAct" onchange="onSpmActChange()" class="w-full border border-zinc-200 rounded-xl p-2.5 outline-none font-semibold bg-white focus:ring-2 focus:ring-zinc-900"></select>
+          </div>
+        </div>
+        <div>
+          <label class="block font-semibold text-zinc-700 mb-1">Títol de la sessió</label>
+          <input type="text" id="spmTitle" placeholder="Ex: Circuit de capacitats físiques" class="w-full text-sm border border-zinc-200 rounded-xl p-2.5 outline-none font-semibold focus:ring-2 focus:ring-zinc-900">
+        </div>
+        <div>
+          <label class="block font-semibold text-zinc-700 mb-1">Objectiu de la sessió</label>
+          <input type="text" id="spmObjectiu" placeholder="Què han d'aprendre o millorar avui?" class="w-full border border-zinc-200 rounded-xl p-2.5 outline-none font-medium focus:ring-2 focus:ring-zinc-900">
+        </div>
+
+        <div class="space-y-2.5">
+          <div class="flex items-center justify-between">
+            <span class="font-bold text-zinc-800 text-[11px] uppercase tracking-wider">Parts de la sessió</span>
+            <span id="spmMinutes" class="text-[11px] font-mono font-bold px-2 py-0.5 rounded-md bg-zinc-100 text-zinc-600"></span>
+          </div>
+          <div id="spmParts" class="space-y-2.5"></div>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div>
+            <label class="block font-semibold text-zinc-700 mb-1">Material i espai</label>
+            <textarea id="spmMaterial" rows="2" placeholder="Cons, pilotes... · Gimnàs" class="plan-textarea"></textarea>
+          </div>
+          <div>
+            <label class="block font-semibold text-zinc-700 mb-1">Com ha anat? <span class="font-normal text-zinc-400">(després de la sessió)</span></label>
+            <textarea id="spmReflexio" rows="2" placeholder="Què ha funcionat, què canviaria..." class="plan-textarea"></textarea>
+          </div>
+        </div>
+
+        <div id="spmCopyBox" class="bg-zinc-50 border border-zinc-200 rounded-2xl p-3 space-y-2">
+          <span class="font-semibold text-zinc-700"><i class="fa-regular fa-copy mr-1 text-zinc-400"></i>Fer el mateix amb una altra classe</span>
+          <div class="flex flex-wrap items-center gap-2">
+            <select id="spmCopyGroup" onchange="refreshSpmCopyDates()" class="bg-white border border-zinc-200 rounded-xl px-2 py-1.5 font-semibold outline-none"></select>
+            <select id="spmCopyDate" class="bg-white border border-zinc-200 rounded-xl px-2 py-1.5 font-semibold outline-none"></select>
+            <button onclick="copySessionPlanFromModal()" class="px-3 py-1.5 bg-white hover:bg-zinc-100 border border-zinc-300 rounded-xl font-semibold">Copiar</button>
+          </div>
+        </div>
+      </div>
+      <div class="px-6 py-3.5 bg-zinc-50 border-t border-zinc-200 flex justify-between items-center text-xs">
+        <div>
+          <button id="spmDeleteBtn" onclick="deleteSessionPlanFromModal()" class="hidden px-3 py-1.5 bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 rounded-xl font-semibold"><i class="fa-regular fa-trash-can mr-1"></i> Esborrar</button>
+        </div>
+        <div class="flex gap-2">
+          <button onclick="closeSessionPlanModal()" class="px-3.5 py-1.5 border border-zinc-300 rounded-xl font-semibold text-zinc-600">Cancel·lar</button>
+          <button onclick="saveSessionPlanFromModal()" class="px-4 py-1.5 bg-zinc-900 hover:bg-zinc-800 text-white rounded-xl font-semibold">Desar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL REPARTIR SdA -->
+  <div id="distributeModal" class="fixed inset-0 bg-zinc-950/40 backdrop-blur-xs z-50 flex items-center justify-center p-4 hidden no-print">
+    <div class="bg-white rounded-3xl shadow-card max-w-lg w-full max-h-[92vh] flex flex-col overflow-hidden border border-zinc-200">
+      <div class="px-6 py-4 bg-zinc-900 text-white flex justify-between items-center">
+        <h3 class="text-sm font-bold flex items-center gap-2"><i class="fa-solid fa-wand-magic-sparkles text-amber-400"></i> Repartir una SdA a les sessions</h3>
+        <button onclick="closeDistributeModal()" class="text-zinc-400 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div class="p-6 space-y-4 text-xs overflow-y-auto">
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div>
+            <label class="block font-semibold text-zinc-700 mb-1">SdA</label>
+            <select id="distSda" onchange="renderDistributePreview()" class="w-full border border-zinc-200 rounded-xl p-2.5 outline-none font-semibold bg-white"></select>
+          </div>
+          <div>
+            <label class="block font-semibold text-zinc-700 mb-1">Començar el dia</label>
+            <select id="distStart" onchange="renderDistributePreview()" class="w-full border border-zinc-200 rounded-xl p-2.5 outline-none font-semibold bg-white"></select>
+          </div>
+        </div>
+        <label class="flex items-center gap-2 font-semibold text-zinc-700">
+          <input type="checkbox" id="distOverwrite" onchange="renderDistributePreview()" class="w-4 h-4 accent-zinc-900"> Substituir les sessions que ja estan planificades
+        </label>
+        <div id="distPreview" class="space-y-1"></div>
+      </div>
+      <div class="px-6 py-3.5 bg-zinc-50 border-t border-zinc-200 flex justify-end gap-2 text-xs">
+        <button onclick="closeDistributeModal()" class="px-3.5 py-1.5 border border-zinc-300 rounded-xl font-semibold text-zinc-600">Cancel·lar</button>
+        <button onclick="applyDistribute()" class="px-4 py-1.5 bg-zinc-900 hover:bg-zinc-800 text-white rounded-xl font-semibold">Planificar</button>
+      </div>
+    </div>
+  </div>
+
   <!-- FITXA IMPRIMIBLE DE LA SdA -->
   <div id="sdaPosterOverlay" class="hidden">
     <div class="poster-toolbar">
@@ -1462,6 +1592,7 @@
             if (window.appState.currentView === 'final') window.renderFinalView();
             if (window.appState.currentView === 'report') window.renderIndividualReport();
             if (window.appState.currentView === 'stats') window.renderStatsView();
+            if (window.appState.currentView === 'planif') window.renderPlanifView();
             if (window.appState.currentView === 'diari') {
               const ae = document.activeElement;
               const typing = ae && (ae.tagName === 'TEXTAREA' || ae.tagName === 'INPUT') && document.getElementById('viewDiari').contains(ae);
@@ -1486,6 +1617,15 @@
       setCloudStatus('syncing');
       const gradeRef = ref(fbDb, `users/${currentAuthUser}/quadern_data/groups/${groupId}/grades/${sdaId}/${studentId}/${gradeKey}`);
       set(gradeRef, val === null ? null : val)
+        .then(() => setCloudStatus('online'))
+        .catch(() => setCloudStatus('offline'));
+    };
+
+    window.syncPlanToCloud = function(groupId, isoDate, planData) {
+      if (!currentAuthUser || !fbDb) return;
+      setCloudStatus('syncing');
+      const pRef = ref(fbDb, `users/${currentAuthUser}/quadern_data/groups/${groupId}/plans/${isoDate}`);
+      set(pRef, planData ? JSON.parse(JSON.stringify(planData)) : null)
         .then(() => setCloudStatus('online'))
         .catch(() => setCloudStatus('offline'));
     };
@@ -2095,6 +2235,7 @@
                       <span class="text-[11px] font-bold font-mono px-1.5 py-0.5 rounded border ${theme.badgeBg} truncate">${escapeHtml(grp.name)}</span>
                       ${isNow ? '<span class="text-[9px] font-black text-white bg-zinc-900 px-1.5 py-0.5 rounded">ARA</span>' : isNext ? '<span class="text-[9px] font-black text-zinc-600 bg-zinc-100 px-1.5 py-0.5 rounded">SEGÜENT</span>' : ''}
                     </div>
+                    ${planHasContent(getSessionPlan(grp, todayIso)) ? `<div class="text-[11px] font-semibold text-zinc-700 truncate mt-0.5"><i class="fa-regular fa-calendar-check text-zinc-400 mr-0.5"></i>${escapeHtml(getSessionPlan(grp, todayIso).title || 'Sessió planificada')}</div>` : ''}
                     <div class="text-[11px] mt-0.5 ${done ? 'text-emerald-700' : 'text-zinc-400'} truncate">${done ? `<i class="fa-solid fa-check mr-0.5"></i> Llista passada · ${f} falt${f === 1 ? 'a' : 'es'}` : 'Llista pendent'}${s && s.place ? ` · ${escapeHtml(s.place)}` : ''}</div>
                   </div>
                   <span class="text-[11px] font-semibold px-2.5 py-1.5 rounded-xl shrink-0 ${done ? 'bg-zinc-100 text-zinc-700' : 'bg-zinc-900 text-white'}">${done ? 'Obrir' : 'Passar llista'}</span>
@@ -2416,8 +2557,10 @@
       if (!sessions[iso]) {
         const trimSdas = (group.sdas || []).filter(s => s.trim === window.appState.currentTrim);
         const selVal = (document.getElementById('sdaSelect') || {}).value;
-        const sda = trimSdas.find(s => s.id === selVal) || trimSdas[0];
-        sessions[iso] = { trim: window.appState.currentTrim, sdaId: sda ? sda.id : '', note: '', records: {} };
+        const planSdaId = group.plans && group.plans[iso] && group.plans[iso].sdaId;
+        const planSda = planSdaId ? (group.sdas || []).find(s => s.id === planSdaId) : null;
+        const sda = planSda || trimSdas.find(s => s.id === selVal) || trimSdas[0];
+        sessions[iso] = { trim: planSda ? planSda.trim : window.appState.currentTrim, sdaId: sda ? sda.id : '', note: (group.plans && group.plans[iso] && group.plans[iso].title) || '', records: {} };
       }
       if (!sessions[iso].records || typeof sessions[iso].records !== 'object') sessions[iso].records = {};
       return sessions[iso];
@@ -2612,7 +2755,7 @@
       document.getElementById('diariSummaryPanel').classList.toggle('hidden', mode !== 'summary');
 
       if (mode === 'summary') renderDiariSummary(group);
-      else renderDiariSession(group);
+      else { renderDiariSession(group); prependDiariPlanCard(group); }
     };
 
     function renderDiariSession(group) {
@@ -3339,6 +3482,7 @@
                           </div>
                           <div class="text-[10px] font-mono opacity-80">${s.start}–${s.end}</div>
                           ${st.cancel ? `<div class="text-[10px] font-semibold truncate"><i class="fa-solid fa-ban mr-0.5"></i>${escapeHtml(cancelReasonLabel(st.cancel))}</div>` : ''}
+                          ${!off && planHasContent(getSessionPlan(s.group, d.iso)) && h > 40 ? `<div class="text-[10px] font-semibold truncate" title="Pla de la sessió"><i class="fa-regular fa-calendar-check mr-0.5"></i>${escapeHtml(getSessionPlan(s.group, d.iso).title || 'Planificada')}</div>` : ''}
                           ${s.place && h > 50 && !off ? `<div class="text-[10px] opacity-70 truncate"><i class="fa-solid fa-location-dot mr-0.5"></i>${escapeHtml(s.place)}</div>` : ''}
                           ${st.isNow ? '<div class="text-[9px] font-black uppercase tracking-wider mt-0.5">Ara</div>' : ''}
                         </button>
@@ -3386,7 +3530,7 @@
                       <span class="font-mono text-[11px] font-bold text-zinc-700 w-[84px] shrink-0">${s.start}–${s.end}</span>
                       <button onclick="openDiariFor('${s.gId}','${d.iso}')" class="flex-1 min-w-0 text-left truncate">
                         <span class="text-[11px] font-bold font-mono px-1.5 py-0.5 rounded border ${theme.badgeBg} ${offM ? 'line-through' : ''}">${escapeHtml(s.group.name)}</span>
-                        ${st.cancel ? `<span class="text-[10px] text-zinc-500 ml-1">${escapeHtml(cancelReasonLabel(st.cancel))}</span>` : s.place ? `<span class="text-[10px] text-zinc-400 ml-1">${escapeHtml(s.place)}</span>` : ''}
+                        ${st.cancel ? `<span class="text-[10px] text-zinc-500 ml-1">${escapeHtml(cancelReasonLabel(st.cancel))}</span>` : planHasContent(getSessionPlan(s.group, d.iso)) ? `<span class="text-[10px] text-zinc-600 ml-1"><i class="fa-regular fa-calendar-check mr-0.5"></i>${escapeHtml(getSessionPlan(s.group, d.iso).title || 'Planificada')}</span>` : s.place ? `<span class="text-[10px] text-zinc-400 ml-1">${escapeHtml(s.place)}</span>` : ''}
                         ${st.isNow ? '<span class="ml-1 text-[9px] font-black text-amber-700">ARA</span>' : ''}
                       </button>
                       ${statusIcon(st)}
@@ -3644,6 +3788,512 @@
         openHolidayModal(iso);
       }
     };
+
+    // ================== PLANIFICACIÓ DE SESSIONS ==================
+    // group.plans[YYYY-MM-DD] = { title, sdaId, actIdx, objectiu, parts: { escalfament|principal|tornada: { text, min } }, material, reflexio }
+
+    const SESSION_PARTS = [
+      { id: 'escalfament', label: 'Escalfament', icon: 'fa-fire', def: 10, ph: 'Activació general i específica...' },
+      { id: 'principal', label: 'Part principal', icon: 'fa-person-running', def: 35, ph: 'Activitats, organització, variants...' },
+      { id: 'tornada', label: 'Tornada a la calma', icon: 'fa-wind', def: 5, ph: 'Estiraments, reflexió, recollida de material...' }
+    ];
+
+    function getGroupPlans(group) {
+      if (!group.plans || typeof group.plans !== 'object') group.plans = {};
+      return group.plans;
+    }
+
+    function getSessionPlan(group, iso) {
+      return (group.plans && group.plans[iso]) || null;
+    }
+    window.getSessionPlan = getSessionPlan;
+
+    function planHasContent(p) {
+      return !!(p && (p.title || p.objectiu || p.material || (p.parts && Object.values(p.parts).some(x => x && x.text))));
+    }
+
+    function getSlotForDate(group, iso) {
+      const dow = isoToDate(iso).getDay();
+      return getGroupTimetable(group).filter(s => s.day === dow).sort((a, b) => timeToMin(a.start) - timeToMin(b.start))[0] || null;
+    }
+
+    // Dates de classe d'una classe a partir d'una data (endavant o endarrere)
+    function getClassDates(group, gId, fromIso, { count = 12, dir = 1, includeOff = true, maxDays = 370 } = {}) {
+      const days = getGroupDays(group);
+      const out = [];
+      if (!days.length) return out;
+      const d = isoToDate(fromIso);
+      let onCount = 0;
+      for (let i = 0; i < maxDays && onCount < count; i++) {
+        if (i > 0) d.setDate(d.getDate() + dir);
+        if (!days.includes(d.getDay())) continue;
+        const iso = dateToISO(d);
+        const status = getClassDayStatus(group, gId, iso);
+        if (status.off && !includeOff) continue;
+        out.push({ iso, status, slot: getSlotForDate(group, iso) });
+        if (!status.off) onCount++;
+      }
+      return out;
+    }
+
+    function syncPlan(gId, iso) {
+      saveToStorage();
+      const group = window.appData.groups[gId];
+      if (window.syncPlanToCloud) window.syncPlanToCloud(gId, iso, (group.plans || {})[iso] || null);
+    }
+
+    function refreshAfterPlanChange() {
+      if (window.appState.currentScreen === 'class') {
+        if (window.appState.currentView === 'planif') renderPlanifView();
+        if (window.appState.currentView === 'diari') renderDiariView();
+      }
+      if (window.appState.currentScreen === 'timetable') renderTimetable();
+      if (window.appState.currentScreen === 'home') renderHomeScreen();
+    }
+
+    // ---------- Modal del pla de sessió ----------
+
+    let spmTarget = null; // { gId, iso }
+
+    window.openSessionPlanModal = function(gId, iso) {
+      const group = window.appData.groups[gId];
+      if (!group) return;
+      spmTarget = { gId, iso };
+      const plan = getSessionPlan(group, iso) || {};
+      const slot = getSlotForDate(group, iso);
+      document.getElementById('spmInfo').textContent = `${group.name} · ${formatLongDateCa(iso)}${slot ? ` · ${slot.start}–${slot.end}${slot.place ? ' · ' + slot.place : ''}` : ''}`;
+
+      // SdA: primer les del trimestre actual
+      const sdas = (group.sdas || []).slice().sort((a, b) => (a.trim === window.appState.currentTrim ? -1 : 0) - (b.trim === window.appState.currentTrim ? -1 : 0) || a.trim - b.trim);
+      const defaultSda = plan.sdaId !== undefined ? plan.sdaId : ((group.sdas || []).find(s => s.trim === window.appState.currentTrim) || {}).id || '';
+      document.getElementById('spmSda').innerHTML = `<option value="">— Sense SdA —</option>` + sdas.map(s => `<option value="${s.id}">T${s.trim} · ${escapeHtml(s.title)}</option>`).join('');
+      document.getElementById('spmSda').value = (group.sdas || []).some(s => s.id === defaultSda) ? defaultSda : '';
+      fillSpmActivities(plan.actIdx);
+
+      document.getElementById('spmTitle').value = plan.title || '';
+      document.getElementById('spmObjectiu').value = plan.objectiu || '';
+      document.getElementById('spmMaterial').value = plan.material || '';
+      document.getElementById('spmReflexio').value = plan.reflexio || '';
+
+      const slotMin = slot ? timeToMin(slot.end) - timeToMin(slot.start) : 55;
+      document.getElementById('spmParts').innerHTML = SESSION_PARTS.map(p => {
+        const part = (plan.parts && plan.parts[p.id]) || {};
+        const defMin = p.id === 'principal' ? Math.max(10, slotMin - 15) : p.def;
+        return `
+          <div class="border border-zinc-200 rounded-2xl p-2.5 space-y-1.5 bg-zinc-50/50">
+            <div class="flex items-center justify-between">
+              <span class="font-bold text-zinc-800"><i class="fa-solid ${p.icon} text-zinc-400 mr-1.5"></i>${p.label}</span>
+              <span class="flex items-center gap-1 text-zinc-400"><input type="number" min="0" step="5" id="spmMin_${p.id}" value="${part.min !== undefined ? part.min : defMin}" oninput="updateSpmMinutes()" class="w-14 text-center font-mono font-bold bg-white border border-zinc-200 rounded-lg p-1 outline-none text-zinc-800"> min</span>
+            </div>
+            <textarea id="spmText_${p.id}" rows="${p.id === 'principal' ? 4 : 2}" placeholder="${p.ph}" class="plan-textarea"></textarea>
+          </div>`;
+      }).join('');
+      SESSION_PARTS.forEach(p => { document.getElementById(`spmText_${p.id}`).value = (plan.parts && plan.parts[p.id] && plan.parts[p.id].text) || ''; });
+      updateSpmMinutes();
+
+      // Copiar a una altra classe
+      const others = Object.keys(window.appData.groups).filter(g => g !== gId);
+      document.getElementById('spmCopyBox').classList.toggle('hidden', !others.length);
+      document.getElementById('spmCopyGroup').innerHTML = others.map(g => `<option value="${g}">${escapeHtml(window.appData.groups[g].name)}</option>`).join('');
+      refreshSpmCopyDates();
+
+      document.getElementById('spmDeleteBtn').classList.toggle('hidden', !planHasContent(getSessionPlan(group, iso)));
+      document.getElementById('sessionPlanModal').classList.remove('hidden');
+    };
+
+    function fillSpmActivities(selectedIdx = -1) {
+      const group = window.appData.groups[spmTarget.gId];
+      const sda = (group.sdas || []).find(s => s.id === document.getElementById('spmSda').value);
+      const acts = (sda && sda.plan && sda.plan.activitats) || [];
+      const faseName = id => (PLAN_FASES.find(f => f.id === id) || {}).name || '';
+      document.getElementById('spmAct').innerHTML = `<option value="-1">${acts.length ? '— Tria una activitat —' : (sda ? 'La SdA no té activitats' : '—')}</option>` +
+        acts.map((a, i) => `<option value="${i}">${escapeHtml(faseName(a.fase))} · ${escapeHtml(a.titol || 'Activitat')}${a.sessions ? ` (${a.sessions} s.)` : ''}</option>`).join('');
+      document.getElementById('spmAct').value = String(selectedIdx !== undefined && selectedIdx !== null && acts[selectedIdx] ? selectedIdx : -1);
+      document.getElementById('spmAct').disabled = !acts.length;
+    }
+
+    window.onSpmSdaChange = function() { fillSpmActivities(-1); };
+
+    window.onSpmActChange = function() {
+      const group = window.appData.groups[spmTarget.gId];
+      const sda = (group.sdas || []).find(s => s.id === document.getElementById('spmSda').value);
+      const act = sda && sda.plan && (sda.plan.activitats || [])[parseInt(document.getElementById('spmAct').value)];
+      if (!act) return;
+      const t = document.getElementById('spmTitle');
+      if (!t.value.trim()) t.value = act.titol || '';
+      const pr = document.getElementById('spmText_principal');
+      if (!pr.value.trim()) pr.value = act.descripcio || '';
+      const mat = document.getElementById('spmMaterial');
+      if (!mat.value.trim() && sda.plan.materials) mat.value = sda.plan.materials.replace(/\r?\n/g, ', ');
+    };
+
+    window.updateSpmMinutes = function() {
+      const total = SESSION_PARTS.reduce((a, p) => a + (parseFloat(document.getElementById(`spmMin_${p.id}`).value) || 0), 0);
+      const group = window.appData.groups[spmTarget.gId];
+      const slot = getSlotForDate(group, spmTarget.iso);
+      const slotMin = slot ? timeToMin(slot.end) - timeToMin(slot.start) : null;
+      const el = document.getElementById('spmMinutes');
+      el.textContent = slotMin ? `${total} / ${slotMin} min` : `${total} min`;
+      el.className = `text-[11px] font-mono font-bold px-2 py-0.5 rounded-md ${slotMin && total > slotMin ? 'bg-rose-50 text-rose-700' : 'bg-zinc-100 text-zinc-600'}`;
+    };
+
+    function collectSpm() {
+      const parts = {};
+      SESSION_PARTS.forEach(p => {
+        parts[p.id] = { text: document.getElementById(`spmText_${p.id}`).value.trim(), min: parseFloat(document.getElementById(`spmMin_${p.id}`).value) || 0 };
+      });
+      return {
+        title: document.getElementById('spmTitle').value.trim(),
+        sdaId: document.getElementById('spmSda').value,
+        actIdx: parseInt(document.getElementById('spmAct').value),
+        objectiu: document.getElementById('spmObjectiu').value.trim(),
+        parts,
+        material: document.getElementById('spmMaterial').value.trim(),
+        reflexio: document.getElementById('spmReflexio').value.trim()
+      };
+    }
+
+    window.closeSessionPlanModal = function() {
+      document.getElementById('sessionPlanModal').classList.add('hidden');
+      spmTarget = null;
+    };
+
+    window.saveSessionPlanFromModal = function() {
+      if (!spmTarget) return;
+      const { gId, iso } = spmTarget;
+      const plan = collectSpm();
+      const plans = getGroupPlans(window.appData.groups[gId]);
+      if (planHasContent(plan) || plan.sdaId) plans[iso] = plan;
+      else delete plans[iso];
+      syncPlan(gId, iso);
+      closeSessionPlanModal();
+      refreshAfterPlanChange();
+    };
+
+    window.deleteSessionPlanFromModal = function() {
+      if (!spmTarget) return;
+      if (!confirm("Vols esborrar el pla d'aquesta sessió?")) return;
+      const { gId, iso } = spmTarget;
+      delete getGroupPlans(window.appData.groups[gId])[iso];
+      syncPlan(gId, iso);
+      closeSessionPlanModal();
+      refreshAfterPlanChange();
+    };
+
+    window.refreshSpmCopyDates = function() {
+      const tg = document.getElementById('spmCopyGroup').value;
+      const sel = document.getElementById('spmCopyDate');
+      if (!tg) { sel.innerHTML = ''; return; }
+      const group = window.appData.groups[tg];
+      const from = spmTarget.iso < todayISO() ? todayISO() : spmTarget.iso;
+      const dates = getClassDates(group, tg, from, { count: 15, includeOff: false });
+      if (!dates.length) { sel.innerHTML = `<option value="">Aquesta classe no té horari</option>`; return; }
+      sel.innerHTML = dates.map(d => {
+        const p = getSessionPlan(group, d.iso);
+        return `<option value="${d.iso}">${isoToDate(d.iso).toLocaleDateString('ca-ES', { weekday: 'short', day: 'numeric', month: 'short' })}${d.slot ? ' ' + d.slot.start : ''}${planHasContent(p) ? ' · ja planificada' : ''}</option>`;
+      }).join('');
+      const free = dates.find(d => !planHasContent(getSessionPlan(group, d.iso)));
+      if (free) sel.value = free.iso;
+    };
+
+    window.copySessionPlanFromModal = function() {
+      const tg = document.getElementById('spmCopyGroup').value;
+      const iso = document.getElementById('spmCopyDate').value;
+      if (!tg || !iso) return;
+      const target = window.appData.groups[tg];
+      const existing = getSessionPlan(target, iso);
+      if (planHasContent(existing) && !confirm(`${target.name} ja té una sessió planificada aquell dia ("${existing.title || 'sense títol'}"). Vols substituir-la?`)) return;
+      const plan = collectSpm();
+      // Busquem la mateixa SdA a la classe de destí
+      const srcSda = (window.appData.groups[spmTarget.gId].sdas || []).find(s => s.id === plan.sdaId);
+      const dstSda = srcSda ? (target.sdas || []).find(s => s.title === srcSda.title && s.trim === srcSda.trim) : null;
+      getGroupPlans(target)[iso] = { ...JSON.parse(JSON.stringify(plan)), sdaId: dstSda ? dstSda.id : '', actIdx: dstSda ? plan.actIdx : -1, reflexio: '' };
+      syncPlan(tg, iso);
+      refreshSpmCopyDates();
+      alert(`Copiat a ${target.name} (${formatLongDateCa(iso)}).`);
+    };
+
+    // ---------- Repartir una SdA ----------
+
+    window.openDistributeModal = function(sdaId = null) {
+      const group = getCurrentGroup();
+      const gId = window.appData.activeGroupId;
+      if (!getGroupDays(group).length) return alert("Primer afegeix l'horari d'aquesta classe (botó Horari, a dalt).");
+      const sdas = (group.sdas || []).slice().sort((a, b) => a.trim - b.trim);
+      if (!sdas.length) return alert("Aquesta classe encara no té cap SdA.");
+      document.getElementById('distSda').innerHTML = sdas.map(s => `<option value="${s.id}">T${s.trim} · ${escapeHtml(s.title)}</option>`).join('');
+      const cur = sdaId || (sdas.find(s => s.trim === window.appState.currentTrim) || sdas[0]).id;
+      document.getElementById('distSda').value = cur;
+      const dates = getClassDates(group, gId, todayISO(), { count: 60, includeOff: false });
+      document.getElementById('distStart').innerHTML = dates.map(d => `<option value="${d.iso}">${isoToDate(d.iso).toLocaleDateString('ca-ES', { weekday: 'short', day: 'numeric', month: 'short' })}${d.slot ? ' · ' + d.slot.start : ''}${planHasContent(getSessionPlan(group, d.iso)) ? ' (planificada)' : ''}</option>`).join('');
+      const firstFree = dates.find(d => !planHasContent(getSessionPlan(group, d.iso)));
+      if (firstFree) document.getElementById('distStart').value = firstFree.iso;
+      document.getElementById('distOverwrite').checked = false;
+      renderDistributePreview();
+      document.getElementById('distributeModal').classList.remove('hidden');
+    };
+
+    window.closeDistributeModal = function() {
+      document.getElementById('distributeModal').classList.add('hidden');
+    };
+
+    function buildDistribution() {
+      const group = getCurrentGroup();
+      const gId = window.appData.activeGroupId;
+      const sda = (group.sdas || []).find(s => s.id === document.getElementById('distSda').value);
+      const start = document.getElementById('distStart').value;
+      const overwrite = document.getElementById('distOverwrite').checked;
+      if (!sda || !start) return { units: [], rows: [] };
+      const acts = (sda.plan && sda.plan.activitats) || [];
+      const units = [];
+      acts.forEach((a, idx) => {
+        const n = Math.max(1, Math.round(a.sessions || 1));
+        for (let k = 1; k <= n; k++) {
+          units.push({ title: `${a.titol || 'Activitat'}${n > 1 ? ` (${k}/${n})` : ''}`, text: a.descripcio || '', actIdx: idx, fase: a.fase });
+        }
+      });
+      if (!units.length) {
+        const n = (sda.plan && sda.plan.sessions) || 0;
+        for (let k = 1; k <= n; k++) units.push({ title: `${sda.title} · sessió ${k}/${n}`, text: '', actIdx: -1 });
+      }
+      const dates = getClassDates(group, gId, start, { count: 200, includeOff: false });
+      const rows = [];
+      let u = 0;
+      for (const d of dates) {
+        if (u >= units.length) break;
+        const existing = getSessionPlan(group, d.iso);
+        if (planHasContent(existing) && !overwrite) {
+          rows.push({ iso: d.iso, slot: d.slot, keep: existing });
+          continue;
+        }
+        rows.push({ iso: d.iso, slot: d.slot, unit: units[u], replaces: planHasContent(existing) ? existing : null });
+        u++;
+      }
+      return { sda, units, rows, missing: units.length - u };
+    }
+
+    window.renderDistributePreview = function() {
+      const { sda, units, rows, missing } = buildDistribution();
+      const box = document.getElementById('distPreview');
+      if (!units.length) {
+        box.innerHTML = `<div class="bg-amber-50 border border-amber-200 rounded-xl p-3 text-amber-900">Aquesta SdA no té activitats amb sessions. Afegeix-les a l'editor de la SdA (pestanya <b>5 · Seqüència d'activitats</b>) o indica'n el nombre de sessions.
+          <button onclick="closeDistributeModal(); openSdaModal(false, '${sda ? sda.id : ''}'); switchSdaModalTab('activitats');" class="ml-1 underline font-semibold">Obrir la SdA</button></div>`;
+        return;
+      }
+      const planned = rows.filter(r => r.unit);
+      const last = planned[planned.length - 1];
+      box.innerHTML = `
+        <div class="text-[11px] text-zinc-500 mb-1"><b class="text-zinc-800">${units.length} sessions</b> · del ${planned[0] ? isoToDate(planned[0].iso).toLocaleDateString('ca-ES', { day: 'numeric', month: 'short' }) : '—'} al ${last ? isoToDate(last.iso).toLocaleDateString('ca-ES', { day: 'numeric', month: 'short' }) : '—'}${missing > 0 ? ` · <span class="text-rose-600 font-semibold">en falten ${missing} (no hi ha prou dies)</span>` : ''}</div>
+        <div class="border border-zinc-200 rounded-xl divide-y divide-zinc-100 max-h-72 overflow-y-auto">
+          ${rows.map(r => `
+            <div class="flex items-center gap-2 px-3 py-1.5 ${r.keep ? 'bg-zinc-50 text-zinc-400' : ''}">
+              <span class="font-mono text-[11px] w-24 shrink-0">${isoToDate(r.iso).toLocaleDateString('ca-ES', { weekday: 'short', day: '2-digit', month: '2-digit' })}</span>
+              <span class="flex-1 min-w-0 truncate ${r.keep ? 'italic' : 'font-semibold text-zinc-800'}">${r.keep ? `Es manté: ${escapeHtml(r.keep.title || 'sessió planificada')}` : escapeHtml(r.unit.title)}</span>
+              ${r.replaces ? '<span class="text-[10px] font-bold text-rose-600 shrink-0">substitueix</span>' : ''}
+            </div>`).join('')}
+        </div>`;
+    };
+
+    window.applyDistribute = function() {
+      const { sda, rows } = buildDistribution();
+      const toWrite = rows.filter(r => r.unit);
+      if (!toWrite.length) return;
+      const group = getCurrentGroup();
+      const gId = window.appData.activeGroupId;
+      const plans = getGroupPlans(group);
+      const slotMinFor = iso => { const s = getSlotForDate(group, iso); return s ? timeToMin(s.end) - timeToMin(s.start) : 55; };
+      toWrite.forEach(r => {
+        const total = slotMinFor(r.iso);
+        plans[r.iso] = {
+          title: r.unit.title, sdaId: sda.id, actIdx: r.unit.actIdx, objectiu: '',
+          parts: { escalfament: { text: '', min: 10 }, principal: { text: r.unit.text, min: Math.max(10, total - 15) }, tornada: { text: '', min: 5 } },
+          material: sda.plan && sda.plan.materials ? sda.plan.materials.replace(/\r?\n/g, ', ') : '', reflexio: ''
+        };
+      });
+      saveToStorage();
+      if (window.syncGroupEntityToCloud) window.syncGroupEntityToCloud(gId);
+      closeDistributeModal();
+      window.appState.planifRange = 'next';
+      refreshAfterPlanChange();
+    };
+
+    // ---------- Vista Planificació ----------
+
+    if (!window.appState.planifRange) window.appState.planifRange = 'next';
+    if (!window.appState.planifCount) window.appState.planifCount = 12;
+
+    window.setPlanifRange = function(r) {
+      window.appState.planifRange = r;
+      window.appState.planifCount = 12;
+      renderPlanifView();
+    };
+
+    window.planifShowMore = function() {
+      window.appState.planifCount += 12;
+      renderPlanifView();
+    };
+
+    window.printPlanif = function() {
+      document.body.classList.add('print-planif');
+      let st = document.getElementById('planifPageStyle');
+      if (!st) { st = document.createElement('style'); st.id = 'planifPageStyle'; document.head.appendChild(st); }
+      st.textContent = '@media print { @page { size: A4 portrait; margin: 12mm; } }';
+      setTimeout(() => { window.print(); setTimeout(() => document.body.classList.remove('print-planif'), 500); }, 100);
+    };
+
+    function planPartsSummary(p) {
+      return SESSION_PARTS.map(sp => {
+        const part = p.parts && p.parts[sp.id];
+        if (!part || !part.text) return '';
+        return `<div class="flex flex-col sm:flex-row sm:gap-2 text-[11px]"><span class="shrink-0 sm:w-36 font-semibold whitespace-nowrap text-zinc-500"><i class="fa-solid ${sp.icon} text-[9px] mr-1 text-zinc-400"></i>${sp.label}${part.min ? ` <span class="font-mono text-zinc-400">${part.min}'</span>` : ''}</span><span class="text-zinc-700 whitespace-pre-line">${escapeHtml(part.text || '—')}</span></div>`;
+      }).join('');
+    }
+
+    window.renderPlanifView = function() {
+      const group = getCurrentGroup();
+      const gId = window.appData.activeGroupId;
+      const range = window.appState.planifRange;
+      const listEl = document.getElementById('planifList');
+      ['Next', 'Past'].forEach(k => {
+        const on = range === k.toLowerCase();
+        document.getElementById(`planifRange${k}`).className = `px-3 py-1.5 rounded-lg transition ${on ? 'bg-white text-zinc-900 shadow-subtle font-bold' : 'text-zinc-500 hover:text-zinc-900'}`;
+      });
+      document.getElementById('planifPrintTitle').textContent = `Planificació d'Educació Física · ${group.name}`;
+
+      if (!getGroupDays(group).length) {
+        document.getElementById('planifSummary').textContent = '';
+        listEl.innerHTML = `
+          <div class="bg-white border border-dashed border-zinc-300 rounded-3xl p-8 text-center space-y-3">
+            <i class="fa-regular fa-calendar text-3xl text-zinc-300"></i>
+            <p class="text-sm font-semibold text-zinc-700">Per planificar les sessions, primer indica quins dies i a quina hora tens aquesta classe.</p>
+            <button onclick="openSlotModal(null, null, { gId: '${gId}' })" class="inline-flex items-center gap-1.5 bg-zinc-900 hover:bg-zinc-800 text-white text-xs font-semibold px-4 py-2 rounded-xl"><i class="fa-solid fa-plus text-[10px]"></i> Afegir l'horari de ${escapeHtml(group.name)}</button>
+          </div>`;
+        return;
+      }
+
+      const today = todayISO();
+      let dates;
+      if (range === 'next') {
+        dates = getClassDates(group, gId, today, { count: window.appState.planifCount });
+      } else {
+        const y = isoToDate(today); y.setDate(y.getDate() - 1);
+        dates = getClassDates(group, gId, dateToISO(y), { count: window.appState.planifCount, dir: -1 }).reverse();
+      }
+      const onDates = dates.filter(d => !d.status.off);
+      const nPlanned = onDates.filter(d => planHasContent(getSessionPlan(group, d.iso))).length;
+      document.getElementById('planifSummary').innerHTML = range === 'next'
+        ? `<b class="text-zinc-800">${nPlanned} de ${onDates.length}</b> properes sessions planificades`
+        : `Últimes ${onDates.length} sessions · ${nPlanned} amb pla`;
+
+      // Agrupar per setmanes
+      const weeks = [];
+      dates.forEach(d => {
+        const dt = isoToDate(d.iso);
+        const mon = new Date(dt); mon.setDate(dt.getDate() - ((dt.getDay() || 7) - 1));
+        const key = dateToISO(mon);
+        let w = weeks.find(x => x.key === key);
+        if (!w) { w = { key, mon, items: [] }; weeks.push(w); }
+        w.items.push(d);
+      });
+      if (range === 'past') weeks.reverse().forEach(w => w.items.reverse());
+
+      listEl.innerHTML = weeks.map(w => {
+        const fri = new Date(w.mon); fri.setDate(w.mon.getDate() + 4);
+        const thisWeek = today >= w.key && today <= dateToISO(fri);
+        return `
+          <div class="space-y-2">
+            <h4 class="text-[11px] font-bold text-zinc-500 uppercase tracking-wider">${thisWeek ? 'Aquesta setmana' : 'Setmana'} · <span class="font-mono normal-case tracking-normal">${w.mon.toLocaleDateString('ca-ES', { day: 'numeric', month: 'short' })} – ${fri.toLocaleDateString('ca-ES', { day: 'numeric', month: 'short' })}</span></h4>
+            <div class="space-y-2">
+              ${w.items.map(d => {
+                const dt = isoToDate(d.iso);
+                const p = getSessionPlan(group, d.iso);
+                const has = planHasContent(p);
+                const sda = p && (group.sdas || []).find(s => s.id === p.sdaId);
+                const session = group.sessions && group.sessions[d.iso];
+                const isToday = d.iso === today;
+                const dateBlock = `
+                  <div class="w-16 shrink-0 self-start text-center rounded-xl py-2 ${isToday ? 'bg-zinc-900 text-white' : 'bg-zinc-100 text-zinc-700'}">
+                    <div class="text-[10px] font-bold uppercase">${dt.toLocaleDateString('ca-ES', { weekday: 'short' })}</div>
+                    <div class="text-lg font-black leading-none">${dt.getDate()}</div>
+                    <div class="text-[10px] opacity-70">${dt.toLocaleDateString('ca-ES', { month: 'short' })}</div>
+                    ${d.slot ? `<div class="text-[10px] font-mono mt-1 opacity-80">${d.slot.start}</div>` : ''}
+                  </div>`;
+                if (d.status.off) {
+                  return `
+                    <div class="flex gap-3 items-center bg-zinc-50 border border-zinc-200 rounded-2xl p-2.5 opacity-60" style="background-image:repeating-linear-gradient(135deg, rgba(228,228,231,.5) 0 8px, transparent 8px 16px)">
+                      ${dateBlock}
+                      <div class="text-xs font-semibold text-zinc-600"><i class="fa-solid ${d.status.holiday ? 'fa-calendar-xmark' : 'fa-ban'} mr-1"></i>${d.status.holiday ? escapeHtml(d.status.holiday.label) : 'No es fa · ' + escapeHtml(cancelReasonLabel(d.status.cancel))}</div>
+                    </div>`;
+                }
+                const totalMin = has && p.parts ? SESSION_PARTS.reduce((a, sp) => a + ((p.parts[sp.id] && p.parts[sp.id].min) || 0), 0) : 0;
+                return `
+                  <div class="flex gap-3 bg-white border ${isToday ? 'border-zinc-900' : 'border-zinc-200'} rounded-2xl p-2.5 shadow-subtle break-inside-avoid">
+                    ${dateBlock}
+                    <div class="flex-1 min-w-0 space-y-1.5">
+                      ${has ? `
+                        <div class="flex flex-wrap items-start justify-between gap-2">
+                          <div class="min-w-0">
+                            <div class="text-sm font-bold text-zinc-900">${escapeHtml(p.title || 'Sessió sense títol')}</div>
+                            <div class="flex flex-wrap items-center gap-1.5 mt-0.5">
+                              ${sda ? `<span class="text-[10px] font-bold px-1.5 py-0.5 rounded bg-amber-50 text-amber-800 border border-amber-200">${escapeHtml(sda.title)}</span>` : ''}
+                              ${totalMin ? `<span class="text-[10px] font-mono text-zinc-400">${totalMin} min</span>` : ''}
+                              ${session ? '<span class="text-[10px] font-bold text-emerald-700"><i class="fa-solid fa-check mr-0.5"></i>llista passada</span>' : ''}
+                            </div>
+                          </div>
+                        </div>
+                        ${p.objectiu ? `<div class="text-[11px] text-zinc-600"><i class="fa-solid fa-bullseye text-zinc-400 mr-1"></i>${escapeHtml(p.objectiu)}</div>` : ''}
+                        <div class="space-y-1">${planPartsSummary(p)}</div>
+                        ${p.material ? `<div class="text-[11px] text-zinc-500"><i class="fa-solid fa-box-open text-zinc-400 mr-1"></i>${escapeHtml(p.material)}</div>` : ''}
+                        ${p.reflexio ? `<div class="text-[11px] text-zinc-600 bg-zinc-50 border border-zinc-200 rounded-lg px-2 py-1"><i class="fa-regular fa-comment text-zinc-400 mr-1"></i>${escapeHtml(p.reflexio)}</div>` : ''}
+                      ` : `
+                        <div class="h-full flex items-center text-xs text-zinc-400 italic">Sense planificar${session ? ' · <span class="not-italic font-bold text-emerald-700 ml-1"><i class="fa-solid fa-check mr-0.5"></i>llista passada</span>' : ''}</div>
+                      `}
+                    </div>
+                    <div class="flex flex-col gap-1 shrink-0 planif-noprint">
+                      <button onclick="openSessionPlanModal('${gId}','${d.iso}')" class="text-[11px] font-semibold px-2.5 py-1.5 rounded-lg ${has ? 'bg-zinc-100 hover:bg-zinc-200 text-zinc-700' : 'bg-zinc-900 hover:bg-zinc-800 text-white'}">${has ? '<i class="fa-solid fa-pen text-[9px] mr-1"></i>Editar' : '<i class="fa-solid fa-plus text-[9px] mr-1"></i>Planificar'}</button>
+                      <button onclick="openDiariFor('${gId}','${d.iso}')" class="text-[11px] font-semibold px-2.5 py-1.5 rounded-lg text-zinc-500 hover:text-zinc-900 hover:bg-zinc-100"><i class="fa-solid fa-clipboard-check text-[9px] mr-1"></i>Diari</button>
+                    </div>
+                  </div>`;
+              }).join('')}
+            </div>
+          </div>`;
+      }).join('') + `
+        <div class="text-center planif-noprint">
+          <button onclick="planifShowMore()" class="text-xs font-semibold text-zinc-600 bg-white hover:bg-zinc-50 border border-zinc-200 px-4 py-2 rounded-xl">Mostrar més sessions</button>
+        </div>`;
+    };
+
+    // Targeta del pla dins del Diari
+    function prependDiariPlanCard(group) {
+      const iso = window.appState.diariDate;
+      const gId = window.appData.activeGroupId;
+      const p = getSessionPlan(group, iso);
+      const status = getClassDayStatus(group, gId, iso);
+      const panel = document.getElementById('diariSessionPanel');
+      if (!planHasContent(p) && status.off) return;
+      const sda = p && (group.sdas || []).find(s => s.id === p.sdaId);
+      const open = window.appState.diariPlanOpen !== false;
+      const html = planHasContent(p) ? `
+        <div class="bg-amber-50/60 border border-amber-200 rounded-2xl p-3 space-y-2">
+          <div class="flex items-start justify-between gap-2">
+            <button onclick="window.appState.diariPlanOpen = ${!open}; renderDiariView();" class="text-left min-w-0">
+              <div class="text-[10px] font-bold uppercase tracking-wider text-amber-700"><i class="fa-solid fa-chevron-${open ? 'down' : 'right'} text-[8px] mr-1"></i>Pla de la sessió</div>
+              <div class="text-sm font-bold text-zinc-900">${escapeHtml(p.title || 'Sessió')}${sda ? ` <span class="text-[10px] font-semibold text-amber-800 ml-1">${escapeHtml(sda.title)}</span>` : ''}</div>
+            </button>
+            <button onclick="openSessionPlanModal('${gId}','${iso}')" class="shrink-0 text-[11px] font-semibold px-2.5 py-1 rounded-lg bg-white border border-amber-200 hover:bg-amber-100 text-amber-900"><i class="fa-solid fa-pen text-[9px] mr-1"></i>Editar</button>
+          </div>
+          ${open ? `
+            ${p.objectiu ? `<div class="text-[11px] text-zinc-700"><i class="fa-solid fa-bullseye text-amber-500 mr-1"></i>${escapeHtml(p.objectiu)}</div>` : ''}
+            <div class="space-y-1">${planPartsSummary(p)}</div>
+            ${p.material ? `<div class="text-[11px] text-zinc-600"><i class="fa-solid fa-box-open text-amber-500 mr-1"></i>${escapeHtml(p.material)}</div>` : ''}` : ''}
+        </div>` : `
+        <div class="flex items-center justify-between gap-2 bg-white border border-dashed border-zinc-300 rounded-2xl px-3 py-2 text-xs">
+          <span class="text-zinc-400"><i class="fa-regular fa-calendar-check mr-1"></i>Aquesta sessió no està planificada.</span>
+          <button onclick="openSessionPlanModal('${gId}','${iso}')" class="font-semibold text-zinc-700 bg-zinc-100 hover:bg-zinc-200 px-2.5 py-1 rounded-lg">Planificar</button>
+        </div>`;
+      panel.insertAdjacentHTML('afterbegin', html);
+    }
+    window.prependDiariPlanCard = prependDiariPlanCard;
 
     // ================== BIBLIOTECA DE SdAs ==================
 
@@ -4674,7 +5324,7 @@
 
     window.switchView = function(view) {
       window.appState.currentView = view;
-      ['sda', 'diari', 'roster', 'trim', 'final', 'report', 'stats'].forEach(id => {
+      ['sda', 'diari', 'planif', 'roster', 'trim', 'final', 'report', 'stats'].forEach(id => {
         const btn = document.getElementById(`tabBtn${id.charAt(0).toUpperCase() + id.slice(1)}`);
         const sec = document.getElementById(`view${id.charAt(0).toUpperCase() + id.slice(1)}`);
         if (id === view) {
@@ -4692,6 +5342,7 @@
       if (view === 'report') renderIndividualReport();
       if (view === 'stats') initStatsView();
       if (view === 'diari') renderDiariView();
+      if (view === 'planif') renderPlanifView();
     };
 
     // ================== ALUMNAT ==================
