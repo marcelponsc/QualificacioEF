@@ -1478,6 +1478,13 @@
             <select id="spmAct" onchange="onSpmActChange()" class="w-full border border-zinc-200 rounded-xl p-2.5 outline-none font-semibold bg-white focus:ring-2 focus:ring-zinc-900"></select>
           </div>
         </div>
+        <div id="spmEvalWrap" class="bg-zinc-50 border border-zinc-200 rounded-2xl p-3 space-y-2">
+          <div class="flex items-center justify-between">
+            <span class="font-bold text-zinc-800"><i class="fa-solid fa-pen-to-square text-zinc-400 mr-1.5"></i>Què avaluaràs avui?</span>
+            <span class="text-[11px] text-zinc-400">Sortiran per posar nota quan passis llista</span>
+          </div>
+          <div id="spmEvalChips" class="flex flex-wrap gap-1.5"></div>
+        </div>
         <div>
           <label class="block font-semibold text-zinc-700 mb-1">Títol de la sessió</label>
           <input type="text" id="spmTitle" placeholder="Ex: Circuit de capacitats físiques" class="w-full text-sm border border-zinc-200 rounded-xl p-2.5 outline-none font-semibold focus:ring-2 focus:ring-zinc-900">
@@ -1620,6 +1627,27 @@
       <div class="px-6 py-3.5 bg-zinc-50 border-t border-zinc-200 flex justify-end gap-2 text-xs">
         <button onclick="closeIdoceoModal()" class="px-3.5 py-1.5 border border-zinc-300 rounded-xl font-semibold text-zinc-600">Cancel·lar</button>
         <button id="idoImportBtn" onclick="applyIdoceoImport()" class="hidden px-4 py-1.5 bg-zinc-900 hover:bg-zinc-800 text-white rounded-xl font-semibold">Importar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL RÚBRICA D'UN OBJECTIU -->
+  <div id="rubricModal" class="fixed inset-0 bg-zinc-950/40 backdrop-blur-xs z-50 flex items-center justify-center p-2 sm:p-4 hidden no-print">
+    <div class="bg-white rounded-3xl shadow-card max-w-3xl w-full max-h-[94vh] flex flex-col overflow-hidden border border-zinc-200">
+      <div class="px-6 py-4 bg-zinc-900 text-white flex justify-between items-center">
+        <div class="min-w-0">
+          <h3 class="text-sm font-bold flex items-center gap-2"><i class="fa-solid fa-table-list text-zinc-400"></i> Rúbrica</h3>
+          <div id="rubricInfo" class="text-[11px] text-zinc-400 mt-0.5 truncate"></div>
+        </div>
+        <button onclick="closeRubricModal()" class="text-zinc-400 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div class="p-5 sm:p-6 space-y-3 text-xs overflow-y-auto">
+        <p class="text-zinc-500">Descriu què fa l'alumne/a a cada nivell. Ho veuràs mentre avalues i s'aplica a totes les classes que tenen aquesta SdA.</p>
+        <div id="rubricFields" class="grid grid-cols-1 md:grid-cols-5 gap-2"></div>
+      </div>
+      <div class="px-6 py-3.5 bg-zinc-50 border-t border-zinc-200 flex justify-end gap-2 text-xs">
+        <button onclick="closeRubricModal()" class="px-3.5 py-1.5 border border-zinc-300 rounded-xl font-semibold text-zinc-600">Cancel·lar</button>
+        <button onclick="saveRubricFromModal()" class="px-4 py-1.5 bg-zinc-900 hover:bg-zinc-800 text-white rounded-xl font-semibold">Desar</button>
       </div>
     </div>
   </div>
@@ -2814,6 +2842,7 @@
       const group = getCurrentGroup();
       const session = ensureSession(group, window.appState.diariDate);
       session[field] = field === 'trim' ? parseInt(value) : value;
+      if (field === 'sdaId') delete session.evalKeys;
       persistSession(window.appState.diariDate, field !== 'note');
       if (field !== 'note') renderDiariView();
     };
@@ -2856,16 +2885,33 @@
       inputEl.className = `diari-grade w-14 h-9 text-center rounded-lg font-mono text-xs outline-none border border-zinc-200 focus:ring-2 focus:ring-zinc-900 ${getScoreColorClass(val)}`;
     };
 
-    window.diariGradeKeydown = function(e, idx) {
+    window.diariGradeKeydown = function(e, idx, col = 0) {
+      const go = (r, c) => { const el = document.querySelector(`input.diari-grade[data-idx="${r}"][data-col="${c}"]`); if (el) { el.focus(); el.select(); return true; } return false; };
       if (e.key === 'Enter' || e.key === 'ArrowDown') {
         e.preventDefault();
-        const next = document.querySelector(`input.diari-grade[data-idx="${idx + 1}"]`);
-        if (next) { next.focus(); next.select(); } else e.target.blur();
-      } else if (e.key === 'ArrowUp') {
-        e.preventDefault();
-        const prev = document.querySelector(`input.diari-grade[data-idx="${idx - 1}"]`);
-        if (prev) { prev.focus(); prev.select(); }
-      }
+        if (!go(idx + 1, col) && !go(0, col + 1)) e.target.blur();
+      } else if (e.key === 'ArrowUp') { e.preventDefault(); go(idx - 1, col); }
+      else if (e.key === 'ArrowRight' && e.target.selectionStart === e.target.value.length) { if (go(idx, col + 1)) e.preventDefault(); }
+      else if (e.key === 'ArrowLeft' && e.target.selectionStart === 0) { if (go(idx, col - 1)) e.preventDefault(); }
+    };
+
+    // Objectius a avaluar en una sessió: els triats al Diari o, si no, els del pla d'aquell dia
+    function getDiariEvalKeys(group, session, iso) {
+      if (session && Array.isArray(session.evalKeys)) return session.evalKeys;
+      const plan = getSessionPlan(group, iso);
+      if (plan && Array.isArray(plan.evalKeys) && (!session || !session.sdaId || plan.sdaId === session.sdaId)) return plan.evalKeys;
+      return [];
+    }
+
+    window.diariToggleEvalKey = function(key) {
+      const group = getCurrentGroup();
+      const iso = window.appState.diariDate;
+      const session = ensureSession(group, iso);
+      const cur = new Set(getDiariEvalKeys(group, session, iso));
+      cur.has(key) ? cur.delete(key) : cur.add(key);
+      session.evalKeys = Array.from(cur);
+      persistSession(iso);
+      renderDiariView();
     };
 
     // Marca la penalització de mínim de pràctica segons el % del trimestre
@@ -2975,16 +3021,9 @@
 
       const trimSdas = (group.sdas || []).filter(s => s.trim === session.trim);
       const sda = (group.sdas || []).find(s => s.id === session.sdaId);
-      const evalOptions = [];
-      if (sda) {
-        OFFICIAL_CES.forEach(ce => {
-          const conf = sda.competences && sda.competences[ce.id];
-          if (!conf || !conf.active) return;
-          if (conf.oas && conf.oas.length) conf.oas.forEach(oa => evalOptions.push({ key: `${ce.id}_${oa.id}`, label: `${ce.id} · ${oa.label || oa.id}` }));
-          else evalOptions.push({ key: `${ce.id}_direct`, label: `${ce.id} · avaluació directa` });
-        });
-      }
-      const evalKey = evalOptions.some(o => o.key === window.appState.diariEvalKey) ? window.appState.diariEvalKey : '';
+      const evalOptions = getSdaEvalOptions(sda);
+      const evalKeys = getDiariEvalKeys(group, session, iso).filter(k => evalOptions.some(o => o.key === k));
+      const evalCols = evalOptions.filter(o => evalKeys.includes(o.key));
 
       // Comptadors
       const all = group.students || [];
@@ -2998,12 +3037,13 @@
       const counter = (n, label, cls) => `<div class="flex-1 min-w-[70px] rounded-xl border ${cls} px-2 py-1.5 text-center"><div class="text-lg font-black font-mono leading-none">${n}</div><div class="text-[10px] font-semibold mt-0.5">${label}</div></div>`;
 
       const minP = getMinPractice(group);
-      const rows = students.map((st, idx) => {
+      const task = evalCols.length && window.appState.diariTask === 'avaluar' ? 'avaluar' : 'llista';
+      const rows = task === 'avaluar' ? renderDiariEvalRows(group, session, sda, evalCols, students) : students.map((st, idx) => {
         const r = getRecord(session, st.id);
         const a = r.a || 'P';
         const absent = a === 'F' || a === 'FJ';
         const stats = getStudentAttendanceStats(group, st.id, session.trim);
-        const gradeVal = evalKey && group.grades && group.grades[sda.id] && group.grades[sda.id][st.id] && group.grades[sda.id][st.id][evalKey] !== undefined ? group.grades[sda.id][st.id][evalKey] : '';
+        const stGrades = (sda && group.grades && group.grades[sda.id] && group.grades[sda.id][st.id]) || {};
         const obsOpen = window.appState.diariOpenObs === st.id;
 
         return `
@@ -3037,10 +3077,7 @@
                   <i class="fa-regular fa-comment-dots text-xs"></i>
                   <span id="diariObsInd_${st.id}" class="${r.obs ? '' : 'hidden'} absolute -top-1 -right-1 w-2.5 h-2.5 rounded-full bg-amber-500 border-2 border-white"></span>
                 </button>
-                ${evalKey ? `
-                  <input type="text" inputmode="decimal" value="${gradeVal}" data-idx="${idx}" placeholder="nota"
-                    onfocus="this.select()" onkeydown="diariGradeKeydown(event, ${idx})" onblur="diariSetGrade('${sda.id}', ${st.id}, '${evalKey}', this)"
-                    class="diari-grade w-14 h-9 text-center rounded-lg font-mono text-xs outline-none border border-zinc-200 focus:ring-2 focus:ring-zinc-900 ${getScoreColorClass(gradeVal)}">` : ''}
+
               </div>
             </div>
             ${obsOpen ? `
@@ -3056,7 +3093,7 @@
             ${counter(c.R, 'retards', 'border-amber-200 bg-amber-50 text-amber-800')}
             ${counter(practicing, 'fan pràctica', 'border-zinc-200 bg-zinc-50 text-zinc-800')}
           </div>
-          <div class="grid grid-cols-1 md:grid-cols-3 gap-2 text-xs">
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-2 text-xs">
             <div class="flex items-center gap-2">
               <span class="font-semibold text-zinc-400 shrink-0">Trim.</span>
               <select onchange="diariSetSessionField('trim', this.value)" class="flex-1 bg-zinc-50 border border-zinc-200 rounded-xl px-2 py-1.5 font-semibold outline-none">
@@ -3070,17 +3107,16 @@
                 ${trimSdas.map(s => `<option value="${s.id}" ${s.id === session.sdaId ? 'selected' : ''}>${escapeHtml(s.title)}</option>`).join('')}
               </select>
             </div>
-            <div class="flex items-center gap-2">
-              <span class="font-semibold text-zinc-400 shrink-0">Avaluar</span>
-              <select onchange="diariSetEvalKey(this.value)" ${!evalOptions.length ? 'disabled' : ''} class="flex-1 min-w-0 bg-zinc-50 border border-zinc-200 rounded-xl px-2 py-1.5 font-semibold outline-none disabled:opacity-50">
-                <option value="">${evalOptions.length ? 'No posar notes avui' : 'Tria una SdA per posar notes'}</option>
-                ${evalOptions.map(o => `<option value="${o.key}" ${o.key === evalKey ? 'selected' : ''}>${escapeHtml(o.label)}</option>`).join('')}
-              </select>
-            </div>
+          </div>
+          <div class="flex flex-wrap items-center gap-1.5 text-xs">
+            <span class="font-semibold text-zinc-400 shrink-0 mr-1"><i class="fa-solid fa-pen-to-square mr-1"></i>Avaluar avui:</span>
+            ${evalOptions.length ? evalOptions.map(o => `
+              <button onclick="diariToggleEvalKey('${o.key}')" title="${escapeHtml(o.label)}" class="px-2.5 py-1.5 rounded-xl border text-[11px] font-semibold transition ${evalKeys.includes(o.key) ? 'bg-zinc-900 text-white border-zinc-900' : 'bg-white text-zinc-500 border-zinc-200 hover:border-zinc-400'}"><b>${o.short}</b> <span class="font-normal opacity-80">${escapeHtml(o.label.length > 28 ? o.label.slice(0, 28) + '…' : o.label)}</span></button>`).join('')
+              : '<span class="text-[11px] text-zinc-400 italic">Tria la SdA de la sessió per poder posar notes.</span>'}
           </div>
           <input type="text" value="${escapeHtml(session.note || '')}" oninput="diariSetSessionField('note', this.value)" placeholder="Què s'ha treballat avui? (opcional)" class="w-full bg-zinc-50 border border-zinc-200 rounded-xl px-3 py-2 text-xs outline-none focus:ring-2 focus:ring-zinc-900 focus:bg-white">
           <div class="flex flex-wrap items-center justify-between gap-2 text-[11px]">
-            <span class="text-zinc-400"><i class="fa-regular fa-lightbulb mr-1"></i>Tothom és present per defecte: marca només les excepcions. ${evalKey ? 'Nota: escriu 0–4 o e/n/a/p i prem Enter.' : ''}</span>
+            <span class="text-zinc-400"><i class="fa-regular fa-lightbulb mr-1"></i>Tothom és present per defecte: marca només les excepcions. ${evalCols.length ? 'Per posar notes, passa a <b>Avaluar</b>.' : ''}</span>
             <div class="flex gap-1.5">
               <button onclick="diariAllPresent()" class="px-2.5 py-1.5 rounded-lg bg-zinc-100 hover:bg-zinc-200 font-semibold text-zinc-700">Tothom present</button>
               <button onclick="diariDeleteSession()" class="px-2.5 py-1.5 rounded-lg text-zinc-400 hover:text-rose-600 hover:bg-rose-50 font-semibold">Eliminar sessió</button>
@@ -3088,6 +3124,14 @@
           </div>
         </div>
 
+        ${evalCols.length ? `
+          <div class="flex flex-wrap items-center gap-2">
+            <div class="seg !text-sm">
+              <button onclick="setDiariTask('llista')" class="${task === 'llista' ? 'active' : ''}"><i class="fa-solid fa-clipboard-check mr-1.5"></i>Passar llista</button>
+              <button onclick="setDiariTask('avaluar')" class="${task === 'avaluar' ? 'active' : ''}"><i class="fa-solid fa-pen-to-square mr-1.5"></i>Avaluar (${evalCols.length})</button>
+            </div>
+          </div>
+          ${task === 'avaluar' ? renderDiariEvalHeader(sda, evalCols) : ''}` : ''}
         <div class="bg-white border border-zinc-200 rounded-2xl shadow-card overflow-hidden divide-y divide-zinc-100">
           ${rows || '<div class="p-6 text-center text-xs text-zinc-400">Cap alumne coincideix amb la cerca.</div>'}
         </div>
@@ -3963,6 +4007,30 @@
       { id: 'tornada', label: 'Tornada a la calma', icon: 'fa-wind', def: 5, ph: 'Estiraments, reflexió, recollida de material...' }
     ];
 
+    // Objectius avaluables d'una SdA: una entrada per OA (o avaluació directa de la CE)
+    function getSdaEvalOptions(sda) {
+      const out = [];
+      if (!sda) return out;
+      OFFICIAL_CES.forEach(ce => {
+        const conf = sda.competences && sda.competences[ce.id];
+        if (!conf || !conf.active) return;
+        if (conf.oas && conf.oas.length) conf.oas.forEach((oa, i) => out.push({ key: `${ce.id}_${oa.id}`, ce: ce.id, short: `${ce.id} OA${i + 1}`, label: oa.label || `OA${i + 1}` }));
+        else out.push({ key: `${ce.id}_direct`, ce: ce.id, short: ce.id, label: ce.short || 'Avaluació directa' });
+      });
+      return out;
+    }
+    window.getSdaEvalOptions = getSdaEvalOptions;
+
+    function evalKeysBadges(group, plan) {
+      if (!plan || !Array.isArray(plan.evalKeys) || !plan.evalKeys.length) return '';
+      const sda = (group.sdas || []).find(s => s.id === plan.sdaId);
+      const opts = getSdaEvalOptions(sda);
+      const sel = opts.filter(o => plan.evalKeys.includes(o.key));
+      if (!sel.length) return '';
+      return `<div class="flex flex-wrap items-center gap-1 text-[10px]"><span class="font-bold text-zinc-500"><i class="fa-solid fa-pen-to-square mr-0.5"></i>Avalua:</span>${sel.map(o => `<span title="${escapeHtml(o.label)}" class="font-bold px-1.5 py-0.5 rounded border ${CE_COLOR_THEMES[o.ce] ? CE_COLOR_THEMES[o.ce].header : 'bg-zinc-50 border-zinc-200'}">${o.short}</span>`).join('')}</div>`;
+    }
+    window.evalKeysBadges = evalKeysBadges;
+
     function getGroupPlans(group) {
       if (!group.plans || typeof group.plans !== 'object') group.plans = {};
       return group.plans;
@@ -3974,7 +4042,7 @@
     window.getSessionPlan = getSessionPlan;
 
     function planHasContent(p) {
-      return !!(p && (p.title || p.objectiu || p.material || (p.parts && Object.values(p.parts).some(x => x && x.text))));
+      return !!(p && (p.title || p.objectiu || p.material || (p.evalKeys && p.evalKeys.length) || (p.parts && Object.values(p.parts).some(x => x && x.text))));
     }
 
     function getSlotForDate(group, iso) {
@@ -4035,6 +4103,7 @@
       document.getElementById('spmSda').innerHTML = `<option value="">— Sense SdA —</option>` + sdas.map(s => `<option value="${s.id}">T${s.trim} · ${escapeHtml(s.title)}</option>`).join('');
       document.getElementById('spmSda').value = (group.sdas || []).some(s => s.id === defaultSda) ? defaultSda : '';
       fillSpmActivities(plan.actIdx);
+      renderSpmEvalChips(plan.evalKeys);
 
       document.getElementById('spmTitle').value = plan.title || '';
       document.getElementById('spmObjectiu').value = plan.objectiu || '';
@@ -4078,7 +4147,17 @@
       document.getElementById('spmAct').disabled = !acts.length;
     }
 
-    window.onSpmSdaChange = function() { fillSpmActivities(-1); };
+    function renderSpmEvalChips(selected) {
+      const group = window.appData.groups[spmTarget.gId];
+      const sda = (group.sdas || []).find(s => s.id === document.getElementById('spmSda').value);
+      const opts = getSdaEvalOptions(sda);
+      const sel = new Set(selected || []);
+      document.getElementById('spmEvalChips').innerHTML = opts.length ? opts.map(o => `
+        <label class="plan-chip" title="${escapeHtml(o.label)}"><input type="checkbox" name="spmEval" value="${o.key}" ${sel.has(o.key) ? 'checked' : ''}><span><b>${o.short}</b> · ${escapeHtml(o.label.length > 40 ? o.label.slice(0, 40) + '…' : o.label)}</span></label>`).join('')
+        : `<span class="text-[11px] text-zinc-400 italic">${sda ? 'Aquesta SdA no té competències actives.' : 'Tria una SdA per veure els seus objectius.'}</span>`;
+    }
+
+    window.onSpmSdaChange = function() { fillSpmActivities(-1); renderSpmEvalChips([]); };
 
     window.onSpmActChange = function() {
       const group = window.appData.groups[spmTarget.gId];
@@ -4115,7 +4194,8 @@
         objectiu: document.getElementById('spmObjectiu').value.trim(),
         parts,
         material: document.getElementById('spmMaterial').value.trim(),
-        reflexio: document.getElementById('spmReflexio').value.trim()
+        reflexio: document.getElementById('spmReflexio').value.trim(),
+        evalKeys: Array.from(document.querySelectorAll('input[name="spmEval"]:checked')).map(c => c.value)
       };
     }
 
@@ -4173,7 +4253,7 @@
       // Busquem la mateixa SdA a la classe de destí
       const srcSda = (window.appData.groups[spmTarget.gId].sdas || []).find(s => s.id === plan.sdaId);
       const dstSda = srcSda ? (target.sdas || []).find(s => s.title === srcSda.title && s.trim === srcSda.trim) : null;
-      getGroupPlans(target)[iso] = { ...JSON.parse(JSON.stringify(plan)), sdaId: dstSda ? dstSda.id : '', actIdx: dstSda ? plan.actIdx : -1, reflexio: '' };
+      getGroupPlans(target)[iso] = { ...JSON.parse(JSON.stringify(plan)), sdaId: dstSda ? dstSda.id : '', actIdx: dstSda ? plan.actIdx : -1, evalKeys: dstSda ? plan.evalKeys : [], reflexio: '' };
       syncPlan(tg, iso);
       refreshSpmCopyDates();
       alert(`Copiat a ${target.name} (${formatLongDateCa(iso)}).`);
@@ -4408,6 +4488,7 @@
                           </div>
                         </div>
                         ${p.objectiu ? `<div class="text-[11px] text-zinc-600"><i class="fa-solid fa-bullseye text-zinc-400 mr-1"></i>${escapeHtml(p.objectiu)}</div>` : ''}
+                        ${evalKeysBadges(group, p)}
                         <div class="space-y-1">${planPartsSummary(p)}</div>
                         ${p.material ? `<div class="text-[11px] text-zinc-500"><i class="fa-solid fa-box-open text-zinc-400 mr-1"></i>${escapeHtml(p.material)}</div>` : ''}
                         ${p.reflexio ? `<div class="text-[11px] text-zinc-600 bg-zinc-50 border border-zinc-200 rounded-lg px-2 py-1"><i class="fa-regular fa-comment text-zinc-400 mr-1"></i>${escapeHtml(p.reflexio)}</div>` : ''}
@@ -4450,6 +4531,7 @@
           </div>
           ${open ? `
             ${p.objectiu ? `<div class="text-[11px] text-zinc-700"><i class="fa-solid fa-bullseye text-amber-500 mr-1"></i>${escapeHtml(p.objectiu)}</div>` : ''}
+            ${evalKeysBadges(group, p)}
             <div class="space-y-1">${planPartsSummary(p)}</div>
             ${p.material ? `<div class="text-[11px] text-zinc-600"><i class="fa-solid fa-box-open text-amber-500 mr-1"></i>${escapeHtml(p.material)}</div>` : ''}` : ''}
         </div>` : `
@@ -7708,6 +7790,200 @@
       switchView('diari');
     };
 
+    // ================== AVALUAR AMB BOTONS I RÚBRIQUES ==================
+
+    const LEVEL_CODES = ['NA', 'EPA', 'AS', 'AN', 'AE'];
+    const LEVEL_NAMES = { NA: 'No assolit', EPA: 'En procés', AS: 'Assoliment satisfactori', AN: 'Assoliment notable', AE: 'Assoliment excel·lent' };
+    const LEVEL_ON = {
+      NA: 'bg-rose-500 text-white border-rose-500', EPA: 'bg-amber-400 text-amber-950 border-amber-400', AS: 'bg-sky-500 text-white border-sky-500',
+      AN: 'bg-indigo-500 text-white border-indigo-500', AE: 'bg-emerald-500 text-white border-emerald-500'
+    };
+    const LEVEL_SOFT = {
+      NA: 'bg-rose-50 border-rose-200 text-rose-900', EPA: 'bg-amber-50 border-amber-200 text-amber-900', AS: 'bg-sky-50 border-sky-200 text-sky-900',
+      AN: 'bg-indigo-50 border-indigo-200 text-indigo-900', AE: 'bg-emerald-50 border-emerald-200 text-emerald-900'
+    };
+
+    // Valor numèric que es desa en tocar cada nivell (segons l'escala configurada)
+    function levelValue(code) {
+      const th = gradeThresholds;
+      return { NA: Math.round((th.epa / 2) * 100) / 100, EPA: th.epa, AS: th.as, AN: th.an, AE: th.ae }[code];
+    }
+
+    if (!window.appState.diariTask) window.appState.diariTask = 'llista';
+    if (!window.appState.diariGradeInput) {
+      try { window.appState.diariGradeInput = localStorage.getItem('EF_GRADE_INPUT') || 'buttons'; } catch (e) { window.appState.diariGradeInput = 'buttons'; }
+    }
+
+    window.setDiariTask = function(t) { window.appState.diariTask = t; renderDiariView(); };
+    window.setDiariGradeInput = function(m) {
+      window.appState.diariGradeInput = m;
+      try { localStorage.setItem('EF_GRADE_INPUT', m); } catch (e) {}
+      renderDiariView();
+    };
+
+    function commitGrade(sdaId, stId, key, val) {
+      const group = getCurrentGroup();
+      if (!group.grades) group.grades = {};
+      if (!group.grades[sdaId]) group.grades[sdaId] = {};
+      if (!group.grades[sdaId][stId]) group.grades[sdaId][stId] = {};
+      if (val === null || val === undefined) delete group.grades[sdaId][stId][key];
+      else group.grades[sdaId][stId][key] = val;
+      saveToStorage();
+      if (window.syncGradeToCloud) window.syncGradeToCloud(window.appData.activeGroupId, sdaId, stId, key, val === undefined ? null : val);
+    }
+
+    window.diariSetLevel = function(sdaId, stId, key, code) {
+      const group = getCurrentGroup();
+      const cur = group.grades && group.grades[sdaId] && group.grades[sdaId][stId] ? group.grades[sdaId][stId][key] : undefined;
+      const curCode = cur !== undefined && cur !== null && cur !== '' ? getLevel(cur).code : null;
+      commitGrade(sdaId, stId, key, curCode === code ? null : levelValue(code));
+      renderDiariView();
+    };
+
+    // --- Rúbriques: es guarden a l'OA (o a la CE si s'avalua directament) ---
+    function getRubricTarget(sda, key) {
+      if (!sda) return null;
+      const [ceId, ...rest] = key.split('_');
+      const oaId = rest.join('_');
+      const conf = sda.competences && sda.competences[ceId];
+      if (!conf) return null;
+      if (oaId === 'direct') return conf;
+      return (conf.oas || []).find(o => o.id === oaId) || null;
+    }
+
+    function getRubric(sda, key) {
+      const t = getRubricTarget(sda, key);
+      return (t && t.rubric) || null;
+    }
+
+    let rubricEditing = null; // { sdaId, key }
+
+    window.openRubricModal = function(sdaId, key) {
+      const group = getCurrentGroup();
+      const sda = (group.sdas || []).find(s => s.id === sdaId);
+      if (!sda) return;
+      const opt = getSdaEvalOptions(sda).find(o => o.key === key);
+      rubricEditing = { sdaId, key };
+      const r = getRubric(sda, key) || {};
+      document.getElementById('rubricInfo').textContent = `${sda.title} · ${opt ? `${opt.short} · ${opt.label}` : key}`;
+      document.getElementById('rubricFields').innerHTML = LEVEL_CODES.map(c => `
+        <div class="rounded-2xl border ${LEVEL_SOFT[c]} p-2.5 space-y-1.5">
+          <div class="font-black text-sm">${c} <span class="font-semibold text-[10px] opacity-70">${LEVEL_NAMES[c]}</span></div>
+          <textarea id="rubric_${c}" rows="5" placeholder="Què fa l'alumne/a en aquest nivell?" class="plan-textarea !bg-white/80"></textarea>
+        </div>`).join('');
+      LEVEL_CODES.forEach(c => { document.getElementById(`rubric_${c}`).value = r[c] || ''; });
+      document.getElementById('rubricModal').classList.remove('hidden');
+    };
+
+    window.closeRubricModal = function() {
+      document.getElementById('rubricModal').classList.add('hidden');
+      rubricEditing = null;
+    };
+
+    window.saveRubricFromModal = function() {
+      if (!rubricEditing) return;
+      const group = getCurrentGroup();
+      const src = (group.sdas || []).find(s => s.id === rubricEditing.sdaId);
+      const rubric = {};
+      LEVEL_CODES.forEach(c => { const v = document.getElementById(`rubric_${c}`).value.trim(); if (v) rubric[c] = v; });
+      // Aplica-la a totes les còpies d'aquesta SdA (mateix títol i trimestre)
+      Object.keys(window.appData.groups).forEach(gId => {
+        const g = window.appData.groups[gId];
+        (g.sdas || []).filter(s => s.title === src.title && s.trim === src.trim).forEach(s => {
+          const t = getRubricTarget(s, rubricEditing.key);
+          if (!t) return;
+          if (Object.keys(rubric).length) t.rubric = rubric; else delete t.rubric;
+          if (window.syncGroupEntityToCloud) window.syncGroupEntityToCloud(gId);
+        });
+      });
+      saveToStorage();
+      closeRubricModal();
+      renderDiariView();
+    };
+
+    window.toggleDiariRubric = function(key) {
+      window.appState.diariRubricOpen = window.appState.diariRubricOpen === key ? null : key;
+      renderDiariView();
+    };
+
+    // Capçalera del mode Avaluar: rúbriques i tipus d'entrada
+    function renderDiariEvalHeader(sda, evalCols) {
+      const open = window.appState.diariRubricOpen;
+      const mode = window.appState.diariGradeInput;
+      return `
+        <div class="bg-white border border-zinc-200 rounded-2xl p-3 space-y-2.5">
+          <div class="flex flex-wrap items-center justify-between gap-2">
+            <div class="flex flex-wrap gap-1.5">
+              ${evalCols.map(o => {
+                const has = !!getRubric(sda, o.key);
+                return `<button onclick="toggleDiariRubric('${o.key}')" class="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl border text-[11px] font-semibold transition ${open === o.key ? 'bg-zinc-900 text-white border-zinc-900' : 'bg-white text-zinc-600 border-zinc-200 hover:border-zinc-400'}">
+                  <i class="fa-solid fa-table-list text-[10px]"></i><b>${o.short}</b> ${has ? 'Rúbrica' : '<span class="opacity-70">Sense rúbrica</span>'}</button>`;
+              }).join('')}
+            </div>
+            <div class="seg">
+              <button onclick="setDiariGradeInput('buttons')" class="${mode === 'buttons' ? 'active' : ''}"><i class="fa-solid fa-hand-pointer mr-1"></i>Botons</button>
+              <button onclick="setDiariGradeInput('numbers')" class="${mode === 'numbers' ? 'active' : ''}"><i class="fa-solid fa-keyboard mr-1"></i>Números</button>
+            </div>
+          </div>
+          ${open && evalCols.some(o => o.key === open) ? (() => {
+            const o = evalCols.find(x => x.key === open);
+            const r = getRubric(sda, o.key) || {};
+            return `
+              <div class="space-y-1.5">
+                <div class="flex items-center justify-between text-[11px]">
+                  <span class="font-bold text-zinc-700">${o.short} · ${escapeHtml(o.label)}</span>
+                  <button onclick="openRubricModal('${sda.id}','${o.key}')" class="font-semibold text-zinc-600 hover:text-zinc-900"><i class="fa-solid fa-pen text-[9px] mr-1"></i>${Object.keys(r).length ? 'Editar rúbrica' : 'Crear rúbrica'}</button>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-5 gap-1.5">
+                  ${LEVEL_CODES.map(c => `<div class="rounded-xl border ${LEVEL_SOFT[c]} p-2"><div class="text-[11px] font-black">${c}</div><div class="text-[11px] leading-snug mt-0.5 whitespace-pre-line">${r[c] ? escapeHtml(r[c]) : '<span class="opacity-50 italic">—</span>'}</div></div>`).join('')}
+                </div>
+              </div>`;
+          })() : ''}
+        </div>`;
+    }
+
+    // Files del mode Avaluar
+    function renderDiariEvalRows(group, session, sda, evalCols, students) {
+      const mode = window.appState.diariGradeInput;
+      return students.map((st, idx) => {
+        const r = getRecord(session, st.id);
+        const a = r.a || 'P';
+        const absent = a === 'F' || a === 'FJ';
+        const g = (group.grades && group.grades[sda.id] && group.grades[sda.id][st.id]) || {};
+        const cells = evalCols.map((o, ci) => {
+          const v = g[o.key];
+          const has = v !== undefined && v !== null && v !== '';
+          const code = has ? getLevel(v).code : null;
+          if (mode === 'numbers') {
+            return `<label class="flex flex-col items-center gap-0.5" title="${escapeHtml(o.label)}">
+              <span class="text-[9px] font-bold text-zinc-400 leading-none">${o.short}</span>
+              <input type="text" inputmode="decimal" value="${has ? v : ''}" data-idx="${idx}" data-col="${ci}" placeholder="–"
+                onfocus="this.select()" onkeydown="diariGradeKeydown(event, ${idx}, ${ci})" onblur="diariSetGrade('${sda.id}', ${st.id}, '${o.key}', this)"
+                class="diari-grade w-16 h-10 text-center rounded-lg font-mono text-sm outline-none border border-zinc-200 focus:ring-2 focus:ring-zinc-900 ${getScoreColorClass(has ? v : '')}">
+            </label>`;
+          }
+          const rub = getRubric(sda, o.key) || {};
+          return `<div class="flex flex-col gap-0.5">
+            <span class="text-[9px] font-bold text-zinc-400 leading-none">${o.short}${has ? ` <span class="font-mono text-zinc-500">${v}</span>` : ''}</span>
+            <div class="flex gap-0.5">
+              ${LEVEL_CODES.map(c => `<button onclick="diariSetLevel('${sda.id}', ${st.id}, '${o.key}', '${c}')" title="${c} · ${LEVEL_NAMES[c]}${rub[c] ? '\n' + escapeHtml(rub[c]) : ''}"
+                class="h-10 min-w-[40px] px-1.5 rounded-lg border text-[11px] font-black transition ${code === c ? LEVEL_ON[c] : 'bg-white text-zinc-400 border-zinc-200 hover:border-zinc-400'}">${c}</button>`).join('')}
+            </div>
+          </div>`;
+        }).join('');
+        return `
+          <div class="px-3 py-2.5 flex flex-col lg:flex-row lg:items-center gap-2 ${absent ? 'bg-rose-50/40' : ''}">
+            <div class="flex items-center gap-2 min-w-0 lg:w-56 shrink-0">
+              <span class="text-[10px] font-mono text-zinc-400 w-5 text-right shrink-0">${idx + 1}</span>
+              <span class="text-xs font-bold text-zinc-900 truncate">${escapeHtml(st.name)}</span>
+              ${a !== 'P' ? `<span class="text-[10px] font-black px-1.5 py-0.5 rounded ${ATT_CODES[a].on}">${a}</span>` : ''}
+              ${r.p ? `<span class="text-[10px] font-bold px-1.5 py-0.5 rounded border ${PRACTICE_CODES[r.p].on}">${PRACTICE_CODES[r.p].short}</span>` : ''}
+            </div>
+            <div class="flex flex-wrap items-end gap-3 lg:ml-auto">${cells}</div>
+          </div>`;
+      }).join('');
+    }
+
     // ================== NAVEGACIÓ PRINCIPAL (estil iDoceo) ==================
 
     const APP_SCREENS = {
@@ -8224,6 +8500,7 @@
                 </div>
                 ${has && !cancel ? `
                   ${p.objectiu ? `<div class="text-sm text-zinc-700"><i class="fa-solid fa-bullseye text-zinc-400 mr-1.5"></i>${escapeHtml(p.objectiu)}</div>` : ''}
+                  ${evalKeysBadges(g, p)}
                   <div class="space-y-1">${planPartsSummary(p)}</div>
                   ${p.material ? `<div class="text-xs text-zinc-500"><i class="fa-solid fa-box-open text-zinc-400 mr-1"></i>${escapeHtml(p.material)}</div>` : ''}` : ''}
               </div>
