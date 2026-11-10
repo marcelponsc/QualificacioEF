@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="ca" class="h-full bg-zinc-50/60 antialiased selection:bg-zinc-900 selection:text-white">
 <head>
@@ -425,6 +426,23 @@
         </div>
 
         <div class="set-card">
+          <h3 class="set-title"><i class="fa-solid fa-shirt"></i>Sense roba / material</h3>
+          <p class="text-xs text-zinc-500 mb-3">Quan al Diari marques <b>Roba</b>, no es resta del % de pràctica: es resta nota d'un objectiu. A cada SdA es fa servir l'objectiu de la competència triada que parli de material, roba o higiene (o el primer d'aquesta competència).</p>
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
+            <label class="font-semibold text-zinc-600">Competència
+              <select id="setRobaCe" onchange="saveRobaRule()" class="mt-1 w-full border border-zinc-200 rounded-xl p-2 font-semibold bg-white outline-none"></select>
+            </label>
+            <label class="font-semibold text-zinc-600">Resta per cada cop
+              <input type="number" id="setRobaStep" min="0" max="4" step="0.25" onchange="saveRobaRule()" class="mt-1 w-full border border-zinc-200 rounded-xl p-2 font-mono font-bold outline-none">
+            </label>
+            <label class="font-semibold text-zinc-600">Nota de partida
+              <input type="number" id="setRobaBase" min="0" max="4" step="0.25" onchange="saveRobaRule()" class="mt-1 w-full border border-zinc-200 rounded-xl p-2 font-mono font-bold outline-none">
+            </label>
+          </div>
+          <p class="text-[11px] text-zinc-400 mt-2">La nota de partida s'utilitza si no has posat nota a l'objectiu. Si l'has posada, es resta de la teva nota.</p>
+        </div>
+
+        <div class="set-card">
           <h3 class="set-title"><i class="fa-regular fa-calendar-xmark"></i>Calendari</h3>
           <div id="setHolidays" class="text-xs text-zinc-600 mb-3"></div>
           <div class="flex flex-wrap gap-2">
@@ -644,6 +662,11 @@
 
         <!-- MODE RESUM -->
         <div id="diariSummaryPanel" class="space-y-3 hidden"></div>
+      </section>
+
+      <!-- FITXA DE L'ALUMNE -->
+      <section id="viewFitxa" class="space-y-5 hidden">
+        <div id="fitxaContent" class="space-y-5"></div>
       </section>
 
       <!-- VISTA 2: ROSTER D'ALUMNAT -->
@@ -2624,7 +2647,7 @@
     };
     const PRACTICE_CODES = {
       NP: { label: 'No fa pràctica', short: 'No pràct.', icon: 'fa-person-walking', on: 'bg-rose-100 text-rose-800 border-rose-300' },
-      SR: { label: 'Sense roba / material', short: 'Roba', icon: 'fa-shirt', on: 'bg-orange-100 text-orange-800 border-orange-300' },
+      SR: { label: 'Sense roba / material (no resta assistència: resta nota de l\'objectiu configurat)', short: 'Roba', icon: 'fa-shirt', on: 'bg-orange-100 text-orange-800 border-orange-300' },
       L:  { label: 'Lesió / exempció justificada', short: 'Lesió', icon: 'fa-kit-medical', on: 'bg-sky-100 text-sky-800 border-sky-300' }
     };
     const WEEKDAYS = [{ n: 1, s: 'Dl' }, { n: 2, s: 'Dt' }, { n: 3, s: 'Dc' }, { n: 4, s: 'Dj' }, { n: 5, s: 'Dv' }];
@@ -2678,7 +2701,7 @@
         const justified = a === 'FJ' || ((a === 'P' || a === 'R') && p === 'L');
         if (!justified) {
           st.eligible++;
-          if ((a === 'P' || a === 'R') && !p) st.practiced++;
+          if ((a === 'P' || a === 'R') && (!p || p === 'SR')) st.practiced++;
         }
         if (rec.obs) st.obs.push({ date, text: rec.obs });
       });
@@ -3037,7 +3060,7 @@
         c[r.a || 'P']++;
         if (r.p && (r.a || 'P') !== 'F' && r.a !== 'FJ') c[r.p]++;
       });
-      const practicing = all.length - c.F - c.FJ - c.NP - c.SR - c.L;
+      const practicing = all.length - c.F - c.FJ - c.NP - c.L;
       const counter = (n, label, cls) => `<div class="flex-1 min-w-[70px] rounded-xl border ${cls} px-2 py-1.5 text-center"><div class="text-lg font-black font-mono leading-none">${n}</div><div class="text-[10px] font-semibold mt-0.5">${label}</div></div>`;
 
       const minP = getMinPractice(group);
@@ -3196,7 +3219,7 @@
         return `
           <tr class="hover:bg-zinc-50/70 align-top ${below ? 'bg-rose-50/30' : ''}">
             <td class="py-2 px-3 text-center text-zinc-400 font-mono">${idx + 1}</td>
-            <td class="py-2 px-3 font-semibold text-zinc-800 min-w-[170px]">${escapeHtml(st.name)}
+            <td class="py-2 px-3 font-semibold text-zinc-800 min-w-[170px]"><button onclick="openStudentFitxa(${st.id})" class="hover:underline text-left" title="Veure la fitxa">${escapeHtml(st.name)}</button>
               ${penalized ? '<span class="ml-1 text-[9px] font-bold text-rose-700 bg-rose-50 border border-rose-200 px-1 rounded">&lt; Mínim</span>' : ''}
               ${lastObs.map(o => `<div class="text-[10px] font-normal text-zinc-500 mt-0.5"><span class="font-mono text-zinc-400">${isoToDate(o.date).toLocaleDateString('ca-ES', { day: '2-digit', month: '2-digit' })}</span> ${escapeHtml(o.text)}</div>`).join('')}
             </td>
@@ -3215,7 +3238,7 @@
         <div class="bg-white border border-zinc-200/90 rounded-2xl p-3 shadow-subtle flex flex-wrap items-center justify-between gap-3 text-xs">
           <div>
             <div class="font-bold text-zinc-900">${trim}${['', 'r', 'n', 'r'][trim]} trimestre · ${nSessions} sessions registrades</div>
-            <div class="text-[11px] text-zinc-400">Les faltes justificades i les lesions no compten per al % de pràctica.</div>
+            <div class="text-[11px] text-zinc-400">Les faltes justificades i les lesions no compten per al % de pràctica. "Sense roba" no resta assistència: resta nota de l'objectiu configurat.</div>
           </div>
           <div class="flex flex-wrap items-center gap-2">
             <label class="flex items-center gap-1.5 font-semibold text-zinc-600">Mínim de pràctica
@@ -5105,6 +5128,60 @@
       return 'bg-emerald-100/80 text-emerald-950 font-bold';
     }
 
+    // ===== "Sense roba / material": resta nota d'un objectiu concret =====
+    function getRobaRule() {
+      const s = (window.appData && window.appData.settings) || {};
+      const r = s.robaRule || {};
+      return { enabled: r.enabled !== false, ce: r.ce || 'CE5', step: r.step !== undefined ? r.step : 0.5, base: r.base !== undefined ? r.base : 4 };
+    }
+
+    // Objectiu de la SdA on es resta: un OA de la CE configurada que parli de material/roba/higiene, o el primer d'aquesta CE
+    function getRobaTargetKey(sda) {
+      const rule = getRobaRule();
+      if (!rule.enabled || !sda || !sda.competences) return null;
+      if (sda.robaKey !== undefined) return sda.robaKey || null;
+      const conf = sda.competences[rule.ce];
+      if (!conf || !conf.active) return null;
+      if (conf.oas && conf.oas.length) {
+        const oa = conf.oas.find(o => /material|roba|higien|indument|equipa/i.test(o.label || '')) || conf.oas[0];
+        return `${rule.ce}_${oa.id}`;
+      }
+      return `${rule.ce}_direct`;
+    }
+
+    // Quantes vegades ha vingut sense roba en les sessions d'aquesta SdA
+    function countRobaForSda(group, sda, stId) {
+      const sessions = (group && group.sessions) || {};
+      let n = 0;
+      Object.values(sessions).forEach(s => {
+        if (!s) return;
+        const belongs = s.sdaId ? s.sdaId === sda.id : s.trim === sda.trim;
+        if (!belongs) return;
+        const r = (s.records && s.records[stId]) || {};
+        if ((r.a || 'P') !== 'F' && r.a !== 'FJ' && r.p === 'SR') n++;
+      });
+      return n;
+    }
+
+    function getRobaPenalty(group, sda, stId, key) {
+      if (!sda || key !== getRobaTargetKey(sda)) return null;
+      const n = countRobaForSda(group, sda, stId);
+      if (!n) return null;
+      return { n, minus: Math.round(n * getRobaRule().step * 100) / 100 };
+    }
+    window.getRobaPenalty = getRobaPenalty;
+    window.getRobaTargetKey = getRobaTargetKey;
+
+    // Nota efectiva d'una casella (amb el descompte per roba si toca)
+    function getEffectiveGrade(group, sda, stId, key, raw) {
+      const has = raw !== undefined && raw !== null && raw !== '';
+      const pen = getRobaPenalty(group, sda, stId, key);
+      if (!pen) return has ? parseFloat(raw) : null;
+      const base = has ? parseFloat(raw) : getRobaRule().base;
+      return Math.max(0, Math.round((base - pen.minus) * 100) / 100);
+    }
+    window.getEffectiveGrade = getEffectiveGrade;
+
     function getStudentCeScoreInSda(sda, stId, ceId, group = null) {
       if (!sda || !sda.competences) return null;
       const conf = sda.competences[ceId];
@@ -5115,16 +5192,15 @@
       if (conf.oas && conf.oas.length > 0) {
         let sum = 0, weightSum = 0;
         conf.oas.forEach(oa => {
-          const val = sdaGrades[`${ceId}_${oa.id}`];
-          if (val !== undefined && val !== null && val !== '') {
-            sum += parseFloat(val) * ((oa.weight || 0) / 100);
+          const val = getEffectiveGrade(curGroup, sda, stId, `${ceId}_${oa.id}`, sdaGrades[`${ceId}_${oa.id}`]);
+          if (val !== null) {
+            sum += val * ((oa.weight || 0) / 100);
             weightSum += (oa.weight || 0);
           }
         });
         return weightSum > 0 ? (sum * (100 / weightSum)) : null;
       } else {
-        const val = sdaGrades[`${ceId}_direct`];
-        return (val !== undefined && val !== null && val !== '') ? parseFloat(val) : null;
+        return getEffectiveGrade(curGroup, sda, stId, `${ceId}_direct`, sdaGrades[`${ceId}_direct`]);
       }
     }
 
@@ -5269,6 +5345,13 @@
 
     // ================== GRAELLA SdA ==================
 
+    function robaBadge(sda, stId, key, raw) {
+      const pen = getRobaPenalty(getCurrentGroup(), sda, stId, key);
+      if (!pen) return '';
+      const eff = getEffectiveGrade(getCurrentGroup(), sda, stId, key, raw);
+      return `<div class="text-[9px] font-bold text-rose-600 leading-tight pb-0.5" title="${pen.n} cop${pen.n === 1 ? '' : 's'} sense roba: −${pen.minus}. Nota que compta: ${eff}"><i class="fa-solid fa-shirt mr-0.5"></i>−${pen.minus} → ${eff}</div>`;
+    }
+
     window.renderSdaGrid = function() {
       const curGroup = getCurrentGroup();
       const trimSdas = (curGroup.sdas || []).filter(s => s.trim === window.appState.currentTrim);
@@ -5352,11 +5435,13 @@
           if (conf.oas && conf.oas.length > 0) {
             conf.oas.forEach((oa, oaIdx) => {
               const oaTheme = getOaColorTheme(ce.id, oaIdx);
-              r3 += `<th class="py-1.5 px-2 border-r border-zinc-200 font-medium max-w-[120px] truncate ${oaTheme.header}" title="${oa.label}">${oa.label}</th>`;
+              const isRoba = getRobaTargetKey(sda) === `${ce.id}_${oa.id}`;
+              r3 += `<th class="py-1.5 px-2 border-r border-zinc-200 font-medium max-w-[120px] truncate ${oaTheme.header}" title="${oa.label}${isRoba ? ' · Es resta nota per cada «sense roba» del Diari' : ''}">${isRoba ? '<i class="fa-solid fa-shirt text-rose-500 mr-1"></i>' : ''}${oa.label}</th>`;
             });
           } else {
             const oaTheme = getOaColorTheme(ce.id, 0);
-            r3 += `<th class="py-1.5 px-2 border-r border-zinc-200 font-normal italic ${oaTheme.header}">Avaluació directa</th>`;
+            const isRobaD = getRobaTargetKey(sda) === `${ce.id}_direct`;
+            r3 += `<th class="py-1.5 px-2 border-r border-zinc-200 font-normal italic ${oaTheme.header}">${isRobaD ? '<i class="fa-solid fa-shirt text-rose-500 mr-1"></i>' : ''}Avaluació directa</th>`;
           }
         }
       });
@@ -5431,6 +5516,7 @@
                     onfocus="this.select()"
                     onblur="saveCellCommit('${sda.id}', ${st.id}, '${gradeKey}', this)"
                     class="grade-cell-input w-full h-8 text-center rounded-lg font-mono text-xs outline-none transition focus:ring-2 focus:ring-zinc-900 focus:bg-white ${colorClass}">
+                  ${robaBadge(sda, st.id, gradeKey, val)}
                 </td>`;
                 colCounter++;
               });
@@ -5447,6 +5533,7 @@
                   onfocus="this.select()"
                   onblur="saveCellCommit('${sda.id}', ${st.id}, '${gradeKey}', this)"
                   class="grade-cell-input w-full h-8 text-center rounded-lg font-mono text-xs outline-none transition focus:ring-2 focus:ring-zinc-900 focus:bg-white ${colorClass}">
+                ${robaBadge(sda, st.id, gradeKey, val)}
               </td>`;
               colCounter++;
             }
@@ -5576,7 +5663,7 @@
 
     window.switchView = function(view) {
       window.appState.currentView = view;
-      ['sda', 'diari', 'planif', 'roster', 'trim', 'final', 'report', 'stats'].forEach(id => {
+      ['sda', 'diari', 'planif', 'roster', 'fitxa', 'trim', 'final', 'report', 'stats'].forEach(id => {
         const btn = document.getElementById(`tabBtn${id.charAt(0).toUpperCase() + id.slice(1)}`);
         const sec = document.getElementById(`view${id.charAt(0).toUpperCase() + id.slice(1)}`);
         if (id === view) {
@@ -5595,6 +5682,7 @@
       if (view === 'stats') initStatsView();
       if (view === 'diari') renderDiariView();
       if (view === 'planif') renderPlanifView();
+      if (view === 'fitxa') renderStudentFitxa();
     };
 
     // ================== ALUMNAT ==================
@@ -5625,7 +5713,8 @@
           <td class="py-2 px-4">
             <input type="text" value="${st.name || ''}" onchange="updateStudentName(${st.id}, this.value)" class="w-full bg-transparent border-0 border-b border-transparent hover:border-zinc-300 focus:border-zinc-900 rounded-none py-1 font-semibold text-zinc-800 outline-none text-xs">
           </td>
-          <td class="py-2 px-3 text-center">
+          <td class="py-2 px-3 text-center whitespace-nowrap">
+            <button onclick="openStudentFitxa(${st.id})" class="text-zinc-500 hover:text-zinc-900 px-2 py-1 rounded-lg hover:bg-zinc-100 text-[11px] font-semibold transition mr-1" title="Fitxa de l'alumne"><i class="fa-regular fa-id-card mr-1"></i>Fitxa</button>
             <button onclick="deleteStudent(${st.id})" class="text-zinc-400 hover:text-rose-500 p-1 transition" title="Eliminar alumne">
               <i class="fa-regular fa-trash-can text-xs"></i>
             </button>
@@ -7968,7 +8057,7 @@
           }
           const rub = getRubric(sda, o.key) || {};
           return `<div class="flex flex-col gap-0.5">
-            <span class="text-[9px] font-bold text-zinc-400 leading-none">${o.short}${has ? ` <span class="font-mono text-zinc-500">${v}</span>` : ''}</span>
+            <span class="text-[9px] font-bold text-zinc-400 leading-none">${o.short}${has ? ` <span class="font-mono text-zinc-500">${v}</span>` : ''}${(() => { const pen = getRobaPenalty(group, sda, st.id, o.key); return pen ? ` <span class="text-rose-600" title="${pen.n} cop(s) sense roba"><i class="fa-solid fa-shirt"></i> −${pen.minus} → ${getEffectiveGrade(group, sda, st.id, o.key, v)}</span>` : ''; })()}</span>
             <div class="flex gap-0.5">
               ${LEVEL_CODES.map(c => `<button onclick="diariSetLevel('${sda.id}', ${st.id}, '${o.key}', '${c}')" title="${c} · ${LEVEL_NAMES[c]}${rub[c] ? '\n' + escapeHtml(rub[c]) : ''}"
                 class="h-10 min-w-[40px] px-1.5 rounded-lg border text-[11px] font-black transition ${code === c ? LEVEL_ON[c] : 'bg-white text-zinc-400 border-zinc-200 hover:border-zinc-400'}">${c}</button>`).join('')}
@@ -7987,6 +8076,180 @@
           </div>`;
       }).join('');
     }
+
+    // ================== FITXA DE L'ALUMNE ==================
+
+    const INCIDENT_TYPES = {
+      F: { label: 'Falta', cls: 'bg-rose-50 text-rose-700 border-rose-200', icon: 'fa-user-xmark' },
+      FJ: { label: 'Falta justificada', cls: 'bg-sky-50 text-sky-700 border-sky-200', icon: 'fa-file-medical' },
+      R: { label: 'Retard', cls: 'bg-amber-50 text-amber-700 border-amber-200', icon: 'fa-clock' },
+      NP: { label: 'No fa pràctica', cls: 'bg-rose-50 text-rose-700 border-rose-200', icon: 'fa-person-walking' },
+      SR: { label: 'Sense roba', cls: 'bg-orange-50 text-orange-700 border-orange-200', icon: 'fa-shirt' },
+      L: { label: 'Lesió / justif.', cls: 'bg-sky-50 text-sky-700 border-sky-200', icon: 'fa-kit-medical' },
+      pos: { label: 'Actitud +', cls: 'bg-emerald-50 text-emerald-700 border-emerald-200', icon: 'fa-thumbs-up' },
+      neg: { label: 'Actitud −', cls: 'bg-rose-50 text-rose-700 border-rose-200', icon: 'fa-thumbs-down' },
+      obs: { label: 'Observació', cls: 'bg-zinc-50 text-zinc-700 border-zinc-200', icon: 'fa-comment' }
+    };
+
+    window.openStudentFitxa = function(stId) {
+      window.appState.fitxaStudentId = stId;
+      switchView('fitxa');
+    };
+
+    window.setFitxaFilter = function(f) {
+      window.appState.fitxaFilter = window.appState.fitxaFilter === f ? null : f;
+      renderStudentFitxa();
+    };
+
+    window.moveFitxaStudent = function(dir) {
+      const students = getCurrentGroup().students || [];
+      const i = students.findIndex(s => s.id === window.appState.fitxaStudentId);
+      const next = students[(i + dir + students.length) % students.length];
+      if (next) { window.appState.fitxaStudentId = next.id; renderStudentFitxa(); }
+    };
+
+    function getStudentIncidents(group, stId) {
+      const sessions = group.sessions || {};
+      const out = [];
+      Object.keys(sessions).sort().reverse().forEach(iso => {
+        const s = sessions[iso];
+        const r = (s && s.records && s.records[stId]) || {};
+        const types = [];
+        if (r.a && r.a !== 'P') types.push(r.a);
+        if (r.p && r.a !== 'F' && r.a !== 'FJ') types.push(r.p);
+        if (r.pos) types.push('pos');
+        if (r.neg) types.push('neg');
+        if (r.obs) types.push('obs');
+        if (types.length) out.push({ iso, session: s, rec: r, types });
+      });
+      return out;
+    }
+
+    window.renderStudentFitxa = function() {
+      const group = getCurrentGroup();
+      const box = document.getElementById('fitxaContent');
+      const students = group.students || [];
+      if (!students.length) { box.innerHTML = `<div class="bg-white border border-zinc-200 rounded-3xl p-10 text-center text-sm text-zinc-400">Aquesta classe encara no té alumnes.</div>`; return; }
+      let st = students.find(s => s.id === window.appState.fitxaStudentId);
+      if (!st) { st = students[0]; window.appState.fitxaStudentId = st.id; }
+
+      const min = getMinPractice(group);
+      const course = getStudentAttendanceStats(group, st.id, null);
+      const trims = [1, 2, 3].map(t => ({ t, s: getStudentAttendanceStats(group, st.id, t) }));
+      const incidents = getStudentIncidents(group, st.id);
+      const filter = window.appState.fitxaFilter;
+      const shown = filter ? incidents.filter(i => i.types.includes(filter)) : incidents;
+      const initials = st.name.split(/[\s,]+/).filter(Boolean).slice(0, 2).map(w => w[0]).join('').toUpperCase();
+      const theme = getGroupPastelTheme(group);
+
+      const kpi = (key, label, value, tone) => `
+        <button onclick="setFitxaFilter('${key}')" class="text-left rounded-2xl border p-3 transition ${filter === key ? 'ring-2 ring-zinc-900 ' : ''}${value ? tone : 'bg-white border-zinc-200 text-zinc-400'}">
+          <div class="text-[11px] font-semibold opacity-80"><i class="fa-solid ${INCIDENT_TYPES[key].icon} mr-1"></i>${label}</div>
+          <div class="text-2xl font-black font-mono leading-tight mt-0.5">${value}</div>
+        </button>`;
+
+      // Notes per SdA
+      const sdaRows = (group.sdas || []).slice().sort((a, b) => a.trim - b.trim).map(sda => {
+        const sc = getStudentOverallSdaScore(sda, st.id, group);
+        const lvl = getLevel(sc);
+        const robaN = countRobaForSda(group, sda, st.id);
+        return `<tr class="border-t border-zinc-100">
+          <td class="py-2 px-3 text-xs text-zinc-400 font-mono">T${sda.trim}</td>
+          <td class="py-2 px-3 text-xs font-semibold text-zinc-800">${escapeHtml(sda.title)}${robaN && getRobaTargetKey(sda) ? ` <span class="text-[10px] text-orange-600 font-bold ml-1"><i class="fa-solid fa-shirt"></i> ${robaN}</span>` : ''}</td>
+          <td class="py-2 px-3 text-right font-mono font-bold text-sm">${sc !== null ? sc.toFixed(2) : '—'}</td>
+          <td class="py-2 px-3 text-center"><span class="inline-flex px-1.5 py-0.5 rounded text-[10px] font-bold ring-1 ring-inset ${lvl.badge}">${lvl.code}</span></td>
+        </tr>`;
+      }).join('');
+      const trimScores = [1, 2, 3].map(t => getStudentTrimScoreByTrim(st.id, t, group));
+      const finalScore = getStudentCourseFinalScore(st.id, group);
+
+      box.innerHTML = `
+        <div class="bg-white border border-zinc-200 rounded-3xl p-4 sm:p-5 flex flex-wrap items-center gap-4">
+          <div class="w-14 h-14 rounded-2xl ${theme.avatarBg} flex items-center justify-center text-lg font-black shrink-0">${escapeHtml(initials)}</div>
+          <div class="flex-1 min-w-0">
+            <select onchange="window.appState.fitxaStudentId = parseFloat(this.value); renderStudentFitxa();" class="text-xl sm:text-2xl font-black text-zinc-900 bg-transparent outline-none max-w-full truncate cursor-pointer">
+              ${students.map(s => `<option value="${s.id}" ${s.id === st.id ? 'selected' : ''}>${escapeHtml(s.name)}</option>`).join('')}
+            </select>
+            <div class="text-sm text-zinc-500 font-semibold">${escapeHtml(group.name)} · ${course.total} sessions registrades</div>
+          </div>
+          <div class="text-center px-4">
+            <div class="text-[11px] font-semibold text-zinc-400">% pràctica (curs)</div>
+            <div class="text-3xl font-black font-mono ${course.pct === null ? 'text-zinc-300' : course.pct >= min ? 'text-emerald-600' : 'text-rose-600'}">${course.pct === null ? '—' : Math.round(course.pct) + '%'}</div>
+            <div class="text-[10px] text-zinc-400">mínim ${min}%</div>
+          </div>
+          <div class="flex gap-1">
+            <button onclick="moveFitxaStudent(-1)" class="icon-btn" title="Anterior"><i class="fa-solid fa-chevron-left text-xs"></i></button>
+            <button onclick="moveFitxaStudent(1)" class="icon-btn" title="Següent"><i class="fa-solid fa-chevron-right text-xs"></i></button>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-2">
+          ${kpi('F', 'Faltes', course.F, 'bg-rose-50 border-rose-200 text-rose-700')}
+          ${kpi('FJ', 'Justificades', course.FJ, 'bg-sky-50 border-sky-200 text-sky-700')}
+          ${kpi('R', 'Retards', course.R, 'bg-amber-50 border-amber-200 text-amber-700')}
+          ${kpi('SR', 'Sense roba', course.SR, 'bg-orange-50 border-orange-200 text-orange-700')}
+          ${kpi('NP', 'No pràctica', course.NP, 'bg-rose-50 border-rose-200 text-rose-700')}
+          ${kpi('L', 'Lesió', course.L, 'bg-sky-50 border-sky-200 text-sky-700')}
+          ${kpi('pos', 'Actitud +', course.pos, 'bg-emerald-50 border-emerald-200 text-emerald-700')}
+          ${kpi('neg', 'Actitud −', course.neg, 'bg-rose-50 border-rose-200 text-rose-700')}
+        </div>
+
+        <div class="grid grid-cols-1 xl:grid-cols-5 gap-5">
+          <div class="xl:col-span-3 space-y-2">
+            <div class="flex items-center justify-between">
+              <h3 class="text-xs font-bold text-zinc-500 uppercase tracking-wider">Historial ${filter ? `· ${INCIDENT_TYPES[filter].label}` : ''}</h3>
+              ${filter ? `<button onclick="setFitxaFilter('${filter}')" class="text-[11px] font-semibold text-zinc-500 hover:text-zinc-900"><i class="fa-solid fa-xmark mr-1"></i>Treure filtre</button>` : `<span class="text-[11px] text-zinc-400">Toca una xifra per filtrar</span>`}
+            </div>
+            <div class="bg-white border border-zinc-200 rounded-2xl divide-y divide-zinc-100 overflow-hidden">
+              ${shown.length ? shown.map(i => {
+                const sda = (group.sdas || []).find(s => s.id === i.session.sdaId);
+                return `
+                  <div class="flex gap-3 px-4 py-3">
+                    <button onclick="openDiariFor('${window.appData.activeGroupId}','${i.iso}')" class="w-14 shrink-0 text-left">
+                      <div class="text-sm font-black font-mono text-zinc-900">${isoToDate(i.iso).toLocaleDateString('ca-ES', { day: '2-digit', month: '2-digit' })}</div>
+                      <div class="text-[10px] text-zinc-400">${isoToDate(i.iso).toLocaleDateString('ca-ES', { weekday: 'short' })} · T${i.session.trim}</div>
+                    </button>
+                    <div class="flex-1 min-w-0 space-y-1">
+                      <div class="flex flex-wrap gap-1">
+                        ${i.types.filter(t => t !== 'obs').map(t => `<span class="text-[11px] font-bold px-2 py-0.5 rounded-lg border ${INCIDENT_TYPES[t].cls}"><i class="fa-solid ${INCIDENT_TYPES[t].icon} mr-1"></i>${INCIDENT_TYPES[t].label}${(t === 'pos' || t === 'neg') && i.rec[t] > 1 ? ' ×' + i.rec[t] : ''}</span>`).join('')}
+                      </div>
+                      ${i.rec.obs ? `<div class="text-xs text-zinc-700 bg-zinc-50 border border-zinc-200 rounded-lg px-2.5 py-1.5"><i class="fa-regular fa-comment text-zinc-400 mr-1"></i>${escapeHtml(i.rec.obs)}</div>` : ''}
+                      ${sda || i.session.note ? `<div class="text-[11px] text-zinc-400 truncate">${escapeHtml(i.session.note || '')}${sda && i.session.note ? ' · ' : ''}${sda ? escapeHtml(sda.title) : ''}</div>` : ''}
+                    </div>
+                  </div>`;
+              }).join('') : `<div class="p-8 text-center text-sm text-zinc-400">${incidents.length ? 'Cap registre d\'aquest tipus.' : 'Cap incidència: sempre present i fent pràctica.'}</div>`}
+            </div>
+          </div>
+
+          <div class="xl:col-span-2 space-y-5">
+            <div class="space-y-2">
+              <h3 class="text-xs font-bold text-zinc-500 uppercase tracking-wider">Per trimestre</h3>
+              <div class="bg-white border border-zinc-200 rounded-2xl overflow-hidden">
+                <table class="w-full text-xs text-center">
+                  <thead class="bg-zinc-50 text-zinc-500 text-[10px]"><tr><th class="py-2 px-2 text-left">Trim.</th><th>Ses.</th><th>F</th><th>R</th><th>Roba</th><th>No pr.</th><th>% pràct.</th><th>Nota</th></tr></thead>
+                  <tbody class="font-mono">
+                    ${trims.map(({ t, s }, k) => `<tr class="border-t border-zinc-100">
+                      <td class="py-2 px-2 text-left font-sans font-semibold text-zinc-700">${t}${['', 'r', 'n', 'r'][t]}</td>
+                      <td>${s.total}</td><td class="${s.F ? 'text-rose-600 font-bold' : 'text-zinc-300'}">${s.F}</td><td class="${s.R ? 'text-amber-600 font-bold' : 'text-zinc-300'}">${s.R}</td>
+                      <td class="${s.SR ? 'text-orange-600 font-bold' : 'text-zinc-300'}">${s.SR}</td><td class="${s.NP ? 'text-rose-600 font-bold' : 'text-zinc-300'}">${s.NP}</td>
+                      <td>${practicePctBadge(s.pct, min)}</td>
+                      <td class="font-bold">${trimScores[k] !== null ? trimScores[k].toFixed(2) : '—'}</td>
+                    </tr>`).join('')}
+                    <tr class="border-t border-zinc-200 bg-zinc-50 font-bold"><td class="py-2 px-2 text-left font-sans">Curs</td><td>${course.total}</td><td>${course.F}</td><td>${course.R}</td><td>${course.SR}</td><td>${course.NP}</td><td>${practicePctBadge(course.pct, min)}</td><td>${finalScore !== null ? finalScore.toFixed(2) : '—'}</td></tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+            <div class="space-y-2">
+              <h3 class="text-xs font-bold text-zinc-500 uppercase tracking-wider">Notes per SdA</h3>
+              <div class="bg-white border border-zinc-200 rounded-2xl overflow-hidden">
+                <table class="w-full">${sdaRows || '<tr><td class="p-4 text-xs text-zinc-400 text-center">Sense SdAs</td></tr>'}</table>
+              </div>
+            </div>
+            <button onclick="window.appState.reportStudentId = ${st.id}; document.getElementById('reportStudentSelect') && (document.getElementById('reportStudentSelect').value = '${st.id}'); switchView('report');" class="btn-sec w-full justify-center"><i class="fa-regular fa-address-card"></i>Veure el butlletí</button>
+          </div>
+        </div>`;
+    };
 
     // ================== NAVEGACIÓ PRINCIPAL (estil iDoceo) ==================
 
@@ -8063,7 +8326,7 @@
     window.switchView = function(view) {
       _origSwitchView(view);
       if (['sda', 'trim', 'final'].includes(view)) window.appState.lastQuadernView = view;
-      if (['roster', 'report'].includes(view)) window.appState.lastAlumnesView = view;
+      if (['roster', 'fitxa', 'report'].includes(view)) window.appState.lastAlumnesView = view;
       updateClassTabs(view);
     };
 
@@ -8124,12 +8387,12 @@
     };
 
     function updateClassTabs(view) {
-      const tab = ['sda', 'trim', 'final'].includes(view) ? 'quadern' : ['roster', 'report'].includes(view) ? 'alumnes' : view;
+      const tab = ['sda', 'trim', 'final'].includes(view) ? 'quadern' : ['roster', 'fitxa', 'report'].includes(view) ? 'alumnes' : view;
       document.querySelectorAll('#classTabs .ctab').forEach(b => b.classList.toggle('active', b.dataset.tab === tab));
       const seg = document.getElementById('classSubSeg');
       const subs = tab === 'quadern'
         ? [['sda', 'Per SdA'], ['trim', 'Resum trimestral'], ['final', 'Final de curs']]
-        : tab === 'alumnes' ? [['roster', 'Llista'], ['report', 'Butlletins']] : [];
+        : tab === 'alumnes' ? [['roster', 'Llista'], ['fitxa', 'Fitxa'], ['report', 'Butlletins']] : [];
       seg.innerHTML = subs.map(([v, l]) => `<button onclick="switchView('${v}')" class="${v === view ? 'active' : ''}">${l}</button>`).join('');
     }
 
@@ -8231,7 +8494,25 @@
       if (window.syncWholeAppToCloud) window.syncWholeAppToCloud();
     };
 
+    window.saveRobaRule = function() {
+      const s = getSettings();
+      const ce = document.getElementById('setRobaCe').value;
+      s.robaRule = {
+        enabled: ce !== 'off', ce: ce === 'off' ? 'CE5' : ce,
+        step: Math.max(0, parseFloat(document.getElementById('setRobaStep').value) || 0),
+        base: Math.max(0, Math.min(4, parseFloat(document.getElementById('setRobaBase').value) || 0))
+      };
+      saveToStorage();
+      if (window.syncWholeAppToCloud) window.syncWholeAppToCloud();
+    };
+
     window.renderSettingsScreen = function() {
+      const rr = getRobaRule();
+      const ceSel = document.getElementById('setRobaCe');
+      ceSel.innerHTML = `<option value="off">No restar nota</option>` + OFFICIAL_CES.map(c => `<option value="${c.id}">${c.id} · ${c.short}</option>`).join('');
+      ceSel.value = rr.enabled ? rr.ce : 'off';
+      document.getElementById('setRobaStep').value = rr.step;
+      document.getElementById('setRobaBase').value = rr.base;
       const inp = document.getElementById('setCentreInput');
       if (document.activeElement !== inp) inp.value = getSettings().centre || '';
       document.getElementById('setSchoolYear').textContent = getSchoolYearLabel();
