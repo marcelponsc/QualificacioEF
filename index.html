@@ -434,6 +434,12 @@
         </div>
 
         <div class="set-card">
+          <h3 class="set-title"><i class="fa-solid fa-file-import"></i>Importar d'iDoceo</h3>
+          <p class="text-xs text-zinc-500 mb-3">Passa l'assistència d'una classe des de l'exportació XLS de l'iDoceo. Es crea la classe (o s'aparellen els alumnes) i les sessions apareixen al Diari amb el % de pràctica.</p>
+          <button onclick="openIdoceoModal()" class="btn-sec"><i class="fa-solid fa-file-excel"></i>Importar fitxer</button>
+        </div>
+
+        <div class="set-card">
           <h3 class="set-title"><i class="fa-solid fa-database"></i>Dades</h3>
           <p class="text-xs text-zinc-500 mb-3">Fes una còpia de seguretat de tant en tant. Es desa un fitxer que pots restaurar en qualsevol moment.</p>
           <div class="flex flex-wrap gap-2">
@@ -1547,6 +1553,73 @@
       <div class="px-6 py-3.5 bg-zinc-50 border-t border-zinc-200 flex justify-end gap-2 text-xs">
         <button onclick="closeDistributeModal()" class="px-3.5 py-1.5 border border-zinc-300 rounded-xl font-semibold text-zinc-600">Cancel·lar</button>
         <button onclick="applyDistribute()" class="px-4 py-1.5 bg-zinc-900 hover:bg-zinc-800 text-white rounded-xl font-semibold">Planificar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL IMPORTAR D'iDOCEO -->
+  <div id="idoceoModal" class="fixed inset-0 bg-zinc-950/40 backdrop-blur-xs z-50 flex items-center justify-center p-2 sm:p-4 hidden no-print">
+    <div class="bg-white rounded-3xl shadow-card max-w-3xl w-full max-h-[94vh] flex flex-col overflow-hidden border border-zinc-200">
+      <div class="px-6 py-4 bg-zinc-900 text-white flex justify-between items-center">
+        <h3 class="text-sm font-bold flex items-center gap-2"><i class="fa-solid fa-file-import text-zinc-400"></i> Importar assistència d'iDoceo</h3>
+        <button onclick="closeIdoceoModal()" class="text-zinc-400 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div class="p-5 sm:p-6 space-y-5 text-xs overflow-y-auto">
+        <div class="bg-zinc-50 border border-zinc-200 rounded-2xl p-4 space-y-3">
+          <p class="text-zinc-600">A l'iDoceo, obre la classe, toca <b>Exportar</b> i tria <b>XLS</b>. Després tria el fitxer aquí.</p>
+          <label class="flex items-center justify-center gap-2 border-2 border-dashed border-zinc-300 hover:border-zinc-500 rounded-2xl py-5 cursor-pointer text-sm font-semibold text-zinc-600 bg-white">
+            <i class="fa-solid fa-file-excel text-emerald-600"></i><span id="idoFileLabel">Triar fitxer (.xls, .xlsx o .csv)</span>
+            <input type="file" id="idoFileInput" accept=".xls,.xlsx,.csv" onchange="onIdoceoFile(event)" class="hidden">
+          </label>
+          <div id="idoStatus" class="hidden text-[11px] font-semibold"></div>
+        </div>
+
+        <div id="idoStep2" class="hidden space-y-5">
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            <div id="idoSheetWrap" class="hidden">
+              <label class="block font-semibold text-zinc-700 mb-1">Full del fitxer</label>
+              <select id="idoSheet" onchange="onIdoceoSheetChange()" class="w-full border border-zinc-200 rounded-xl p-2.5 font-semibold bg-white outline-none"></select>
+            </div>
+            <div>
+              <label class="block font-semibold text-zinc-700 mb-1">Classe de destí</label>
+              <select id="idoTarget" onchange="renderIdoceoPreview()" class="w-full border border-zinc-200 rounded-xl p-2.5 font-semibold bg-white outline-none"></select>
+            </div>
+            <div id="idoNewNameWrap">
+              <label class="block font-semibold text-zinc-700 mb-1">Nom de la nova classe</label>
+              <input type="text" id="idoNewName" class="w-full border border-zinc-200 rounded-xl p-2.5 font-semibold outline-none">
+            </div>
+            <div>
+              <label class="block font-semibold text-zinc-700 mb-1">Trimestre</label>
+              <select id="idoTrim" class="w-full border border-zinc-200 rounded-xl p-2.5 font-semibold bg-white outline-none">
+                <option value="1">1r trimestre</option><option value="2">2n trimestre</option><option value="3">3r trimestre</option>
+              </select>
+            </div>
+          </div>
+
+          <div id="idoSummary"></div>
+
+          <div>
+            <div class="font-bold text-zinc-800 text-[11px] uppercase tracking-wider mb-1.5">Què vol dir cada símbol?</div>
+            <div id="idoSymbols" class="flex flex-wrap gap-2"></div>
+          </div>
+
+          <div>
+            <div class="flex items-center justify-between mb-1.5">
+              <span class="font-bold text-zinc-800 text-[11px] uppercase tracking-wider">Alumnes</span>
+              <span id="idoMatchInfo" class="text-[11px] text-zinc-500"></span>
+            </div>
+            <div id="idoStudents" class="border border-zinc-200 rounded-2xl divide-y divide-zinc-100 max-h-72 overflow-y-auto"></div>
+          </div>
+
+          <label class="flex items-start gap-2 text-zinc-700">
+            <input type="checkbox" id="idoOverwrite" checked class="w-4 h-4 mt-0.5 accent-zinc-900">
+            <span>Si ja hi ha una sessió al Diari en alguna d'aquestes dates, substituir l'assistència amb la de l'iDoceo</span>
+          </label>
+        </div>
+      </div>
+      <div class="px-6 py-3.5 bg-zinc-50 border-t border-zinc-200 flex justify-end gap-2 text-xs">
+        <button onclick="closeIdoceoModal()" class="px-3.5 py-1.5 border border-zinc-300 rounded-xl font-semibold text-zinc-600">Cancel·lar</button>
+        <button id="idoImportBtn" onclick="applyIdoceoImport()" class="hidden px-4 py-1.5 bg-zinc-900 hover:bg-zinc-800 text-white rounded-xl font-semibold">Importar</button>
       </div>
     </div>
   </div>
@@ -3100,6 +3173,7 @@
             <label class="flex items-center gap-1.5 font-semibold text-zinc-600">Mínim de pràctica
               <input type="number" min="0" max="100" value="${min}" onchange="setMinPractice(this.value)" class="w-14 text-center font-mono font-bold bg-white border border-zinc-300 rounded-lg p-1 outline-none focus:ring-2 focus:ring-zinc-900">%
             </label>
+            <button onclick="openIdoceoModal('${window.appData.activeGroupId}')" class="btn-sec"><i class="fa-solid fa-file-import"></i>Importar d'iDoceo</button>
             <button onclick="applyPracticeMinimum(${trim})" class="inline-flex items-center gap-1.5 bg-zinc-900 hover:bg-zinc-800 text-white font-semibold px-3 py-1.5 rounded-xl"><i class="fa-solid fa-person-running text-[10px]"></i> Aplicar a la nota del trimestre</button>
           </div>
         </div>
@@ -7293,6 +7367,345 @@
         return;
       }
       reader.readAsText(e.target.files[0]);
+    };
+
+    // ================== IMPORTAR ASSISTÈNCIA D'iDOCEO ==================
+    // Llegeix l'exportació XLS/XLSX/CSV de l'iDoceo: una fila per alumne i una columna
+    // d'assistència per dia ("Assistència\n14/09") amb símbols (✔️, ❌, ...).
+
+    const IDO_CODES = [
+      { id: 'P', label: 'Present' }, { id: 'F', label: 'Falta' }, { id: 'R', label: 'Retard' },
+      { id: 'FJ', label: 'Falta justificada' }, { id: 'NP', label: 'Present, no fa pràctica' },
+      { id: 'SR', label: 'Present, sense roba' }, { id: 'L', label: 'Present, lesió/justif.' }, { id: 'IGN', label: 'No comptar' }
+    ];
+    let idoState = null; // { sheets: {name: rows}, sheetName, parsed, symbolMap, studentMap }
+
+    function normName(s) {
+      return String(s || '').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^a-z0-9ñç\s]/g, ' ').split(/\s+/).filter(Boolean);
+    }
+
+    function guessSymbolCode(sym) {
+      const s = sym.trim();
+      if (!s) return 'P';
+      if (/[✔✓☑✅]/.test(s) || /^(p|si|sí|ok|1|present)$/i.test(s)) return 'P';
+      if (/[❌✘✗✖❎]/.test(s) || /^(x|f|a|0|falta|absent)$/i.test(s)) return 'F';
+      if (/[⏰⏱⌚🕐🕑🕒🕓🕔🕕🕖🕗🕘🕙🕚🕛⌛⏳]/u.test(s) || /^(r|retard|retraso)$/i.test(s)) return 'R';
+      if (/[📄📝🩺⚕💊🏥]/u.test(s) || /^(j|fj|just|justificada)$/i.test(s)) return 'FJ';
+      return 'IGN';
+    }
+
+    // Converteix un text CSV (amb camps entre cometes i salts de línia) en files
+    function parseCsvText(text) {
+      text = text.replace(/^﻿/, '');
+      const firstLine = text.split(/\r?\n/)[0] || '';
+      const delim = (firstLine.split(';').length > firstLine.split(',').length) ? ';' : (firstLine.includes('\t') ? '\t' : ',');
+      const rows = []; let row = []; let field = ''; let q = false;
+      for (let i = 0; i < text.length; i++) {
+        const c = text[i];
+        if (q) {
+          if (c === '"') { if (text[i + 1] === '"') { field += '"'; i++; } else q = false; }
+          else field += c;
+        } else if (c === '"') q = true;
+        else if (c === delim) { row.push(field); field = ''; }
+        else if (c === '\n') { row.push(field); rows.push(row); row = []; field = ''; }
+        else if (c !== '\r') field += c;
+      }
+      if (field !== '' || row.length) { row.push(field); rows.push(row); }
+      return rows;
+    }
+
+    function loadSheetJS() {
+      if (window.XLSX) return Promise.resolve(window.XLSX);
+      return new Promise((resolve, reject) => {
+        const s = document.createElement('script');
+        s.src = 'https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js';
+        s.onload = () => resolve(window.XLSX);
+        s.onerror = () => reject(new Error('No s\'ha pogut carregar el lector d\'Excel'));
+        document.head.appendChild(s);
+      });
+    }
+
+    // Analitza les files d'un full: troba alumnes i columnes d'assistència
+    function parseIdoceoRows(rows) {
+      rows = (rows || []).map(r => (r || []).map(c => (c === null || c === undefined) ? '' : String(c)));
+      // Fila de capçalera: la primera que té almenys una data dd/mm
+      const dateRe = /(\d{1,2})\/(\d{1,2})(?:\/(\d{2,4}))?/;
+      let hIdx = rows.findIndex(r => r.some(c => dateRe.test(c)));
+      if (hIdx === -1) hIdx = 0;
+      const header = rows[hIdx] || [];
+      const body = rows.slice(hIdx + 1).filter(r => (r[0] || '').trim() && !/^(mitjana|media|average|promedio|total)/i.test(r[0].trim()));
+      const startYear = parseInt(getSchoolYearLabel().split('-')[0]);
+
+      const attCols = [];
+      header.forEach((h, ci) => {
+        if (ci === 0) return;
+        const m = String(h).match(dateRe);
+        if (!m) return;
+        const vals = body.map(r => (r[ci] || '').trim()).filter(Boolean);
+        if (!vals.length) return;
+        const symbolic = vals.filter(v => !/\d/.test(v)).length / vals.length;
+        if (symbolic < 0.6) return; // columnes de notes (tenen números)
+        const dd = parseInt(m[1]), mm = parseInt(m[2]);
+        let yy = m[3] ? parseInt(m[3]) : (mm >= 8 ? startYear : startYear + 1);
+        if (yy < 100) yy += 2000;
+        const iso = `${yy}-${String(mm).padStart(2, '0')}-${String(dd).padStart(2, '0')}`;
+        attCols.push({ ci, iso, title: String(h).replace(/\s+/g, ' ').trim() });
+      });
+
+      const symbols = {};
+      body.forEach(r => attCols.forEach(c => {
+        const v = (r[c.ci] || '').trim();
+        const key = v.replace(/️/g, '');
+        symbols[key] = (symbols[key] || 0) + 1;
+      }));
+
+      return {
+        students: body.map(r => r[0].trim()),
+        rows: body,
+        attCols,
+        dates: Array.from(new Set(attCols.map(c => c.iso))).sort(),
+        symbols
+      };
+    }
+
+    window.openIdoceoModal = function(targetGid = null) {
+      idoState = { preferTarget: targetGid };
+      document.getElementById('idoFileInput').value = '';
+      document.getElementById('idoFileLabel').textContent = 'Triar fitxer (.xls, .xlsx o .csv)';
+      document.getElementById('idoStatus').classList.add('hidden');
+      document.getElementById('idoStep2').classList.add('hidden');
+      document.getElementById('idoImportBtn').classList.add('hidden');
+      document.getElementById('idoceoModal').classList.remove('hidden');
+    };
+
+    window.closeIdoceoModal = function() {
+      document.getElementById('idoceoModal').classList.add('hidden');
+      idoState = null;
+    };
+
+    function idoStatus(msg, tone = 'zinc') {
+      const el = document.getElementById('idoStatus');
+      el.className = `text-[11px] font-semibold text-${tone}-700`;
+      el.innerHTML = msg;
+    }
+
+    window.onIdoceoFile = async function(e) {
+      const file = e.target.files && e.target.files[0];
+      if (!file) return;
+      document.getElementById('idoFileLabel').textContent = file.name;
+      idoStatus('<i class="fa-solid fa-spinner fa-spin mr-1"></i>Llegint el fitxer...');
+      try {
+        const sheets = {};
+        if (/\.csv$/i.test(file.name)) {
+          sheets['Full 1'] = parseCsvText(await file.text());
+        } else {
+          const XLSX = await loadSheetJS();
+          const wb = XLSX.read(await file.arrayBuffer(), { type: 'array' });
+          wb.SheetNames.forEach(n => { sheets[n] = XLSX.utils.sheet_to_json(wb.Sheets[n], { header: 1, raw: false, defval: '' }); });
+        }
+        const names = Object.keys(sheets);
+        if (!names.length) throw new Error('El fitxer no té cap full.');
+        idoState.sheets = sheets;
+        idoState.fileName = file.name;
+        // Full per defecte: el primer que tingui columnes d'assistència
+        idoState.sheetName = names.find(n => parseIdoceoRows(sheets[n]).attCols.length) || names[0];
+        const sel = document.getElementById('idoSheet');
+        sel.innerHTML = names.map(n => `<option value="${escapeHtml(n)}">${escapeHtml(n)}</option>`).join('');
+        sel.value = idoState.sheetName;
+        document.getElementById('idoSheetWrap').classList.toggle('hidden', names.length < 2);
+
+        // Classe de destí: per defecte la que tingui el nom del fitxer
+        const guessName = file.name.replace(/\.(xlsx?|csv)$/i, '').replace(/^idoceo[_\s-]*/i, '').replace(/[_]+/g, ' ').trim();
+        document.getElementById('idoNewName').value = guessName;
+        const groups = window.appData.groups || {};
+        const tSel = document.getElementById('idoTarget');
+        tSel.innerHTML = `<option value="__new">+ Crear una classe nova</option>` + Object.keys(groups).map(g => `<option value="${g}">${escapeHtml(groups[g].name)}</option>`).join('');
+        const byName = Object.keys(groups).find(g => normName(groups[g].name).join(' ') === normName(guessName).join(' '));
+        tSel.value = idoState.preferTarget && groups[idoState.preferTarget] ? idoState.preferTarget : (byName || '__new');
+        onIdoceoSheetChange();
+      } catch (err) {
+        idoStatus(`<i class="fa-solid fa-triangle-exclamation mr-1"></i>${escapeHtml(err.message || 'No s\'ha pogut llegir el fitxer.')} Si és un .xls, prova d'exportar-lo com a CSV des de l'iDoceo.`, 'rose');
+        document.getElementById('idoStatus').classList.remove('hidden');
+      }
+    };
+
+    window.onIdoceoSheetChange = function() {
+      idoState.sheetName = document.getElementById('idoSheet').value || idoState.sheetName;
+      const parsed = parseIdoceoRows(idoState.sheets[idoState.sheetName]);
+      idoState.parsed = parsed;
+      const tm = String(idoState.sheetName).match(/([123])\s*(r|n|er|º|o)?\s*trim/i);
+      if (tm) document.getElementById('idoTrim').value = tm[1];
+      idoState.symbolMap = {};
+      Object.keys(parsed.symbols).forEach(s => { idoState.symbolMap[s] = guessSymbolCode(s); });
+      if (!parsed.attCols.length) {
+        idoStatus('<i class="fa-solid fa-triangle-exclamation mr-1"></i>No he trobat cap columna d\'assistència amb dates en aquest full.', 'rose');
+        document.getElementById('idoStatus').classList.remove('hidden');
+        document.getElementById('idoStep2').classList.add('hidden');
+        document.getElementById('idoImportBtn').classList.add('hidden');
+        return;
+      }
+      idoStatus(`<i class="fa-solid fa-check mr-1"></i>Fitxer llegit: ${parsed.students.length} alumnes i ${parsed.dates.length} dies d'assistència.`, 'emerald');
+      document.getElementById('idoStatus').classList.remove('hidden');
+      document.getElementById('idoStep2').classList.remove('hidden');
+      document.getElementById('idoImportBtn').classList.remove('hidden');
+      renderIdoceoPreview();
+    };
+
+    window.setIdoSymbol = function(sym, code) {
+      idoState.symbolMap[sym] = code;
+      renderIdoceoPreview();
+    };
+
+    window.setIdoStudent = function(idx, val) {
+      idoState.studentMap[idx] = val;
+      renderIdoceoPreview(false);
+    };
+
+    function matchStudent(name, students, used) {
+      const a = normName(name);
+      let best = null, bestScore = 0;
+      students.forEach(st => {
+        if (used.has(st.id)) return;
+        const b = normName(st.name);
+        const common = a.filter(t => b.includes(t)).length;
+        const score = common / Math.max(a.length, b.length);
+        if (common >= Math.min(2, a.length) && score > bestScore) { best = st; bestScore = score; }
+      });
+      return best;
+    }
+
+    window.renderIdoceoPreview = function(rematch = true) {
+      const p = idoState.parsed;
+      const target = document.getElementById('idoTarget').value;
+      document.getElementById('idoNewNameWrap').classList.toggle('hidden', target !== '__new');
+      const group = target === '__new' ? null : window.appData.groups[target];
+      const students = group ? (group.students || []) : [];
+
+      if (rematch || !idoState.studentMap || idoState.lastTarget !== target) {
+        idoState.studentMap = {};
+        const used = new Set();
+        p.students.forEach((n, i) => {
+          const m = group ? matchStudent(n, students, used) : null;
+          if (m) used.add(m.id);
+          idoState.studentMap[i] = m ? String(m.id) : 'new';
+        });
+        idoState.lastTarget = target;
+      }
+
+      // Símbols
+      document.getElementById('idoSymbols').innerHTML = Object.keys(p.symbols).map(s => `
+        <div class="flex items-center gap-2 bg-zinc-50 border border-zinc-200 rounded-xl pl-3 pr-1.5 py-1.5">
+          <span class="text-base">${s ? escapeHtml(s) : '<span class="text-[11px] text-zinc-400 italic">(buit)</span>'}</span>
+          <span class="text-[10px] text-zinc-400 font-mono">×${p.symbols[s]}</span>
+          <select onchange="setIdoSymbol(${escapeHtml(JSON.stringify(s))}, this.value)" class="border border-zinc-200 rounded-lg px-1.5 py-1 font-semibold bg-white outline-none">
+            ${IDO_CODES.map(c => `<option value="${c.id}" ${idoState.symbolMap[s] === c.id ? 'selected' : ''}>${c.label}</option>`).join('')}
+          </select>
+        </div>`).join('');
+
+      // Alumnes
+      const opts = st => `<option value="new">+ Afegir com a alumne nou</option><option value="skip">No importar</option>` +
+        students.map(x => `<option value="${x.id}" ${String(x.id) === st ? 'selected' : ''}>${escapeHtml(x.name)}</option>`).join('');
+      let matched = 0, created = 0, skipped = 0;
+      document.getElementById('idoStudents').innerHTML = p.students.map((n, i) => {
+        const v = idoState.studentMap[i];
+        if (v === 'new') created++; else if (v === 'skip') skipped++; else matched++;
+        // % de pràctica que sortirà
+        let pr = 0, el = 0;
+        p.attCols.forEach(c => {
+          const code = idoState.symbolMap[(p.rows[i][c.ci] || '').trim().replace(/️/g, '')] || 'P';
+          if (code === 'IGN') return;
+          if (code === 'FJ' || code === 'L') return;
+          el++;
+          if (code === 'P' || code === 'R') pr++;
+        });
+        const pct = el ? (pr / el) * 100 : null;
+        return `
+          <div class="flex flex-wrap items-center gap-2 px-3 py-2">
+            <span class="flex-1 min-w-[140px] font-semibold text-zinc-800">${escapeHtml(n)}</span>
+            <span>${practicePctBadge(pct, group ? getMinPractice(group) : DEFAULT_MIN_PRACTICE)}</span>
+            ${group ? `<select onchange="setIdoStudent(${i}, this.value)" class="border ${v === 'new' ? 'border-amber-300 bg-amber-50' : v === 'skip' ? 'border-zinc-200 bg-zinc-50' : 'border-emerald-300 bg-emerald-50'} rounded-lg px-1.5 py-1 font-semibold outline-none max-w-[220px]">${opts(v)}</select>` : '<span class="text-[10px] font-bold text-amber-700">nou</span>'}
+          </div>`;
+      }).join('');
+      document.getElementById('idoMatchInfo').textContent = group
+        ? `${matched} trobats a ${group.name} · ${created} nous${skipped ? ` · ${skipped} no s'importen` : ''}`
+        : `Es crearan ${p.students.length} alumnes`;
+
+      const first = p.dates[0], last = p.dates[p.dates.length - 1];
+      const fmt = iso => isoToDate(iso).toLocaleDateString('ca-ES', { day: 'numeric', month: 'short', year: 'numeric' });
+      const existing = group ? p.dates.filter(d => group.sessions && group.sessions[d]).length : 0;
+      document.getElementById('idoSummary').innerHTML = `
+        <div class="grid grid-cols-3 gap-2">
+          <div class="bg-zinc-50 rounded-xl p-3"><div class="text-[10px] text-zinc-500 font-semibold">Alumnes</div><div class="text-xl font-black font-mono">${p.students.length}</div></div>
+          <div class="bg-zinc-50 rounded-xl p-3"><div class="text-[10px] text-zinc-500 font-semibold">Sessions</div><div class="text-xl font-black font-mono">${p.dates.length}</div></div>
+          <div class="bg-zinc-50 rounded-xl p-3"><div class="text-[10px] text-zinc-500 font-semibold">Període</div><div class="text-[12px] font-bold mt-1">${fmt(first)} – ${fmt(last)}</div></div>
+        </div>
+        ${existing ? `<div class="mt-2 text-[11px] text-amber-800 bg-amber-50 border border-amber-200 rounded-xl px-3 py-2"><i class="fa-solid fa-circle-info mr-1"></i>${existing} d'aquestes dates ja tenen sessió al Diari.</div>` : ''}`;
+    };
+
+    window.applyIdoceoImport = function() {
+      const p = idoState.parsed;
+      const trim = parseInt(document.getElementById('idoTrim').value);
+      const overwrite = document.getElementById('idoOverwrite').checked;
+      let target = document.getElementById('idoTarget').value;
+      let group;
+      if (target === '__new') {
+        const name = document.getElementById('idoNewName').value.trim() || 'Classe importada';
+        target = 'g_' + Date.now();
+        const colors = Object.keys(PASTEL_PALETTE || {});
+        window.appData.groups[target] = {
+          name, color: colors.length ? colors[Object.keys(window.appData.groups).length % colors.length] : undefined,
+          students: [], sdas: [], grades: {}, attendancePenalty: { 1: {}, 2: {}, 3: {} }
+        };
+      }
+      group = window.appData.groups[target];
+      if (!group.students) group.students = [];
+
+      // Alumnes
+      const idMap = {};
+      let nextId = Date.now();
+      p.students.forEach((n, i) => {
+        const v = idoState.studentMap[i] || 'new';
+        if (v === 'skip') return;
+        if (v === 'new') {
+          const id = nextId++;
+          group.students.push({ id, name: n });
+          idMap[i] = id;
+        } else idMap[i] = parseInt(v);
+      });
+
+      // Sessions del Diari
+      if (!group.sessions || typeof group.sessions !== 'object') group.sessions = {};
+      let nSessions = 0;
+      p.dates.forEach(iso => {
+        const cols = p.attCols.filter(c => c.iso === iso);
+        let s = group.sessions[iso];
+        if (s && !overwrite) return;
+        if (!s) { s = group.sessions[iso] = { trim, sdaId: '', note: 'Importat d\'iDoceo', records: {} }; }
+        if (!s.records || typeof s.records !== 'object') s.records = {};
+        s.trim = trim;
+        nSessions++;
+        Object.keys(idMap).forEach(i => {
+          const stId = idMap[i];
+          // Si hi ha dues columnes el mateix dia, mana la pitjor (falta > retard > present)
+          const codes = cols.map(c => idoState.symbolMap[(p.rows[i][c.ci] || '').trim().replace(/️/g, '')] || 'P').filter(c => c !== 'IGN');
+          const rank = { F: 5, FJ: 4, NP: 3, SR: 3, L: 2, R: 1, P: 0 };
+          const code = codes.sort((a, b) => rank[b] - rank[a])[0] || 'P';
+          const prev = s.records[stId] || {};
+          const rec = { ...(prev.pos ? { pos: prev.pos } : {}), ...(prev.neg ? { neg: prev.neg } : {}), ...(prev.obs ? { obs: prev.obs } : {}) };
+          if (['F', 'FJ', 'R'].includes(code)) rec.a = code;
+          if (['NP', 'SR', 'L'].includes(code)) rec.p = code;
+          if (Object.keys(rec).length) s.records[stId] = rec; else delete s.records[stId];
+        });
+      });
+
+      saveToStorage();
+      if (window.syncGroupEntityToCloud) window.syncGroupEntityToCloud(target);
+      closeIdoceoModal();
+      alert(`Importat a ${group.name}: ${nSessions} sessions d'assistència del ${trim}r trimestre.`.replace('2r', '2n'));
+      window.appState.currentTrim = trim;
+      enterClass(target);
+      window.appState.diariMode = 'summary';
+      switchView('diari');
     };
 
     // ================== NAVEGACIÓ PRINCIPAL (estil iDoceo) ==================
