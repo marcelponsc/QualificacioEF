@@ -138,6 +138,7 @@
     .sp-empty { color: var(--muted); font-style: italic; }
 
     @media print {
+      body { padding: 0 !important; }
       * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
       body.poster-mode > *:not(#sdaPosterOverlay) { display: none !important; }
       body.print-horari main > section:not(#screenTimetable), body.print-horari .tt-noprint, body.print-horari #loginOverlay { display: none !important; }
@@ -151,9 +152,55 @@
       body.poster-mode.poster-dark, html.poster-dark { background: #0e1834 !important; }
       .sp-ce, .sp-phase { break-inside: avoid; }
     }
+
+    /* ===== Estructura tipus iDoceo ===== */
+    .nav-item { width: 100%; display: flex; align-items: center; gap: 12px; padding: 10px 12px; border-radius: 12px; font-size: 14px; font-weight: 600; color: #52525b; transition: all .15s; position: relative; }
+    .nav-item i { width: 20px; text-align: center; font-size: 17px; color: #a1a1aa; }
+    .nav-item:hover { background: #f4f4f5; color: #18181b; }
+    .nav-item.active { background: #18181b; color: #fff; }
+    .nav-item.active i { color: #fff; }
+    @media (min-width: 768px) and (max-width: 1023px) {
+      .nav-item { flex-direction: column; gap: 4px; padding: 10px 4px; font-size: 10px; }
+      .nav-item i { font-size: 18px; }
+    }
+    .side-class { width: 100%; display: flex; align-items: center; gap: 10px; padding: 7px 12px; border-radius: 10px; font-size: 13px; font-weight: 600; color: #3f3f46; text-align: left; }
+    .side-class:hover { background: #f4f4f5; }
+    .side-class.active { background: #f4f4f5; color: #18181b; }
+    .bnav-item { display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 8px 0 6px; font-size: 10px; font-weight: 600; color: #71717a; }
+    .bnav-item i { font-size: 17px; }
+    .bnav-item.active { color: #18181b; }
+    .bnav-item.active i { color: #18181b; }
+    .page-head { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 12px; padding-bottom: 16px; border-bottom: 1px solid rgba(228,228,231,.8); }
+    .page-title { font-size: 34px; line-height: 1.1; font-weight: 900; letter-spacing: -0.025em; color: #18181b; }
+    .page-sub { font-size: 15px; font-weight: 600; color: #71717a; margin-top: 4px; }
+    @media (max-width: 640px) { .page-title { font-size: 26px; } .page-sub { font-size: 13px; } }
+    .seg { display: inline-flex; border-radius: 12px; background: #f4f4f5; padding: 2px; border: 1px solid #e4e4e7; font-size: 12px; font-weight: 600; }
+    .seg:empty { display: none; }
+    .seg > button { padding: 6px 12px; border-radius: 10px; color: #71717a; transition: all .15s; white-space: nowrap; }
+    .seg > button:hover { color: #18181b; }
+    .seg > button.active { background: #fff; color: #18181b; font-weight: 700; box-shadow: 0 1px 2px rgba(0,0,0,.06); }
+    .ctab { display: inline-flex; align-items: center; gap: 8px; padding: 10px 16px; font-size: 14px; font-weight: 700; color: #71717a; border-bottom: 3px solid transparent; white-space: nowrap; transition: all .15s; }
+    .ctab i { font-size: 13px; color: #a1a1aa; }
+    .ctab:hover { color: #18181b; }
+    .ctab.active { color: #18181b; border-bottom-color: #18181b; }
+    .ctab.active i { color: #18181b; }
+    .fab { position: fixed; right: 28px; bottom: 28px; width: 60px; height: 60px; border-radius: 999px; background: #18181b; color: #fff; font-size: 22px; display: flex; align-items: center; justify-content: center; box-shadow: 0 10px 25px -5px rgba(0,0,0,.25); z-index: 30; transition: transform .15s; }
+    .fab:hover { transform: scale(1.06); }
+    @media (max-width: 767px) { .fab { bottom: 84px; right: 18px; width: 54px; height: 54px; } }
+    .icon-btn { width: 36px; height: 36px; border-radius: 12px; border: 1px solid #e4e4e7; background: #fff; color: #52525b; display: inline-flex; align-items: center; justify-content: center; }
+    .icon-btn:hover { background: #fafafa; }
+    .set-card { background: #fff; border: 1px solid #e4e4e7; border-radius: 20px; padding: 20px; }
+    .set-title { font-size: 15px; font-weight: 800; color: #18181b; margin-bottom: 12px; display: flex; align-items: center; gap: 8px; }
+    .set-title i { color: #a1a1aa; font-size: 14px; }
+    .btn-sec { display: inline-flex; align-items: center; gap: 6px; padding: 8px 12px; border-radius: 12px; border: 1px solid #e4e4e7; background: #fff; font-size: 12px; font-weight: 600; color: #3f3f46; }
+    .btn-sec:hover { background: #fafafa; border-color: #d4d4d8; }
+    .btn-sec i { color: #a1a1aa; font-size: 11px; }
+    .cls-row { display: flex; align-items: center; gap: 16px; padding: 16px 20px; border-bottom: 1px solid #f4f4f5; cursor: pointer; transition: background .1s; }
+    .cls-row:hover { background: #fafafa; }
+    .cls-row:last-child { border-bottom: none; }
   </style>
 </head>
-<body class="min-h-full flex flex-col text-zinc-900 bg-[#fafafa]">
+<body class="min-h-full flex flex-col text-zinc-900 bg-[#fafafa] md:pl-20 lg:pl-64 pb-20 md:pb-0">
 
   <!-- ================= PANTALLA D'ACCÉS PRIVADA ================= -->
   <div id="loginOverlay" class="fixed inset-0 bg-zinc-950/80 backdrop-blur-md z-50 flex items-center justify-center p-4">
@@ -185,182 +232,239 @@
     </div>
   </div>
 
-  <!-- ================= CAPÇALERA ================= -->
-  <header class="bg-white/90 backdrop-blur-md border-b border-zinc-200/80 sticky top-0 z-40 no-print">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      <div class="flex items-center justify-between h-14 gap-2 sm:gap-4">
-        
-        <div class="flex items-center gap-3">
-          <button onclick="goToHome()" class="flex items-center gap-2.5 text-left group">
-            <div class="w-8 h-8 rounded-xl bg-zinc-900 text-white flex items-center justify-center p-1.5 shadow-subtle group-hover:bg-zinc-800 transition">
-              <svg viewBox="0 0 24 24" fill="none" class="w-full h-full stroke-current stroke-[2.2] stroke-linecap-round stroke-linejoin-round">
-                <circle cx="16" cy="5" r="2.2" fill="currentColor" stroke="none" />
-                <path d="M5 19l4-3 3 2 4-5-2-4-4 1-2 4" />
-                <path d="M12 11l2-3 4 1" />
-              </svg>
-            </div>
-            <div class="flex flex-col">
-              <div class="flex items-center gap-1.5">
-                <span class="text-xs font-black tracking-tight text-zinc-900 group-hover:text-zinc-600 transition whitespace-nowrap">EF COMPETENCIAL</span>
-                <span class="hidden sm:inline text-[9px] font-bold text-zinc-600 bg-zinc-100 px-1.5 py-0.5 rounded tracking-wider uppercase border border-zinc-200/60">PRO</span>
-              </div>
-              <span class="hidden sm:block text-[9px] font-medium text-zinc-400 -mt-0.5">Avaluació Educació Física LOMLOE</span>
-            </div>
-          </button>
-
-          <div id="headerBreadcrumb" class="hidden max-sm:!hidden items-center gap-1.5 ml-2 pl-3 border-l border-zinc-200 text-xs">
-            <span class="text-zinc-400 font-medium">Grup:</span>
-            <span id="breadcrumbGroupName" class="font-bold text-zinc-900 px-2 py-0.5 rounded-md text-[11px] border font-mono">--</span>
-          </div>
-        </div>
-
-        <div class="flex items-center gap-2">
-          <div id="cloudStatusBadge" class="flex items-center gap-1.5 text-[11px] font-medium px-2.5 py-1 rounded-xl border bg-zinc-50 border-zinc-200 text-zinc-600">
-            <span id="cloudStatusDot" class="w-2 h-2 rounded-full bg-emerald-500"></span>
-            <span id="cloudStatusText" class="hidden sm:inline font-mono text-[10px] font-semibold">Local (Actiu)</span>
-          </div>
-
-          <div class="flex items-center gap-2 bg-zinc-100 pl-2 sm:pl-3 pr-1 sm:pr-2 py-1 rounded-xl border border-zinc-200 text-xs">
-            <i class="fa-solid fa-user-check text-emerald-600 text-[11px]"></i>
-            <span id="headerUserLabel" class="hidden sm:inline font-bold text-zinc-800 max-w-[120px] truncate">Docent</span>
-            <button onclick="logoutActiveUser()" title="Tancar Sessió" class="text-zinc-400 hover:text-rose-600 p-1 transition ml-1">
-              <i class="fa-solid fa-arrow-right-from-bracket"></i>
-            </button>
-          </div>
-
-          <button onclick="goToTimetable()" id="ttNavBtn" title="Horari setmanal" class="inline-flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1.5 rounded-xl border border-zinc-200/80 bg-white text-zinc-700 hover:bg-zinc-50 shadow-subtle transition">
-            <i class="fa-regular fa-calendar text-[11px] text-zinc-400"></i>
-            <span class="hidden sm:inline">Horari</span>
-          </button>
-
-          <button onclick="goToSdaLibrary()" id="sdaLibNavBtn" title="Totes les situacions d'aprenentatge" class="inline-flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1.5 rounded-xl border border-amber-300 bg-amber-50 text-amber-900 hover:bg-amber-100 shadow-subtle transition">
-            <i class="fa-regular fa-folder-open text-[11px]"></i>
-            <span class="hidden sm:inline">SdAs</span>
-          </button>
-
-          <button onclick="goToHome()" id="homeNavBtn" class="hidden sm:inline-flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1.5 rounded-xl border border-zinc-200/80 bg-white text-zinc-700 hover:bg-zinc-50 shadow-subtle transition">
-            <i class="fa-solid fa-house text-zinc-400 text-[10px]"></i>
-            <span class="hidden sm:inline">Inici</span>
-          </button>
-
-          <div class="flex items-center pl-1 border-l border-zinc-200 gap-0 sm:gap-1">
-            <button onclick="openCriteriaModal()" title="Gestionar Catàleg de Criteris LOMLOE" class="p-1.5 text-zinc-500 hover:text-zinc-900 hover:bg-zinc-100 rounded-lg text-xs transition">
-              <i class="fa-solid fa-list-check"></i>
-            </button>
-            <button onclick="openThresholdsModal()" title="Configurar Escala LOMLOE" class="p-1.5 text-zinc-500 hover:text-zinc-900 hover:bg-zinc-100 rounded-lg text-xs transition">
-              <i class="fa-solid fa-sliders"></i>
-            </button>
-            <button onclick="exportBackupJSON()" title="Còpia de Seguretat (JSON)" class="p-1.5 text-zinc-400 hover:text-zinc-900 hover:bg-zinc-100 rounded-lg text-xs transition">
-              <i class="fa-solid fa-download"></i>
-            </button>
-            <label title="Restaurar fitxer JSON" class="p-1.5 text-zinc-400 hover:text-zinc-900 hover:bg-zinc-100 rounded-lg text-xs transition cursor-pointer">
-              <i class="fa-solid fa-upload"></i>
-              <input type="file" id="backupFileInput" accept=".json" onchange="importBackupJSON(event)" class="hidden">
-            </label>
-            <span class="w-px h-4 bg-zinc-200 mx-1"></span>
-            <button onclick="resetDefaultData()" title="Esborrar-ho tot i carregar dades de mostra" class="p-1.5 text-zinc-300 hover:text-rose-600 hover:bg-rose-50 rounded-lg text-xs transition">
-              <i class="fa-solid fa-trash-arrow-up"></i>
-            </button>
-          </div>
-        </div>
+  <!-- ================= MENÚ LATERAL (iPad / ordinador) ================= -->
+  <aside id="appSidebar" class="no-print hidden md:flex fixed inset-y-0 left-0 z-40 flex-col w-20 lg:w-64 bg-white border-r border-zinc-200/80">
+    <button onclick="goToHome()" class="flex items-center gap-3 px-4 lg:px-5 h-20 shrink-0 text-left group">
+      <div class="w-11 h-11 rounded-2xl bg-zinc-900 text-white flex items-center justify-center p-2 shadow-subtle group-hover:bg-zinc-800 transition mx-auto lg:mx-0">
+        <svg viewBox="0 0 24 24" fill="none" class="w-full h-full stroke-current stroke-[2.2] stroke-linecap-round stroke-linejoin-round">
+          <circle cx="16" cy="5" r="2.2" fill="currentColor" stroke="none" />
+          <path d="M5 19l4-3 3 2 4-5-2-4-4 1-2 4" />
+          <path d="M12 11l2-3 4 1" />
+        </svg>
       </div>
+      <div class="hidden lg:block min-w-0">
+        <div class="text-sm font-black tracking-tight text-zinc-900">EF Competencial</div>
+        <div class="text-[11px] text-zinc-400 font-medium truncate" id="sidebarCentre">Quadern LOMLOE</div>
+      </div>
+    </button>
 
-      <nav id="classSubNav" class="hidden flex items-center space-x-1 border-t border-zinc-100 py-1.5 overflow-x-auto text-[11px] font-semibold">
-        <button id="tabBtnSda" onclick="switchView('sda')" class="whitespace-nowrap shrink-0 px-3 py-1 rounded-md text-zinc-900 bg-zinc-100 transition">
-          <i class="fa-regular fa-folder-open text-zinc-500 mr-1.5"></i> Qualificació SdA
-        </button>
-        <button id="tabBtnDiari" onclick="switchView('diari')" class="whitespace-nowrap shrink-0 px-3 py-1 rounded-md text-zinc-500 hover:text-zinc-900 hover:bg-zinc-50 transition">
-          <i class="fa-solid fa-clipboard-check text-zinc-400 mr-1.5"></i> Diari
-        </button>
-        <button id="tabBtnPlanif" onclick="switchView('planif')" class="whitespace-nowrap shrink-0 px-3 py-1 rounded-md text-zinc-500 hover:text-zinc-900 hover:bg-zinc-50 transition">
-          <i class="fa-regular fa-calendar-check text-zinc-400 mr-1.5"></i> Planificació
-        </button>
-        <button id="tabBtnRoster" onclick="switchView('roster')" class="whitespace-nowrap shrink-0 px-3 py-1 rounded-md text-zinc-500 hover:text-zinc-900 hover:bg-zinc-50 transition">
-          <i class="fa-solid fa-users text-zinc-400 mr-1.5"></i> Alumnat (<span id="tabStudentCount">0</span>)
-        </button>
-        <button id="tabBtnTrim" onclick="switchView('trim')" class="whitespace-nowrap shrink-0 px-3 py-1 rounded-md text-zinc-500 hover:text-zinc-900 hover:bg-zinc-50 transition">
-          <i class="fa-solid fa-table-cells text-zinc-400 mr-1.5"></i> Resum Trimestral
-        </button>
-        <button id="tabBtnFinal" onclick="switchView('final')" class="whitespace-nowrap shrink-0 px-3 py-1 rounded-md text-zinc-500 hover:text-zinc-900 hover:bg-zinc-50 transition">
-          <i class="fa-regular fa-calendar-check text-zinc-400 mr-1.5"></i> Final de Curs
-        </button>
-        <button id="tabBtnReport" onclick="switchView('report')" class="whitespace-nowrap shrink-0 px-3 py-1 rounded-md text-zinc-500 hover:text-zinc-900 hover:bg-zinc-50 transition">
-          <i class="fa-regular fa-address-card text-zinc-400 mr-1.5"></i> Butlletí
-        </button>
-        <button id="tabBtnStats" onclick="switchView('stats')" class="whitespace-nowrap shrink-0 px-3 py-1 rounded-md text-zinc-500 hover:text-zinc-900 hover:bg-zinc-50 transition">
-          <i class="fa-solid fa-chart-pie text-zinc-400 mr-1.5"></i> Analítica
-        </button>
-      </nav>
+    <nav class="flex-1 overflow-y-auto px-2 lg:px-3 py-2 space-y-0.5" id="sidebarNav">
+      <button data-nav="home" onclick="goToHome()" class="nav-item"><i class="fa-regular fa-sun"></i><span>Avui</span></button>
+      <button data-nav="classes" onclick="goToClasses()" class="nav-item"><i class="fa-solid fa-users"></i><span>Classes</span></button>
+      <button data-nav="timetable" onclick="goToTimetable()" class="nav-item"><i class="fa-regular fa-clock"></i><span>Horari</span></button>
+      <button data-nav="planner" onclick="goToPlanner()" class="nav-item"><i class="fa-regular fa-calendar-check"></i><span>Planner</span></button>
+      <button data-nav="library" onclick="goToSdaLibrary()" class="nav-item"><i class="fa-regular fa-folder-open"></i><span>SdAs</span></button>
+
+      <div class="hidden lg:block pt-5 pb-1 px-3 text-[10px] font-bold uppercase tracking-wider text-zinc-400">Les meves classes</div>
+      <div id="sidebarClassList" class="hidden lg:block space-y-0.5"></div>
+    </nav>
+
+    <div class="px-2 lg:px-3 py-3 border-t border-zinc-100 space-y-1">
+      <button data-nav="settings" onclick="goToSettings()" class="nav-item"><i class="fa-solid fa-gear"></i><span>Configuració</span></button>
+      <div class="flex flex-col lg:flex-row items-center gap-2 px-2 lg:px-3 py-2">
+        <div id="cloudStatusBadge" class="flex items-center gap-1.5 text-[11px] font-medium" title="Estat de la sincronització">
+          <span id="cloudStatusDot" class="w-2 h-2 rounded-full bg-emerald-500"></span>
+          <span id="cloudStatusText" class="hidden lg:inline font-mono text-[10px] font-semibold text-zinc-500">Local (Actiu)</span>
+        </div>
+        <span id="headerUserLabel" class="hidden lg:inline ml-auto text-[11px] font-bold text-zinc-700 truncate max-w-[90px]">Docent</span>
+        <button onclick="logoutActiveUser()" title="Tancar sessió" class="text-zinc-400 hover:text-rose-600 p-1 transition"><i class="fa-solid fa-arrow-right-from-bracket text-xs"></i></button>
+      </div>
     </div>
-  </header>
+  </aside>
+
+  <!-- ================= BARRA INFERIOR (mòbil) ================= -->
+  <nav id="appBottomNav" class="no-print md:hidden fixed bottom-0 inset-x-0 z-40 bg-white/95 backdrop-blur border-t border-zinc-200 grid grid-cols-6 pb-[env(safe-area-inset-bottom)]">
+    <button data-nav="home" onclick="goToHome()" class="bnav-item"><i class="fa-regular fa-sun"></i><span>Avui</span></button>
+    <button data-nav="classes" onclick="goToClasses()" class="bnav-item"><i class="fa-solid fa-users"></i><span>Classes</span></button>
+    <button data-nav="timetable" onclick="goToTimetable()" class="bnav-item"><i class="fa-regular fa-clock"></i><span>Horari</span></button>
+    <button data-nav="planner" onclick="goToPlanner()" class="bnav-item"><i class="fa-regular fa-calendar-check"></i><span>Planner</span></button>
+    <button data-nav="library" onclick="goToSdaLibrary()" class="bnav-item"><i class="fa-regular fa-folder-open"></i><span>SdAs</span></button>
+    <button data-nav="settings" onclick="goToSettings()" class="bnav-item"><i class="fa-solid fa-gear"></i><span>Ajustos</span></button>
+  </nav>
+
+  <!-- Elements antics que el codi encara referencia (no visibles) -->
+  <div class="hidden" aria-hidden="true">
+    <div id="headerBreadcrumb"><span id="breadcrumbGroupName"></span></div>
+    <nav id="classSubNav"></nav>
+    <span id="tabStudentCount"></span>
+    <div id="homeProgramacio"></div>
+  </div>
+
+
 
   <!-- ================= COS PRINCIPAL ================= -->
-  <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-5">
+  <main class="flex-1 max-w-[1400px] w-full mx-auto px-4 sm:px-6 lg:px-10 py-6 lg:py-8">
 
-    <!-- PANTALLA D'INICI (HUB DE CLASSES) -->
-    <section id="screenHome" class="space-y-5">
-      <div class="flex flex-col lg:flex-row lg:items-end justify-between gap-3 border-b border-zinc-200/70 pb-4">
+    <!-- ===== AVUI ===== -->
+    <section id="screenHome" class="space-y-6">
+      <div class="page-head">
         <div>
-          <div class="flex items-center gap-2 text-xs font-semibold text-zinc-400">
-            <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
-            <span id="homeSchoolYearLabel">Curs actiu</span>
-          </div>
-          <h2 id="homeGreeting" class="text-xl font-extrabold tracking-tight text-zinc-900 mt-0.5">Tauler de Classes</h2>
+          <h1 id="homeGreeting" class="page-title">Avui</h1>
+          <p id="homeSchoolYearLabel" class="page-sub">Curs actiu</p>
         </div>
-
         <div class="flex flex-wrap items-center gap-2">
-          <div class="inline-flex rounded-xl bg-zinc-100 p-0.5 text-xs font-semibold border border-zinc-200">
-            <button id="homeTrimBtn1" onclick="setHomeTrim(1)" class="px-3 py-1.5 rounded-lg transition">1r Trim</button>
-            <button id="homeTrimBtn2" onclick="setHomeTrim(2)" class="px-3 py-1.5 rounded-lg transition">2n Trim</button>
-            <button id="homeTrimBtn3" onclick="setHomeTrim(3)" class="px-3 py-1.5 rounded-lg transition">3r Trim</button>
+          <div class="seg">
+            <button id="homeTrimBtn1" onclick="setHomeTrim(1)">1r Trim</button>
+            <button id="homeTrimBtn2" onclick="setHomeTrim(2)">2n Trim</button>
+            <button id="homeTrimBtn3" onclick="setHomeTrim(3)">3r Trim</button>
           </div>
-          <button onclick="openGlobalSdaModal()" class="inline-flex items-center gap-1.5 bg-white hover:bg-zinc-50 border border-zinc-200/90 text-zinc-700 text-xs font-semibold px-3 py-2 rounded-xl shadow-subtle transition">
-            <i class="fa-regular fa-folder-open text-zinc-400 text-[10px]"></i> Nova SdA
-          </button>
-          <button onclick="openNewGroupModal()" class="inline-flex items-center gap-1.5 bg-zinc-900 hover:bg-zinc-800 text-white text-xs font-semibold px-3.5 py-2 rounded-xl shadow-subtle transition">
-            <i class="fa-solid fa-plus text-[10px]"></i> Nova Classe
-          </button>
         </div>
       </div>
 
-      <!-- Continua on ho vas deixar -->
-      <div id="homeContinueCard"></div>
-
-      <!-- Classes d'avui -->
-      <div id="homeToday"></div>
-
-      <!-- Indicadors del trimestre -->
-      <div id="homeKpis" class="grid grid-cols-2 lg:grid-cols-4 gap-3"></div>
-
-      <!-- Classes -->
-      <div class="space-y-3">
-        <div class="flex items-center justify-between">
-          <h3 class="text-xs font-bold text-zinc-500 uppercase tracking-wider"><i class="fa-solid fa-users mr-1.5 text-zinc-400"></i>Les meves classes</h3>
-          <span id="homeClassesCount" class="text-[11px] font-mono text-zinc-400"></span>
+      <div class="grid grid-cols-1 xl:grid-cols-3 gap-6">
+        <div class="xl:col-span-2 space-y-5">
+          <div id="homeContinueCard"></div>
+          <div id="homeToday"></div>
         </div>
-        <div id="homeClassesGrid" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4"></div>
-      </div>
-
-      <!-- Pendents -->
-      <div id="homeTodoSection" class="space-y-3"></div>
-
-      <!-- Programació del curs -->
-      <div class="space-y-3">
-        <div class="flex items-center justify-between">
-          <h3 class="text-xs font-bold text-zinc-500 uppercase tracking-wider"><i class="fa-regular fa-calendar mr-1.5 text-zinc-400"></i>Programació del curs</h3>
-          <button onclick="goToSdaLibrary()" class="text-[11px] font-semibold text-zinc-500 hover:text-zinc-900 transition">Veure totes les SdAs <i class="fa-solid fa-arrow-right text-[9px] ml-0.5"></i></button>
+        <div class="space-y-5">
+          <div id="homeKpis" class="grid grid-cols-2 gap-3"></div>
+          <div id="homeTodoSection" class="space-y-3"></div>
         </div>
-        <div id="homeProgramacio" class="grid grid-cols-1 lg:grid-cols-3 gap-3"></div>
       </div>
     </section>
 
+    <!-- ===== CLASSES ===== -->
+    <section id="screenClasses" class="hidden space-y-6">
+      <div class="page-head">
+        <div>
+          <h1 class="page-title">Classes</h1>
+          <p id="homeClassesCount" class="page-sub"></p>
+        </div>
+        <div class="flex flex-wrap items-center gap-2">
+          <div class="seg" id="clsTrimSeg">
+            <button data-t="1" onclick="setHomeTrim(1)">1r Trim</button>
+            <button data-t="2" onclick="setHomeTrim(2)">2n Trim</button>
+            <button data-t="3" onclick="setHomeTrim(3)">3r Trim</button>
+          </div>
+          <div class="seg" id="clsViewSeg">
+            <button data-v="list" onclick="setClassesView('list')"><i class="fa-solid fa-list mr-1"></i>Llista</button>
+            <button data-v="mosaic" onclick="setClassesView('mosaic')"><i class="fa-solid fa-grip mr-1"></i>Mosaic</button>
+          </div>
+        </div>
+      </div>
+      <div id="classesList"></div>
+      <div id="homeClassesGrid" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4"></div>
+      <button onclick="openNewGroupModal()" title="Nova classe" class="fab no-print"><i class="fa-solid fa-plus"></i></button>
+    </section>
+
+    <!-- ===== PLANNER ===== -->
+    <section id="screenPlanner" class="hidden space-y-5">
+      <div class="page-head">
+        <div>
+          <h1 class="page-title">Planner</h1>
+          <p id="plannerSub" class="page-sub"></p>
+        </div>
+        <div class="flex flex-wrap items-center gap-2">
+          <div class="seg" id="plannerModeSeg">
+            <button data-m="day" onclick="setPlannerMode('day')">Dia</button>
+            <button data-m="week" onclick="setPlannerMode('week')">Setmana</button>
+            <button data-m="class" onclick="setPlannerMode('class')">Per classe</button>
+          </div>
+          <div id="plannerNav" class="flex items-center gap-1">
+            <button onclick="movePlanner(-1)" class="icon-btn" title="Anterior"><i class="fa-solid fa-chevron-left text-xs"></i></button>
+            <button onclick="movePlanner(0)" class="h-9 px-3 rounded-xl border border-zinc-200 bg-white hover:bg-zinc-50 text-xs font-semibold text-zinc-700">Avui</button>
+            <button onclick="movePlanner(1)" class="icon-btn" title="Següent"><i class="fa-solid fa-chevron-right text-xs"></i></button>
+          </div>
+        </div>
+      </div>
+      <div id="plannerContent"></div>
+      <div id="plannerByClass" class="hidden space-y-4">
+        <div id="plannerClassChips" class="flex flex-wrap gap-2"></div>
+      <!-- VISTA PLANIFICACIÓ DE SESSIONS -->
+      <section id="viewPlanif" class="space-y-4 hidden">
+        <div class="bg-white border border-zinc-200/90 rounded-2xl p-3 shadow-subtle flex flex-wrap items-center justify-between gap-2">
+          <div class="flex flex-wrap items-center gap-2">
+            <div class="inline-flex rounded-xl bg-zinc-100 p-0.5 text-xs font-semibold border border-zinc-200">
+              <button id="planifRangeNext" onclick="setPlanifRange('next')" class="px-3 py-1.5 rounded-lg transition">Properes</button>
+              <button id="planifRangePast" onclick="setPlanifRange('past')" class="px-3 py-1.5 rounded-lg transition">Fetes</button>
+            </div>
+            <span id="planifSummary" class="text-[11px] text-zinc-500"></span>
+          </div>
+          <div class="flex flex-wrap gap-2">
+            <button onclick="openDistributeModal()" class="inline-flex items-center gap-1.5 bg-white hover:bg-zinc-50 border border-zinc-200 text-zinc-700 text-xs font-semibold px-3 py-2 rounded-xl shadow-subtle transition">
+              <i class="fa-solid fa-wand-magic-sparkles text-amber-500 text-[10px]"></i> Repartir una SdA
+            </button>
+            <button onclick="printPlanif()" class="inline-flex items-center gap-1.5 bg-white hover:bg-zinc-50 border border-zinc-200 text-zinc-700 text-xs font-semibold px-3 py-2 rounded-xl shadow-subtle transition">
+              <i class="fa-solid fa-print text-zinc-400 text-[10px]"></i> Imprimir
+            </button>
+          </div>
+        </div>
+        <div class="hidden print:block">
+          <h2 id="planifPrintTitle" class="text-lg font-extrabold text-zinc-900"></h2>
+        </div>
+        <div id="planifList" class="space-y-4"></div>
+      </section>
+
+
+      </div>
+    </section>
+
+    <!-- ===== CONFIGURACIÓ ===== -->
+    <section id="screenSettings" class="hidden space-y-6">
+      <div class="page-head">
+        <div>
+          <h1 class="page-title">Configuració</h1>
+          <p class="page-sub">Centre, avaluació, calendari i dades</p>
+        </div>
+      </div>
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-5">
+        <div class="set-card">
+          <h3 class="set-title"><i class="fa-solid fa-school"></i>Centre i curs</h3>
+          <label class="block text-xs font-semibold text-zinc-600 mb-1">Nom del centre</label>
+          <input type="text" id="setCentreInput" onchange="saveCentreSetting(this.value)" class="w-full border border-zinc-200 rounded-xl p-2.5 text-sm font-semibold outline-none focus:ring-2 focus:ring-zinc-900">
+          <p class="text-xs text-zinc-500 mt-2">Curs actual: <b id="setSchoolYear"></b> · Surt a les fitxes de SdA, a l'horari imprès i als butlletins.</p>
+        </div>
+
+        <div class="set-card">
+          <h3 class="set-title"><i class="fa-solid fa-sliders"></i>Avaluació</h3>
+          <div id="setThresholds" class="flex flex-wrap gap-1.5 mb-3"></div>
+          <div class="flex flex-wrap gap-2">
+            <button onclick="openThresholdsModal()" class="btn-sec"><i class="fa-solid fa-sliders"></i>Escala de qualificació</button>
+            <button onclick="openCriteriaModal()" class="btn-sec"><i class="fa-solid fa-list-check"></i>Catàleg de criteris</button>
+          </div>
+        </div>
+
+        <div class="set-card">
+          <h3 class="set-title"><i class="fa-regular fa-calendar-xmark"></i>Calendari</h3>
+          <div id="setHolidays" class="text-xs text-zinc-600 mb-3"></div>
+          <div class="flex flex-wrap gap-2">
+            <button onclick="openHolidayModal()" class="btn-sec"><i class="fa-regular fa-calendar-xmark"></i>Festius</button>
+            <button onclick="goToTimetable()" class="btn-sec"><i class="fa-regular fa-clock"></i>Horari</button>
+          </div>
+        </div>
+
+        <div class="set-card">
+          <h3 class="set-title"><i class="fa-solid fa-database"></i>Dades</h3>
+          <p class="text-xs text-zinc-500 mb-3">Fes una còpia de seguretat de tant en tant. Es desa un fitxer que pots restaurar en qualsevol moment.</p>
+          <div class="flex flex-wrap gap-2">
+            <button onclick="exportBackupJSON()" class="btn-sec"><i class="fa-solid fa-download"></i>Descarregar còpia</button>
+            <label class="btn-sec cursor-pointer"><i class="fa-solid fa-upload"></i>Restaurar còpia
+              <input type="file" id="backupFileInput" accept=".json" onchange="importBackupJSON(event)" class="hidden">
+            </label>
+          </div>
+          <div class="mt-4 pt-3 border-t border-zinc-100 flex items-center justify-between gap-2">
+            <span class="text-xs text-zinc-400">Esborrar-ho tot i carregar dades de mostra</span>
+            <button onclick="resetDefaultData()" class="text-xs font-semibold text-rose-600 hover:bg-rose-50 px-2.5 py-1.5 rounded-lg"><i class="fa-solid fa-trash-arrow-up mr-1"></i>Esborrar</button>
+          </div>
+        </div>
+
+        <div class="set-card">
+          <h3 class="set-title"><i class="fa-regular fa-user"></i>Compte</h3>
+          <div class="flex items-center justify-between gap-2 text-sm">
+            <div><div class="font-bold text-zinc-900" id="setUserLabel"></div><div class="text-xs text-zinc-500" id="setCloudLabel"></div></div>
+            <button onclick="logoutActiveUser()" class="btn-sec"><i class="fa-solid fa-arrow-right-from-bracket"></i>Tancar sessió</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+
     <!-- BIBLIOTECA DE SITUACIONS D'APRENENTATGE -->
     <section id="screenSdaLibrary" class="hidden space-y-5">
-      <div class="flex flex-col lg:flex-row lg:items-end justify-between gap-3 border-b border-zinc-200/70 pb-4">
+      <div class="page-head">
         <div>
-          <button onclick="goToHome()" class="text-xs font-semibold text-zinc-400 hover:text-zinc-900 transition"><i class="fa-solid fa-arrow-left text-[10px] mr-1"></i>Inici</button>
-          <h2 class="text-xl font-extrabold tracking-tight text-zinc-900 mt-0.5">Situacions d'Aprenentatge</h2>
-          <p id="libSummary" class="text-xs text-zinc-500 mt-0.5"></p>
+          <h1 class="page-title">Situacions d'aprenentatge</h1>
+          <p id="libSummary" class="page-sub"></p>
         </div>
         <div class="flex flex-wrap items-center gap-2">
           <button onclick="openSdaFromLibraryNew()" class="inline-flex items-center gap-1.5 bg-zinc-900 hover:bg-zinc-800 text-white text-xs font-semibold px-3.5 py-2 rounded-xl shadow-subtle transition">
@@ -396,11 +500,10 @@
 
     <!-- HORARI SETMANAL -->
     <section id="screenTimetable" class="hidden space-y-5">
-      <div class="flex flex-col lg:flex-row lg:items-end justify-between gap-3 border-b border-zinc-200/70 pb-4 tt-noprint">
+      <div class="page-head tt-noprint">
         <div>
-          <button onclick="goToHome()" class="text-xs font-semibold text-zinc-400 hover:text-zinc-900 transition"><i class="fa-solid fa-arrow-left text-[10px] mr-1"></i>Inici</button>
-          <h2 class="text-xl font-extrabold tracking-tight text-zinc-900 mt-0.5">Horari setmanal</h2>
-          <p id="ttSummary" class="text-xs text-zinc-500 mt-0.5"></p>
+          <h1 class="page-title">Horari</h1>
+          <p id="ttSummary" class="page-sub"></p>
         </div>
         <div class="flex flex-wrap items-center gap-2">
           <div class="flex items-center gap-1">
@@ -432,27 +535,34 @@
 
     <!-- ZONA DE TREBALL DE LA CLASSE -->
     <div id="screenClassWorkspace" class="hidden space-y-5">
-      <div class="flex flex-wrap items-center justify-between gap-3 bg-white border border-zinc-200/80 px-3.5 py-2.5 rounded-2xl shadow-subtle no-print">
-        <div class="flex items-center gap-3">
-          <button onclick="goToHome()" class="text-zinc-500 hover:text-zinc-900 text-xs font-semibold flex items-center gap-1.5 transition pr-3 border-r border-zinc-200">
-            <i class="fa-solid fa-arrow-left text-[10px]"></i> Sortir
-          </button>
-          <div class="inline-flex rounded-xl bg-zinc-100 p-0.5 text-xs font-semibold">
-            <button id="trimBtn1_class" onclick="setTrim(1)" class="px-3 py-1 rounded-lg transition bg-white text-zinc-900 shadow-subtle font-bold">1r Trim</button>
-            <button id="trimBtn2_class" onclick="setTrim(2)" class="px-3 py-1 rounded-lg transition text-zinc-500 hover:text-zinc-900">2n Trim</button>
-            <button id="trimBtn3_class" onclick="setTrim(3)" class="px-3 py-1 rounded-lg transition text-zinc-500 hover:text-zinc-900">3r Trim</button>
+      <div class="no-print space-y-4">
+        <div class="page-head !pb-0 !border-0">
+          <div class="min-w-0">
+            <button onclick="goToClasses()" class="text-xs font-semibold text-zinc-400 hover:text-zinc-900 transition"><i class="fa-solid fa-chevron-left text-[10px] mr-1"></i>Classes</button>
+            <h1 class="page-title flex items-center gap-3"><span id="classTitleDot" class="w-4 h-4 rounded-full shrink-0"></span><span id="classTitleName" class="truncate">--</span></h1>
+            <p id="classTitleSub" class="page-sub"></p>
+          </div>
+          <div class="flex flex-wrap items-center gap-2">
+            <div class="seg">
+              <button id="trimBtn1_class" onclick="setTrim(1)">1r Trim</button>
+              <button id="trimBtn2_class" onclick="setTrim(2)">2n Trim</button>
+              <button id="trimBtn3_class" onclick="setTrim(3)">3r Trim</button>
+            </div>
+            <div class="relative">
+              <i class="fa-solid fa-magnifying-glass absolute left-3 top-3 text-zinc-400 text-[11px]"></i>
+              <input type="text" id="studentSearchInput" placeholder="Cercar alumne/a..." oninput="filterStudents(this.value)" class="pl-8 pr-3 h-9 bg-white border border-zinc-200 rounded-xl text-xs outline-none focus:ring-2 focus:ring-zinc-900 w-40 sm:w-52 font-medium">
+            </div>
           </div>
         </div>
 
-        <div class="flex items-center gap-2">
-          <!-- Cercador ràpid d'alumnes -->
-          <div class="relative">
-            <i class="fa-solid fa-magnifying-glass absolute left-3 top-2.5 text-zinc-400 text-[11px]"></i>
-            <input type="text" id="studentSearchInput" placeholder="Cercar alumne/a..." oninput="filterStudents(this.value)" class="pl-8 pr-3 py-1.5 bg-zinc-50 border border-zinc-200 rounded-xl text-xs outline-none focus:ring-2 focus:ring-zinc-900 focus:bg-white w-36 sm:w-48 font-medium">
+        <div class="flex flex-wrap items-end justify-between gap-3 border-b border-zinc-200">
+          <div id="classTabs" class="flex gap-1 -mb-px overflow-x-auto">
+            <button data-tab="quadern" onclick="switchView(window.appState.lastQuadernView || 'sda')" class="ctab"><i class="fa-solid fa-table-cells"></i>Quadern</button>
+            <button data-tab="diari" onclick="switchView('diari')" class="ctab"><i class="fa-solid fa-clipboard-check"></i>Diari</button>
+            <button data-tab="alumnes" onclick="switchView(window.appState.lastAlumnesView || 'roster')" class="ctab"><i class="fa-solid fa-user-graduate"></i>Alumnes</button>
+            <button data-tab="stats" onclick="switchView('stats')" class="ctab"><i class="fa-solid fa-chart-pie"></i>Analítica</button>
           </div>
-          <button onclick="switchView('roster')" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold text-zinc-700 bg-zinc-50 hover:bg-zinc-100 border border-zinc-200/80 transition">
-            <i class="fa-solid fa-user-gear text-zinc-400 text-[11px]"></i> Gestionar
-          </button>
+          <div id="classSubSeg" class="seg mb-2"></div>
         </div>
       </div>
 
@@ -528,31 +638,6 @@
 
         <!-- MODE RESUM -->
         <div id="diariSummaryPanel" class="space-y-3 hidden"></div>
-      </section>
-
-      <!-- VISTA PLANIFICACIÓ DE SESSIONS -->
-      <section id="viewPlanif" class="space-y-4 hidden">
-        <div class="bg-white border border-zinc-200/90 rounded-2xl p-3 shadow-subtle flex flex-wrap items-center justify-between gap-2">
-          <div class="flex flex-wrap items-center gap-2">
-            <div class="inline-flex rounded-xl bg-zinc-100 p-0.5 text-xs font-semibold border border-zinc-200">
-              <button id="planifRangeNext" onclick="setPlanifRange('next')" class="px-3 py-1.5 rounded-lg transition">Properes</button>
-              <button id="planifRangePast" onclick="setPlanifRange('past')" class="px-3 py-1.5 rounded-lg transition">Fetes</button>
-            </div>
-            <span id="planifSummary" class="text-[11px] text-zinc-500"></span>
-          </div>
-          <div class="flex flex-wrap gap-2">
-            <button onclick="openDistributeModal()" class="inline-flex items-center gap-1.5 bg-white hover:bg-zinc-50 border border-zinc-200 text-zinc-700 text-xs font-semibold px-3 py-2 rounded-xl shadow-subtle transition">
-              <i class="fa-solid fa-wand-magic-sparkles text-amber-500 text-[10px]"></i> Repartir una SdA
-            </button>
-            <button onclick="printPlanif()" class="inline-flex items-center gap-1.5 bg-white hover:bg-zinc-50 border border-zinc-200 text-zinc-700 text-xs font-semibold px-3 py-2 rounded-xl shadow-subtle transition">
-              <i class="fa-solid fa-print text-zinc-400 text-[10px]"></i> Imprimir
-            </button>
-          </div>
-        </div>
-        <div class="hidden print:block">
-          <h2 id="planifPrintTitle" class="text-lg font-extrabold text-zinc-900"></h2>
-        </div>
-        <div id="planifList" class="space-y-4"></div>
       </section>
 
       <!-- VISTA 2: ROSTER D'ALUMNAT -->
@@ -1602,9 +1687,15 @@
             window.renderSdaLibrary();
           } else if (window.appState?.currentScreen === 'timetable') {
             window.renderTimetable();
+          } else if (window.appState?.currentScreen === 'planner') {
+            window.renderPlanner();
+          } else if (window.appState?.currentScreen === 'settings') {
+            window.renderSettingsScreen();
           } else {
             window.renderHomeScreen();
           }
+          if (window.renderSidebarClasses) window.renderSidebarClasses();
+          if (window.appState?.currentScreen === 'class' && window.updateClassHeader) window.updateClassHeader();
           setCloudStatus('online');
         } else {
           set(userBranchRef, window.appData).then(() => setCloudStatus('online'));
@@ -2186,7 +2277,7 @@
             <h3 class="text-xs font-bold text-zinc-500 uppercase tracking-wider"><i class="fa-solid fa-clipboard-check mr-1.5 text-zinc-400"></i>El teu dia d'avui</h3>
             <button onclick="goToTimetable()" class="text-[11px] font-semibold text-zinc-500 hover:text-zinc-900">Veure l'horari <i class="fa-solid fa-arrow-right text-[9px] ml-0.5"></i></button>
           </div>
-          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
+          <div class="grid grid-cols-1 gap-2">
             ${todayItems.map((it, i) => {
               if (it.other) {
                 const s = it.slot, ty = OTHER_SLOT_TYPES[s.type] || OTHER_SLOT_TYPES.altre;
@@ -3849,6 +3940,7 @@
       }
       if (window.appState.currentScreen === 'timetable') renderTimetable();
       if (window.appState.currentScreen === 'home') renderHomeScreen();
+      if (window.appState.currentScreen === 'planner') renderPlanner();
     }
 
     // ---------- Modal del pla de sessió ----------
@@ -7203,8 +7295,531 @@
       reader.readAsText(e.target.files[0]);
     };
 
-    window.onload = function() {
+    // ================== NAVEGACIÓ PRINCIPAL (estil iDoceo) ==================
+
+    const APP_SCREENS = {
+      home: 'screenHome', classes: 'screenClasses', timetable: 'screenTimetable', planner: 'screenPlanner',
+      library: 'screenSdaLibrary', settings: 'screenSettings', class: 'screenClassWorkspace'
+    };
+
+    function showScreen(name) {
+      Object.entries(APP_SCREENS).forEach(([k, id]) => {
+        const el = document.getElementById(id);
+        if (el) el.classList.toggle('hidden', k !== name);
+      });
+      window.appState.currentScreen = name;
+      const navKey = name === 'class' ? 'classes' : name;
+      document.querySelectorAll('[data-nav]').forEach(b => b.classList.toggle('active', b.dataset.nav === navKey));
+      renderSidebarClasses();
+      window.scrollTo(0, 0);
+    }
+    window.showScreen = showScreen;
+
+    function groupDotClass(group) {
+      return getGroupPastelTheme(group).avatarBg;
+    }
+
+    function renderSidebarClasses() {
+      const box = document.getElementById('sidebarClassList');
+      if (!box) return;
+      const groups = window.appData.groups || {};
+      box.innerHTML = Object.keys(groups).map(g => `
+        <button onclick="enterClass('${g}')" class="side-class ${window.appState.currentScreen === 'class' && window.appData.activeGroupId === g ? 'active' : ''}">
+          <span class="w-3 h-3 rounded-full border border-black/10 shrink-0 ${groupDotClass(groups[g])}"></span>
+          <span class="truncate">${escapeHtml(groups[g].name)}</span>
+        </button>`).join('') + `
+        <button onclick="openNewGroupModal()" class="side-class text-zinc-400 hover:text-zinc-900"><i class="fa-solid fa-plus w-3 text-[10px]"></i><span>Nova classe</span></button>`;
+      const centre = document.getElementById('sidebarCentre');
+      if (centre) centre.textContent = getSettings().centre || 'Quadern LOMLOE';
+    }
+    window.renderSidebarClasses = renderSidebarClasses;
+
+    // --- Pantalles existents adaptades ---
+    window.goToHome = function() {
+      showScreen('home');
       renderHomeScreen();
+    };
+
+    window.goToClasses = function() {
+      showScreen('classes');
+      renderHomeScreen();
+      renderClassesScreen();
+    };
+
+    const _origGoToTimetable = window.goToTimetable;
+    window.goToTimetable = function() {
+      _origGoToTimetable();
+      showScreen('timetable');
+    };
+
+    const _origGoToLibrary = window.goToSdaLibrary;
+    window.goToSdaLibrary = function() {
+      _origGoToLibrary();
+      showScreen('library');
+    };
+
+    const _origEnterClass = window.enterClass;
+    window.enterClass = function(groupId) {
+      _origEnterClass(groupId);
+      showScreen('class');
+      updateClassHeader();
+      updateClassTabs(window.appState.currentView);
+    };
+
+    const _origSwitchView = window.switchView;
+    window.switchView = function(view) {
+      _origSwitchView(view);
+      if (['sda', 'trim', 'final'].includes(view)) window.appState.lastQuadernView = view;
+      if (['roster', 'report'].includes(view)) window.appState.lastAlumnesView = view;
+      updateClassTabs(view);
+    };
+
+    const _origRenderHome = window.renderHomeScreen;
+    window.renderHomeScreen = function() {
+      _origRenderHome();
+      const d = new Date();
+      const dateTxt = d.toLocaleDateString('ca-ES', { weekday: 'long', day: 'numeric', month: 'long' });
+      const lbl = document.getElementById('homeSchoolYearLabel');
+      if (lbl) lbl.textContent = `${dateTxt.charAt(0).toUpperCase() + dateTxt.slice(1)} · Curs ${getSchoolYearLabel()} · ${window.appState.currentTrim}${['', 'r', 'n', 'r'][window.appState.currentTrim]} trimestre`;
+      [1, 2, 3].forEach(n => {
+        const b = document.getElementById(`homeTrimBtn${n}`);
+        if (b) b.className = n === window.appState.currentTrim ? 'active' : '';
+      });
+      if (window.appState.currentScreen === 'classes') renderClassesScreen();
+      renderSidebarClasses();
+    };
+
+    // Refresc automàtic de les pantalles noves quan canvien les dades
+    const _origSaveToStorage = window.saveToStorage;
+    let shellRefreshTimer = null;
+    window.saveToStorage = function() {
+      _origSaveToStorage.apply(this, arguments);
+      clearTimeout(shellRefreshTimer);
+      shellRefreshTimer = setTimeout(() => {
+        renderSidebarClasses();
+        const s = window.appState.currentScreen;
+        if (s === 'classes') renderClassesScreen();
+        if (s === 'planner') renderPlanner();
+        if (s === 'settings') renderSettingsScreen();
+        if (s === 'class') updateClassHeader();
+      }, 60);
+    };
+
+    // --- Capçalera i pestanyes de la classe ---
+    function updateClassHeader() {
+      const group = getCurrentGroup();
+      if (!group) return;
+      document.getElementById('classTitleName').textContent = group.name;
+      document.getElementById('classTitleDot').className = `w-4 h-4 rounded-full shrink-0 border border-black/10 ${groupDotClass(group)}`;
+      const slots = getGroupTimetable(group).slice().sort((a, b) => a.day - b.day || timeToMin(a.start) - timeToMin(b.start));
+      const n = (group.students || []).length;
+      document.getElementById('classTitleSub').textContent = `${n} alumne${n === 1 ? '' : 's'}${slots.length ? ' · ' + slots.map(s => `${TT_DAYS.find(d => d.n === s.day).s} ${s.start}`).join(', ') : ''}`;
+      [1, 2, 3].forEach(t => {
+        const b = document.getElementById(`trimBtn${t}_class`);
+        if (b) b.className = t === window.appState.currentTrim ? 'active' : '';
+      });
+    }
+    window.updateClassHeader = updateClassHeader;
+
+    const _origSetTrim = window.setTrim;
+    window.setTrim = function(t) {
+      _origSetTrim(t);
+      [1, 2, 3].forEach(n => {
+        const b = document.getElementById(`trimBtn${n}_class`);
+        if (b) b.className = n === window.appState.currentTrim ? 'active' : '';
+      });
+    };
+
+    function updateClassTabs(view) {
+      const tab = ['sda', 'trim', 'final'].includes(view) ? 'quadern' : ['roster', 'report'].includes(view) ? 'alumnes' : view;
+      document.querySelectorAll('#classTabs .ctab').forEach(b => b.classList.toggle('active', b.dataset.tab === tab));
+      const seg = document.getElementById('classSubSeg');
+      const subs = tab === 'quadern'
+        ? [['sda', 'Per SdA'], ['trim', 'Resum trimestral'], ['final', 'Final de curs']]
+        : tab === 'alumnes' ? [['roster', 'Llista'], ['report', 'Butlletins']] : [];
+      seg.innerHTML = subs.map(([v, l]) => `<button onclick="switchView('${v}')" class="${v === view ? 'active' : ''}">${l}</button>`).join('');
+    }
+
+    // --- Pantalla Classes ---
+    if (!window.appState.classesView) {
+      try { window.appState.classesView = localStorage.getItem('EF_CLASSES_VIEW') || 'list'; } catch (e) { window.appState.classesView = 'list'; }
+    }
+
+    window.setClassesView = function(v) {
+      window.appState.classesView = v;
+      try { localStorage.setItem('EF_CLASSES_VIEW', v); } catch (e) {}
+      renderClassesScreen();
+    };
+
+    function getNextClassSlot(group, gId) {
+      const now = new Date();
+      const nowMin = now.getHours() * 60 + now.getMinutes();
+      const dates = getClassDates(group, gId, todayISO(), { count: 3, includeOff: false });
+      for (const d of dates) {
+        const dow = isoToDate(d.iso).getDay();
+        const slots = getGroupTimetable(group).filter(s => s.day === dow).sort((a, b) => timeToMin(a.start) - timeToMin(b.start));
+        for (const s of slots) {
+          if (d.iso === todayISO() && timeToMin(s.end) <= nowMin) continue;
+          if (getCancellation(s.id, d.iso, gId)) continue;
+          return { iso: d.iso, slot: s };
+        }
+      }
+      return null;
+    }
+
+    window.renderClassesScreen = function() {
+      const groups = window.appData.groups || {};
+      const keys = Object.keys(groups);
+      const view = window.appState.classesView;
+      const trim = window.appState.currentTrim;
+      document.querySelectorAll('#clsTrimSeg button').forEach(b => b.classList.toggle('active', b.dataset.t === String(trim)));
+      document.querySelectorAll('#clsViewSeg button').forEach(b => b.classList.toggle('active', b.dataset.v === view));
+      const totalSt = keys.reduce((a, g) => a + (groups[g].students || []).length, 0);
+      document.getElementById('homeClassesCount').textContent = `${keys.length} classe${keys.length === 1 ? '' : 's'} · ${totalSt} alumnes`;
+      document.getElementById('homeClassesGrid').classList.toggle('hidden', view !== 'mosaic');
+      const list = document.getElementById('classesList');
+      list.classList.toggle('hidden', view !== 'list');
+      if (view !== 'list') return;
+
+      if (!keys.length) {
+        list.innerHTML = `<div class="bg-white border border-dashed border-zinc-300 rounded-3xl p-10 text-center space-y-3">
+          <p class="text-base font-bold text-zinc-800">Crea la teva primera classe</p>
+          <button onclick="openNewGroupModal()" class="inline-flex items-center gap-1.5 bg-zinc-900 text-white text-sm font-semibold px-4 py-2 rounded-xl"><i class="fa-solid fa-plus text-xs"></i> Nova classe</button></div>`;
+        return;
+      }
+
+      const today = todayISO();
+      list.innerHTML = `<div class="bg-white border border-zinc-200 rounded-3xl overflow-hidden">
+        ${keys.map(gId => {
+          const g = groups[gId];
+          const s = getClassTrimSummary(g, trim);
+          const lvl = getLevel(s.avg);
+          const next = getNextClassSlot(g, gId);
+          const nextTxt = next ? `${next.iso === today ? 'Avui' : isoToDate(next.iso).toLocaleDateString('ca-ES', { weekday: 'short', day: 'numeric' })} ${next.slot.start}` : '';
+          const nextPlan = next ? getSessionPlan(g, next.iso) : null;
+          return `
+            <div class="cls-row" onclick="enterClass('${gId}')">
+              <span class="w-4 h-4 rounded-full border border-black/10 shrink-0 ${groupDotClass(g)}"></span>
+              <div class="flex-1 min-w-0">
+                <div class="text-lg font-bold text-zinc-900 truncate">${escapeHtml(g.name)}</div>
+                <div class="text-xs text-zinc-500 truncate">${(g.students || []).length} alumnes · ${s.sdaRows.length} SdA${s.sdaRows.length === 1 ? '' : 's'} al trimestre${s.naStudents.length ? ` · <span class="text-rose-600 font-semibold">${s.naStudents.length} amb NA</span>` : ''}</div>
+              </div>
+              <div class="hidden md:block w-44 shrink-0">
+                ${next ? `<div class="text-[11px] font-semibold text-zinc-500"><i class="fa-regular fa-clock mr-1 text-zinc-400"></i>${nextTxt}</div>
+                <div class="text-[11px] text-zinc-400 truncate">${planHasContent(nextPlan) ? escapeHtml(nextPlan.title || 'Planificada') : 'Sense planificar'}</div>` : '<div class="text-[11px] text-zinc-300">Sense horari</div>'}
+              </div>
+              <div class="hidden lg:block w-36 shrink-0">
+                <div class="flex items-center justify-between text-[10px] font-semibold text-zinc-400 mb-1"><span>Notes posades</span><span class="font-mono">${s.progressPct === null ? '—' : s.progressPct + '%'}</span></div>
+                ${progressBar(s.progressPct || 0)}
+              </div>
+              <div class="w-16 text-right shrink-0">
+                <span class="font-mono font-black text-sm text-zinc-900">${s.avg !== null ? s.avg.toFixed(2) : '—'}</span>
+                <div><span class="inline-flex px-1.5 py-0.5 rounded text-[10px] font-bold ring-1 ring-inset ${lvl.badge}">${lvl.code}</span></div>
+              </div>
+              <div class="flex items-center gap-0.5 shrink-0">
+                <button onclick="event.stopPropagation(); openEditGroupModal('${gId}')" title="Modificar" class="p-2 text-zinc-400 hover:text-zinc-900 rounded-lg hover:bg-zinc-100"><i class="fa-solid fa-pen text-xs"></i></button>
+                <button onclick="event.stopPropagation(); deleteGroup('${gId}')" title="Eliminar" class="p-2 text-zinc-300 hover:text-rose-600 rounded-lg hover:bg-rose-50"><i class="fa-regular fa-trash-can text-xs"></i></button>
+                <i class="fa-solid fa-chevron-right text-zinc-300 text-xs ml-1"></i>
+              </div>
+            </div>`;
+        }).join('')}
+      </div>`;
+    };
+
+    // --- Configuració ---
+    window.goToSettings = function() {
+      showScreen('settings');
+      renderSettingsScreen();
+    };
+
+    window.saveCentreSetting = function(v) {
+      getSettings().centre = v.trim();
+      saveToStorage();
+      if (window.syncWholeAppToCloud) window.syncWholeAppToCloud();
+    };
+
+    window.renderSettingsScreen = function() {
+      const inp = document.getElementById('setCentreInput');
+      if (document.activeElement !== inp) inp.value = getSettings().centre || '';
+      document.getElementById('setSchoolYear').textContent = getSchoolYearLabel();
+      const th = gradeThresholds;
+      document.getElementById('setThresholds').innerHTML = [
+        ['NA', `< ${th.epa}`, 'bg-rose-50 text-rose-700 border-rose-200'], ['EPA', `≥ ${th.epa}`, 'bg-amber-50 text-amber-700 border-amber-200'],
+        ['AS', `≥ ${th.as}`, 'bg-sky-50 text-sky-700 border-sky-200'], ['AN', `≥ ${th.an}`, 'bg-indigo-50 text-indigo-700 border-indigo-200'],
+        ['AE', `≥ ${th.ae}`, 'bg-emerald-50 text-emerald-700 border-emerald-200']
+      ].map(([c, v, cls]) => `<span class="text-xs font-bold px-2 py-1 rounded-lg border ${cls}">${c} <span class="font-mono font-semibold">${v}</span></span>`).join('');
+      const hols = getHolidays().slice().sort((a, b) => a.from.localeCompare(b.from)).filter(h => (h.to || h.from) >= todayISO());
+      document.getElementById('setHolidays').innerHTML = hols.length
+        ? `Propers festius: ${hols.slice(0, 4).map(h => `<b>${escapeHtml(h.label)}</b> (${isoToDate(h.from).toLocaleDateString('ca-ES', { day: 'numeric', month: 'short' })})`).join(', ')}${hols.length > 4 ? '…' : ''}`
+        : 'No hi ha festius propers.';
+      document.getElementById('setUserLabel').textContent = (document.getElementById('headerUserLabel') || {}).textContent || 'Docent';
+      document.getElementById('setCloudLabel').textContent = (document.getElementById('cloudStatusText') || {}).textContent || '';
+    };
+
+    // ================== PLANNER (per hores) ==================
+
+    if (!window.appState.plannerMode) {
+      try { window.appState.plannerMode = localStorage.getItem('EF_PLANNER_MODE') || 'week'; } catch (e) { window.appState.plannerMode = 'week'; }
+    }
+    if (!window.appState.plannerDate) window.appState.plannerDate = todayISO();
+
+    window.goToPlanner = function() {
+      showScreen('planner');
+      renderPlanner();
+    };
+
+    window.setPlannerMode = function(m) {
+      window.appState.plannerMode = m;
+      try { localStorage.setItem('EF_PLANNER_MODE', m); } catch (e) {}
+      renderPlanner();
+    };
+
+    window.movePlanner = function(dir) {
+      if (dir === 0) { window.appState.plannerDate = todayISO(); renderPlanner(); return; }
+      const d = isoToDate(window.appState.plannerDate);
+      if (window.appState.plannerMode === 'week') d.setDate(d.getDate() + 7 * dir);
+      else {
+        do { d.setDate(d.getDate() + dir); } while (d.getDay() === 0 || d.getDay() === 6);
+      }
+      window.appState.plannerDate = dateToISO(d);
+      renderPlanner();
+    };
+
+    window.selectPlannerClass = function(gId) {
+      window.appData.activeGroupId = gId;
+      saveToStorage();
+      renderPlanner();
+    };
+
+    function isoWeekNumber(date) {
+      const d = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
+      const day = d.getUTCDay() || 7;
+      d.setUTCDate(d.getUTCDate() + 4 - day);
+      const yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1));
+      return Math.ceil((((d - yearStart) / 86400000) + 1) / 7);
+    }
+
+    function mondayOf(iso) {
+      const d = isoToDate(iso);
+      const dow = d.getDay() || 7;
+      d.setDate(d.getDate() - dow + 1 + (dow >= 6 ? 7 : 0));
+      return d;
+    }
+
+    window.renderPlanner = function() {
+      const mode = window.appState.plannerMode;
+      document.querySelectorAll('#plannerModeSeg button').forEach(b => b.classList.toggle('active', b.dataset.m === mode));
+      const content = document.getElementById('plannerContent');
+      const byClass = document.getElementById('plannerByClass');
+      document.getElementById('plannerNav').classList.toggle('hidden', mode === 'class');
+      content.classList.toggle('hidden', mode === 'class');
+      byClass.classList.toggle('hidden', mode !== 'class');
+
+      if (mode === 'class') {
+        const groups = window.appData.groups || {};
+        if (!groups[window.appData.activeGroupId]) window.appData.activeGroupId = Object.keys(groups)[0];
+        document.getElementById('plannerSub').textContent = 'Properes sessions de cada classe';
+        document.getElementById('plannerClassChips').innerHTML = Object.keys(groups).map(g => `
+          <button onclick="selectPlannerClass('${g}')" class="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl border text-sm font-semibold transition ${g === window.appData.activeGroupId ? 'bg-zinc-900 text-white border-zinc-900' : 'bg-white text-zinc-700 border-zinc-200 hover:border-zinc-400'}">
+            <span class="w-2.5 h-2.5 rounded-full border border-black/10 ${groupDotClass(groups[g])}"></span>${escapeHtml(groups[g].name)}
+          </button>`).join('');
+        const v = document.getElementById('viewPlanif');
+        if (v) v.classList.remove('hidden');
+        if (Object.keys(groups).length) renderPlanifView();
+        return;
+      }
+
+      if (mode === 'day') renderPlannerDay(content);
+      else renderPlannerWeek(content);
+    };
+
+    function plannerEmptyState() {
+      return `
+        <div class="bg-white border border-dashed border-zinc-300 rounded-3xl p-10 text-center space-y-3">
+          <i class="fa-regular fa-calendar text-3xl text-zinc-300"></i>
+          <p class="text-base font-bold text-zinc-800">Primer afegeix les teves classes a l'horari</p>
+          <p class="text-sm text-zinc-500">El Planner fa servir l'horari per saber quan tens cada classe.</p>
+          <button onclick="goToTimetable()" class="inline-flex items-center gap-1.5 bg-zinc-900 text-white text-sm font-semibold px-4 py-2 rounded-xl"><i class="fa-regular fa-clock text-xs"></i> Anar a l'horari</button>
+        </div>`;
+    }
+
+    function plannerBlockInner(e, iso, compact) {
+      const g = e.group;
+      const p = getSessionPlan(g, iso);
+      const has = planHasContent(p);
+      return `
+        <div class="flex items-start justify-between gap-1">
+          <span class="text-[11px] font-extrabold truncate">${escapeHtml(g.name)}</span>
+          <span class="text-[10px] font-mono opacity-70 shrink-0">${e.start}–${e.end}</span>
+        </div>
+        ${has ? `<div class="text-[13px] font-bold leading-snug mt-0.5 text-zinc-900 ${compact ? 'truncate' : 'line-clamp-2'}">${escapeHtml(p.title || 'Sessió planificada')}</div>
+                 ${!compact && p.objectiu ? `<div class="text-[11px] text-zinc-600 mt-0.5 line-clamp-2">${escapeHtml(p.objectiu)}</div>` : ''}`
+              : `<div class="text-[12px] font-semibold mt-1 opacity-60"><i class="fa-solid fa-plus text-[9px] mr-1"></i>Planificar</div>`}`;
+    }
+
+    function renderPlannerWeek(content) {
+      const monday = mondayOf(window.appState.plannerDate);
+      const days = TT_DAYS.map((d, i) => {
+        const date = new Date(monday); date.setDate(monday.getDate() + i);
+        const iso = dateToISO(date);
+        return { ...d, iso, date, hol: getHoliday(iso) };
+      });
+      const fri = days[4].date;
+      document.getElementById('plannerSub').textContent = `${monday.getFullYear()} · Setmana ${isoWeekNumber(monday)} · ${monday.getDate()}–${fri.getDate()} ${fri.toLocaleDateString('ca-ES', { month: 'long' })}`;
+
+      const entries = getAllEntries();
+      if (!entries.length) { content.innerHTML = plannerEmptyState(); return; }
+
+      const todayIso = todayISO();
+      const now = new Date();
+      const nowMin = now.getHours() * 60 + now.getMinutes();
+      let minStart = Math.floor(Math.min(...entries.map(s => timeToMin(s.start))) / 60) * 60;
+      let maxEnd = Math.ceil(Math.max(...entries.map(s => timeToMin(s.end))) / 60) * 60;
+      const PX = 1.75, PAD = 10;
+      const height = (maxEnd - minStart) * PX + PAD * 2;
+      const yOf = m => (m - minStart) * PX + PAD;
+      const hours = [];
+      for (let m = minStart; m <= maxEnd; m += 60) hours.push(m);
+
+      // carrils per a solapaments
+      const lane = {};
+      TT_DAYS.forEach(d => {
+        const ds = entries.filter(s => s.day === d.n).sort((a, b) => timeToMin(a.start) - timeToMin(b.start));
+        const ends = [];
+        ds.forEach(s => {
+          let l = ends.findIndex(e => e <= timeToMin(s.start));
+          if (l === -1) { l = ends.length; ends.push(0); }
+          ends[l] = timeToMin(s.end);
+          lane[s.id] = { l };
+        });
+        ds.forEach(s => {
+          const ov = ds.filter(o => timeToMin(o.start) < timeToMin(s.end) && timeToMin(o.end) > timeToMin(s.start));
+          lane[s.id].n = Math.max(...ov.map(o => lane[o.id].l)) + 1;
+        });
+      });
+
+      const planned = days.reduce((acc, d) => acc + entries.filter(e => e.kind === 'class' && e.day === d.n && !d.hol && !getCancellation(e.id, d.iso, e.gId) && planHasContent(getSessionPlan(e.group, d.iso))).length, 0);
+      const totalCls = days.reduce((acc, d) => acc + entries.filter(e => e.kind === 'class' && e.day === d.n && !d.hol && !getCancellation(e.id, d.iso, e.gId)).length, 0);
+
+      content.innerHTML = `
+        <div class="text-xs text-zinc-500 mb-2"><b class="text-zinc-800">${planned} de ${totalCls}</b> sessions d'aquesta setmana planificades</div>
+        <div class="bg-white border border-zinc-200 rounded-3xl overflow-hidden">
+          <div class="grid" style="grid-template-columns: 56px repeat(5, minmax(0, 1fr))">
+            <div class="border-b border-zinc-200"></div>
+            ${days.map(d => `
+              <div class="py-3 text-center border-b border-l border-zinc-200 ${d.iso === todayIso ? 'bg-zinc-900 text-white' : d.hol ? 'bg-zinc-100 text-zinc-500' : ''}">
+                <div class="text-[13px] font-semibold ${d.iso === todayIso ? 'text-zinc-300' : 'text-zinc-500'}">${d.date.toLocaleDateString('ca-ES', { weekday: 'short' })} <span class="font-black ${d.iso === todayIso ? 'text-white' : 'text-zinc-900'}">${d.date.getDate()}</span></div>
+                <div class="text-[11px] ${d.iso === todayIso ? 'text-zinc-400' : 'text-zinc-400'}">${d.hol ? escapeHtml(d.hol.label) : d.date.toLocaleDateString('ca-ES', { month: 'long' })}</div>
+              </div>`).join('')}
+            <div class="relative" style="height:${height}px">
+              ${hours.map(m => `<div class="absolute right-2 text-[11px] font-mono text-zinc-400 -translate-y-1/2" style="top:${yOf(m)}px">${minToTime(m)}</div>`).join('')}
+            </div>
+            ${days.map(d => {
+              const ds = entries.filter(s => s.day === d.n);
+              return `
+                <div class="relative border-l border-zinc-200 ${d.iso === todayIso ? 'bg-zinc-50/70' : ''}" style="height:${height}px">
+                  ${hours.map(m => `<div class="absolute left-0 right-0 border-t border-dashed border-zinc-100" style="top:${yOf(m)}px"></div>`).join('')}
+                  ${d.hol ? `<div class="absolute inset-0 z-20" style="background:repeating-linear-gradient(135deg, rgba(228,228,231,.8) 0 8px, rgba(244,244,245,.8) 8px 16px)"></div>` : ''}
+                  ${d.iso === todayIso && nowMin > minStart && nowMin < maxEnd ? `<div class="absolute left-0 right-0 border-t-2 border-rose-500 z-10" style="top:${yOf(nowMin)}px"></div>` : ''}
+                  ${ds.map(e => {
+                    const top = yOf(timeToMin(e.start));
+                    const h = Math.max(26, (timeToMin(e.end) - timeToMin(e.start)) * PX - 4);
+                    const li = lane[e.id] || { l: 0, n: 1 };
+                    const pos = `top:${top + 2}px;height:${h}px;left:calc(${(li.l / li.n) * 100}% + 4px);width:calc(${100 / li.n}% - 8px)`;
+                    const cancel = getCancellation(e.id, d.iso, e.gId);
+                    if (e.kind === 'other') {
+                      const ty = OTHER_SLOT_TYPES[e.type] || OTHER_SLOT_TYPES.altre;
+                      return `<div class="absolute rounded-lg border border-dashed ${ty.cls} opacity-60 px-2 py-1 overflow-hidden ${cancel ? 'line-through' : ''}" style="${pos}">
+                        <div class="text-[11px] font-semibold truncate"><i class="fa-solid ${ty.icon} text-[9px] mr-1"></i>${escapeHtml(entryTitle(e))}</div>
+                        ${h > 36 ? `<div class="text-[10px] font-mono opacity-70">${e.start}–${e.end}</div>` : ''}
+                      </div>`;
+                    }
+                    const theme = getGroupPastelTheme(e.group);
+                    return `
+                      <div class="absolute rounded-xl border-l-4 border ${theme.badgeBg} ${cancel ? 'opacity-40' : ''} overflow-hidden group/pb" style="${pos}">
+                        <button onclick="openSessionPlanModal('${e.gId}','${d.iso}')" class="w-full h-full text-left px-2.5 py-1.5 bg-white/40 hover:bg-white/70 transition">
+                          ${cancel ? `<div class="text-[11px] font-extrabold line-through">${escapeHtml(e.group.name)}</div><div class="text-[10px] font-semibold"><i class="fa-solid fa-ban mr-0.5"></i>${escapeHtml(cancelReasonLabel(cancel))}</div>` : plannerBlockInner(e, d.iso, h < 70)}
+                        </button>
+                        ${!cancel ? `<button onclick="event.stopPropagation(); openDiariFor('${e.gId}','${d.iso}')" title="Passar llista" class="absolute bottom-1 right-1 w-7 h-7 rounded-lg bg-white/90 hover:bg-white text-zinc-600 opacity-0 group-hover/pb:opacity-100 transition"><i class="fa-solid fa-clipboard-check text-[10px]"></i></button>` : ''}
+                      </div>`;
+                  }).join('')}
+                </div>`;
+            }).join('')}
+          </div>
+        </div>`;
+    }
+
+    function renderPlannerDay(content) {
+      let iso = window.appState.plannerDate;
+      const dt = isoToDate(iso);
+      if (dt.getDay() === 0 || dt.getDay() === 6) { // cap de setmana → dilluns següent
+        const m = mondayOf(iso); iso = dateToISO(m); window.appState.plannerDate = iso;
+      }
+      const txt = formatLongDateCa(iso);
+      document.getElementById('plannerSub').textContent = `${txt}${iso === todayISO() ? ' · Avui' : ''}`;
+      const entries = getAllEntries();
+      if (!entries.length) { content.innerHTML = plannerEmptyState(); return; }
+      const dow = isoToDate(iso).getDay();
+      const ds = entries.filter(e => e.day === dow);
+      const hol = getHoliday(iso);
+      if (hol) {
+        content.innerHTML = `<div class="bg-zinc-100 border border-zinc-300 rounded-3xl p-10 text-center text-base font-bold text-zinc-600" style="background-image:repeating-linear-gradient(135deg, rgba(228,228,231,.7) 0 8px, transparent 8px 16px)"><i class="fa-regular fa-calendar-xmark mr-2"></i>${escapeHtml(hol.label)}</div>`;
+        return;
+      }
+      if (!ds.length) { content.innerHTML = `<div class="bg-white border border-zinc-200 rounded-3xl p-10 text-center text-sm text-zinc-400">Aquest dia no tens res a l'horari.</div>`; return; }
+
+      content.innerHTML = `<div class="space-y-3">${ds.map(e => {
+        const cancel = getCancellation(e.id, iso, e.gId);
+        if (e.kind === 'other') {
+          const ty = OTHER_SLOT_TYPES[e.type] || OTHER_SLOT_TYPES.altre;
+          return `
+            <div class="flex gap-4 items-center ${cancel ? 'opacity-50' : ''}">
+              <div class="w-16 shrink-0 text-right font-mono text-sm font-bold text-zinc-400">${e.start}</div>
+              <div class="flex-1 rounded-2xl border border-dashed ${ty.cls} px-4 py-2.5 text-sm font-semibold ${cancel ? 'line-through' : ''}"><i class="fa-solid ${ty.icon} text-xs mr-1.5"></i>${escapeHtml(entryTitle(e))} <span class="font-mono text-xs opacity-60 ml-1">${e.start}–${e.end}</span>${e.place ? `<span class="text-xs opacity-60 ml-2">${escapeHtml(e.place)}</span>` : ''}</div>
+            </div>`;
+        }
+        const g = e.group;
+        const p = getSessionPlan(g, iso);
+        const has = planHasContent(p);
+        const sda = has && (g.sdas || []).find(s => s.id === p.sdaId);
+        const theme = getGroupPastelTheme(g);
+        const session = g.sessions && g.sessions[iso];
+        return `
+          <div class="flex gap-4 ${cancel ? 'opacity-50' : ''}">
+            <div class="w-16 shrink-0 text-right pt-4">
+              <div class="font-mono text-lg font-black text-zinc-900 leading-none">${e.start}</div>
+              <div class="font-mono text-xs text-zinc-400 mt-1">${e.end}</div>
+            </div>
+            <div class="flex-1 min-w-0 bg-white border border-zinc-200 rounded-2xl overflow-hidden flex">
+              <div class="w-2 shrink-0 ${theme.avatarBg}"></div>
+              <div class="flex-1 min-w-0 p-4 space-y-2">
+                <div class="flex flex-wrap items-start justify-between gap-2">
+                  <div class="min-w-0">
+                    <div class="flex items-center gap-2">
+                      <span class="text-sm font-black font-mono px-2 py-0.5 rounded-lg border ${theme.badgeBg}">${escapeHtml(g.name)}</span>
+                      ${e.place ? `<span class="text-xs text-zinc-400"><i class="fa-solid fa-location-dot mr-0.5"></i>${escapeHtml(e.place)}</span>` : ''}
+                      ${session ? '<span class="text-xs font-bold text-emerald-700"><i class="fa-solid fa-check mr-0.5"></i>llista passada</span>' : ''}
+                    </div>
+                    ${cancel ? `<div class="text-base font-bold text-zinc-600 mt-2"><i class="fa-solid fa-ban mr-1"></i>No es fa · ${escapeHtml(cancelReasonLabel(cancel))}</div>`
+                      : has ? `<div class="text-lg font-bold text-zinc-900 mt-2">${escapeHtml(p.title || 'Sessió planificada')}</div>${sda ? `<div class="text-xs font-semibold text-amber-800">${escapeHtml(sda.title)}</div>` : ''}`
+                      : `<div class="text-base font-semibold text-zinc-400 mt-2">Sense planificar</div>`}
+                  </div>
+                  ${!cancel ? `<div class="flex gap-2 shrink-0">
+                    <button onclick="openSessionPlanModal('${e.gId}','${iso}')" class="btn-sec"><i class="fa-solid ${has ? 'fa-pen' : 'fa-plus'}"></i>${has ? 'Editar' : 'Planificar'}</button>
+                    <button onclick="openDiariFor('${e.gId}','${iso}')" class="btn-sec"><i class="fa-solid fa-clipboard-check"></i>Diari</button>
+                  </div>` : ''}
+                </div>
+                ${has && !cancel ? `
+                  ${p.objectiu ? `<div class="text-sm text-zinc-700"><i class="fa-solid fa-bullseye text-zinc-400 mr-1.5"></i>${escapeHtml(p.objectiu)}</div>` : ''}
+                  <div class="space-y-1">${planPartsSummary(p)}</div>
+                  ${p.material ? `<div class="text-xs text-zinc-500"><i class="fa-solid fa-box-open text-zinc-400 mr-1"></i>${escapeHtml(p.material)}</div>` : ''}` : ''}
+              </div>
+            </div>
+          </div>`;
+      }).join('')}</div>`;
+    }
+
+    window.onload = function() {
       goToHome();
     };
   </script>
