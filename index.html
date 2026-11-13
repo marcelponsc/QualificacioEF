@@ -512,6 +512,11 @@
         </div>
       </div>
 
+      <div id="libScopeTabs" class="inline-flex rounded-2xl bg-zinc-100 p-1 text-sm font-semibold border border-zinc-200">
+        <button data-scope="mine" onclick="setLibFilter('scope','mine')" class="px-4 py-2 rounded-xl transition"><i class="fa-regular fa-folder mr-1.5"></i>Les meves</button>
+        <button data-scope="dept" onclick="setLibFilter('scope','dept')" class="px-4 py-2 rounded-xl transition"><i class="fa-solid fa-people-group mr-1.5"></i>Departament <span id="libDeptCount" class="font-mono text-xs opacity-60"></span></button>
+      </div>
+
       <!-- Filtres -->
       <div class="bg-white border border-zinc-200/90 rounded-2xl p-3 shadow-subtle flex flex-col md:flex-row md:items-center gap-2.5">
         <div class="relative flex-1">
@@ -1204,6 +1209,13 @@
             </div>
             <div id="modalTargetGroupsContainer" class="flex flex-wrap gap-2 pt-1"></div>
           </div>
+          <label id="modalShareWrap" class="flex items-start gap-3 bg-indigo-50/60 border border-indigo-200 rounded-2xl p-3 cursor-pointer">
+            <input type="checkbox" id="modalSdaShare" class="mt-0.5 w-4 h-4 accent-indigo-600 shrink-0">
+            <span class="text-xs">
+              <span class="font-bold text-indigo-900"><i class="fa-solid fa-people-group mr-1"></i>Compartir a la biblioteca del departament</span>
+              <span id="modalShareHint" class="block text-[11px] text-indigo-700/80 mt-0.5">La veuran i la podran copiar els altres professors d'EF. No es comparteixen alumnes ni notes.</span>
+            </span>
+          </label>
           <p class="text-[11px] text-zinc-400"><i class="fa-regular fa-lightbulb mr-1"></i>Als camps de text llargs, <b>cada línia es converteix en un punt</b> a la fitxa impresa. Pots posar <b>**paraules**</b> entre dos asteriscs per destacar-les.</p>
         </div>
 
@@ -1871,10 +1883,45 @@
       document.getElementById('headerUserLabel').textContent = label;
       document.getElementById('headerUserLabel').title = user.email || '';
       setCloudStatus('syncing');
+      window.currentUserInfo = { uid: user.uid, name: user.displayName || (user.email || '').split('@')[0] || 'Docent', email: user.email || '' };
       await migrateLegacyDataIfNeeded(user.uid);
       try { localStorage.removeItem('EF_AUTH_USER'); } catch (e) {}
       connectToUserCloud(currentAuthUser);
+      subscribeSharedLibrary();
     }
+
+    // ===== BIBLIOTECA COMUNA DEL DEPARTAMENT =====
+    // shared/sdaLibrary/{clau} = { title, trim, trimWeight, competences, plan, author: {uid, name, email}, updatedAt }
+    window.sharedSdaLibrary = {};
+    window.sharedLibStatus = 'off'; // off | loading | ok | denied
+    let sharedLibSubscribed = false;
+    function subscribeSharedLibrary() {
+      if (sharedLibSubscribed || !fbDb) return;
+      sharedLibSubscribed = true;
+      window.sharedLibStatus = 'loading';
+      onValue(ref(fbDb, 'shared/sdaLibrary'), snap => {
+        window.sharedSdaLibrary = snap.val() || {};
+        window.sharedLibStatus = 'ok';
+        if (window.onSharedLibraryChange) window.onSharedLibraryChange();
+      }, err => {
+        console.warn('Biblioteca comuna:', err);
+        window.sharedLibStatus = 'denied';
+        sharedLibSubscribed = false;
+        if (window.onSharedLibraryChange) window.onSharedLibraryChange();
+      });
+    }
+    window.subscribeSharedLibrary = subscribeSharedLibrary;
+
+    window.publishSharedSda = function(key, payload) {
+      if (!currentAuthUser || !fbDb) return Promise.reject(new Error('no-auth'));
+      const data = JSON.parse(JSON.stringify({ ...payload, author: window.currentUserInfo, updatedAt: Date.now() }));
+      return set(ref(fbDb, `shared/sdaLibrary/${key}`), data);
+    };
+
+    window.unpublishSharedSda = function(key) {
+      if (!currentAuthUser || !fbDb) return Promise.reject(new Error('no-auth'));
+      return set(ref(fbDb, `shared/sdaLibrary/${key}`), null);
+    };
 
     function connectToUserCloud(userKey) {
       const userBranchRef = ref(fbDb, `users/${userKey}/quadern_data`);
@@ -4716,8 +4763,8 @@
     // ================== BIBLIOTECA DE SdAs ==================
 
     const libFilters = (() => {
-      try { return { trim: 'all', group: 'all', ce: 'all', view: 'cards', ...JSON.parse(localStorage.getItem('EF_LIB_FILTERS') || '{}') }; }
-      catch (e) { return { trim: 'all', group: 'all', ce: 'all', view: 'cards' }; }
+      try { return { trim: 'all', group: 'all', ce: 'all', view: 'cards', scope: 'mine', ...JSON.parse(localStorage.getItem('EF_LIB_FILTERS') || '{}') }; }
+      catch (e) { return { trim: 'all', group: 'all', ce: 'all', view: 'cards', scope: 'mine' }; }
     })();
 
     // Agrupa les còpies d'una mateixa SdA a diferents classes (mateix títol i trimestre)
@@ -4786,6 +4833,7 @@
       window.appState.editingSdaOriginal = null;
       document.getElementById('modalSdaTitle').value = `${item.title} (còpia)`;
       document.getElementById('modalDeleteSdaBtn').classList.add('hidden');
+      setModalShareBox(false, null);
       renderModalTargetGroups(null, item.trim);
       document.getElementById('modalSdaTitle').focus();
     };
@@ -4793,6 +4841,7 @@
     window.libDelete = function(key) {
       const item = findLibraryItem(key);
       if (!item) return;
+      const sharedCopy = item.copies.find(c => c.sda.shared && c.sda.shareKey);
       let gradedStudents = 0;
       item.copies.forEach(c => {
         const g = (c.group.grades && c.group.grades[c.sda.id]) || {};
@@ -4802,6 +4851,9 @@
       const msg = `Vols eliminar la SdA "${item.title}" de ${item.copies.length === 1 ? 'la classe' : 'les classes'} ${classes}?` +
         (gradedStudents ? `\n\nATENCIÓ: s'esborraran les notes de ${gradedStudents} alumne${gradedStudents === 1 ? '' : 's'}.` : '');
       if (!confirm(msg)) return;
+      if (sharedCopy && window.unpublishSharedSda && confirm('Aquesta SdA està compartida a la biblioteca del departament.\n\nVols retirar-la també de la biblioteca? (Si dius que no, els companys la continuaran veient.)')) {
+        window.unpublishSharedSda(sharedCopy.sda.shareKey).catch(() => {});
+      }
       item.copies.forEach(c => {
         c.group.sdas = (c.group.sdas || []).filter(s => s.id !== c.sda.id);
         if (c.group.grades) delete c.group.grades[c.sda.id];
@@ -4814,6 +4866,136 @@
     window.openSdaFromLibraryNew = function() {
       openSdaModal(true);
     };
+
+    // ---------- Biblioteca del departament ----------
+    window.onSharedLibraryChange = function() {
+      if (window.appState.currentScreen === 'library') renderSdaLibrary();
+      if (posterSdaRef && posterSdaRef.shared) renderSdaPoster();
+    };
+
+    function sharedItems() {
+      const lib = window.sharedSdaLibrary || {};
+      return Object.keys(lib).map(k => ({ key: k, ...lib[k], competences: lib[k].competences || {}, plan: lib[k].plan || {} }))
+        .filter(i => i.title);
+    }
+
+    window.libSharedPoster = function(key) {
+      if (!(window.sharedSdaLibrary || {})[key]) return;
+      posterSdaRef = { shared: key };
+      document.getElementById('sdaPosterOverlay').classList.remove('hidden');
+      document.body.classList.add('poster-mode');
+      document.body.style.overflow = 'hidden';
+      renderSdaPoster();
+    };
+
+    window.libImportShared = function(key) {
+      const it = (window.sharedSdaLibrary || {})[key];
+      if (!it) return;
+      if (!Object.keys(window.appData.groups || {}).length) { alert('Primer crea alguna classe.'); return; }
+      openSdaModalWithData({ title: it.title, trim: it.trim, trimWeight: it.trimWeight, competences: it.competences || {}, plan: it.plan || {} },
+        { key, author: (it.author && it.author.name) || '', at: Date.now() });
+    };
+
+    window.libUnshare = function(key) {
+      const it = (window.sharedSdaLibrary || {})[key];
+      if (!it) return;
+      if (!confirm(`Retirar "${it.title}" de la biblioteca del departament?\n\nLa teva SdA i les còpies que hagin fet els companys no s'esborren.`)) return;
+      window.unpublishSharedSda(key).catch(err => alert('No s\'ha pogut retirar: ' + (err && err.message || err)));
+      Object.values(window.appData.groups || {}).forEach(g => (g.sdas || []).forEach(sd => { if (sd.shareKey === key) delete sd.shared; }));
+      saveToStorage();
+      if (window.syncWholeAppToCloud) window.syncWholeAppToCloud();
+    };
+
+    function renderDeptLibrary(content) {
+      const st = window.sharedLibStatus;
+      const me = window.currentUserInfo;
+      const msgBox = (icon, title, text, extra = '') => `
+        <div class="bg-white border border-dashed border-zinc-300 rounded-3xl p-8 text-center space-y-2 max-w-xl mx-auto">
+          <i class="${icon} text-3xl text-zinc-300"></i>
+          <p class="text-sm font-bold text-zinc-800">${title}</p>
+          <p class="text-xs text-zinc-500">${text}</p>${extra}
+        </div>`;
+      document.getElementById('libSummary').textContent = 'SdA compartides pels professors del departament';
+      if (!me) { content.innerHTML = msgBox('fa-solid fa-lock', 'Cal entrar amb Google', 'La biblioteca del departament només funciona amb la sessió iniciada.'); return; }
+      if (st === 'denied') {
+        content.innerHTML = msgBox('fa-solid fa-shield-halved', 'Falta activar la biblioteca a Firebase',
+          'Cal afegir la secció <b>shared</b> a les regles de Firebase (Realtime Database → Reglas). Només s\'ha de fer una vegada.',
+          `<button onclick="window.subscribeSharedLibrary && window.subscribeSharedLibrary(); renderSdaLibrary();" class="mt-2 text-xs font-bold px-3 py-2 rounded-xl bg-zinc-900 text-white">Tornar-ho a provar</button>`);
+        return;
+      }
+      if (st !== 'ok') { content.innerHTML = msgBox('fa-solid fa-spinner fa-spin', 'Carregant la biblioteca…', ''); return; }
+
+      const term = (document.getElementById('libSearch').value || '').toLowerCase().trim();
+      const all = sharedItems();
+      const items = all.filter(i =>
+        (libFilters.trim === 'all' || String(i.trim) === String(libFilters.trim)) &&
+        (libFilters.ce === 'all' || (i.competences[libFilters.ce] && i.competences[libFilters.ce].active)) &&
+        (!term || term.split(/\s+/).every(t => [i.title, i.plan.pregunta, i.plan.repte, i.plan.producteTitol, i.author && i.author.name, ...(i.plan.sabers || []).map(x => x.text)].filter(Boolean).join(' ').toLowerCase().includes(t)))
+      ).sort((a, b) => (a.trim - b.trim) || String(a.title).localeCompare(String(b.title)));
+      document.getElementById('libSummary').textContent = `${all.length} SdA compartides al departament · ${all.filter(i => me && i.author && i.author.uid === me.uid).length} són teves`;
+
+      if (!all.length) {
+        content.innerHTML = msgBox('fa-solid fa-people-group', 'Encara no hi ha cap SdA compartida',
+          'Obre una SdA teva, marca <b>Compartir a la biblioteca del departament</b> i desa-la.');
+        return;
+      }
+      if (!items.length) { content.innerHTML = `<div class="bg-white border border-zinc-200 rounded-2xl p-8 text-center text-xs text-zinc-400">Cap SdA coincideix amb els filtres.</div>`; return; }
+
+      // Quines ja tinc copiades
+      const mineKeys = new Set();
+      Object.values(window.appData.groups || {}).forEach(g => (g.sdas || []).forEach(sd => { if (sd.shareKey) mineKeys.add(sd.shareKey); if (sd.sharedFrom && sd.sharedFrom.key) mineKeys.add(sd.sharedFrom.key); }));
+
+      const ceChips = i => OFFICIAL_CES.filter(ce => i.competences[ce.id] && i.competences[ce.id].active).map(ce => {
+        const t = CE_COLOR_THEMES[ce.id];
+        return `<span class="inline-flex items-center gap-1 text-[10px] px-2 py-0.5 rounded-md font-bold border ${t.header}" title="${escapeHtml(ce.name)}">${ce.id}<span class="font-mono font-semibold opacity-70">${i.competences[ce.id].weight || 0}%</span></span>`;
+      }).join('');
+
+      content.innerHTML = [1, 2, 3].map(t => {
+        const list = items.filter(i => Number(i.trim) === t);
+        if (!list.length) return '';
+        return `
+          <div class="space-y-3 mb-6">
+            <h3 class="text-xs font-bold text-zinc-500 uppercase tracking-wider">${t}${['', 'r', 'n', 'r'][t]} trimestre <span class="font-mono font-normal text-zinc-400 ml-1">${list.length}</span></h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+              ${list.map(i => {
+                const mine = me && i.author && i.author.uid === me.uid;
+                const have = mineKeys.has(i.key);
+                const ses = getSdaTotalSessions(i.plan);
+                const nActs = (i.plan.activitats || []).length;
+                const k = escapeHtml(JSON.stringify(i.key));
+                const date = i.updatedAt ? new Date(i.updatedAt).toLocaleDateString('ca-ES', { day: 'numeric', month: 'short' }) : '';
+                return `
+                  <div class="bg-white border ${mine ? 'border-indigo-200' : 'border-zinc-200/90'} rounded-3xl shadow-card hover:shadow-float transition flex flex-col overflow-hidden">
+                    <div class="bg-[#1d2a5c] text-white px-4 py-3.5">
+                      <div class="flex items-center justify-between text-[10px] font-bold uppercase tracking-[0.18em] text-indigo-200">
+                        <span>SdA · T${i.trim}</span>
+                        <span class="font-mono tracking-normal text-zinc-300 normal-case">${ses ? ses + ' sessions' : ''}</span>
+                      </div>
+                      <div class="text-[15px] font-extrabold leading-tight mt-1.5" style="font-family:'Roboto Slab',Georgia,serif">${escapeHtml(i.title)}</div>
+                      ${i.plan.pregunta ? `<div class="text-[11px] text-zinc-300 mt-1 italic">${escapeHtml(i.plan.pregunta)}</div>` : ''}
+                    </div>
+                    <div class="p-4 space-y-3 flex-1 flex flex-col">
+                      <div class="flex items-center gap-2 text-[11px] text-zinc-600">
+                        <span class="w-6 h-6 rounded-full ${mine ? 'bg-indigo-100 text-indigo-700' : 'bg-zinc-100 text-zinc-600'} flex items-center justify-center text-[10px] font-black">${escapeHtml(((i.author && i.author.name) || '?').split(/\s+/).slice(0, 2).map(w => w[0]).join('').toUpperCase())}</span>
+                        <span class="font-semibold">${mine ? 'Tu' : escapeHtml((i.author && i.author.name) || 'Desconegut')}</span>
+                        ${date ? `<span class="text-zinc-400">· ${date}</span>` : ''}
+                        ${have && !mine ? '<span class="ml-auto text-[10px] font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 rounded-md px-1.5 py-0.5"><i class="fa-solid fa-check mr-0.5"></i>La tens</span>' : ''}
+                      </div>
+                      <div class="flex flex-wrap gap-1">${ceChips(i) || '<span class="text-[11px] text-zinc-400 italic">Sense competències</span>'}</div>
+                      ${i.plan.producteTitol ? `<div class="text-[11px] text-zinc-600"><span class="font-bold text-zinc-400 uppercase tracking-wider text-[9px] mr-1">Producte</span>${escapeHtml(i.plan.producteTitol)}</div>` : ''}
+                      ${nActs ? `<div class="text-[11px] text-zinc-500">${nActs} activitats programades</div>` : ''}
+                      <div class="mt-auto pt-2 border-t border-zinc-100 flex flex-wrap gap-1">
+                        <button onclick='libSharedPoster(${k})' class="inline-flex items-center gap-1 px-2 py-1.5 rounded-lg text-[11px] font-semibold text-amber-800 bg-amber-50 hover:bg-amber-100"><i class="fa-solid fa-print text-[10px]"></i>Fitxa</button>
+                        ${mine ? '' : `<button onclick='libImportShared(${k})' class="inline-flex items-center gap-1 px-2 py-1.5 rounded-lg text-[11px] font-bold text-white bg-zinc-900 hover:bg-zinc-800"><i class="fa-solid fa-download text-[10px]"></i>Afegir a les meves classes</button>`}
+                        ${mine ? `<button onclick='libUnshare(${k})' class="inline-flex items-center gap-1 px-2 py-1.5 rounded-lg text-[11px] font-semibold text-zinc-400 hover:text-rose-600 hover:bg-rose-50"><i class="fa-solid fa-link-slash text-[10px]"></i>Deixar de compartir</button>` : ''}
+                      </div>
+                    </div>
+                  </div>`;
+              }).join('')}
+            </div>
+          </div>`;
+      }).join('');
+    }
 
     function libMatchesSearch(item, term) {
       if (!term) return true;
@@ -4831,6 +5013,15 @@
       if (!content) return;
       const groups = window.appData.groups || {};
       const all = collectLibrarySdas();
+
+      document.querySelectorAll('#libScopeTabs [data-scope]').forEach(b => {
+        b.className = `px-4 py-2 rounded-xl transition ${b.dataset.scope === libFilters.scope ? 'bg-white text-zinc-900 shadow-subtle' : 'text-zinc-500 hover:text-zinc-900'}`;
+      });
+      const nShared = Object.keys(window.sharedSdaLibrary || {}).length;
+      document.getElementById('libDeptCount').textContent = window.sharedLibStatus === 'ok' ? nShared : '';
+      document.getElementById('libGroupFilter').classList.toggle('hidden', libFilters.scope === 'dept');
+      document.querySelectorAll('#screenSdaLibrary [data-view]').forEach(b => b.parentElement.classList.toggle('hidden', libFilters.scope === 'dept'));
+      if (libFilters.scope === 'dept') { renderDeptLibrary(content); return; }
 
       // Opcions dels selectors
       const groupSel = document.getElementById('libGroupFilter');
@@ -4955,7 +5146,7 @@
                   <div class="bg-white border border-zinc-200/90 rounded-3xl shadow-card hover:shadow-float transition flex flex-col overflow-hidden">
                     <div class="bg-[#0e1834] text-white px-4 py-3.5">
                       <div class="flex items-center justify-between text-[10px] font-bold uppercase tracking-[0.18em] text-[#e8ad3c]">
-                        <span>SdA · T${item.trim}</span>
+                        <span>SdA · T${item.trim}${item.copies.some(c => c.sda.shared) ? ' <span class="ml-1 normal-case tracking-normal text-indigo-200" title="Compartida a la biblioteca del departament"><i class="fa-solid fa-people-group"></i> compartida</span>' : ''}</span>
                         <span class="font-mono tracking-normal text-zinc-300 normal-case">${ses ? ses + ' sessions' : 'sessions per definir'}</span>
                       </div>
                       <div class="text-[15px] font-extrabold leading-tight mt-1.5" style="font-family:'Roboto Slab',Georgia,serif">${escapeHtml(item.title)}</div>
@@ -6026,10 +6217,48 @@
         if (delBtn) delBtn.classList.remove('hidden');
       }
 
+      window.appState.modalSourceSda = isNew ? null : sda;
+      window.appState.modalSharedFrom = null;
+      setModalShareBox(!isNew && !!sda.shared, sda);
+
       document.getElementById('modalSdaTitle').value = sda.title || '';
       document.getElementById('modalSdaTrim').value = sda.trim || window.appState.currentTrim;
       document.getElementById('modalSdaTrimWeight').value = sda.trimWeight !== undefined ? sda.trimWeight : 50;
       renderModalTargetGroups(isNew ? null : sda.title, sda.trim || window.appState.currentTrim);
+      renderModalCeCards(sda);
+      fillPlanEditor(sda.plan);
+      switchSdaModalTab('basics');
+      document.getElementById('sdaModal').classList.remove('hidden');
+    };
+
+    function setModalShareBox(checked, sda) {
+      const box = document.getElementById('modalSdaShare');
+      const hint = document.getElementById('modalShareHint');
+      if (!box) return;
+      const logged = !!window.currentUserInfo;
+      box.checked = logged && checked;
+      box.disabled = !logged;
+      const from = sda && sda.sharedFrom;
+      hint.innerHTML = !logged
+        ? 'Cal haver entrat amb Google per compartir.'
+        : from ? `Copiada de la biblioteca (autor: <b>${escapeHtml(from.author || '—')}</b>). Si la comparteixes, es publicarà com una SdA nova teva.`
+        : 'La veuran i la podran copiar els altres professors d\'EF. No es comparteixen alumnes ni notes.';
+    }
+
+    // Obrir l'editor amb una SdA que no és de cap classe (de la biblioteca comuna)
+    window.openSdaModalWithData = function(data, sharedFrom = null) {
+      const sda = JSON.parse(JSON.stringify(data));
+      window.appState.editingSdaId = null;
+      window.appState.editingSdaOriginal = null;
+      window.appState.modalSourceSda = sda;
+      window.appState.modalSharedFrom = sharedFrom;
+      const delBtn = document.getElementById('modalDeleteSdaBtn');
+      if (delBtn) delBtn.classList.add('hidden');
+      setModalShareBox(false, { sharedFrom });
+      document.getElementById('modalSdaTitle').value = sda.title || '';
+      document.getElementById('modalSdaTrim').value = sda.trim || window.appState.currentTrim;
+      document.getElementById('modalSdaTrimWeight').value = sda.trimWeight !== undefined ? sda.trimWeight : 50;
+      renderModalTargetGroups(null, sda.trim || window.appState.currentTrim);
       renderModalCeCards(sda);
       fillPlanEditor(sda.plan);
       switchSdaModalTab('basics');
@@ -6238,6 +6467,23 @@
         }
       });
 
+      // Conservem les rúbriques (de CE i d'OA) que ja tenia la SdA d'origen
+      const srcSda = window.appState.modalSourceSda;
+      if (srcSda && srcSda.competences) {
+        Object.keys(competences).forEach(ceId => {
+          const sc = srcSda.competences[ceId];
+          if (!sc) return;
+          if (sc.rubric) competences[ceId].rubric = JSON.parse(JSON.stringify(sc.rubric));
+          competences[ceId].oas.forEach(oa => {
+            const so = (sc.oas || []).find(o => o.id === oa.id);
+            if (so && so.rubric) oa.rubric = JSON.parse(JSON.stringify(so.rubric));
+          });
+        });
+      }
+      const shareBox = document.getElementById('modalSdaShare');
+      const shareWanted = !!(shareBox && shareBox.checked && !shareBox.disabled);
+      const savedCopies = [];
+
       const isEditing = !!window.appState.editingSdaId;
       const sdaIdToUse = isEditing ? window.appState.editingSdaId : ('sda_' + Date.now() + '_' + Math.floor(Math.random() * 1000));
 
@@ -6273,9 +6519,28 @@
           targetSda.plan = JSON.parse(JSON.stringify(plan));
         }
 
+        if (!isEditing && window.appState.modalSharedFrom) targetSda.sharedFrom = window.appState.modalSharedFrom;
         if (gId === window.appData.activeGroupId) activeGroupSdaId = targetSda.id;
-        if (!centreChanged && window.syncGroupEntityToCloud) window.syncGroupEntityToCloud(gId);
+        savedCopies.push({ gId, sda: targetSda });
       });
+
+      // Biblioteca del departament: publicar, actualitzar o retirar
+      const prevKey = (savedCopies.find(c => c.sda.shareKey) || {}).sda;
+      let shareKey = prevKey ? prevKey.shareKey : null;
+      const wasShared = savedCopies.some(c => c.sda.shared);
+      if (shareWanted) {
+        if (!shareKey) shareKey = 'sh_' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+        savedCopies.forEach(c => { c.sda.shareKey = shareKey; c.sda.shared = true; });
+        const ref0 = savedCopies[0] ? savedCopies[0].sda : null;
+        if (ref0 && window.publishSharedSda) {
+          window.publishSharedSda(shareKey, { title: ref0.title, trim: ref0.trim, trimWeight: ref0.trimWeight, competences: ref0.competences, plan: ref0.plan || {} })
+            .catch(err => alert('No s\'ha pogut publicar a la biblioteca del departament.' + (String(err && err.message || '').includes('permission') || String(err && err.code || '').includes('PERMISSION') ? '\n\nCal actualitzar les regles de Firebase (Realtime Database → Reglas).' : '')));
+        }
+      } else if (wasShared) {
+        savedCopies.forEach(c => { delete c.sda.shared; });
+        if (shareKey && window.unpublishSharedSda) window.unpublishSharedSda(shareKey).catch(() => {});
+      }
+      savedCopies.forEach(c => { if (!centreChanged && window.syncGroupEntityToCloud) window.syncGroupEntityToCloud(c.gId); });
 
       saveToStorage();
       if (centreChanged && window.syncWholeAppToCloud) window.syncWholeAppToCloud();
@@ -7085,6 +7350,7 @@
 
     window.editSdaFromPoster = function() {
       if (!posterSdaRef) return;
+      if (posterSdaRef.shared) { const k = posterSdaRef.shared; closeSdaPoster(); libImportShared(k); return; }
       const sdaId = posterSdaRef.sdaId;
       closeSdaPoster();
       document.getElementById('sdaSelect').value = sdaId;
@@ -7153,8 +7419,10 @@
 
     function renderSdaPoster() {
       if (!posterSdaRef) return;
-      const group = window.appData.groups[posterSdaRef.groupId];
-      const sda = group && (group.sdas || []).find(s => s.id === posterSdaRef.sdaId);
+      const sharedSrc = posterSdaRef.shared ? (window.sharedSdaLibrary || {})[posterSdaRef.shared] : null;
+      const group = sharedSrc ? null : window.appData.groups[posterSdaRef.groupId];
+      const sda = sharedSrc ? { id: '__shared', ...sharedSrc, competences: sharedSrc.competences || {}, plan: sharedSrc.plan || {} }
+        : group && (group.sdas || []).find(s => s.id === posterSdaRef.sdaId);
       if (!sda) { closeSdaPoster(); return; }
       applyPosterOptions();
 
@@ -7163,7 +7431,7 @@
       const comps = sda.competences || {};
       const activeCes = OFFICIAL_CES.filter(ce => comps[ce.id] && comps[ce.id].active);
       const totalSessions = getSdaTotalSessions(plan);
-      const groupsNames = getGroupsSharingSda(sda);
+      const groupsNames = sharedSrc ? [] : getGroupsSharingSda(sda);
       const nCriteris = activeCes.reduce((acc, ce) => acc + (comps[ce.id].curricularCriteria || '').split(/[-,\s]+/).filter(Boolean).length, 0);
       const nOas = activeCes.reduce((acc, ce) => acc + (comps[ce.id].oas || []).length, 0);
       const empty = (txt = 'Pendent de completar') => `<p class="sp-empty">${txt}</p>`;
@@ -7176,7 +7444,7 @@
       const titleHtml = titleWords.length > 2
         ? `${escapeHtml(titleWords.slice(0, splitAt).join(' '))} <span class="gold">${escapeHtml(titleWords.slice(splitAt).join(' '))}</span>`
         : `<span class="gold">${escapeHtml(titleWords.join(' '))}</span>`;
-      const subParts = ['Educació Física', plan.nivell, groupsNames.length ? groupsNames.join(', ') : group.name, settings.centre, 'Decret 175/2022 (LOMLOE)'].filter(Boolean);
+      const subParts = ['Educació Física', plan.nivell, groupsNames.length ? groupsNames.join(', ') : (group ? group.name : (sda.author && sda.author.name ? 'Autor/a: ' + sda.author.name : '')), settings.centre, 'Decret 175/2022 (LOMLOE)'].filter(Boolean);
       const dates = [formatDateCa(plan.dataInici), formatDateCa(plan.dataFi)].filter(Boolean).join(' – ');
 
       // Flux superior
