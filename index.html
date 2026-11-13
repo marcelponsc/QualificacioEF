@@ -434,6 +434,30 @@
         </div>
 
         <div class="set-card">
+          <h3 class="set-title"><i class="fa-solid fa-hand-holding-heart"></i>Actitud a classe</h3>
+          <p class="text-xs text-zinc-500 mb-3">L'actitud és sempre un <b>percentatge fix</b> de la nota de cada trimestre (i, per tant, de la final). La resta surt de les SdA. La valores al Diari, a <b>Avaluar</b>, amb els botons NA–AE; els <b>+ / −</b> de passar llista hi sumen o resten.</p>
+          <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs">
+            <label class="font-semibold text-zinc-600">Actitud
+              <select id="setAttEnabled" onchange="saveAttitudeRule()" class="mt-1 w-full border border-zinc-200 rounded-xl p-2 font-semibold bg-white outline-none">
+                <option value="on">Compta</option><option value="off">No compta</option>
+              </select>
+            </label>
+            <label class="font-semibold text-zinc-600">% de la nota
+              <input type="number" id="setAttWeight" min="0" max="100" step="5" onchange="saveAttitudeRule()" class="mt-1 w-full border border-zinc-200 rounded-xl p-2 font-mono font-bold outline-none">
+            </label>
+            <label class="font-semibold text-zinc-600">Cada + / − val
+              <input type="number" id="setAttStep" min="0" max="4" step="0.05" onchange="saveAttitudeRule()" class="mt-1 w-full border border-zinc-200 rounded-xl p-2 font-mono font-bold outline-none">
+            </label>
+            <label class="font-semibold text-zinc-600">Parteix de
+              <select id="setAttBase" onchange="saveAttitudeRule()" class="mt-1 w-full border border-zinc-200 rounded-xl p-2 font-semibold bg-white outline-none">
+                <option>NA</option><option>EPA</option><option>AS</option><option>AN</option><option>AE</option>
+              </select>
+            </label>
+          </div>
+          <p id="setAttExample" class="text-[11px] text-zinc-400 mt-2"></p>
+        </div>
+
+        <div class="set-card">
           <h3 class="set-title"><i class="fa-regular fa-calendar-xmark"></i>Calendari</h3>
           <div id="setHolidays" class="text-xs text-zinc-600 mb-3"></div>
           <div class="flex flex-wrap gap-2">
@@ -1731,6 +1755,20 @@
       }
     }
 
+    const fbConfigAuthDomain = "quadern-ef.firebaseapp.com";
+
+    // Navegador integrat d'una altra app (Instagram, Gmail, WhatsApp, Teams...)
+    function isInAppBrowser() {
+      const ua = navigator.userAgent || '';
+      return /FBAN|FBAV|Instagram|Line\/|GSA\/|Teams|LinkedInApp|Snapchat|Twitter|MicroMessenger|; wv\)/i.test(ua);
+    }
+
+    function openInBrowserMessage() {
+      return `Aquest navegador no deixa obrir la finestra de Google.<br>
+        Obre l'app directament a <b>Safari</b> o <b>Chrome</b> (no des d'un enllaç dins d'una altra app).
+        <button onclick="navigator.clipboard && navigator.clipboard.writeText(location.origin + location.pathname).then(() => { this.textContent = 'Enllaç copiat ✓'; })" class="mt-2 block mx-auto bg-white border border-rose-300 rounded-lg px-3 py-1.5 text-rose-700 font-bold">Copiar l'enllaç</button>`;
+    }
+
     function showAuthError(msg) {
       const errBox = document.getElementById('authErrorMsg');
       errBox.innerHTML = msg;
@@ -1760,7 +1798,13 @@
         await signInWithPopup(fbAuth, provider);
       } catch (err) {
         if (err && (err.code === 'auth/popup-blocked' || err.code === 'auth/operation-not-supported-in-this-environment')) {
-          try { await signInWithRedirect(fbAuth, provider); return; } catch (e2) { showAuthError(authErrorMessage(e2)); return; }
+          // La redirecció només és fiable si l'app és al mateix domini que Firebase.
+          // A Vercel/GitHub, Safari (i els navegadors integrats d'altres apps) la trenquen.
+          if (location.hostname === fbConfigAuthDomain) {
+            try { await signInWithRedirect(fbAuth, provider); return; } catch (e2) { showAuthError(authErrorMessage(e2)); return; }
+          }
+          showAuthError(openInBrowserMessage());
+          return;
         }
         showAuthError(authErrorMessage(err));
       }
@@ -1772,7 +1816,8 @@
     };
 
     function checkActiveSession() {
-      getRedirectResult(fbAuth).catch(err => showAuthError(authErrorMessage(err)));
+      if (location.hostname === fbConfigAuthDomain) getRedirectResult(fbAuth).catch(err => showAuthError(authErrorMessage(err)));
+      if (isInAppBrowser()) setTimeout(() => showAuthError(openInBrowserMessage()), 300);
       onAuthStateChanged(fbAuth, user => {
         if (user) loginUserSession(user);
         else document.getElementById('loginOverlay').classList.remove('hidden');
@@ -2852,6 +2897,7 @@
       if (!rec.pos) delete rec.pos;
       if (!rec.neg) delete rec.neg;
       if (!rec.obs) delete rec.obs;
+      if (!rec.act) delete rec.act;
       if (Object.keys(rec).length) session.records[stId] = rec;
       else delete session.records[stId];
       persistSession(iso, rerender);
@@ -3107,7 +3153,9 @@
       const counter = (n, label, cls) => `<div class="flex-1 min-w-[70px] rounded-xl border ${cls} px-2 py-1.5 text-center"><div class="text-lg font-black font-mono leading-none">${n}</div><div class="text-[10px] font-semibold mt-0.5">${label}</div></div>`;
 
       const minP = getMinPractice(group);
-      const task = evalCols.length && window.appState.diariTask === 'avaluar' ? 'avaluar' : 'llista';
+      const attOn = getAttitudeRule().enabled;
+      const canEval = evalCols.length > 0 || attOn;
+      const task = canEval && window.appState.diariTask === 'avaluar' ? 'avaluar' : 'llista';
       const rows = task === 'avaluar' ? renderDiariEvalRows(group, session, sda, evalCols, students) : students.map((st, idx) => {
         const r = getRecord(session, st.id);
         const a = r.a || 'P';
@@ -3194,14 +3242,14 @@
           </div>
         </div>
 
-        ${evalCols.length ? `
+        ${canEval ? `
           <div class="flex flex-wrap items-center gap-2">
             <div class="seg !text-sm">
               <button onclick="setDiariTask('llista')" class="${task === 'llista' ? 'active' : ''}"><i class="fa-solid fa-clipboard-check mr-1.5"></i>Passar llista</button>
-              <button onclick="setDiariTask('avaluar')" class="${task === 'avaluar' ? 'active' : ''}"><i class="fa-solid fa-pen-to-square mr-1.5"></i>Avaluar (${evalCols.length})</button>
+              <button onclick="setDiariTask('avaluar')" class="${task === 'avaluar' ? 'active' : ''}"><i class="fa-solid fa-pen-to-square mr-1.5"></i>Avaluar (${[evalCols.length ? evalCols.length : '', attOn ? 'actitud' : ''].filter(Boolean).join(' + ')})</button>
             </div>
           </div>
-          ${task === 'avaluar' ? renderDiariEvalHeader(sda, evalCols) : ''}` : ''}
+          ${task === 'avaluar' && evalCols.length ? renderDiariEvalHeader(sda, evalCols) : ''}` : ''}
         <div class="bg-white border border-zinc-200 rounded-2xl shadow-card overflow-hidden divide-y divide-zinc-100">
           ${rows || '<div class="p-6 text-center text-xs text-zinc-400">Cap alumne coincideix amb la cerca.</div>'}
         </div>
@@ -5295,7 +5343,85 @@
       return c > 0 ? sum / c : null;
     }
 
+    // ===== ACTITUD: percentatge fix de la nota =====
+    function getAttitudeRule() {
+      const s = (window.appData && window.appData.settings) || {};
+      const r = s.attitudeRule || {};
+      return {
+        enabled: r.enabled !== false,
+        weight: r.weight !== undefined ? r.weight : 10,
+        step: r.step !== undefined ? r.step : 0.25,
+        base: r.base || 'AN'
+      };
+    }
+    window.getAttitudeRule = getAttitudeRule;
+
+    function attitudeMax() { return Math.max(gradeThresholds.ae, 4); }
+
+    // Hi ha alguna dada d'actitud en aquest grup i trimestre? (si no, l'actitud no compta)
+    function groupHasAttitudeData(group, trimNum) {
+      const ov = group.attitudeOverride && group.attitudeOverride[trimNum];
+      if (ov && Object.keys(ov).length) return true;
+      return Object.values(group.sessions || {}).some(s => s && s.trim === trimNum &&
+        Object.values(s.records || {}).some(r => r && (r.act || r.pos || r.neg)));
+    }
+
+    // Detall de l'actitud d'un alumne en un trimestre
+    function getStudentAttitudeInfo(group, stId, trimNum) {
+      const rule = getAttitudeRule();
+      const info = { value: null, avg: null, n: 0, pos: 0, neg: 0, override: null, auto: null };
+      if (!rule.enabled || !group) return info;
+      const ov = group.attitudeOverride && group.attitudeOverride[trimNum] ? group.attitudeOverride[trimNum][stId] : undefined;
+      let sum = 0;
+      Object.values(group.sessions || {}).forEach(s => {
+        if (!s || s.trim !== trimNum) return;
+        const r = (s.records && s.records[stId]) || {};
+        const a = r.a || 'P';
+        if (a === 'F' || a === 'FJ') return;
+        if (r.act && levelValue(r.act) !== undefined) { sum += levelValue(r.act); info.n++; }
+        info.pos += r.pos || 0;
+        info.neg += r.neg || 0;
+      });
+      if (info.n) info.avg = sum / info.n;
+      if (groupHasAttitudeData(group, trimNum)) {
+        const start = info.avg !== null ? info.avg : levelValue(rule.base);
+        const v = start + (info.pos - info.neg) * rule.step;
+        info.auto = Math.round(Math.max(0, Math.min(attitudeMax(), v)) * 100) / 100;
+      }
+      if (ov !== undefined && ov !== null && ov !== '' && !isNaN(parseFloat(ov))) info.override = parseFloat(ov);
+      info.value = info.override !== null ? info.override : info.auto;
+      return info;
+    }
+    window.getStudentAttitudeInfo = getStudentAttitudeInfo;
+
+    function getStudentAttitudeTrim(group, stId, trimNum) {
+      return getStudentAttitudeInfo(group, stId, trimNum).value;
+    }
+
+    // Mitjana de l'actitud dels trimestres que en tenen
+    function getStudentAttitudeCourse(group, stId) {
+      const vals = [1, 2, 3].map(t => getStudentAttitudeTrim(group, stId, t)).filter(v => v !== null);
+      return vals.length ? vals.reduce((a, b) => a + b, 0) / vals.length : null;
+    }
+
+    function mixWithAttitude(comp, att) {
+      if (comp === null || comp === undefined) return null;
+      const rule = getAttitudeRule();
+      if (!rule.enabled || att === null || att === undefined || !rule.weight) return comp;
+      const w = Math.max(0, Math.min(100, rule.weight)) / 100;
+      return comp * (1 - w) + att * w;
+    }
+
+    // Nota del trimestre: part competencial (SdA) + actitud
     function getStudentTrimScoreByTrim(stId, trimNum, group = null) {
+      const curGroup = group || getCurrentGroup();
+      if (isStudentPenalized(curGroup, trimNum, stId)) return PENALTY_SCORE;
+      const comp = getStudentTrimCompScore(stId, trimNum, curGroup);
+      return mixWithAttitude(comp, getStudentAttitudeTrim(curGroup, stId, trimNum));
+    }
+
+    // Només la part competencial (mitjana ponderada de les SdA)
+    function getStudentTrimCompScore(stId, trimNum, group = null) {
       const curGroup = group || getCurrentGroup();
       if (isStudentPenalized(curGroup, trimNum, stId)) return PENALTY_SCORE;
 
@@ -5341,7 +5467,8 @@
             activeWeight += w;
           }
         });
-        return activeWeight > 0 ? (totalWeighted * 100) / activeWeight : null;
+        const comp = activeWeight > 0 ? (totalWeighted * 100) / activeWeight : null;
+        return mixWithAttitude(comp, getStudentAttitudeCourse(curGroup, stId));
       }
     }
 
@@ -6226,6 +6353,13 @@
         </th>`;
       });
 
+      const attRule = getAttitudeRule();
+      if (attRule.enabled) {
+        headHtml += `<th class="py-2.5 px-2 text-center border-l border-zinc-800" title="Mitjana de l'actitud del Diari (botons NA–AE i +/−). Escriu una nota per substituir-la.">
+          <div class="font-bold text-violet-300"><i class="fa-solid fa-hand-holding-heart mr-1"></i>Actitud</div>
+          <div class="text-[10px] text-zinc-400 font-mono">${attRule.weight}% de la nota</div>
+        </th>`;
+      }
       headHtml += `<th class="py-3 px-4 text-center border-l-2 border-zinc-700 bg-zinc-950 font-bold text-white uppercase tracking-wider text-xs">Qualificació Trimestre</th></tr>`;
       thead.innerHTML = headHtml;
 
@@ -6283,17 +6417,53 @@
           </td>`;
         });
 
+        let attInfo = null;
+        if (attRule.enabled) {
+          attInfo = getStudentAttitudeInfo(curGroup, st.id, window.appState.currentTrim);
+          const shown = attInfo.value;
+          const aLvl = getLevel(shown);
+          rowsHtml += `<td class="py-2 px-2 text-center border-l border-zinc-100 bg-violet-50/30">
+            <input type="text" inputmode="decimal" value="${attInfo.override !== null ? attInfo.override : ''}" placeholder="${attInfo.auto !== null ? attInfo.auto.toFixed(2) : '—'}"
+              onfocus="this.select()" onchange="setAttitudeOverride(${st.id}, this.value)"
+              title="${attInfo.n ? attInfo.n + ' valoracions' : 'Sense valoracions'}${attInfo.pos || attInfo.neg ? ' · +' + attInfo.pos + ' / −' + attInfo.neg : ''}${attInfo.override !== null ? ' · Nota posada a mà (esborra-la per tornar a l\'automàtica)' : ''}"
+              class="w-14 h-8 text-center rounded-lg font-mono text-xs font-bold outline-none border ${attInfo.override !== null ? 'border-violet-400 bg-white text-violet-800' : 'border-zinc-200 bg-white/70 placeholder:text-zinc-700'} focus:ring-2 focus:ring-violet-500">
+            <div class="mt-0.5 flex items-center justify-center gap-1">
+              <span class="inline-flex items-center text-[9px] px-1 rounded font-semibold ${aLvl.badge}">${aLvl.code}</span>
+              ${attInfo.n || attInfo.pos || attInfo.neg ? `<span class="text-[9px] font-mono text-zinc-400">${attInfo.n}v${attInfo.pos || attInfo.neg ? ` +${attInfo.pos}/−${attInfo.neg}` : ''}</span>` : ''}
+            </div>
+          </td>`;
+        }
+
         const overallTrimScore = getStudentTrimScore(st.id);
         const overallLvl = getLevel(overallTrimScore);
+        const compScore = getStudentTrimCompScore(st.id, window.appState.currentTrim, curGroup);
 
         rowsHtml += `<td class="py-2 px-4 text-center border-l-2 border-zinc-800 ${isPenalized ? 'bg-rose-100/50' : 'bg-zinc-50/70'} font-bold">
           <div class="text-sm font-black font-mono ${isPenalized ? 'text-rose-700' : 'text-zinc-950'}">${overallTrimScore !== null ? overallTrimScore.toFixed(2) : '<span class="text-zinc-300 font-normal">—</span>'}</div>
           <span class="inline-flex items-center mt-0.5 text-[10px] px-2.5 py-0.5 rounded font-bold ring-1 ring-inset ${overallLvl.badge}">${overallLvl.code}</span>
+          ${!isPenalized && attInfo && attInfo.value !== null && compScore !== null ? `<div class="text-[9px] font-mono font-normal text-zinc-400 mt-0.5" title="Part competencial · actitud">SdA ${compScore.toFixed(2)} · Act. ${attInfo.value.toFixed(2)}</div>` : ''}
         </td></tr>`;
       });
 
       tbody.innerHTML = rowsHtml;
     }
+
+    window.setAttitudeOverride = function(stId, raw) {
+      const group = getCurrentGroup();
+      const t = window.appState.currentTrim;
+      if (!group.attitudeOverride) group.attitudeOverride = {};
+      if (!group.attitudeOverride[t]) group.attitudeOverride[t] = {};
+      const v = String(raw).replace(',', '.').trim();
+      if (v === '') delete group.attitudeOverride[t][stId];
+      else {
+        const n = parseFloat(v);
+        if (isNaN(n) || n < 0 || n > attitudeMax()) { alert(`La nota d'actitud ha d'anar de 0 a ${attitudeMax()}.`); renderTrimView(); return; }
+        group.attitudeOverride[t][stId] = Math.round(n * 100) / 100;
+      }
+      saveToStorage();
+      if (window.syncGroupEntityToCloud) window.syncGroupEntityToCloud(window.appData.activeGroupId);
+      renderTrimView();
+    };
 
     window.updateSdaTrimWeight = function(sdaId, newWeight) {
       const curGroup = getCurrentGroup();
@@ -7463,6 +7633,7 @@
         `Nota final (${methodLabel})`, 'Nivell final',
         'Mín. pràctica no assolit',
         'Sessions', 'Faltes', 'Faltes just.', 'Retards', 'No fa pràctica', 'Sense roba', '% pràctica (curs)', 'Actitud +', 'Actitud -',
+        'Actitud T1', 'Actitud T2', 'Actitud T3',
         'Observacions',
         'Grup'
       ];
@@ -7483,6 +7654,7 @@
           txt(penalizedTrims),
           ...(() => { const a = getStudentAttendanceStats(curGroup, st.id, null);
             return [a.total, a.F, a.FJ, a.R, a.NP, a.SR, num(a.pct), a.pos, a.neg]; })(),
+          ...[1, 2, 3].map(t => num(getStudentAttitudeTrim(curGroup, st.id, t))),
           txt(obs.replace(/\r?\n/g, ' ')),
           txt(curGroup.name)
         ].join(';');
@@ -8125,13 +8297,18 @@
     }
 
     // Files del mode Avaluar
+    window.diariSetAttitudeLevel = function(stId, code) {
+      updateRecord(stId, rec => { rec.act = rec.act === code ? null : code; });
+    };
+
     function renderDiariEvalRows(group, session, sda, evalCols, students) {
       const mode = window.appState.diariGradeInput;
+      const attRule = getAttitudeRule();
       return students.map((st, idx) => {
         const r = getRecord(session, st.id);
         const a = r.a || 'P';
         const absent = a === 'F' || a === 'FJ';
-        const g = (group.grades && group.grades[sda.id] && group.grades[sda.id][st.id]) || {};
+        const g = (sda && group.grades && group.grades[sda.id] && group.grades[sda.id][st.id]) || {};
         const cells = evalCols.map((o, ci) => {
           const v = g[o.key];
           const has = v !== undefined && v !== null && v !== '';
@@ -8152,7 +8329,13 @@
                 class="h-10 min-w-[40px] px-1.5 rounded-lg border text-[11px] font-black transition ${code === c ? LEVEL_ON[c] : 'bg-white text-zinc-400 border-zinc-200 hover:border-zinc-400'}">${c}</button>`).join('')}
             </div>
           </div>`;
-        }).join('');
+        }).join('') + (attRule.enabled ? `<div class="flex flex-col gap-0.5 ${absent ? 'opacity-30 pointer-events-none' : ''} ${evalCols.length ? 'lg:pl-3 lg:border-l lg:border-zinc-200' : ''}">
+            <span class="text-[9px] font-bold text-violet-500 leading-none"><i class="fa-solid fa-hand-holding-heart mr-0.5"></i>ACTITUD${r.pos || r.neg ? ` <span class="font-mono text-zinc-400">+${r.pos || 0}/−${r.neg || 0}</span>` : ''}</span>
+            <div class="flex gap-0.5">
+              ${LEVEL_CODES.map(c => `<button onclick="diariSetAttitudeLevel(${st.id}, '${c}')" title="Actitud d'avui: ${c} · ${LEVEL_NAMES[c]}"
+                class="h-10 min-w-[40px] px-1.5 rounded-lg border text-[11px] font-black transition ${r.act === c ? LEVEL_ON[c] : 'bg-white text-zinc-400 border-zinc-200 hover:border-zinc-400'}">${c}</button>`).join('')}
+            </div>
+          </div>` : '');
         return `
           <div class="px-3 py-2.5 flex flex-col lg:flex-row lg:items-center gap-2 ${absent ? 'bg-rose-50/40' : ''}">
             <div class="flex items-center gap-2 min-w-0 lg:w-56 shrink-0">
@@ -8315,16 +8498,17 @@
               <h3 class="text-xs font-bold text-zinc-500 uppercase tracking-wider">Per trimestre</h3>
               <div class="bg-white border border-zinc-200 rounded-2xl overflow-hidden">
                 <table class="w-full text-xs text-center">
-                  <thead class="bg-zinc-50 text-zinc-500 text-[10px]"><tr><th class="py-2 px-2 text-left">Trim.</th><th>Ses.</th><th>F</th><th>R</th><th>Roba</th><th>No pr.</th><th>% pràct.</th><th>Nota</th></tr></thead>
+                  <thead class="bg-zinc-50 text-zinc-500 text-[10px]"><tr><th class="py-2 px-2 text-left">Trim.</th><th>Ses.</th><th>F</th><th>R</th><th>Roba</th><th>No pr.</th><th>% pràct.</th>${getAttitudeRule().enabled ? '<th>Actitud</th>' : ''}<th>Nota</th></tr></thead>
                   <tbody class="font-mono">
                     ${trims.map(({ t, s }, k) => `<tr class="border-t border-zinc-100">
                       <td class="py-2 px-2 text-left font-sans font-semibold text-zinc-700">${t}${['', 'r', 'n', 'r'][t]}</td>
                       <td>${s.total}</td><td class="${s.F ? 'text-rose-600 font-bold' : 'text-zinc-300'}">${s.F}</td><td class="${s.R ? 'text-amber-600 font-bold' : 'text-zinc-300'}">${s.R}</td>
                       <td class="${s.SR ? 'text-orange-600 font-bold' : 'text-zinc-300'}">${s.SR}</td><td class="${s.NP ? 'text-rose-600 font-bold' : 'text-zinc-300'}">${s.NP}</td>
                       <td>${practicePctBadge(s.pct, min)}</td>
+                      ${getAttitudeRule().enabled ? (() => { const v = getStudentAttitudeTrim(group, st.id, t); return `<td class="text-violet-700">${v !== null ? v.toFixed(2) : '—'}</td>`; })() : ''}
                       <td class="font-bold">${trimScores[k] !== null ? trimScores[k].toFixed(2) : '—'}</td>
                     </tr>`).join('')}
-                    <tr class="border-t border-zinc-200 bg-zinc-50 font-bold"><td class="py-2 px-2 text-left font-sans">Curs</td><td>${course.total}</td><td>${course.F}</td><td>${course.R}</td><td>${course.SR}</td><td>${course.NP}</td><td>${practicePctBadge(course.pct, min)}</td><td>${finalScore !== null ? finalScore.toFixed(2) : '—'}</td></tr>
+                    <tr class="border-t border-zinc-200 bg-zinc-50 font-bold"><td class="py-2 px-2 text-left font-sans">Curs</td><td>${course.total}</td><td>${course.F}</td><td>${course.R}</td><td>${course.SR}</td><td>${course.NP}</td><td>${practicePctBadge(course.pct, min)}</td>${getAttitudeRule().enabled ? (() => { const v = getStudentAttitudeCourse(group, st.id); return `<td class="text-violet-700">${v !== null ? v.toFixed(2) : '—'}</td>`; })() : ''}<td>${finalScore !== null ? finalScore.toFixed(2) : '—'}</td></tr>
                   </tbody>
                 </table>
               </div>
@@ -8595,7 +8779,32 @@
       if (window.syncWholeAppToCloud) window.syncWholeAppToCloud();
     };
 
+    window.saveAttitudeRule = function() {
+      const s = getSettings();
+      s.attitudeRule = {
+        enabled: document.getElementById('setAttEnabled').value === 'on',
+        weight: Math.max(0, Math.min(100, parseFloat(document.getElementById('setAttWeight').value) || 0)),
+        step: Math.max(0, Math.min(4, parseFloat(document.getElementById('setAttStep').value) || 0)),
+        base: document.getElementById('setAttBase').value || 'AN'
+      };
+      saveToStorage();
+      if (window.syncWholeAppToCloud) window.syncWholeAppToCloud();
+      renderSettingsScreen();
+    };
+
+    function renderAttitudeSettings() {
+      const ar = getAttitudeRule();
+      document.getElementById('setAttEnabled').value = ar.enabled ? 'on' : 'off';
+      document.getElementById('setAttWeight').value = ar.weight;
+      document.getElementById('setAttStep').value = ar.step;
+      document.getElementById('setAttBase').value = ar.base;
+      document.getElementById('setAttExample').innerHTML = ar.enabled
+        ? `Exemple: SdA 3,00 i actitud 2,00 → <b>${(3 * (1 - ar.weight / 100) + 2 * ar.weight / 100).toFixed(2)}</b> (${100 - ar.weight}% SdA + ${ar.weight}% actitud). Qui no té valoracions parteix de <b>${ar.base}</b> (${levelValue(ar.base)}) i se li apliquen els +/−. A la pestanya Trimestre pots posar l'actitud a mà.`
+        : 'Ara l\'actitud no compta: la nota surt només de les SdA.';
+    }
+
     window.renderSettingsScreen = function() {
+      renderAttitudeSettings();
       const rr = getRobaRule();
       const ceSel = document.getElementById('setRobaCe');
       ceSel.innerHTML = `<option value="off">No restar nota</option>` + OFFICIAL_CES.map(c => `<option value="${c.id}">${c.id} · ${c.short}</option>`).join('');
