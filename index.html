@@ -1648,6 +1648,12 @@
             <div id="idoSymbols" class="flex flex-wrap gap-2"></div>
           </div>
 
+          <div id="idoRubricWrap" class="hidden">
+            <div class="font-bold text-zinc-800 text-[11px] uppercase tracking-wider mb-1">Rúbriques diàries → actitud i roba</div>
+            <p class="text-[11px] text-zinc-500 mb-2">He trobat rúbriques amb data. Tria què és cada criteri i quant val cada descripció. L'actitud del dia serà la <b>mitjana</b> dels criteris d'actitud.</p>
+            <div id="idoRubric" class="space-y-2"></div>
+          </div>
+
           <div>
             <div class="flex items-center justify-between mb-1.5">
               <span class="font-bold text-zinc-800 text-[11px] uppercase tracking-wider">Alumnes</span>
@@ -5424,7 +5430,8 @@
         const r = (s.records && s.records[stId]) || {};
         const a = r.a || 'P';
         if (a === 'F' || a === 'FJ') return;
-        if (r.act && levelValue(r.act) !== undefined) { sum += levelValue(r.act); info.n++; }
+        const av = typeof r.act === 'number' ? r.act : (r.act ? levelValue(r.act) : undefined);
+        if (av !== undefined && av !== null && !isNaN(av)) { sum += av; info.n++; }
         info.pos += r.pos || 0;
         info.neg += r.neg || 0;
       });
@@ -7934,6 +7941,45 @@
         attCols.push({ ci, iso, title: String(h).replace(/\s+/g, ' ').trim() });
       });
 
+      // Rúbriques diàries: columna amb data i valors tipus "3.60/4", seguida de columnes de criteri amb text
+      const rubricRe = /^\s*\d+(?:[.,]\d+)?\s*\/\s*\d+/;
+      const rubrics = [];
+      header.forEach((h, ci) => {
+        const m = String(h).match(dateRe);
+        if (!m || ci === 0) return;
+        const vals = body.map(r => (r[ci] || '').trim()).filter(Boolean);
+        if (!vals.length || vals.filter(v => rubricRe.test(v)).length / vals.length < 0.6) return;
+        const dd = parseInt(m[1]), mm = parseInt(m[2]);
+        let yy = m[3] ? parseInt(m[3]) : (mm >= 8 ? startYear : startYear + 1);
+        if (yy < 100) yy += 2000;
+        const iso = `${yy}-${String(mm).padStart(2, '0')}-${String(dd).padStart(2, '0')}`;
+        const crit = [];
+        for (let k = ci + 1; k < header.length; k++) {
+          if (dateRe.test(String(header[k]))) break;
+          const cv = body.map(r => (r[k] || '').trim()).filter(Boolean);
+          if (cv.length && cv.filter(v => /^[\d.,\s%\/]+$/.test(v)).length / cv.length > 0.5) break; // columna de notes
+          const name = String(header[k]).split('\n')[0].trim();
+          if (!name) break;
+          if (!cv.length) continue; // columna buida: no és un criteri útil
+          crit.push({ ci: k, name });
+        }
+        if (crit.length) rubrics.push({ ci, iso, crit });
+      });
+      // Criteris únics i descripcions, amb la nota mitjana de la rúbrica on surten (per ordenar-les)
+      const criteria = {};
+      rubrics.forEach(rb => rb.crit.forEach(c => {
+        if (!criteria[c.name]) criteria[c.name] = { name: c.name, descs: {} };
+        body.forEach(r => {
+          const d = (r[c.ci] || '').trim();
+          if (!d) return;
+          const tm = String(r[rb.ci] || '').match(/([\d.,]+)\s*\/\s*([\d.,]+)/);
+          const tot = tm ? parseFloat(tm[1].replace(',', '.')) / parseFloat(tm[2].replace(',', '.')) : null;
+          const e = criteria[c.name].descs[d] || (criteria[c.name].descs[d] = { n: 0, sum: 0, cnt: 0 });
+          e.n++;
+          if (tot !== null && !isNaN(tot)) { e.sum += tot; e.cnt++; }
+        });
+      }));
+
       const symbols = {};
       body.forEach(r => attCols.forEach(c => {
         const v = (r[c.ci] || '').trim();
@@ -7946,7 +7992,9 @@
         rows: body,
         attCols,
         dates: Array.from(new Set(attCols.map(c => c.iso))).sort(),
-        symbols
+        symbols,
+        rubrics,
+        criteria
       };
     }
 
@@ -8019,6 +8067,7 @@
       if (tm) document.getElementById('idoTrim').value = tm[1];
       idoState.symbolMap = {};
       Object.keys(parsed.symbols).forEach(s => { idoState.symbolMap[s] = guessSymbolCode(s); });
+      guessRubricMaps(parsed);
       if (!parsed.attCols.length) {
         idoStatus('<i class="fa-solid fa-triangle-exclamation mr-1"></i>No he trobat cap columna d\'assistència amb dates en aquest full.', 'rose');
         document.getElementById('idoStatus').classList.remove('hidden');
@@ -8032,6 +8081,69 @@
       document.getElementById('idoImportBtn').classList.remove('hidden');
       renderIdoceoPreview();
     };
+
+    // Proposta inicial: quin criteri és roba i quant val cada descripció
+    function guessRubricMaps(parsed) {
+      idoState.critRole = {};
+      idoState.descVal = {};
+      Object.values(parsed.criteria || {}).forEach(c => {
+        const isRoba = /equipament|material|roba|indument|vestimenta|uniforme|higiene/i.test(c.name);
+        idoState.critRole[c.name] = isRoba ? 'roba' : 'act';
+        const descs = Object.keys(c.descs).sort((a, b) => {
+          const A = c.descs[a], B = c.descs[b];
+          return (B.cnt ? B.sum / B.cnt : 0) - (A.cnt ? A.sum / A.cnt : 0);
+        });
+        idoState.descVal[c.name] = {};
+        descs.forEach((d, i) => {
+          if (isRoba) {
+            const bad = /^no\b|no porta|no duu|sense|oblid|falta/i.test(d);
+            const good = !bad && /porta|duu|adequat|correcte|sí/i.test(d);
+            idoState.descVal[c.name][d] = bad ? 'SR' : good ? 'OK' : (i === 0 ? 'OK' : 'SR');
+          } else {
+            idoState.descVal[c.name][d] = String(Math.max(1, 4 - i));
+          }
+        });
+      });
+    }
+
+    window.setIdoCritRole = function(name, role) { idoState.critRole[name] = role; renderIdoceoPreview(false); };
+    window.setIdoDescVal = function(name, desc, val) { idoState.descVal[name][desc] = val; renderIdoceoPreview(false); };
+
+    function renderIdoRubric(p) {
+      const wrap = document.getElementById('idoRubricWrap');
+      const crits = Object.values(p.criteria || {});
+      wrap.classList.toggle('hidden', !crits.length);
+      if (!crits.length) return;
+      const ptsOpts = [['4', '4 · AE'], ['3', '3 · AN'], ['2', '2 · AS'], ['1', '1 · EPA'], ['0', '0 · NA'], ['skip', 'No comptar']];
+      document.getElementById('idoRubric').innerHTML = `<div class="text-[11px] text-zinc-500"><i class="fa-regular fa-calendar mr-1"></i>${p.rubrics.length} dies amb rúbrica: ${p.rubrics.map(r => isoToDate(r.iso).toLocaleDateString('ca-ES', { day: '2-digit', month: '2-digit' })).join(', ')}</div>` +
+        crits.map(c => {
+          const role = idoState.critRole[c.name];
+          const descs = Object.keys(c.descs).sort((a, b) => (role === 'roba' ? 0 : parseFloat(idoState.descVal[c.name][b]) - parseFloat(idoState.descVal[c.name][a])) || 0);
+          return `<div class="border ${role === 'roba' ? 'border-orange-200' : role === 'act' ? 'border-violet-200' : 'border-zinc-200'} rounded-xl overflow-hidden">
+            <div class="flex flex-wrap items-center gap-2 px-3 py-2 ${role === 'roba' ? 'bg-orange-50' : role === 'act' ? 'bg-violet-50' : 'bg-zinc-50'}">
+              <span class="flex-1 min-w-[160px] font-bold text-zinc-800">${escapeHtml(c.name)}</span>
+              <select onchange="setIdoCritRole(${escapeHtml(JSON.stringify(c.name))}, this.value)" class="border border-zinc-200 rounded-lg px-1.5 py-1 font-semibold bg-white outline-none">
+                <option value="act" ${role === 'act' ? 'selected' : ''}>Actitud</option>
+                <option value="roba" ${role === 'roba' ? 'selected' : ''}>Roba / material</option>
+                <option value="skip" ${role === 'skip' ? 'selected' : ''}>No importar</option>
+              </select>
+            </div>
+            ${role === 'skip' ? '' : `<div class="divide-y divide-zinc-100">${descs.map(d => {
+              const v = idoState.descVal[c.name][d];
+              const sel = role === 'roba'
+                ? `<option value="OK" ${v === 'OK' ? 'selected' : ''}>Porta roba</option><option value="SR" ${v === 'SR' ? 'selected' : ''}>Sense roba</option>`
+                : ptsOpts.map(([k, l]) => `<option value="${k}" ${v === k ? 'selected' : ''}>${l}</option>`).join('');
+              const safeV = role === 'roba' ? (v === 'SR' || v === 'OK' ? v : 'OK') : v;
+              if (safeV !== v) idoState.descVal[c.name][d] = safeV;
+              return `<div class="flex items-center gap-2 px-3 py-1.5">
+                <span class="flex-1 text-[11px] text-zinc-700">${escapeHtml(d)}</span>
+                <span class="text-[10px] text-zinc-400 font-mono">×${c.descs[d].n}</span>
+                <select onchange="setIdoDescVal(${escapeHtml(JSON.stringify(c.name))}, ${escapeHtml(JSON.stringify(d))}, this.value)" class="border border-zinc-200 rounded-lg px-1.5 py-1 font-semibold bg-white outline-none text-[11px]">${sel}</select>
+              </div>`;
+            }).join('')}</div>`}
+          </div>`;
+        }).join('');
+    }
 
     window.setIdoSymbol = function(sym, code) {
       idoState.symbolMap[sym] = code;
@@ -8083,6 +8195,8 @@
             ${IDO_CODES.map(c => `<option value="${c.id}" ${idoState.symbolMap[s] === c.id ? 'selected' : ''}>${c.label}</option>`).join('')}
           </select>
         </div>`).join('');
+
+      renderIdoRubric(p);
 
       // Alumnes
       const opts = st => `<option value="new">+ Afegir com a alumne nou</option><option value="skip">No importar</option>` +
@@ -8180,10 +8294,41 @@
         });
       });
 
+      // Rúbriques diàries → actitud (mitjana) i sense roba
+      let nAct = 0, nSR = 0;
+      (p.rubrics || []).forEach(rb => {
+        let s = group.sessions[rb.iso];
+        if (!s) { s = group.sessions[rb.iso] = { trim, sdaId: '', note: 'Importat d\'iDoceo', records: {} }; }
+        if (!s.records || typeof s.records !== 'object') s.records = {};
+        Object.keys(idMap).forEach(i => {
+          const stId = idMap[i];
+          const row = p.rows[i];
+          const pts = []; let sr = false, any = false;
+          rb.crit.forEach(c => {
+            const d = (row[c.ci] || '').trim();
+            if (!d) return;
+            const role = idoState.critRole[c.name];
+            const v = (idoState.descVal[c.name] || {})[d];
+            if (role === 'act' && v !== undefined && v !== 'skip') { pts.push(parseFloat(v)); any = true; }
+            if (role === 'roba' && v === 'SR') { sr = true; any = true; }
+          });
+          if (!any) return;
+          const rec = { ...(s.records[stId] || {}) };
+          const absent = rec.a === 'F' || rec.a === 'FJ';
+          if (pts.length && (overwrite || rec.act === undefined)) {
+            rec.act = Math.round((pts.reduce((a, b) => a + b, 0) / pts.length) * 100) / 100;
+            nAct++;
+          }
+          if (sr && !absent && (!rec.p || overwrite)) { rec.p = 'SR'; nSR++; }
+          s.records[stId] = rec;
+        });
+      });
+
       saveToStorage();
       if (window.syncGroupEntityToCloud) window.syncGroupEntityToCloud(target);
       closeIdoceoModal();
-      alert(`Importat a ${group.name}: ${nSessions} sessions d'assistència del ${trim}r trimestre.`.replace('2r', '2n'));
+      alert((`Importat a ${group.name}: ${nSessions} sessions d'assistència del ${trim}r trimestre.` +
+        ((p.rubrics || []).length ? `\nRúbriques: ${nAct} valoracions d'actitud i ${nSR} dies sense roba.` : '')).replace('2r trim', '2n trim'));
       window.appState.currentTrim = trim;
       enterClass(target);
       window.appState.diariMode = 'summary';
@@ -8376,10 +8521,10 @@
             </div>
           </div>`;
         }).join('') + (attRule.enabled ? `<div class="flex flex-col gap-0.5 ${absent ? 'opacity-30 pointer-events-none' : ''} ${evalCols.length ? 'lg:pl-3 lg:border-l lg:border-zinc-200' : ''}">
-            <span class="text-[9px] font-bold text-violet-500 leading-none"><i class="fa-solid fa-hand-holding-heart mr-0.5"></i>ACTITUD${r.pos || r.neg ? ` <span class="font-mono text-zinc-400">+${r.pos || 0}/−${r.neg || 0}</span>` : ''}</span>
+            <span class="text-[9px] font-bold text-violet-500 leading-none"><i class="fa-solid fa-hand-holding-heart mr-0.5"></i>ACTITUD${typeof r.act === 'number' ? ` <span class="font-mono text-violet-400" title="Importat d'iDoceo">${r.act.toFixed(2)}</span>` : ''}${r.pos || r.neg ? ` <span class="font-mono text-zinc-400">+${r.pos || 0}/−${r.neg || 0}</span>` : ''}</span>
             <div class="flex gap-0.5">
-              ${LEVEL_CODES.map(c => `<button onclick="diariSetAttitudeLevel(${st.id}, '${c}')" title="Actitud d'avui: ${c} · ${LEVEL_NAMES[c]}"
-                class="h-10 min-w-[40px] px-1.5 rounded-lg border text-[11px] font-black transition ${r.act === c ? LEVEL_ON[c] : 'bg-white text-zinc-400 border-zinc-200 hover:border-zinc-400'}">${c}</button>`).join('')}
+              ${LEVEL_CODES.map(c => { const actCode = typeof r.act === 'number' ? getLevel(r.act).code : r.act; return `<button onclick="diariSetAttitudeLevel(${st.id}, '${c}')" title="Actitud d'avui: ${c} · ${LEVEL_NAMES[c]}"
+                class="h-10 min-w-[40px] px-1.5 rounded-lg border text-[11px] font-black transition ${actCode === c ? LEVEL_ON[c] : 'bg-white text-zinc-400 border-zinc-200 hover:border-zinc-400'}">${c}</button>`; }).join('')}
             </div>
           </div>` : '');
         return `
