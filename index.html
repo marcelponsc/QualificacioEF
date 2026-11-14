@@ -102,6 +102,7 @@
     .sp-flow-step .d { color: var(--head); font-size: 11px; margin-top: 2px; }
     .sp-flow-arrow { color: var(--gold); font-weight: 900; display: flex; align-items: center; padding: 0 9px; font-size: 16px; }
     .sp-grid4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; }
+    .target-group-trim.tg-own { background: #fef3c7; border-color: #f59e0b; color: #92400e; }
     .sp.sp-portrait { width: 1000px; padding: 26px 28px 20px; }
     .sp-masonry { column-count: var(--cols, 3); column-gap: 14px; }
     .sp-masonry > .sp-card { display: inline-block; width: 100%; margin: 0 0 14px; break-inside: avoid; -webkit-column-break-inside: avoid; page-break-inside: avoid; }
@@ -1230,6 +1231,7 @@
               </div>
             </div>
             <div id="modalTargetGroupsContainer" class="flex flex-wrap gap-2 pt-1"></div>
+            <p class="text-[11px] text-zinc-400 mt-2">Al costat de cada grup pots triar un <b>trimestre diferent</b> (p. ex. natació: un grup al T1 i un altre al T2). És la mateixa SdA: si l'edites, canvia a tots els grups.</p>
           </div>
           <label id="modalShareWrap" class="flex items-start gap-3 bg-indigo-50/60 border border-indigo-200 rounded-2xl p-3 cursor-pointer">
             <input type="checkbox" id="modalSdaShare" class="mt-0.5 w-4 h-4 accent-indigo-600 shrink-0">
@@ -4804,12 +4806,14 @@
       Object.keys(window.appData.groups || {}).forEach(gId => {
         const group = window.appData.groups[gId];
         (group.sdas || []).forEach(sda => {
-          const key = `${sda.title}||${sda.trim}`;
+          const key = sda.linkId ? `link||${sda.linkId}` : `${sda.title}||${sda.trim}`;
           if (!map.has(key)) map.set(key, { key, title: sda.title, trim: sda.trim, copies: [] });
           map.get(key).copies.push({ gId, group, sda });
         });
       });
       return Array.from(map.values()).map(item => {
+        item.trims = Array.from(new Set(item.copies.map(c => c.sda.trim))).sort();
+        item.trim = item.trims[0];
         // La còpia amb la programació més completa és la de referència
         const best = item.copies.slice().sort((a, b) => getPlanCompleteness(b.sda.plan) - getPlanCompleteness(a.sda.plan))[0];
         return { ...item, ref: best, plan: best.sda.plan || {}, competences: best.sda.competences || {} };
@@ -5072,7 +5076,7 @@
 
       const term = (document.getElementById('libSearch').value || '').toLowerCase().trim();
       const items = all.filter(item =>
-        (libFilters.trim === 'all' || String(item.trim) === String(libFilters.trim)) &&
+        (libFilters.trim === 'all' || (item.trims || [item.trim]).map(String).includes(String(libFilters.trim))) &&
         (libFilters.group === 'all' || item.copies.some(c => c.gId === libFilters.group)) &&
         (libFilters.ce === 'all' || (item.competences[libFilters.ce] && item.competences[libFilters.ce].active)) &&
         libMatchesSearch(item, term)
@@ -5105,7 +5109,7 @@
         const p = getSdaProgress(c.group, c.sda);
         return `
           <button onclick="openSdaFromHome('${c.gId}','${c.sda.id}')" title="Obrir la graella de ${escapeHtml(c.group.name)}" class="w-full flex items-center gap-2 text-left rounded-lg px-1.5 py-1 hover:bg-zinc-50 transition">
-            <span class="text-[9px] font-bold font-mono px-1.5 py-0.5 rounded border shrink-0 ${getGroupPastelTheme(c.group).badgeBg}">${escapeHtml(c.group.name)}</span>
+            <span class="text-[9px] font-bold font-mono px-1.5 py-0.5 rounded border shrink-0 ${getGroupPastelTheme(c.group).badgeBg}">${escapeHtml(c.group.name)}${(item.trims || []).length > 1 ? ` · T${c.sda.trim}` : ''}</span>
             <div class="flex-1">${progressBar(p.pct)}</div>
             <span class="text-[10px] font-mono text-zinc-400 w-8 text-right shrink-0">${p.total ? p.pct + '%' : '—'}</span>
           </button>`;
@@ -5141,7 +5145,7 @@
                   ${items.map(item => {
                     const comp = getPlanCompleteness(item.plan);
                     return `<tr class="hover:bg-zinc-50/60 align-top">
-                      <td class="py-2.5 px-3 text-center font-mono font-bold text-zinc-500">T${item.trim}</td>
+                      <td class="py-2.5 px-3 text-center font-mono font-bold text-zinc-500">T${(item.trims || [item.trim]).join('/')}</td>
                       <td class="py-2.5 px-3">
                         <div class="font-bold text-zinc-900">${escapeHtml(item.title)}</div>
                         ${item.plan.pregunta ? `<div class="text-[11px] text-zinc-500 italic mt-0.5">${escapeHtml(item.plan.pregunta)}</div>` : ''}
@@ -5177,7 +5181,7 @@
                   <div class="bg-white border border-zinc-200/90 rounded-3xl shadow-card hover:shadow-float transition flex flex-col overflow-hidden">
                     <div class="bg-[#0e1834] text-white px-4 py-3.5">
                       <div class="flex items-center justify-between text-[10px] font-bold uppercase tracking-[0.18em] text-[#e8ad3c]">
-                        <span>SdA · T${item.trim}${item.copies.some(c => c.sda.shared) ? ' <span class="ml-1 normal-case tracking-normal text-indigo-200" title="Compartida a la biblioteca del departament"><i class="fa-solid fa-people-group"></i> compartida</span>' : ''}</span>
+                        <span>SdA · T${(item.trims || [item.trim]).join(' / T')}${item.copies.some(c => c.sda.shared) ? ' <span class="ml-1 normal-case tracking-normal text-indigo-200" title="Compartida a la biblioteca del departament"><i class="fa-solid fa-people-group"></i> compartida</span>' : ''}</span>
                         <span class="font-mono tracking-normal text-zinc-300 normal-case">${ses ? ses + ' sessions' : 'sessions per definir'}</span>
                       </div>
                       <div class="text-[15px] font-extrabold leading-tight mt-1.5" style="font-family:'Roboto Slab',Georgia,serif">${escapeHtml(item.title)}</div>
@@ -6246,7 +6250,7 @@
         window.appState.editingSdaId = sda.id;
         // Guardem títol i trimestre originals per trobar la mateixa SdA a les altres classes
         // (les SdAs importades tenen un identificador diferent a cada classe)
-        window.appState.editingSdaOriginal = { title: sda.title, trim: sda.trim };
+        window.appState.editingSdaOriginal = { title: sda.title, trim: sda.trim, linkId: sda.linkId || null, id: sda.id };
         if (delBtn) delBtn.classList.remove('hidden');
       }
 
@@ -6308,24 +6312,46 @@
         return;
       }
 
+      const orig = window.appState.editingSdaOriginal;
+      const findCopy = group => (group.sdas || []).find(s =>
+        (orig && (s.id === orig.id || (orig.linkId && s.linkId === orig.linkId))) ||
+        (existingTitle && s.title === existingTitle && s.trim === currentTrim));
       cont.innerHTML = groupKeys.map(gId => {
         const group = groups[gId];
         let isChecked = false;
+        let copyTrim = null;
         if (!window.appState.editingSdaId) {
           isChecked = (gId === window.appData.activeGroupId);
         } else {
-          isChecked = (group.sdas || []).some(s => s.title === existingTitle && s.trim === currentTrim);
+          const copy = findCopy(group);
+          isChecked = !!copy;
+          if (copy) copyTrim = copy.trim;
           if (!isChecked && gId === window.appData.activeGroupId) isChecked = true;
         }
+        const t = copyTrim || currentTrim;
+        const own = copyTrim && copyTrim !== currentTrim;
 
         return `
-          <label class="inline-flex items-center gap-2 bg-white px-3 py-1.5 rounded-xl border border-zinc-200 cursor-pointer hover:border-zinc-300 transition">
-            <input type="checkbox" value="${gId}" ${isChecked ? 'checked' : ''} class="target-group-checkbox rounded text-zinc-900 focus:ring-zinc-900 w-3.5 h-3.5">
-            <span class="font-semibold text-zinc-800 text-xs">${group.name}</span>
-          </label>
+          <span class="tg-item inline-flex items-center gap-1.5 bg-white pl-3 pr-1 py-1 rounded-xl border ${isChecked ? 'border-zinc-400' : 'border-zinc-200'} transition">
+            <label class="inline-flex items-center gap-2 cursor-pointer">
+              <input type="checkbox" value="${gId}" ${isChecked ? 'checked' : ''} onchange="this.closest('.tg-item').classList.toggle('border-zinc-400', this.checked)" class="target-group-checkbox rounded text-zinc-900 focus:ring-zinc-900 w-3.5 h-3.5">
+              <span class="font-semibold text-zinc-800 text-xs">${escapeHtml(group.name)}</span>
+            </label>
+            <select data-gid="${gId}" data-own="${own ? '1' : '0'}" onchange="this.dataset.own = (this.value !== document.getElementById('modalSdaTrim').value) ? '1' : '0'; this.classList.toggle('tg-own', this.dataset.own === '1')" title="Trimestre en què fas aquesta SdA amb ${escapeHtml(group.name)}"
+              class="target-group-trim ${own ? 'tg-own' : ''} text-[11px] font-bold rounded-lg border border-zinc-200 bg-zinc-50 px-1 py-0.5 outline-none">
+              ${[1, 2, 3].map(n => `<option value="${n}" ${n === t ? 'selected' : ''}>T${n}</option>`).join('')}
+            </select>
+          </span>
         `;
       }).join('');
     }
+
+    // Si canvies el trimestre general, s'actualitzen els grups que no tenen un trimestre propi
+    document.addEventListener('change', e => {
+      if (e.target && e.target.id === 'modalSdaTrim') {
+        document.querySelectorAll('.target-group-trim').forEach(sel => { if (sel.dataset.own !== '1') sel.value = e.target.value; });
+      }
+    });
 
     window.selectAllModalGroups = function(checked) {
       document.querySelectorAll('.target-group-checkbox').forEach(cb => cb.checked = checked);
@@ -6520,16 +6546,25 @@
       const isEditing = !!window.appState.editingSdaId;
       const sdaIdToUse = isEditing ? window.appState.editingSdaId : ('sda_' + Date.now() + '_' + Math.floor(Math.random() * 1000));
 
+      // Trimestre de cada grup (una mateixa SdA pot anar a trimestres diferents segons el grup)
+      const groupTrim = {};
+      document.querySelectorAll('.target-group-trim').forEach(sel => { groupTrim[sel.dataset.gid] = parseInt(sel.value) || selectedTrim; });
+      const origRef = window.appState.editingSdaOriginal;
+      let linkId = (isEditing && origRef && origRef.linkId) || null;
+      if (!linkId) linkId = sdaIdToUse;
+
       let activeGroupSdaId = null;
       targetGroupIds.forEach(gId => {
         const grp = window.appData.groups[gId];
         if (!grp) return;
         if (!Array.isArray(grp.sdas)) grp.sdas = [];
+        const gTrim = groupTrim[gId] || selectedTrim;
 
         let targetSda = null;
         if (isEditing) {
           const orig = window.appState.editingSdaOriginal;
           targetSda = grp.sdas.find(s => s.id === sdaIdToUse)
+            || (orig && orig.linkId ? grp.sdas.find(s => s.linkId === orig.linkId) : null)
             || (orig ? grp.sdas.find(s => s.title === orig.title && s.trim === orig.trim) : null);
         }
 
@@ -6537,7 +6572,7 @@
           const alreadyUsed = grp.sdas.some(s => s.id === sdaIdToUse);
           targetSda = {
             id: alreadyUsed ? ('sda_' + Date.now() + '_' + Math.floor(Math.random() * 1000)) : sdaIdToUse,
-            trim: selectedTrim,
+            trim: gTrim,
             title: title,
             trimWeight: trimWeight,
             competences: JSON.parse(JSON.stringify(competences)),
@@ -6545,13 +6580,14 @@
           };
           grp.sdas.push(targetSda);
         } else {
-          targetSda.trim = selectedTrim;
+          targetSda.trim = gTrim;
           targetSda.title = title;
           targetSda.trimWeight = trimWeight;
           targetSda.competences = JSON.parse(JSON.stringify(competences));
           targetSda.plan = JSON.parse(JSON.stringify(plan));
         }
 
+        targetSda.linkId = linkId;
         if (!isEditing && window.appState.modalSharedFrom) targetSda.sharedFrom = window.appState.modalSharedFrom;
         if (gId === window.appData.activeGroupId) activeGroupSdaId = targetSda.id;
         savedCopies.push({ gId, sda: targetSda });
@@ -6579,9 +6615,10 @@
       if (centreChanged && window.syncWholeAppToCloud) window.syncWholeAppToCloud();
       closeSdaModal();
 
+      const activeTrim = groupTrim[window.appData.activeGroupId] || selectedTrim;
       if (window.appState.currentScreen === 'class') {
-        if (window.appState.currentTrim !== selectedTrim) {
-          setTrim(selectedTrim);
+        if (window.appState.currentTrim !== activeTrim) {
+          setTrim(activeTrim);
         } else {
           populateSdaSelect();
           const sel = document.getElementById('sdaSelect');
@@ -7990,9 +8027,13 @@
     }
 
     function getGroupsSharingSda(sda) {
-      return Object.values(window.appData.groups || {})
-        .filter(g => (g.sdas || []).some(s => s.title === sda.title && s.trim === sda.trim))
-        .map(g => g.name);
+      const res = [];
+      Object.values(window.appData.groups || {}).forEach(g => {
+        const c = (g.sdas || []).find(s => (sda.linkId && s.linkId === sda.linkId) || (s.title === sda.title && s.trim === sda.trim));
+        if (c) res.push({ name: g.name, trim: c.trim });
+      });
+      const multi = new Set(res.map(r => r.trim)).size > 1;
+      return res.map(r => multi ? `${r.name} (T${r.trim})` : r.name);
     }
 
     function renderSdaPoster() {
