@@ -1956,10 +1956,24 @@
       return set(ref(fbDb, `shared/sdaLibrary/${key}`), null);
     };
 
+    // Escriptures pròpies en curs. Firebase avisa de cada canvi local a l'instant (abans d'acabar de desar);
+    // mentre n'hi ha, no substituïm les dades locals per la còpia del núvol, que encara seria a mitges
+    // (això feia que, en desar una SdA a diversos grups, només se'n desés un).
+    let pendingCloudWrites = 0;
+    function cloudSet(r, v) {
+      pendingCloudWrites++;
+      let clean;
+      try { clean = v === undefined ? null : JSON.parse(JSON.stringify(v)); } catch (e) { clean = v; }
+      let p;
+      try { p = set(r, clean); } catch (e) { pendingCloudWrites--; return Promise.reject(e); }
+      return p.finally(() => { pendingCloudWrites = Math.max(0, pendingCloudWrites - 1); });
+    }
+
     function connectToUserCloud(userKey) {
       const userBranchRef = ref(fbDb, `users/${userKey}/quadern_data`);
 
       onValue(userBranchRef, (snapshot) => {
+        if (pendingCloudWrites > 0) return; // és el nostre propi canvi: les dades locals ja són les bones
         const cloudData = snapshot.val();
         if (cloudData && cloudData.groups) {
           // La classe oberta és d'aquest dispositiu: no la sobreescrivim amb la que hi hagi al núvol
@@ -2000,7 +2014,7 @@
           if (window.appState?.currentScreen === 'class' && window.updateClassHeader) window.updateClassHeader();
           setCloudStatus('online');
         } else {
-          set(userBranchRef, window.appData).then(() => setCloudStatus('online'));
+          cloudSet(userBranchRef, window.appData).then(() => setCloudStatus('online'));
         }
       }, () => setCloudStatus('offline'));
     }
@@ -2009,7 +2023,7 @@
       if (!currentAuthUser || !fbDb) return;
       setCloudStatus('syncing');
       const gradeRef = ref(fbDb, `users/${currentAuthUser}/quadern_data/groups/${groupId}/grades/${sdaId}/${studentId}/${gradeKey}`);
-      set(gradeRef, val === null ? null : val)
+      cloudSet(gradeRef, val === null ? null : val)
         .then(() => setCloudStatus('online'))
         .catch(() => setCloudStatus('offline'));
     };
@@ -2018,7 +2032,7 @@
       if (!currentAuthUser || !fbDb) return;
       setCloudStatus('syncing');
       const pRef = ref(fbDb, `users/${currentAuthUser}/quadern_data/groups/${groupId}/plans/${isoDate}`);
-      set(pRef, planData ? JSON.parse(JSON.stringify(planData)) : null)
+      cloudSet(pRef, planData ? JSON.parse(JSON.stringify(planData)) : null)
         .then(() => setCloudStatus('online'))
         .catch(() => setCloudStatus('offline'));
     };
@@ -2027,7 +2041,7 @@
       if (!currentAuthUser || !fbDb) return;
       setCloudStatus('syncing');
       const sRef = ref(fbDb, `users/${currentAuthUser}/quadern_data/groups/${groupId}/sessions/${isoDate}`);
-      set(sRef, sessionData ? JSON.parse(JSON.stringify(sessionData)) : null)
+      cloudSet(sRef, sessionData ? JSON.parse(JSON.stringify(sessionData)) : null)
         .then(() => setCloudStatus('online'))
         .catch(() => setCloudStatus('offline'));
     };
@@ -2036,7 +2050,7 @@
       if (!currentAuthUser || !fbDb) return;
       setCloudStatus('syncing');
       const obsRef = ref(fbDb, `users/${currentAuthUser}/quadern_data/groups/${groupId}/observations/${studentId}`);
-      set(obsRef, text)
+      cloudSet(obsRef, text)
         .then(() => setCloudStatus('online'))
         .catch(() => setCloudStatus('offline'));
     };
@@ -2045,7 +2059,7 @@
       if (!currentAuthUser || !fbDb) return;
       setCloudStatus('syncing');
       const groupRef = ref(fbDb, `users/${currentAuthUser}/quadern_data/groups/${groupId}`);
-      set(groupRef, window.appData.groups[groupId])
+      cloudSet(groupRef, window.appData.groups[groupId])
         .then(() => setCloudStatus('online'))
         .catch(() => setCloudStatus('offline'));
     };
@@ -2054,7 +2068,7 @@
       if (!currentAuthUser || !fbDb) return;
       setCloudStatus('syncing');
       const rootRef = ref(fbDb, `users/${currentAuthUser}/quadern_data`);
-      set(rootRef, window.appData)
+      cloudSet(rootRef, window.appData)
         .then(() => setCloudStatus('online'))
         .catch(() => setCloudStatus('offline'));
     };
