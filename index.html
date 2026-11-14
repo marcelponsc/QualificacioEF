@@ -46,6 +46,11 @@
     }
     .cell-saved { animation: cellPulse 0.4s cubic-bezier(0.16, 1, 0.3, 1); }
     @media print {
+      #viewAval textarea { display: none !important; }
+      #viewAval .aval-print-comment { display: block !important; }
+      #viewAval .aval-row { break-inside: avoid; border-color: #ddd !important; }
+    }
+    @media print {
       .no-print { display: none !important; }
       body { background: white !important; }
       .print-page-break { page-break-before: always; }
@@ -767,6 +772,18 @@
             </table>
           </div>
         </div>
+      </section>
+
+      <!-- VISTA: SESSIÓ D'AVALUACIÓ -->
+      <section id="viewAval" class="space-y-4 hidden">
+        <div class="flex flex-wrap items-end justify-between gap-4 border-b border-zinc-200/70 pb-4">
+          <div>
+            <span class="inline-flex items-center rounded-md bg-rose-50 px-2 py-0.5 text-[11px] font-bold text-rose-700">Junta d'avaluació</span>
+            <h2 id="avalTitle" class="text-xl font-bold text-zinc-900 tracking-tight mt-1">Sessió d'avaluació</h2>
+            <p class="text-xs text-zinc-500 mt-0.5">Resum de cada alumne amb alertes i comentari per a l'informe. Canvia de trimestre a dalt.</p>
+          </div>
+        </div>
+        <div id="avalContent" class="space-y-4"></div>
       </section>
 
       <!-- VISTA 4: FINAL DE CURS -->
@@ -6077,11 +6094,12 @@
       if (window.appState.currentView === 'trim') renderTrimView();
       if (window.appState.currentView === 'stats') renderStatsView();
       if (window.appState.currentView === 'diari') renderDiariView();
+      if (window.appState.currentView === 'aval') renderAvalView();
     };
 
     window.switchView = function(view) {
       window.appState.currentView = view;
-      ['sda', 'diari', 'planif', 'roster', 'fitxa', 'trim', 'final', 'report', 'stats'].forEach(id => {
+      ['sda', 'diari', 'planif', 'roster', 'fitxa', 'trim', 'final', 'report', 'stats', 'aval'].forEach(id => {
         const btn = document.getElementById(`tabBtn${id.charAt(0).toUpperCase() + id.slice(1)}`);
         const sec = document.getElementById(`view${id.charAt(0).toUpperCase() + id.slice(1)}`);
         if (id === view) {
@@ -6101,6 +6119,7 @@
       if (view === 'diari') renderDiariView();
       if (view === 'planif') renderPlanifView();
       if (view === 'fitxa') renderStudentFitxa();
+      if (view === 'aval') renderAvalView();
     };
 
     // ================== ALUMNAT ==================
@@ -7013,6 +7032,254 @@
           </div>
         </div>`;
     }
+
+
+    // ================== SESSIÓ D'AVALUACIÓ + COMENTARIS AUTOMÀTICS ==================
+    const CE_COMMENT_LABELS = {
+      CE1: 'els hàbits saludables i la condició física',
+      CE2: 'la resolució de situacions motrius, jocs i esports',
+      CE3: 'l\'expressió i la comunicació corporal',
+      CE4: 'les activitats a l\'entorn',
+      CE5: 'els valors, el treball en equip i la convivència'
+    };
+    const AVAL_LIMITS = { F: 3, R: 3, SR: 3 };
+
+    function studentFirstName(name) {
+      const n = String(name || '').trim();
+      if (n.includes(',')) return n.split(',').slice(1).join(',').trim().split(/\s+/)[0] || n;
+      return n.split(/\s+/)[0];
+    }
+
+    function getAvalData(group, st, trim) {
+      const score = getStudentTrimScore(st.id, group);
+      const comp = getStudentTrimCompScore(st.id, trim, group);
+      const lvl = getLevel(score);
+      const att = getStudentAttendanceStats(group, st.id, trim);
+      const min = getMinPractice(group);
+      const actRule = getAttitudeRule();
+      const act = actRule.enabled ? getStudentAttitudeTrim(group, st.id, trim) : null;
+      const ces = {};
+      OFFICIAL_CES.forEach(ce => { ces[ce.id] = getStudentCeAvg(st.id, ce.id, group, trim); });
+      const injuredNow = !!getActiveInjury(group, st.id, todayISO());
+      const penalized = isStudentPenalized(group, trim, st.id);
+      const alerts = [];
+      if (score === null) alerts.push({ k: 'nonotes', t: 'Sense notes', c: 'bg-zinc-100 text-zinc-500 border-zinc-200' });
+      else if (lvl.code === 'NA' || lvl.code === 'EPA') alerts.push({ k: 'susp', t: lvl.code === 'NA' ? 'No assolit' : 'En procés', c: 'bg-rose-50 text-rose-700 border-rose-200' });
+      if (penalized || (att.pct !== null && att.pct < min)) alerts.push({ k: 'prac', t: `Pràctica ${att.pct !== null ? Math.round(att.pct) + '%' : '—'}`, c: 'bg-rose-50 text-rose-700 border-rose-200' });
+      if (att.F >= AVAL_LIMITS.F) alerts.push({ k: 'F', t: `${att.F} faltes`, c: 'bg-amber-50 text-amber-800 border-amber-200' });
+      if (att.R >= AVAL_LIMITS.R) alerts.push({ k: 'R', t: `${att.R} retards`, c: 'bg-amber-50 text-amber-800 border-amber-200' });
+      if (att.SR >= AVAL_LIMITS.SR) alerts.push({ k: 'SR', t: `${att.SR} sense roba`, c: 'bg-orange-50 text-orange-800 border-orange-200' });
+      if (act !== null && act < gradeThresholds.as) alerts.push({ k: 'act', t: 'Actitud', c: 'bg-violet-50 text-violet-700 border-violet-200' });
+      if (injuredNow) alerts.push({ k: 'inj', t: 'Lesionat', c: 'bg-sky-50 text-sky-700 border-sky-200' });
+      const risk = alerts.some(a => ['susp', 'prac', 'F', 'SR', 'act', 'nonotes'].includes(a.k));
+      return { score, comp, lvl, att, min, act, ces, alerts, risk, penalized };
+    }
+
+    // Comentari en català, neutre de gènere
+    function generateStudentComment(group, st, trim) {
+      const d = getAvalData(group, st, trim);
+      const nom = studentFirstName(st.name);
+      const th = gradeThresholds;
+      const parts = [];
+      const trimTxt = `${['', 'primer', 'segon', 'tercer'][trim]} trimestre`;
+
+      if (d.score === null) return `${nom}: encara no hi ha prou evidències per valorar el ${trimTxt}.`;
+
+      if (d.penalized || (d.att.pct !== null && d.att.pct < d.min)) {
+        parts.push(`${nom} només ha fet pràctica en el ${Math.round(d.att.pct || 0)}% de les sessions i no arriba al mínim exigit (${d.min}%)${d.penalized ? ', per això no pot superar la matèria aquest trimestre' : ', cosa que pot impedir superar la matèria'}.`);
+      } else if (d.lvl.code === 'AE') parts.push(`${nom} ha assolit amb excel·lència els aprenentatges d'aquest ${trimTxt}.`);
+      else if (d.lvl.code === 'AN') parts.push(`${nom} ha assolit els aprenentatges del ${trimTxt} amb un nivell notable.`);
+      else if (d.lvl.code === 'AS') parts.push(`${nom} ha assolit satisfactòriament els aprenentatges del ${trimTxt}.`);
+      else if (d.lvl.code === 'EPA') parts.push(`${nom} està en procés d'assolir els aprenentatges del ${trimTxt}.`);
+      else parts.push(`${nom} no ha assolit els aprenentatges del ${trimTxt}.`);
+
+      // Punts forts i febles per competència
+      const graded = Object.entries(d.ces).filter(([, v]) => v !== null).sort((a, b) => b[1] - a[1]);
+      const penal = d.penalized || (d.att.pct !== null && d.att.pct < d.min);
+      if (graded.length >= 2 && !penal) {
+        const [bestId, best] = graded[0];
+        const [worstId, worst] = graded[graded.length - 1];
+        if (best >= th.an && best - worst >= 0.5) parts.push(`Destaca especialment en ${CE_COMMENT_LABELS[bestId]}.`);
+        if (worst < th.as) parts.push(`Ha de millorar en ${CE_COMMENT_LABELS[worstId]}.`);
+        else if (best - worst >= 0.75 && worst < th.an) parts.push(`Pot millorar en ${CE_COMMENT_LABELS[worstId]}.`);
+      } else if (graded.length === 1 && graded[0][1] < th.as) {
+        parts.push(`Ha de millorar en ${CE_COMMENT_LABELS[graded[0][0]]}.`);
+      }
+
+      // Actitud (només si hi ha dades reals de l'alumne)
+      const ai = getStudentAttitudeInfo(group, st.id, trim);
+      if (d.act !== null && (ai.n > 0 || ai.pos || ai.neg || ai.override !== null)) {
+        if (d.act >= th.an) parts.push('Mostra una actitud molt positiva i participativa a classe.');
+        else if (d.act >= th.as) parts.push('La seva actitud a classe és correcta.');
+        else parts.push('Cal que millori l\'actitud, l\'atenció i la participació a classe.');
+      }
+
+      // Assistència i material
+      const inc = [];
+      if (d.att.F >= AVAL_LIMITS.F) inc.push(`${d.att.F} faltes d'assistència sense justificar`);
+      if (d.att.R >= AVAL_LIMITS.R) inc.push(`${d.att.R} retards`);
+      if (inc.length) parts.push(`Ha acumulat ${inc.join(' i ')}.`);
+      if (d.att.SR >= 2) parts.push(`Ha vingut ${d.att.SR} dies sense la roba o el material adequats; cal que ho porti a totes les sessions.`);
+      if (d.att.L >= 3) parts.push('Durant una part del trimestre no ha pogut fer pràctica per lesió.');
+
+      // Tancament
+      const ok = !['NA', 'EPA'].includes(d.lvl.code) && !(d.penalized || (d.att.pct !== null && d.att.pct < d.min));
+      if (ok && (d.lvl.code === 'AE' || d.lvl.code === 'AN')) parts.push('Continua així!');
+      else if (ok) parts.push('Amb més constància pot millorar el resultat.');
+      else parts.push('Confiem que el proper trimestre pugui millorar amb més esforç i regularitat.');
+      return parts.join(' ');
+    }
+    window.generateStudentComment = generateStudentComment;
+
+    function getComment(group, trim, stId) {
+      return (group.comments && group.comments[trim] && group.comments[trim][stId]) || '';
+    }
+    function setComment(group, trim, stId, text) {
+      if (!group.comments) group.comments = {};
+      if (!group.comments[trim]) group.comments[trim] = {};
+      if (text) group.comments[trim][stId] = text; else delete group.comments[trim][stId];
+    }
+    function persistComments() {
+      saveToStorage();
+      if (window.syncGroupEntityToCloud) window.syncGroupEntityToCloud(window.appData.activeGroupId);
+    }
+
+    window.avalEditComment = function(stId, text) {
+      setComment(getCurrentGroup(), window.appState.currentTrim, stId, text.trim());
+      persistComments();
+    };
+
+    window.avalRegenerate = function(stId) {
+      const g = getCurrentGroup();
+      const st = g.students.find(s => s.id === stId);
+      if (!st) return;
+      const cur = getComment(g, window.appState.currentTrim, stId);
+      if (cur && !confirm('Substituir el comentari actual per un de nou generat automàticament?')) return;
+      setComment(g, window.appState.currentTrim, stId, generateStudentComment(g, st, window.appState.currentTrim));
+      persistComments();
+      renderAvalView();
+    };
+
+    window.avalGenerateAll = function() {
+      const g = getCurrentGroup();
+      const t = window.appState.currentTrim;
+      const withText = (g.students || []).filter(st => getComment(g, t, st.id)).length;
+      let overwrite = false;
+      if (withText) overwrite = confirm(`${withText} alumnes ja tenen comentari.\n\nAcceptar: tornar-los a generar TOTS.\nCancel·lar: generar només els que falten.`);
+      (g.students || []).forEach(st => {
+        if (!overwrite && getComment(g, t, st.id)) return;
+        setComment(g, t, st.id, generateStudentComment(g, st, t));
+      });
+      persistComments();
+      renderAvalView();
+    };
+
+    function copyText(text, btn) {
+      const done = () => { if (btn) { const o = btn.innerHTML; btn.innerHTML = '<i class="fa-solid fa-check"></i> Copiat'; setTimeout(() => { btn.innerHTML = o; }, 1400); } };
+      if (navigator.clipboard && window.isSecureContext) navigator.clipboard.writeText(text).then(done).catch(() => fallback());
+      else fallback();
+      function fallback() {
+        const ta = document.createElement('textarea'); ta.value = text; ta.style.position = 'fixed'; ta.style.opacity = '0';
+        document.body.appendChild(ta); ta.select(); try { document.execCommand('copy'); done(); } catch (e) { alert(text); } ta.remove();
+      }
+    }
+
+    window.avalCopyOne = function(stId, btn) {
+      const g = getCurrentGroup();
+      copyText(getComment(g, window.appState.currentTrim, stId) || '', btn);
+    };
+
+    window.avalCopyAll = function(btn) {
+      const g = getCurrentGroup(); const t = window.appState.currentTrim;
+      const lines = (g.students || []).map(st => {
+        const d = getAvalData(g, st, t);
+        return [st.name, d.lvl.code, d.score !== null ? d.score.toFixed(2).replace('.', ',') : '', getComment(g, t, st.id).replace(/\s+/g, ' ')].join('\t');
+      });
+      copyText(lines.join('\n'), btn);
+    };
+
+    window.setAvalFilter = function(f) { window.appState.avalFilter = f; renderAvalView(); };
+
+    window.renderAvalView = function() {
+      const box = document.getElementById('avalContent');
+      if (!box) return;
+      const g = getCurrentGroup();
+      const t = window.appState.currentTrim;
+      const filter = window.appState.avalFilter || 'all';
+      document.getElementById('avalTitle').textContent = `Sessió d'avaluació · ${g.name} · ${t}${['', 'r', 'n', 'r'][t]} trimestre`;
+      const rows = (g.students || []).map(st => ({ st, d: getAvalData(g, st, t) }));
+      const n = rows.length;
+      const count = code => rows.filter(r => r.d.score !== null && r.d.lvl.code === code).length;
+      const susp = rows.filter(r => r.d.alerts.some(a => a.k === 'susp' || a.k === 'prac')).length;
+      const risk = rows.filter(r => r.d.risk).length;
+      const graded = rows.filter(r => r.d.score !== null);
+      const mean = graded.length ? graded.reduce((a, r) => a + r.d.score, 0) / graded.length : null;
+      const nComments = rows.filter(r => getComment(g, t, r.st.id)).length;
+
+      const kpi = (label, val, cls) => `<div class="rounded-2xl border ${cls} px-3 py-2.5"><div class="text-xl font-black font-mono leading-none">${val}</div><div class="text-[11px] font-semibold mt-1 opacity-80">${label}</div></div>`;
+      const shown = rows.filter(r => filter === 'all' || (filter === 'risk' && r.d.risk) || (filter === 'nocomment' && !getComment(g, t, r.st.id)));
+
+      const lvlBadge = d => `<span class="inline-flex items-center text-[10px] px-1.5 py-0.5 rounded font-bold ring-1 ring-inset ${d.lvl.badge}">${d.lvl.code}</span>`;
+
+      box.innerHTML = `
+        <div class="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-2">
+          ${kpi('Alumnes', n, 'bg-white border-zinc-200 text-zinc-900')}
+          ${kpi('Mitjana', mean !== null ? mean.toFixed(2) : '—', 'bg-white border-zinc-200 text-zinc-900')}
+          ${kpi('AE', count('AE'), 'bg-emerald-50 border-emerald-200 text-emerald-800')}
+          ${kpi('AN', count('AN'), 'bg-indigo-50 border-indigo-200 text-indigo-800')}
+          ${kpi('AS', count('AS'), 'bg-sky-50 border-sky-200 text-sky-800')}
+          ${kpi('No superen', susp, 'bg-rose-50 border-rose-200 text-rose-800')}
+          ${kpi('Amb alertes', risk, 'bg-amber-50 border-amber-200 text-amber-800')}
+        </div>
+
+        <div class="flex flex-wrap items-center gap-2 no-print">
+          <div class="seg !text-xs">
+            <button onclick="setAvalFilter('all')" class="${filter === 'all' ? 'active' : ''}">Tots (${n})</button>
+            <button onclick="setAvalFilter('risk')" class="${filter === 'risk' ? 'active' : ''}">Amb alertes (${risk})</button>
+            <button onclick="setAvalFilter('nocomment')" class="${filter === 'nocomment' ? 'active' : ''}">Sense comentari (${n - nComments})</button>
+          </div>
+          <div class="flex-1"></div>
+          <button onclick="avalGenerateAll()" class="inline-flex items-center gap-1.5 bg-zinc-900 text-white text-xs font-bold px-3 py-2 rounded-xl"><i class="fa-solid fa-wand-magic-sparkles"></i>Generar comentaris</button>
+          <button onclick="avalCopyAll(this)" class="inline-flex items-center gap-1.5 bg-white border border-zinc-200 text-zinc-700 text-xs font-bold px-3 py-2 rounded-xl" title="Copia nom, nivell, nota i comentari de tots (per enganxar a un full de càlcul)"><i class="fa-regular fa-copy"></i>Copiar-ho tot</button>
+          <button onclick="window.print()" class="inline-flex items-center gap-1.5 bg-white border border-zinc-200 text-zinc-700 text-xs font-bold px-3 py-2 rounded-xl"><i class="fa-solid fa-print"></i>Imprimir</button>
+        </div>
+
+        <div class="space-y-2">
+          ${shown.length ? shown.map(({ st, d }) => {
+            const c = getComment(g, t, st.id);
+            return `
+            <div class="aval-row bg-white border ${d.risk ? 'border-rose-200' : 'border-zinc-200'} rounded-2xl p-3 flex flex-col lg:flex-row gap-3">
+              <div class="lg:w-[42%] space-y-2">
+                <div class="flex items-start gap-2">
+                  <button onclick="openStudentFitxa(${st.id})" class="flex-1 text-left text-sm font-bold text-zinc-900 hover:underline">${escapeHtml(st.name)}</button>
+                  <div class="text-right shrink-0">
+                    <div class="text-base font-black font-mono leading-none">${d.score !== null ? d.score.toFixed(2) : '—'}</div>
+                    <div class="mt-0.5">${lvlBadge(d)}</div>
+                  </div>
+                </div>
+                <div class="flex flex-wrap gap-1">
+                  ${OFFICIAL_CES.filter(ce => d.ces[ce.id] !== null).map(ce => { const l = getLevel(d.ces[ce.id]); return `<span title="${escapeHtml(ce.name)}: ${d.ces[ce.id].toFixed(2)}" class="inline-flex items-center gap-1 text-[10px] font-bold px-1.5 py-0.5 rounded-md ring-1 ring-inset ${l.badge}">${ce.id} ${l.code}</span>`; }).join('')}
+                </div>
+                <div class="text-[11px] text-zinc-500 font-mono flex flex-wrap gap-x-3 gap-y-0.5">
+                  <span title="% de pràctica">Pràct. <b class="${d.att.pct !== null && d.att.pct < d.min ? 'text-rose-600' : 'text-zinc-800'}">${d.att.pct !== null ? Math.round(d.att.pct) + '%' : '—'}</b></span>
+                  <span>F <b class="text-zinc-800">${d.att.F}</b></span><span>R <b class="text-zinc-800">${d.att.R}</b></span><span>Roba <b class="text-zinc-800">${d.att.SR}</b></span>
+                  ${d.act !== null ? `<span>Actitud <b class="text-zinc-800">${d.act.toFixed(2)}</b></span>` : ''}
+                </div>
+                ${d.alerts.length ? `<div class="flex flex-wrap gap-1">${d.alerts.map(a => `<span class="text-[10px] font-bold px-1.5 py-0.5 rounded-md border ${a.c}">${a.t}</span>`).join('')}</div>` : ''}
+              </div>
+              <div class="flex-1 flex flex-col gap-1.5">
+                <textarea rows="4" onchange="avalEditComment(${st.id}, this.value)" placeholder="Sense comentari. Prem «Generar» o escriu-lo." class="w-full text-xs leading-relaxed border border-zinc-200 rounded-xl p-2.5 outline-none focus:ring-2 focus:ring-zinc-900 resize-y">${escapeHtml(c)}</textarea>
+                <div class="aval-print-comment hidden text-xs leading-relaxed">${escapeHtml(c) || '—'}</div>
+                <div class="flex gap-1.5 justify-end no-print">
+                  <button onclick="avalRegenerate(${st.id})" class="text-[11px] font-bold px-2.5 py-1.5 rounded-lg bg-zinc-100 text-zinc-700 hover:bg-zinc-200"><i class="fa-solid fa-wand-magic-sparkles mr-1"></i>${c ? 'Tornar a generar' : 'Generar'}</button>
+                  <button onclick="avalCopyOne(${st.id}, this)" ${c ? '' : 'disabled'} class="text-[11px] font-bold px-2.5 py-1.5 rounded-lg bg-white border border-zinc-200 text-zinc-700 disabled:opacity-40"><i class="fa-regular fa-copy mr-1"></i>Copiar</button>
+                </div>
+              </div>
+            </div>`;
+          }).join('') : `<div class="bg-white border border-zinc-200 rounded-2xl p-8 text-center text-xs text-zinc-400">Cap alumne en aquest filtre.</div>`}
+        </div>
+        <p class="text-[11px] text-zinc-400">Alertes: nivell NA o EPA, pràctica per sota del ${getMinPractice(g)}%, ${AVAL_LIMITS.F}+ faltes sense justificar, ${AVAL_LIMITS.R}+ retards, ${AVAL_LIMITS.SR}+ dies sense roba, actitud per sota d'AS. Els comentaris es desen per trimestre.</p>`;
+    };
 
     window.renderIndividualReport = function() {
       const curGroup = getCurrentGroup();
@@ -9406,7 +9673,7 @@
     const _origSwitchView = window.switchView;
     window.switchView = function(view) {
       _origSwitchView(view);
-      if (['sda', 'trim', 'final'].includes(view)) window.appState.lastQuadernView = view;
+      if (['sda', 'trim', 'final', 'aval'].includes(view)) window.appState.lastQuadernView = view;
       if (['roster', 'fitxa', 'report'].includes(view)) window.appState.lastAlumnesView = view;
       updateClassTabs(view);
     };
@@ -9468,11 +9735,11 @@
     };
 
     function updateClassTabs(view) {
-      const tab = ['sda', 'trim', 'final'].includes(view) ? 'quadern' : ['roster', 'fitxa', 'report'].includes(view) ? 'alumnes' : view;
+      const tab = ['sda', 'trim', 'final', 'aval'].includes(view) ? 'quadern' : ['roster', 'fitxa', 'report'].includes(view) ? 'alumnes' : view;
       document.querySelectorAll('#classTabs .ctab').forEach(b => b.classList.toggle('active', b.dataset.tab === tab));
       const seg = document.getElementById('classSubSeg');
       const subs = tab === 'quadern'
-        ? [['sda', 'Per SdA'], ['trim', 'Resum trimestral'], ['final', 'Final de curs']]
+        ? [['sda', 'Per SdA'], ['trim', 'Resum trimestral'], ['aval', 'Sessió d\'avaluació'], ['final', 'Final de curs']]
         : tab === 'alumnes' ? [['roster', 'Llista'], ['fitxa', 'Fitxa'], ['report', 'Butlletins']] : [];
       seg.innerHTML = subs.map(([v, l]) => `<button onclick="switchView('${v}')" class="${v === view ? 'active' : ''}">${l}</button>`).join('');
     }
