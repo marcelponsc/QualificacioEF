@@ -46,11 +46,6 @@
     }
     .cell-saved { animation: cellPulse 0.4s cubic-bezier(0.16, 1, 0.3, 1); }
     @media print {
-      #viewAval textarea { display: none !important; }
-      #viewAval .aval-print-comment { display: block !important; }
-      #viewAval .aval-row { break-inside: avoid; border-color: #ddd !important; }
-    }
-    @media print {
       .no-print { display: none !important; }
       body { background: white !important; }
       .print-page-break { page-break-before: always; }
@@ -517,11 +512,6 @@
         </div>
       </div>
 
-      <div id="libScopeTabs" class="inline-flex rounded-2xl bg-zinc-100 p-1 text-sm font-semibold border border-zinc-200">
-        <button data-scope="mine" onclick="setLibFilter('scope','mine')" class="px-4 py-2 rounded-xl transition"><i class="fa-regular fa-folder mr-1.5"></i>Les meves</button>
-        <button data-scope="dept" onclick="setLibFilter('scope','dept')" class="px-4 py-2 rounded-xl transition"><i class="fa-solid fa-people-group mr-1.5"></i>Departament <span id="libDeptCount" class="font-mono text-xs opacity-60"></span></button>
-      </div>
-
       <!-- Filtres -->
       <div class="bg-white border border-zinc-200/90 rounded-2xl p-3 shadow-subtle flex flex-col md:flex-row md:items-center gap-2.5">
         <div class="relative flex-1">
@@ -772,18 +762,6 @@
             </table>
           </div>
         </div>
-      </section>
-
-      <!-- VISTA: SESSIÓ D'AVALUACIÓ -->
-      <section id="viewAval" class="space-y-4 hidden">
-        <div class="flex flex-wrap items-end justify-between gap-4 border-b border-zinc-200/70 pb-4">
-          <div>
-            <span class="inline-flex items-center rounded-md bg-rose-50 px-2 py-0.5 text-[11px] font-bold text-rose-700">Junta d'avaluació</span>
-            <h2 id="avalTitle" class="text-xl font-bold text-zinc-900 tracking-tight mt-1">Sessió d'avaluació</h2>
-            <p class="text-xs text-zinc-500 mt-0.5">Resum de cada alumne amb alertes i comentari per a l'informe. Canvia de trimestre a dalt.</p>
-          </div>
-        </div>
-        <div id="avalContent" class="space-y-4"></div>
       </section>
 
       <!-- VISTA 4: FINAL DE CURS -->
@@ -1226,13 +1204,6 @@
             </div>
             <div id="modalTargetGroupsContainer" class="flex flex-wrap gap-2 pt-1"></div>
           </div>
-          <label id="modalShareWrap" class="flex items-start gap-3 bg-indigo-50/60 border border-indigo-200 rounded-2xl p-3 cursor-pointer">
-            <input type="checkbox" id="modalSdaShare" class="mt-0.5 w-4 h-4 accent-indigo-600 shrink-0">
-            <span class="text-xs">
-              <span class="font-bold text-indigo-900"><i class="fa-solid fa-people-group mr-1"></i>Compartir a la biblioteca del departament</span>
-              <span id="modalShareHint" class="block text-[11px] text-indigo-700/80 mt-0.5">La veuran i la podran copiar els altres professors d'EF. No es comparteixen alumnes ni notes.</span>
-            </span>
-          </label>
           <p class="text-[11px] text-zinc-400"><i class="fa-regular fa-lightbulb mr-1"></i>Als camps de text llargs, <b>cada línia es converteix en un punt</b> a la fitxa impresa. Pots posar <b>**paraules**</b> entre dos asteriscs per destacar-les.</p>
         </div>
 
@@ -1285,11 +1256,7 @@
           <div>
             <div class="flex items-center justify-between mb-1.5">
               <span class="font-semibold text-zinc-700">Sabers <span class="font-normal text-zinc-400">(per blocs del Decret 175/2022)</span></span>
-            </div>
-            <div id="plan_saberPicker" class="mb-3"></div>
-            <div class="flex items-center justify-between mb-1.5 mt-4">
-              <span class="text-[11px] font-bold uppercase tracking-wider text-zinc-500">Sabers d'aquesta SdA <span class="font-normal normal-case tracking-normal text-zinc-400">· els pots retocar</span></span>
-              <button type="button" onclick="addPlanSaberRow()" class="text-zinc-900 hover:text-zinc-600 font-semibold flex items-center gap-1 text-xs"><i class="fa-solid fa-pen text-[10px]"></i> Escriure'n un de propi</button>
+              <button type="button" onclick="addPlanSaberRow()" class="text-zinc-900 hover:text-zinc-600 font-semibold flex items-center gap-1"><i class="fa-solid fa-plus text-[10px]"></i> Afegir saber</button>
             </div>
             <div id="plan_sabersList" class="space-y-2"></div>
           </div>
@@ -1681,12 +1648,6 @@
             <div id="idoSymbols" class="flex flex-wrap gap-2"></div>
           </div>
 
-          <div id="idoRubricWrap" class="hidden">
-            <div class="font-bold text-zinc-800 text-[11px] uppercase tracking-wider mb-1">Rúbriques diàries → actitud i roba</div>
-            <p class="text-[11px] text-zinc-500 mb-2">He trobat rúbriques amb data. Tria què és cada criteri i quant val cada descripció. L'actitud del dia serà la <b>mitjana</b> dels criteris d'actitud.</p>
-            <div id="idoRubric" class="space-y-2"></div>
-          </div>
-
           <div>
             <div class="flex items-center justify-between mb-1.5">
               <span class="font-bold text-zinc-800 text-[11px] uppercase tracking-wider">Alumnes</span>
@@ -1794,20 +1755,6 @@
       }
     }
 
-    const fbConfigAuthDomain = "quadern-ef.firebaseapp.com";
-
-    // Navegador integrat d'una altra app (Instagram, Gmail, WhatsApp, Teams...)
-    function isInAppBrowser() {
-      const ua = navigator.userAgent || '';
-      return /FBAN|FBAV|Instagram|Line\/|GSA\/|Teams|LinkedInApp|Snapchat|Twitter|MicroMessenger|; wv\)/i.test(ua);
-    }
-
-    function openInBrowserMessage() {
-      return `Aquest navegador no deixa obrir la finestra de Google.<br>
-        Obre l'app directament a <b>Safari</b> o <b>Chrome</b> (no des d'un enllaç dins d'una altra app).
-        <button onclick="navigator.clipboard && navigator.clipboard.writeText(location.origin + location.pathname).then(() => { this.textContent = 'Enllaç copiat ✓'; })" class="mt-2 block mx-auto bg-white border border-rose-300 rounded-lg px-3 py-1.5 text-rose-700 font-bold">Copiar l'enllaç</button>`;
-    }
-
     function showAuthError(msg) {
       const errBox = document.getElementById('authErrorMsg');
       errBox.innerHTML = msg;
@@ -1837,13 +1784,7 @@
         await signInWithPopup(fbAuth, provider);
       } catch (err) {
         if (err && (err.code === 'auth/popup-blocked' || err.code === 'auth/operation-not-supported-in-this-environment')) {
-          // La redirecció només és fiable si l'app és al mateix domini que Firebase.
-          // A Vercel/GitHub, Safari (i els navegadors integrats d'altres apps) la trenquen.
-          if (location.hostname === fbConfigAuthDomain) {
-            try { await signInWithRedirect(fbAuth, provider); return; } catch (e2) { showAuthError(authErrorMessage(e2)); return; }
-          }
-          showAuthError(openInBrowserMessage());
-          return;
+          try { await signInWithRedirect(fbAuth, provider); return; } catch (e2) { showAuthError(authErrorMessage(e2)); return; }
         }
         showAuthError(authErrorMessage(err));
       }
@@ -1855,8 +1796,7 @@
     };
 
     function checkActiveSession() {
-      if (location.hostname === fbConfigAuthDomain) getRedirectResult(fbAuth).catch(err => showAuthError(authErrorMessage(err)));
-      if (isInAppBrowser()) setTimeout(() => showAuthError(openInBrowserMessage()), 300);
+      getRedirectResult(fbAuth).catch(err => showAuthError(authErrorMessage(err)));
       onAuthStateChanged(fbAuth, user => {
         if (user) loginUserSession(user);
         else document.getElementById('loginOverlay').classList.remove('hidden');
@@ -1904,45 +1844,10 @@
       document.getElementById('headerUserLabel').textContent = label;
       document.getElementById('headerUserLabel').title = user.email || '';
       setCloudStatus('syncing');
-      window.currentUserInfo = { uid: user.uid, name: user.displayName || (user.email || '').split('@')[0] || 'Docent', email: user.email || '' };
       await migrateLegacyDataIfNeeded(user.uid);
       try { localStorage.removeItem('EF_AUTH_USER'); } catch (e) {}
       connectToUserCloud(currentAuthUser);
-      subscribeSharedLibrary();
     }
-
-    // ===== BIBLIOTECA COMUNA DEL DEPARTAMENT =====
-    // shared/sdaLibrary/{clau} = { title, trim, trimWeight, competences, plan, author: {uid, name, email}, updatedAt }
-    window.sharedSdaLibrary = {};
-    window.sharedLibStatus = 'off'; // off | loading | ok | denied
-    let sharedLibSubscribed = false;
-    function subscribeSharedLibrary() {
-      if (sharedLibSubscribed || !fbDb) return;
-      sharedLibSubscribed = true;
-      window.sharedLibStatus = 'loading';
-      onValue(ref(fbDb, 'shared/sdaLibrary'), snap => {
-        window.sharedSdaLibrary = snap.val() || {};
-        window.sharedLibStatus = 'ok';
-        if (window.onSharedLibraryChange) window.onSharedLibraryChange();
-      }, err => {
-        console.warn('Biblioteca comuna:', err);
-        window.sharedLibStatus = 'denied';
-        sharedLibSubscribed = false;
-        if (window.onSharedLibraryChange) window.onSharedLibraryChange();
-      });
-    }
-    window.subscribeSharedLibrary = subscribeSharedLibrary;
-
-    window.publishSharedSda = function(key, payload) {
-      if (!currentAuthUser || !fbDb) return Promise.reject(new Error('no-auth'));
-      const data = JSON.parse(JSON.stringify({ ...payload, author: window.currentUserInfo, updatedAt: Date.now() }));
-      return set(ref(fbDb, `shared/sdaLibrary/${key}`), data);
-    };
-
-    window.unpublishSharedSda = function(key) {
-      if (!currentAuthUser || !fbDb) return Promise.reject(new Error('no-auth'));
-      return set(ref(fbDb, `shared/sdaLibrary/${key}`), null);
-    };
 
     function connectToUserCloud(userKey) {
       const userBranchRef = ref(fbDb, `users/${userKey}/quadern_data`);
@@ -2835,49 +2740,9 @@
       return group.sessions;
     }
 
-    // ===== LESIONS / JUSTIFICANTS =====
-    // group.injuries = { stId: { injId: { from: 'YYYY-MM-DD', to: 'YYYY-MM-DD' | '', reason } } }
-    function getStudentInjuries(group, stId) {
-      const m = (group && group.injuries && group.injuries[stId]) || {};
-      return Object.keys(m).map(id => ({ id, ...m[id] })).filter(i => i && i.from).sort((a, b) => b.from.localeCompare(a.from));
-    }
-    window.getStudentInjuries = getStudentInjuries;
-
-    function getActiveInjury(group, stId, iso) {
-      if (!group || !group.injuries || !group.injuries[stId] || !iso) return null;
-      return getStudentInjuries(group, stId).find(i => i.from <= iso && (!i.to || iso <= i.to)) || null;
-    }
-    window.getActiveInjury = getActiveInjury;
-
-    function injuryPeriodText(inj) {
-      const f = d => isoToDate(d).toLocaleDateString('ca-ES', { day: 'numeric', month: 'short' });
-      return inj.to ? `del ${f(inj.from)} al ${f(inj.to)}` : `des del ${f(inj.from)} · sense data de final`;
-    }
-    window.injuryPeriodText = injuryPeriodText;
-
-    // Saber a quin grup i dia pertany cada sessió (sense guardar res a les dades)
-    let _sessMeta = new WeakMap();
-    function sessionMeta(session) {
-      if (_sessMeta.has(session)) return _sessMeta.get(session);
-      Object.values((window.appData && window.appData.groups) || {}).forEach(g => {
-        Object.keys(g.sessions || {}).forEach(iso => { const s = g.sessions[iso]; if (s && typeof s === 'object') _sessMeta.set(s, { group: g, iso }); });
-      });
-      if (!_sessMeta.has(session)) _sessMeta.set(session, null);
-      return _sessMeta.get(session);
-    }
-
-    // Registre efectiu: si l'alumne té una lesió activa aquell dia i no s'ha marcat res, compta com a "L"
-    // rec.p === '-' vol dir "fa pràctica malgrat la lesió"
     function getRecord(session, stId) {
       const recs = session && session.records;
-      const rec = (recs && recs[stId]) || {};
-      if (!session || typeof session !== 'object') return rec;
-      const meta = sessionMeta(session);
-      const inj = meta ? getActiveInjury(meta.group, stId, meta.iso) : null;
-      if (rec.p === '-') { const c = { ...rec }; delete c.p; if (inj) { c.inj = inj; c.injOff = true; } return c; }
-      if (!inj) return rec;
-      if (rec.p) return { ...rec, inj };
-      return { ...rec, p: 'L', inj, pAuto: true };
+      return (recs && recs[stId]) || {};
     }
 
     function getSessionSortedDates(group, trim = null) {
@@ -3026,14 +2891,9 @@
     };
 
     window.diariTogglePractice = function(stId, code) {
-      const group = getCurrentGroup();
-      const iso = window.appState.diariDate;
-      const injured = !!getActiveInjury(group, stId, iso);
-      const eff = getRecord((group.sessions || {})[iso], stId).p || null;
       updateRecord(stId, rec => {
-        if (eff === code) rec.p = injured ? '-' : null;          // desmarcar (si està lesionat: fa pràctica igualment)
-        else rec.p = injured && code === 'L' ? null : code;      // tornar a "L" automàtic o marcar un altre codi
-        if (rec.p && rec.p !== '-' && (rec.a === 'F' || rec.a === 'FJ')) rec.a = 'P';
+        rec.p = rec.p === code ? null : code;
+        if (rec.p && (rec.a === 'F' || rec.a === 'FJ')) rec.a = 'P';
       });
     };
 
@@ -3290,7 +3150,6 @@
                 <span class="text-[10px] font-mono text-zinc-400 w-5 text-right shrink-0">${idx + 1}</span>
                 <div class="min-w-0">
                   <div class="text-xs font-bold text-zinc-900 truncate">${escapeHtml(st.name)}</div>
-                  ${r.inj ? `<button onclick="openStudentFitxa(${st.id})" title="${escapeHtml((r.inj.reason ? r.inj.reason + ' · ' : '') + injuryPeriodText(r.inj))}" class="mt-0.5 inline-flex items-center gap-1 text-[10px] font-bold px-1.5 py-0.5 rounded-md ${r.injOff ? 'bg-zinc-100 text-zinc-500 line-through' : 'bg-sky-100 text-sky-700'}"><i class="fa-solid fa-user-injured"></i>Lesionat${r.inj.reason ? ': ' + escapeHtml(r.inj.reason.length > 22 ? r.inj.reason.slice(0, 22) + '…' : r.inj.reason) : ''}</button>` : ''}
                   <div class="text-[10px] text-zinc-400 flex items-center gap-1.5">Pràctica T${session.trim}: ${practicePctBadge(stats.pct, minP)}${stats.pos || stats.neg ? `<span class="font-mono">+${stats.pos} / −${stats.neg}</span>` : ''}</div>
                 </div>
               </div>
@@ -4784,8 +4643,8 @@
     // ================== BIBLIOTECA DE SdAs ==================
 
     const libFilters = (() => {
-      try { return { trim: 'all', group: 'all', ce: 'all', view: 'cards', scope: 'mine', ...JSON.parse(localStorage.getItem('EF_LIB_FILTERS') || '{}') }; }
-      catch (e) { return { trim: 'all', group: 'all', ce: 'all', view: 'cards', scope: 'mine' }; }
+      try { return { trim: 'all', group: 'all', ce: 'all', view: 'cards', ...JSON.parse(localStorage.getItem('EF_LIB_FILTERS') || '{}') }; }
+      catch (e) { return { trim: 'all', group: 'all', ce: 'all', view: 'cards' }; }
     })();
 
     // Agrupa les còpies d'una mateixa SdA a diferents classes (mateix títol i trimestre)
@@ -4854,7 +4713,6 @@
       window.appState.editingSdaOriginal = null;
       document.getElementById('modalSdaTitle').value = `${item.title} (còpia)`;
       document.getElementById('modalDeleteSdaBtn').classList.add('hidden');
-      setModalShareBox(false, null);
       renderModalTargetGroups(null, item.trim);
       document.getElementById('modalSdaTitle').focus();
     };
@@ -4862,7 +4720,6 @@
     window.libDelete = function(key) {
       const item = findLibraryItem(key);
       if (!item) return;
-      const sharedCopy = item.copies.find(c => c.sda.shared && c.sda.shareKey);
       let gradedStudents = 0;
       item.copies.forEach(c => {
         const g = (c.group.grades && c.group.grades[c.sda.id]) || {};
@@ -4872,9 +4729,6 @@
       const msg = `Vols eliminar la SdA "${item.title}" de ${item.copies.length === 1 ? 'la classe' : 'les classes'} ${classes}?` +
         (gradedStudents ? `\n\nATENCIÓ: s'esborraran les notes de ${gradedStudents} alumne${gradedStudents === 1 ? '' : 's'}.` : '');
       if (!confirm(msg)) return;
-      if (sharedCopy && window.unpublishSharedSda && confirm('Aquesta SdA està compartida a la biblioteca del departament.\n\nVols retirar-la també de la biblioteca? (Si dius que no, els companys la continuaran veient.)')) {
-        window.unpublishSharedSda(sharedCopy.sda.shareKey).catch(() => {});
-      }
       item.copies.forEach(c => {
         c.group.sdas = (c.group.sdas || []).filter(s => s.id !== c.sda.id);
         if (c.group.grades) delete c.group.grades[c.sda.id];
@@ -4887,136 +4741,6 @@
     window.openSdaFromLibraryNew = function() {
       openSdaModal(true);
     };
-
-    // ---------- Biblioteca del departament ----------
-    window.onSharedLibraryChange = function() {
-      if (window.appState.currentScreen === 'library') renderSdaLibrary();
-      if (posterSdaRef && posterSdaRef.shared) renderSdaPoster();
-    };
-
-    function sharedItems() {
-      const lib = window.sharedSdaLibrary || {};
-      return Object.keys(lib).map(k => ({ key: k, ...lib[k], competences: lib[k].competences || {}, plan: lib[k].plan || {} }))
-        .filter(i => i.title);
-    }
-
-    window.libSharedPoster = function(key) {
-      if (!(window.sharedSdaLibrary || {})[key]) return;
-      posterSdaRef = { shared: key };
-      document.getElementById('sdaPosterOverlay').classList.remove('hidden');
-      document.body.classList.add('poster-mode');
-      document.body.style.overflow = 'hidden';
-      renderSdaPoster();
-    };
-
-    window.libImportShared = function(key) {
-      const it = (window.sharedSdaLibrary || {})[key];
-      if (!it) return;
-      if (!Object.keys(window.appData.groups || {}).length) { alert('Primer crea alguna classe.'); return; }
-      openSdaModalWithData({ title: it.title, trim: it.trim, trimWeight: it.trimWeight, competences: it.competences || {}, plan: it.plan || {} },
-        { key, author: (it.author && it.author.name) || '', at: Date.now() });
-    };
-
-    window.libUnshare = function(key) {
-      const it = (window.sharedSdaLibrary || {})[key];
-      if (!it) return;
-      if (!confirm(`Retirar "${it.title}" de la biblioteca del departament?\n\nLa teva SdA i les còpies que hagin fet els companys no s'esborren.`)) return;
-      window.unpublishSharedSda(key).catch(err => alert('No s\'ha pogut retirar: ' + (err && err.message || err)));
-      Object.values(window.appData.groups || {}).forEach(g => (g.sdas || []).forEach(sd => { if (sd.shareKey === key) delete sd.shared; }));
-      saveToStorage();
-      if (window.syncWholeAppToCloud) window.syncWholeAppToCloud();
-    };
-
-    function renderDeptLibrary(content) {
-      const st = window.sharedLibStatus;
-      const me = window.currentUserInfo;
-      const msgBox = (icon, title, text, extra = '') => `
-        <div class="bg-white border border-dashed border-zinc-300 rounded-3xl p-8 text-center space-y-2 max-w-xl mx-auto">
-          <i class="${icon} text-3xl text-zinc-300"></i>
-          <p class="text-sm font-bold text-zinc-800">${title}</p>
-          <p class="text-xs text-zinc-500">${text}</p>${extra}
-        </div>`;
-      document.getElementById('libSummary').textContent = 'SdA compartides pels professors del departament';
-      if (!me) { content.innerHTML = msgBox('fa-solid fa-lock', 'Cal entrar amb Google', 'La biblioteca del departament només funciona amb la sessió iniciada.'); return; }
-      if (st === 'denied') {
-        content.innerHTML = msgBox('fa-solid fa-shield-halved', 'Falta activar la biblioteca a Firebase',
-          'Cal afegir la secció <b>shared</b> a les regles de Firebase (Realtime Database → Reglas). Només s\'ha de fer una vegada.',
-          `<button onclick="window.subscribeSharedLibrary && window.subscribeSharedLibrary(); renderSdaLibrary();" class="mt-2 text-xs font-bold px-3 py-2 rounded-xl bg-zinc-900 text-white">Tornar-ho a provar</button>`);
-        return;
-      }
-      if (st !== 'ok') { content.innerHTML = msgBox('fa-solid fa-spinner fa-spin', 'Carregant la biblioteca…', ''); return; }
-
-      const term = (document.getElementById('libSearch').value || '').toLowerCase().trim();
-      const all = sharedItems();
-      const items = all.filter(i =>
-        (libFilters.trim === 'all' || String(i.trim) === String(libFilters.trim)) &&
-        (libFilters.ce === 'all' || (i.competences[libFilters.ce] && i.competences[libFilters.ce].active)) &&
-        (!term || term.split(/\s+/).every(t => [i.title, i.plan.pregunta, i.plan.repte, i.plan.producteTitol, i.author && i.author.name, ...(i.plan.sabers || []).map(x => x.text)].filter(Boolean).join(' ').toLowerCase().includes(t)))
-      ).sort((a, b) => (a.trim - b.trim) || String(a.title).localeCompare(String(b.title)));
-      document.getElementById('libSummary').textContent = `${all.length} SdA compartides al departament · ${all.filter(i => me && i.author && i.author.uid === me.uid).length} són teves`;
-
-      if (!all.length) {
-        content.innerHTML = msgBox('fa-solid fa-people-group', 'Encara no hi ha cap SdA compartida',
-          'Obre una SdA teva, marca <b>Compartir a la biblioteca del departament</b> i desa-la.');
-        return;
-      }
-      if (!items.length) { content.innerHTML = `<div class="bg-white border border-zinc-200 rounded-2xl p-8 text-center text-xs text-zinc-400">Cap SdA coincideix amb els filtres.</div>`; return; }
-
-      // Quines ja tinc copiades
-      const mineKeys = new Set();
-      Object.values(window.appData.groups || {}).forEach(g => (g.sdas || []).forEach(sd => { if (sd.shareKey) mineKeys.add(sd.shareKey); if (sd.sharedFrom && sd.sharedFrom.key) mineKeys.add(sd.sharedFrom.key); }));
-
-      const ceChips = i => OFFICIAL_CES.filter(ce => i.competences[ce.id] && i.competences[ce.id].active).map(ce => {
-        const t = CE_COLOR_THEMES[ce.id];
-        return `<span class="inline-flex items-center gap-1 text-[10px] px-2 py-0.5 rounded-md font-bold border ${t.header}" title="${escapeHtml(ce.name)}">${ce.id}<span class="font-mono font-semibold opacity-70">${i.competences[ce.id].weight || 0}%</span></span>`;
-      }).join('');
-
-      content.innerHTML = [1, 2, 3].map(t => {
-        const list = items.filter(i => Number(i.trim) === t);
-        if (!list.length) return '';
-        return `
-          <div class="space-y-3 mb-6">
-            <h3 class="text-xs font-bold text-zinc-500 uppercase tracking-wider">${t}${['', 'r', 'n', 'r'][t]} trimestre <span class="font-mono font-normal text-zinc-400 ml-1">${list.length}</span></h3>
-            <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
-              ${list.map(i => {
-                const mine = me && i.author && i.author.uid === me.uid;
-                const have = mineKeys.has(i.key);
-                const ses = getSdaTotalSessions(i.plan);
-                const nActs = (i.plan.activitats || []).length;
-                const k = escapeHtml(JSON.stringify(i.key));
-                const date = i.updatedAt ? new Date(i.updatedAt).toLocaleDateString('ca-ES', { day: 'numeric', month: 'short' }) : '';
-                return `
-                  <div class="bg-white border ${mine ? 'border-indigo-200' : 'border-zinc-200/90'} rounded-3xl shadow-card hover:shadow-float transition flex flex-col overflow-hidden">
-                    <div class="bg-[#1d2a5c] text-white px-4 py-3.5">
-                      <div class="flex items-center justify-between text-[10px] font-bold uppercase tracking-[0.18em] text-indigo-200">
-                        <span>SdA · T${i.trim}</span>
-                        <span class="font-mono tracking-normal text-zinc-300 normal-case">${ses ? ses + ' sessions' : ''}</span>
-                      </div>
-                      <div class="text-[15px] font-extrabold leading-tight mt-1.5" style="font-family:'Roboto Slab',Georgia,serif">${escapeHtml(i.title)}</div>
-                      ${i.plan.pregunta ? `<div class="text-[11px] text-zinc-300 mt-1 italic">${escapeHtml(i.plan.pregunta)}</div>` : ''}
-                    </div>
-                    <div class="p-4 space-y-3 flex-1 flex flex-col">
-                      <div class="flex items-center gap-2 text-[11px] text-zinc-600">
-                        <span class="w-6 h-6 rounded-full ${mine ? 'bg-indigo-100 text-indigo-700' : 'bg-zinc-100 text-zinc-600'} flex items-center justify-center text-[10px] font-black">${escapeHtml(((i.author && i.author.name) || '?').split(/\s+/).slice(0, 2).map(w => w[0]).join('').toUpperCase())}</span>
-                        <span class="font-semibold">${mine ? 'Tu' : escapeHtml((i.author && i.author.name) || 'Desconegut')}</span>
-                        ${date ? `<span class="text-zinc-400">· ${date}</span>` : ''}
-                        ${have && !mine ? '<span class="ml-auto text-[10px] font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 rounded-md px-1.5 py-0.5"><i class="fa-solid fa-check mr-0.5"></i>La tens</span>' : ''}
-                      </div>
-                      <div class="flex flex-wrap gap-1">${ceChips(i) || '<span class="text-[11px] text-zinc-400 italic">Sense competències</span>'}</div>
-                      ${i.plan.producteTitol ? `<div class="text-[11px] text-zinc-600"><span class="font-bold text-zinc-400 uppercase tracking-wider text-[9px] mr-1">Producte</span>${escapeHtml(i.plan.producteTitol)}</div>` : ''}
-                      ${nActs ? `<div class="text-[11px] text-zinc-500">${nActs} activitats programades</div>` : ''}
-                      <div class="mt-auto pt-2 border-t border-zinc-100 flex flex-wrap gap-1">
-                        <button onclick='libSharedPoster(${k})' class="inline-flex items-center gap-1 px-2 py-1.5 rounded-lg text-[11px] font-semibold text-amber-800 bg-amber-50 hover:bg-amber-100"><i class="fa-solid fa-print text-[10px]"></i>Fitxa</button>
-                        ${mine ? '' : `<button onclick='libImportShared(${k})' class="inline-flex items-center gap-1 px-2 py-1.5 rounded-lg text-[11px] font-bold text-white bg-zinc-900 hover:bg-zinc-800"><i class="fa-solid fa-download text-[10px]"></i>Afegir a les meves classes</button>`}
-                        ${mine ? `<button onclick='libUnshare(${k})' class="inline-flex items-center gap-1 px-2 py-1.5 rounded-lg text-[11px] font-semibold text-zinc-400 hover:text-rose-600 hover:bg-rose-50"><i class="fa-solid fa-link-slash text-[10px]"></i>Deixar de compartir</button>` : ''}
-                      </div>
-                    </div>
-                  </div>`;
-              }).join('')}
-            </div>
-          </div>`;
-      }).join('');
-    }
 
     function libMatchesSearch(item, term) {
       if (!term) return true;
@@ -5034,15 +4758,6 @@
       if (!content) return;
       const groups = window.appData.groups || {};
       const all = collectLibrarySdas();
-
-      document.querySelectorAll('#libScopeTabs [data-scope]').forEach(b => {
-        b.className = `px-4 py-2 rounded-xl transition ${b.dataset.scope === libFilters.scope ? 'bg-white text-zinc-900 shadow-subtle' : 'text-zinc-500 hover:text-zinc-900'}`;
-      });
-      const nShared = Object.keys(window.sharedSdaLibrary || {}).length;
-      document.getElementById('libDeptCount').textContent = window.sharedLibStatus === 'ok' ? nShared : '';
-      document.getElementById('libGroupFilter').classList.toggle('hidden', libFilters.scope === 'dept');
-      document.querySelectorAll('#screenSdaLibrary [data-view]').forEach(b => b.parentElement.classList.toggle('hidden', libFilters.scope === 'dept'));
-      if (libFilters.scope === 'dept') { renderDeptLibrary(content); return; }
 
       // Opcions dels selectors
       const groupSel = document.getElementById('libGroupFilter');
@@ -5167,7 +4882,7 @@
                   <div class="bg-white border border-zinc-200/90 rounded-3xl shadow-card hover:shadow-float transition flex flex-col overflow-hidden">
                     <div class="bg-[#0e1834] text-white px-4 py-3.5">
                       <div class="flex items-center justify-between text-[10px] font-bold uppercase tracking-[0.18em] text-[#e8ad3c]">
-                        <span>SdA · T${item.trim}${item.copies.some(c => c.sda.shared) ? ' <span class="ml-1 normal-case tracking-normal text-indigo-200" title="Compartida a la biblioteca del departament"><i class="fa-solid fa-people-group"></i> compartida</span>' : ''}</span>
+                        <span>SdA · T${item.trim}</span>
                         <span class="font-mono tracking-normal text-zinc-300 normal-case">${ses ? ses + ' sessions' : 'sessions per definir'}</span>
                       </div>
                       <div class="text-[15px] font-extrabold leading-tight mt-1.5" style="font-family:'Roboto Slab',Georgia,serif">${escapeHtml(item.title)}</div>
@@ -5642,8 +5357,7 @@
         const r = (s.records && s.records[stId]) || {};
         const a = r.a || 'P';
         if (a === 'F' || a === 'FJ') return;
-        const av = typeof r.act === 'number' ? r.act : (r.act ? levelValue(r.act) : undefined);
-        if (av !== undefined && av !== null && !isNaN(av)) { sum += av; info.n++; }
+        if (r.act && levelValue(r.act) !== undefined) { sum += levelValue(r.act); info.n++; }
         info.pos += r.pos || 0;
         info.neg += r.neg || 0;
       });
@@ -6094,12 +5808,11 @@
       if (window.appState.currentView === 'trim') renderTrimView();
       if (window.appState.currentView === 'stats') renderStatsView();
       if (window.appState.currentView === 'diari') renderDiariView();
-      if (window.appState.currentView === 'aval') renderAvalView();
     };
 
     window.switchView = function(view) {
       window.appState.currentView = view;
-      ['sda', 'diari', 'planif', 'roster', 'fitxa', 'trim', 'final', 'report', 'stats', 'aval'].forEach(id => {
+      ['sda', 'diari', 'planif', 'roster', 'fitxa', 'trim', 'final', 'report', 'stats'].forEach(id => {
         const btn = document.getElementById(`tabBtn${id.charAt(0).toUpperCase() + id.slice(1)}`);
         const sec = document.getElementById(`view${id.charAt(0).toUpperCase() + id.slice(1)}`);
         if (id === view) {
@@ -6119,7 +5832,6 @@
       if (view === 'diari') renderDiariView();
       if (view === 'planif') renderPlanifView();
       if (view === 'fitxa') renderStudentFitxa();
-      if (view === 'aval') renderAvalView();
     };
 
     // ================== ALUMNAT ==================
@@ -6240,48 +5952,10 @@
         if (delBtn) delBtn.classList.remove('hidden');
       }
 
-      window.appState.modalSourceSda = isNew ? null : sda;
-      window.appState.modalSharedFrom = null;
-      setModalShareBox(!isNew && !!sda.shared, sda);
-
       document.getElementById('modalSdaTitle').value = sda.title || '';
       document.getElementById('modalSdaTrim').value = sda.trim || window.appState.currentTrim;
       document.getElementById('modalSdaTrimWeight').value = sda.trimWeight !== undefined ? sda.trimWeight : 50;
       renderModalTargetGroups(isNew ? null : sda.title, sda.trim || window.appState.currentTrim);
-      renderModalCeCards(sda);
-      fillPlanEditor(sda.plan);
-      switchSdaModalTab('basics');
-      document.getElementById('sdaModal').classList.remove('hidden');
-    };
-
-    function setModalShareBox(checked, sda) {
-      const box = document.getElementById('modalSdaShare');
-      const hint = document.getElementById('modalShareHint');
-      if (!box) return;
-      const logged = !!window.currentUserInfo;
-      box.checked = logged && checked;
-      box.disabled = !logged;
-      const from = sda && sda.sharedFrom;
-      hint.innerHTML = !logged
-        ? 'Cal haver entrat amb Google per compartir.'
-        : from ? `Copiada de la biblioteca (autor: <b>${escapeHtml(from.author || '—')}</b>). Si la comparteixes, es publicarà com una SdA nova teva.`
-        : 'La veuran i la podran copiar els altres professors d\'EF. No es comparteixen alumnes ni notes.';
-    }
-
-    // Obrir l'editor amb una SdA que no és de cap classe (de la biblioteca comuna)
-    window.openSdaModalWithData = function(data, sharedFrom = null) {
-      const sda = JSON.parse(JSON.stringify(data));
-      window.appState.editingSdaId = null;
-      window.appState.editingSdaOriginal = null;
-      window.appState.modalSourceSda = sda;
-      window.appState.modalSharedFrom = sharedFrom;
-      const delBtn = document.getElementById('modalDeleteSdaBtn');
-      if (delBtn) delBtn.classList.add('hidden');
-      setModalShareBox(false, { sharedFrom });
-      document.getElementById('modalSdaTitle').value = sda.title || '';
-      document.getElementById('modalSdaTrim').value = sda.trim || window.appState.currentTrim;
-      document.getElementById('modalSdaTrimWeight').value = sda.trimWeight !== undefined ? sda.trimWeight : 50;
-      renderModalTargetGroups(null, sda.trim || window.appState.currentTrim);
       renderModalCeCards(sda);
       fillPlanEditor(sda.plan);
       switchSdaModalTab('basics');
@@ -6490,23 +6164,6 @@
         }
       });
 
-      // Conservem les rúbriques (de CE i d'OA) que ja tenia la SdA d'origen
-      const srcSda = window.appState.modalSourceSda;
-      if (srcSda && srcSda.competences) {
-        Object.keys(competences).forEach(ceId => {
-          const sc = srcSda.competences[ceId];
-          if (!sc) return;
-          if (sc.rubric) competences[ceId].rubric = JSON.parse(JSON.stringify(sc.rubric));
-          competences[ceId].oas.forEach(oa => {
-            const so = (sc.oas || []).find(o => o.id === oa.id);
-            if (so && so.rubric) oa.rubric = JSON.parse(JSON.stringify(so.rubric));
-          });
-        });
-      }
-      const shareBox = document.getElementById('modalSdaShare');
-      const shareWanted = !!(shareBox && shareBox.checked && !shareBox.disabled);
-      const savedCopies = [];
-
       const isEditing = !!window.appState.editingSdaId;
       const sdaIdToUse = isEditing ? window.appState.editingSdaId : ('sda_' + Date.now() + '_' + Math.floor(Math.random() * 1000));
 
@@ -6542,28 +6199,9 @@
           targetSda.plan = JSON.parse(JSON.stringify(plan));
         }
 
-        if (!isEditing && window.appState.modalSharedFrom) targetSda.sharedFrom = window.appState.modalSharedFrom;
         if (gId === window.appData.activeGroupId) activeGroupSdaId = targetSda.id;
-        savedCopies.push({ gId, sda: targetSda });
+        if (!centreChanged && window.syncGroupEntityToCloud) window.syncGroupEntityToCloud(gId);
       });
-
-      // Biblioteca del departament: publicar, actualitzar o retirar
-      const prevKey = (savedCopies.find(c => c.sda.shareKey) || {}).sda;
-      let shareKey = prevKey ? prevKey.shareKey : null;
-      const wasShared = savedCopies.some(c => c.sda.shared);
-      if (shareWanted) {
-        if (!shareKey) shareKey = 'sh_' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
-        savedCopies.forEach(c => { c.sda.shareKey = shareKey; c.sda.shared = true; });
-        const ref0 = savedCopies[0] ? savedCopies[0].sda : null;
-        if (ref0 && window.publishSharedSda) {
-          window.publishSharedSda(shareKey, { title: ref0.title, trim: ref0.trim, trimWeight: ref0.trimWeight, competences: ref0.competences, plan: ref0.plan || {} })
-            .catch(err => alert('No s\'ha pogut publicar a la biblioteca del departament.' + (String(err && err.message || '').includes('permission') || String(err && err.code || '').includes('PERMISSION') ? '\n\nCal actualitzar les regles de Firebase (Realtime Database → Reglas).' : '')));
-        }
-      } else if (wasShared) {
-        savedCopies.forEach(c => { delete c.sda.shared; });
-        if (shareKey && window.unpublishSharedSda) window.unpublishSharedSda(shareKey).catch(() => {});
-      }
-      savedCopies.forEach(c => { if (!centreChanged && window.syncGroupEntityToCloud) window.syncGroupEntityToCloud(c.gId); });
 
       saveToStorage();
       if (centreChanged && window.syncWholeAppToCloud) window.syncWholeAppToCloud();
@@ -7033,254 +6671,6 @@
         </div>`;
     }
 
-
-    // ================== SESSIÓ D'AVALUACIÓ + COMENTARIS AUTOMÀTICS ==================
-    const CE_COMMENT_LABELS = {
-      CE1: 'els hàbits saludables i la condició física',
-      CE2: 'la resolució de situacions motrius, jocs i esports',
-      CE3: 'l\'expressió i la comunicació corporal',
-      CE4: 'les activitats a l\'entorn',
-      CE5: 'els valors, el treball en equip i la convivència'
-    };
-    const AVAL_LIMITS = { F: 3, R: 3, SR: 3 };
-
-    function studentFirstName(name) {
-      const n = String(name || '').trim();
-      if (n.includes(',')) return n.split(',').slice(1).join(',').trim().split(/\s+/)[0] || n;
-      return n.split(/\s+/)[0];
-    }
-
-    function getAvalData(group, st, trim) {
-      const score = getStudentTrimScore(st.id, group);
-      const comp = getStudentTrimCompScore(st.id, trim, group);
-      const lvl = getLevel(score);
-      const att = getStudentAttendanceStats(group, st.id, trim);
-      const min = getMinPractice(group);
-      const actRule = getAttitudeRule();
-      const act = actRule.enabled ? getStudentAttitudeTrim(group, st.id, trim) : null;
-      const ces = {};
-      OFFICIAL_CES.forEach(ce => { ces[ce.id] = getStudentCeAvg(st.id, ce.id, group, trim); });
-      const injuredNow = !!getActiveInjury(group, st.id, todayISO());
-      const penalized = isStudentPenalized(group, trim, st.id);
-      const alerts = [];
-      if (score === null) alerts.push({ k: 'nonotes', t: 'Sense notes', c: 'bg-zinc-100 text-zinc-500 border-zinc-200' });
-      else if (lvl.code === 'NA' || lvl.code === 'EPA') alerts.push({ k: 'susp', t: lvl.code === 'NA' ? 'No assolit' : 'En procés', c: 'bg-rose-50 text-rose-700 border-rose-200' });
-      if (penalized || (att.pct !== null && att.pct < min)) alerts.push({ k: 'prac', t: `Pràctica ${att.pct !== null ? Math.round(att.pct) + '%' : '—'}`, c: 'bg-rose-50 text-rose-700 border-rose-200' });
-      if (att.F >= AVAL_LIMITS.F) alerts.push({ k: 'F', t: `${att.F} faltes`, c: 'bg-amber-50 text-amber-800 border-amber-200' });
-      if (att.R >= AVAL_LIMITS.R) alerts.push({ k: 'R', t: `${att.R} retards`, c: 'bg-amber-50 text-amber-800 border-amber-200' });
-      if (att.SR >= AVAL_LIMITS.SR) alerts.push({ k: 'SR', t: `${att.SR} sense roba`, c: 'bg-orange-50 text-orange-800 border-orange-200' });
-      if (act !== null && act < gradeThresholds.as) alerts.push({ k: 'act', t: 'Actitud', c: 'bg-violet-50 text-violet-700 border-violet-200' });
-      if (injuredNow) alerts.push({ k: 'inj', t: 'Lesionat', c: 'bg-sky-50 text-sky-700 border-sky-200' });
-      const risk = alerts.some(a => ['susp', 'prac', 'F', 'SR', 'act', 'nonotes'].includes(a.k));
-      return { score, comp, lvl, att, min, act, ces, alerts, risk, penalized };
-    }
-
-    // Comentari en català, neutre de gènere
-    function generateStudentComment(group, st, trim) {
-      const d = getAvalData(group, st, trim);
-      const nom = studentFirstName(st.name);
-      const th = gradeThresholds;
-      const parts = [];
-      const trimTxt = `${['', 'primer', 'segon', 'tercer'][trim]} trimestre`;
-
-      if (d.score === null) return `${nom}: encara no hi ha prou evidències per valorar el ${trimTxt}.`;
-
-      if (d.penalized || (d.att.pct !== null && d.att.pct < d.min)) {
-        parts.push(`${nom} només ha fet pràctica en el ${Math.round(d.att.pct || 0)}% de les sessions i no arriba al mínim exigit (${d.min}%)${d.penalized ? ', per això no pot superar la matèria aquest trimestre' : ', cosa que pot impedir superar la matèria'}.`);
-      } else if (d.lvl.code === 'AE') parts.push(`${nom} ha assolit amb excel·lència els aprenentatges d'aquest ${trimTxt}.`);
-      else if (d.lvl.code === 'AN') parts.push(`${nom} ha assolit els aprenentatges del ${trimTxt} amb un nivell notable.`);
-      else if (d.lvl.code === 'AS') parts.push(`${nom} ha assolit satisfactòriament els aprenentatges del ${trimTxt}.`);
-      else if (d.lvl.code === 'EPA') parts.push(`${nom} està en procés d'assolir els aprenentatges del ${trimTxt}.`);
-      else parts.push(`${nom} no ha assolit els aprenentatges del ${trimTxt}.`);
-
-      // Punts forts i febles per competència
-      const graded = Object.entries(d.ces).filter(([, v]) => v !== null).sort((a, b) => b[1] - a[1]);
-      const penal = d.penalized || (d.att.pct !== null && d.att.pct < d.min);
-      if (graded.length >= 2 && !penal) {
-        const [bestId, best] = graded[0];
-        const [worstId, worst] = graded[graded.length - 1];
-        if (best >= th.an && best - worst >= 0.5) parts.push(`Destaca especialment en ${CE_COMMENT_LABELS[bestId]}.`);
-        if (worst < th.as) parts.push(`Ha de millorar en ${CE_COMMENT_LABELS[worstId]}.`);
-        else if (best - worst >= 0.75 && worst < th.an) parts.push(`Pot millorar en ${CE_COMMENT_LABELS[worstId]}.`);
-      } else if (graded.length === 1 && graded[0][1] < th.as) {
-        parts.push(`Ha de millorar en ${CE_COMMENT_LABELS[graded[0][0]]}.`);
-      }
-
-      // Actitud (només si hi ha dades reals de l'alumne)
-      const ai = getStudentAttitudeInfo(group, st.id, trim);
-      if (d.act !== null && (ai.n > 0 || ai.pos || ai.neg || ai.override !== null)) {
-        if (d.act >= th.an) parts.push('Mostra una actitud molt positiva i participativa a classe.');
-        else if (d.act >= th.as) parts.push('La seva actitud a classe és correcta.');
-        else parts.push('Cal que millori l\'actitud, l\'atenció i la participació a classe.');
-      }
-
-      // Assistència i material
-      const inc = [];
-      if (d.att.F >= AVAL_LIMITS.F) inc.push(`${d.att.F} faltes d'assistència sense justificar`);
-      if (d.att.R >= AVAL_LIMITS.R) inc.push(`${d.att.R} retards`);
-      if (inc.length) parts.push(`Ha acumulat ${inc.join(' i ')}.`);
-      if (d.att.SR >= 2) parts.push(`Ha vingut ${d.att.SR} dies sense la roba o el material adequats; cal que ho porti a totes les sessions.`);
-      if (d.att.L >= 3) parts.push('Durant una part del trimestre no ha pogut fer pràctica per lesió.');
-
-      // Tancament
-      const ok = !['NA', 'EPA'].includes(d.lvl.code) && !(d.penalized || (d.att.pct !== null && d.att.pct < d.min));
-      if (ok && (d.lvl.code === 'AE' || d.lvl.code === 'AN')) parts.push('Continua així!');
-      else if (ok) parts.push('Amb més constància pot millorar el resultat.');
-      else parts.push('Confiem que el proper trimestre pugui millorar amb més esforç i regularitat.');
-      return parts.join(' ');
-    }
-    window.generateStudentComment = generateStudentComment;
-
-    function getComment(group, trim, stId) {
-      return (group.comments && group.comments[trim] && group.comments[trim][stId]) || '';
-    }
-    function setComment(group, trim, stId, text) {
-      if (!group.comments) group.comments = {};
-      if (!group.comments[trim]) group.comments[trim] = {};
-      if (text) group.comments[trim][stId] = text; else delete group.comments[trim][stId];
-    }
-    function persistComments() {
-      saveToStorage();
-      if (window.syncGroupEntityToCloud) window.syncGroupEntityToCloud(window.appData.activeGroupId);
-    }
-
-    window.avalEditComment = function(stId, text) {
-      setComment(getCurrentGroup(), window.appState.currentTrim, stId, text.trim());
-      persistComments();
-    };
-
-    window.avalRegenerate = function(stId) {
-      const g = getCurrentGroup();
-      const st = g.students.find(s => s.id === stId);
-      if (!st) return;
-      const cur = getComment(g, window.appState.currentTrim, stId);
-      if (cur && !confirm('Substituir el comentari actual per un de nou generat automàticament?')) return;
-      setComment(g, window.appState.currentTrim, stId, generateStudentComment(g, st, window.appState.currentTrim));
-      persistComments();
-      renderAvalView();
-    };
-
-    window.avalGenerateAll = function() {
-      const g = getCurrentGroup();
-      const t = window.appState.currentTrim;
-      const withText = (g.students || []).filter(st => getComment(g, t, st.id)).length;
-      let overwrite = false;
-      if (withText) overwrite = confirm(`${withText} alumnes ja tenen comentari.\n\nAcceptar: tornar-los a generar TOTS.\nCancel·lar: generar només els que falten.`);
-      (g.students || []).forEach(st => {
-        if (!overwrite && getComment(g, t, st.id)) return;
-        setComment(g, t, st.id, generateStudentComment(g, st, t));
-      });
-      persistComments();
-      renderAvalView();
-    };
-
-    function copyText(text, btn) {
-      const done = () => { if (btn) { const o = btn.innerHTML; btn.innerHTML = '<i class="fa-solid fa-check"></i> Copiat'; setTimeout(() => { btn.innerHTML = o; }, 1400); } };
-      if (navigator.clipboard && window.isSecureContext) navigator.clipboard.writeText(text).then(done).catch(() => fallback());
-      else fallback();
-      function fallback() {
-        const ta = document.createElement('textarea'); ta.value = text; ta.style.position = 'fixed'; ta.style.opacity = '0';
-        document.body.appendChild(ta); ta.select(); try { document.execCommand('copy'); done(); } catch (e) { alert(text); } ta.remove();
-      }
-    }
-
-    window.avalCopyOne = function(stId, btn) {
-      const g = getCurrentGroup();
-      copyText(getComment(g, window.appState.currentTrim, stId) || '', btn);
-    };
-
-    window.avalCopyAll = function(btn) {
-      const g = getCurrentGroup(); const t = window.appState.currentTrim;
-      const lines = (g.students || []).map(st => {
-        const d = getAvalData(g, st, t);
-        return [st.name, d.lvl.code, d.score !== null ? d.score.toFixed(2).replace('.', ',') : '', getComment(g, t, st.id).replace(/\s+/g, ' ')].join('\t');
-      });
-      copyText(lines.join('\n'), btn);
-    };
-
-    window.setAvalFilter = function(f) { window.appState.avalFilter = f; renderAvalView(); };
-
-    window.renderAvalView = function() {
-      const box = document.getElementById('avalContent');
-      if (!box) return;
-      const g = getCurrentGroup();
-      const t = window.appState.currentTrim;
-      const filter = window.appState.avalFilter || 'all';
-      document.getElementById('avalTitle').textContent = `Sessió d'avaluació · ${g.name} · ${t}${['', 'r', 'n', 'r'][t]} trimestre`;
-      const rows = (g.students || []).map(st => ({ st, d: getAvalData(g, st, t) }));
-      const n = rows.length;
-      const count = code => rows.filter(r => r.d.score !== null && r.d.lvl.code === code).length;
-      const susp = rows.filter(r => r.d.alerts.some(a => a.k === 'susp' || a.k === 'prac')).length;
-      const risk = rows.filter(r => r.d.risk).length;
-      const graded = rows.filter(r => r.d.score !== null);
-      const mean = graded.length ? graded.reduce((a, r) => a + r.d.score, 0) / graded.length : null;
-      const nComments = rows.filter(r => getComment(g, t, r.st.id)).length;
-
-      const kpi = (label, val, cls) => `<div class="rounded-2xl border ${cls} px-3 py-2.5"><div class="text-xl font-black font-mono leading-none">${val}</div><div class="text-[11px] font-semibold mt-1 opacity-80">${label}</div></div>`;
-      const shown = rows.filter(r => filter === 'all' || (filter === 'risk' && r.d.risk) || (filter === 'nocomment' && !getComment(g, t, r.st.id)));
-
-      const lvlBadge = d => `<span class="inline-flex items-center text-[10px] px-1.5 py-0.5 rounded font-bold ring-1 ring-inset ${d.lvl.badge}">${d.lvl.code}</span>`;
-
-      box.innerHTML = `
-        <div class="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-2">
-          ${kpi('Alumnes', n, 'bg-white border-zinc-200 text-zinc-900')}
-          ${kpi('Mitjana', mean !== null ? mean.toFixed(2) : '—', 'bg-white border-zinc-200 text-zinc-900')}
-          ${kpi('AE', count('AE'), 'bg-emerald-50 border-emerald-200 text-emerald-800')}
-          ${kpi('AN', count('AN'), 'bg-indigo-50 border-indigo-200 text-indigo-800')}
-          ${kpi('AS', count('AS'), 'bg-sky-50 border-sky-200 text-sky-800')}
-          ${kpi('No superen', susp, 'bg-rose-50 border-rose-200 text-rose-800')}
-          ${kpi('Amb alertes', risk, 'bg-amber-50 border-amber-200 text-amber-800')}
-        </div>
-
-        <div class="flex flex-wrap items-center gap-2 no-print">
-          <div class="seg !text-xs">
-            <button onclick="setAvalFilter('all')" class="${filter === 'all' ? 'active' : ''}">Tots (${n})</button>
-            <button onclick="setAvalFilter('risk')" class="${filter === 'risk' ? 'active' : ''}">Amb alertes (${risk})</button>
-            <button onclick="setAvalFilter('nocomment')" class="${filter === 'nocomment' ? 'active' : ''}">Sense comentari (${n - nComments})</button>
-          </div>
-          <div class="flex-1"></div>
-          <button onclick="avalGenerateAll()" class="inline-flex items-center gap-1.5 bg-zinc-900 text-white text-xs font-bold px-3 py-2 rounded-xl"><i class="fa-solid fa-wand-magic-sparkles"></i>Generar comentaris</button>
-          <button onclick="avalCopyAll(this)" class="inline-flex items-center gap-1.5 bg-white border border-zinc-200 text-zinc-700 text-xs font-bold px-3 py-2 rounded-xl" title="Copia nom, nivell, nota i comentari de tots (per enganxar a un full de càlcul)"><i class="fa-regular fa-copy"></i>Copiar-ho tot</button>
-          <button onclick="window.print()" class="inline-flex items-center gap-1.5 bg-white border border-zinc-200 text-zinc-700 text-xs font-bold px-3 py-2 rounded-xl"><i class="fa-solid fa-print"></i>Imprimir</button>
-        </div>
-
-        <div class="space-y-2">
-          ${shown.length ? shown.map(({ st, d }) => {
-            const c = getComment(g, t, st.id);
-            return `
-            <div class="aval-row bg-white border ${d.risk ? 'border-rose-200' : 'border-zinc-200'} rounded-2xl p-3 flex flex-col lg:flex-row gap-3">
-              <div class="lg:w-[42%] space-y-2">
-                <div class="flex items-start gap-2">
-                  <button onclick="openStudentFitxa(${st.id})" class="flex-1 text-left text-sm font-bold text-zinc-900 hover:underline">${escapeHtml(st.name)}</button>
-                  <div class="text-right shrink-0">
-                    <div class="text-base font-black font-mono leading-none">${d.score !== null ? d.score.toFixed(2) : '—'}</div>
-                    <div class="mt-0.5">${lvlBadge(d)}</div>
-                  </div>
-                </div>
-                <div class="flex flex-wrap gap-1">
-                  ${OFFICIAL_CES.filter(ce => d.ces[ce.id] !== null).map(ce => { const l = getLevel(d.ces[ce.id]); return `<span title="${escapeHtml(ce.name)}: ${d.ces[ce.id].toFixed(2)}" class="inline-flex items-center gap-1 text-[10px] font-bold px-1.5 py-0.5 rounded-md ring-1 ring-inset ${l.badge}">${ce.id} ${l.code}</span>`; }).join('')}
-                </div>
-                <div class="text-[11px] text-zinc-500 font-mono flex flex-wrap gap-x-3 gap-y-0.5">
-                  <span title="% de pràctica">Pràct. <b class="${d.att.pct !== null && d.att.pct < d.min ? 'text-rose-600' : 'text-zinc-800'}">${d.att.pct !== null ? Math.round(d.att.pct) + '%' : '—'}</b></span>
-                  <span>F <b class="text-zinc-800">${d.att.F}</b></span><span>R <b class="text-zinc-800">${d.att.R}</b></span><span>Roba <b class="text-zinc-800">${d.att.SR}</b></span>
-                  ${d.act !== null ? `<span>Actitud <b class="text-zinc-800">${d.act.toFixed(2)}</b></span>` : ''}
-                </div>
-                ${d.alerts.length ? `<div class="flex flex-wrap gap-1">${d.alerts.map(a => `<span class="text-[10px] font-bold px-1.5 py-0.5 rounded-md border ${a.c}">${a.t}</span>`).join('')}</div>` : ''}
-              </div>
-              <div class="flex-1 flex flex-col gap-1.5">
-                <textarea rows="4" onchange="avalEditComment(${st.id}, this.value)" placeholder="Sense comentari. Prem «Generar» o escriu-lo." class="w-full text-xs leading-relaxed border border-zinc-200 rounded-xl p-2.5 outline-none focus:ring-2 focus:ring-zinc-900 resize-y">${escapeHtml(c)}</textarea>
-                <div class="aval-print-comment hidden text-xs leading-relaxed">${escapeHtml(c) || '—'}</div>
-                <div class="flex gap-1.5 justify-end no-print">
-                  <button onclick="avalRegenerate(${st.id})" class="text-[11px] font-bold px-2.5 py-1.5 rounded-lg bg-zinc-100 text-zinc-700 hover:bg-zinc-200"><i class="fa-solid fa-wand-magic-sparkles mr-1"></i>${c ? 'Tornar a generar' : 'Generar'}</button>
-                  <button onclick="avalCopyOne(${st.id}, this)" ${c ? '' : 'disabled'} class="text-[11px] font-bold px-2.5 py-1.5 rounded-lg bg-white border border-zinc-200 text-zinc-700 disabled:opacity-40"><i class="fa-regular fa-copy mr-1"></i>Copiar</button>
-                </div>
-              </div>
-            </div>`;
-          }).join('') : `<div class="bg-white border border-zinc-200 rounded-2xl p-8 text-center text-xs text-zinc-400">Cap alumne en aquest filtre.</div>`}
-        </div>
-        <p class="text-[11px] text-zinc-400">Alertes: nivell NA o EPA, pràctica per sota del ${getMinPractice(g)}%, ${AVAL_LIMITS.F}+ faltes sense justificar, ${AVAL_LIMITS.R}+ retards, ${AVAL_LIMITS.SR}+ dies sense roba, actitud per sota d'AS. Els comentaris es desen per trimestre.</p>`;
-    };
-
     window.renderIndividualReport = function() {
       const curGroup = getCurrentGroup();
       const sel = document.getElementById('reportStudentSelect');
@@ -7475,249 +6865,6 @@
       `).join('');
     }
 
-
-    // ================== CATÀLEG DE SABERS (Decret 175/2022 · EF ESO) ==================
-    // Redacció resumida a partir dels sabers del currículum, organitzats per bloc i apartat.
-    const SABERS_CATALOG = [
-      { bloc: 'Vida activa i saludable', groups: [
-        { name: 'Activitat física saludable', c12: [
-          'Parts d\'una sessió d\'activitat física: activació, part principal i tornada a la calma',
-          'Escalfament general: finalitat i autonomia progressiva en la seva execució',
-          'Capacitats físiques bàsiques i la seva relació amb la salut',
-          'Freqüència cardíaca com a indicador de la intensitat de l\'esforç',
-          'Principis bàsics de l\'entrenament: adaptació, continuïtat i progressió',
-          'Mètodes senzills de millora de la condició física (continu, fraccionat, circuits)'
-        ], c34: [
-          'Planificació de seqüències d\'activitat física adaptades a la pròpia realitat i objectius',
-          'Escalfament específic: disseny i aplicació autònoma',
-          'Càrrega d\'entrenament: volum, intensitat i recuperació',
-          'Mètodes d\'entrenament de les capacitats físiques i autoavaluació de la condició física',
-          'Elaboració d\'un programa personal d\'activitat física saludable'
-        ] },
-        { name: 'Hàbits saludables', c12: [
-          'Alimentació equilibrada i hidratació relacionades amb l\'activitat física',
-          'Higiene corporal i educació postural en l\'activitat física i la vida quotidiana',
-          'Tècniques bàsiques de respiració i relaxació',
-          'Descans i son com a hàbits de vida saludable',
-          'Indumentària, calçat i material adequats per a la pràctica'
-        ], c34: [
-          'Valor nutricional dels aliments i anàlisi crítica de la publicitat alimentària',
-          'Trastorns de la conducta alimentària: conductes de risc i prevenció',
-          'Tècniques de respiració, relaxació i gestió de l\'estrès',
-          'Riscos del consum de drogues, alcohol, suplements i dopatge',
-          'L\'activitat física com a font de gaudi, benestar i alliberament de tensions'
-        ] },
-        { name: 'Primers auxilis i prevenció de lesions', c12: [
-          'Normes de seguretat i prevenció de lesions en la pràctica',
-          'Protocol PAS (protegir, avisar, socórrer) i trucada al 112',
-          'Actuació bàsica davant lesions habituals (contusions, esquinços, ferides)'
-        ], c34: [
-          'Suport vital bàsic: reanimació cardiopulmonar (RCP) i ús del desfibril·lador',
-          'Maniobra de Heimlich i reconeixement dels signes d\'un ictus',
-          'Ergonomia i prevenció de lesions en la pràctica i en la vida diària'
-        ] },
-        { name: 'Recursos digitals', c12: [
-          'Aplicacions i recursos digitals per registrar i gestionar l\'activitat física'
-        ], c34: [
-          'Ús crític de dispositius i aplicacions per planificar i avaluar l\'activitat física'
-        ] }
-      ] },
-      { bloc: 'Resolució de problemes en situacions motrius', groups: [
-        { name: 'Esquema corporal', c12: [
-          'Capacitats perceptivomotrius (coordinació, equilibri, percepció espaciotemporal) per millorar la resposta motriu',
-          'Control corporal en tasques motrius individuals'
-        ], c34: [
-          'Integració de les capacitats perceptivomotrius en situacions motrius de complexitat creixent'
-        ] },
-        { name: 'Habilitats motrius (tècnica, tàctica i estratègia)', c12: [
-          'Habilitats motrius bàsiques i la seva aplicació en jocs i esports',
-          'Fonaments tècnics d\'esports individuals, d\'adversari i col·lectius',
-          'Principis tàctics bàsics d\'atac i defensa en esports col·lectius',
-          'Detecció i correcció d\'errors tècnics habituals',
-          'Esports adaptats i paralímpics',
-          'Esports alternatius (ultimate, fistball, kin-ball, datchball...)',
-          'Respecte a les normes, als companys i als adversaris'
-        ], c34: [
-          'Execució eficaç d\'habilitats específiques en situacions reals de joc',
-          'Estratègies d\'atac i defensa planificades segons les característiques de l\'equip',
-          'Anàlisi del joc i presa de decisions',
-          'Organització i gestió de competicions i tornejos'
-        ] },
-        { name: 'Reptes i projectes motors', c12: [
-          'Reptes motrius individuals i cooperatius',
-          'Participació equilibrada i aportació individual a l\'equip'
-        ], c34: [
-          'Disseny de reptes i projectes motors propis amb solucions creatives',
-          'Autoavaluació del procés i del resultat',
-          'Valoració de l\'esforç personal en l\'assoliment del repte'
-        ] }
-      ] },
-      { bloc: 'Activitats motrius lúdiques, culturals i expressives', groups: [
-        { name: 'Jocs i danses populars', c12: [
-          'Jocs tradicionals i populars de Catalunya',
-          'Jocs i danses d\'altres cultures',
-          'Danses populars i col·lectives'
-        ], c34: [
-          'Patrimoni cultural dels jocs i les danses: recerca i transmissió',
-          'Esports tradicionals i el seu context cultural'
-        ] },
-        { name: 'Expressió i comunicació corporal', c12: [
-          'Tècniques d\'expressió i comunicació corporal (gest, mímica, imitació)',
-          'Activitats ritmicomusicals',
-          'Dramatització i improvisació',
-          'Tècniques de circ (malabars, equilibris, acrobàcies)'
-        ], c34: [
-          'Creació i representació de coreografies i muntatges escènics',
-          'Influència social de les manifestacions culturals motrius'
-        ] }
-      ] },
-      { bloc: 'Interacció amb l\'entorn en el temps de lleure', groups: [
-        { name: 'Activitats en el medi natural i urbà', c12: [
-          'Activitats en el medi natural: orientació, senderisme, activitats aquàtiques',
-          'Espais urbans per a la pràctica (parcs, rutes saludables, cal·listènia)',
-          'Normes de seguretat i educació viària en els desplaçaments actius',
-          'Ús sostenible i respectuós dels espais naturals i urbans',
-          'Construcció i reparació de material'
-        ], c34: [
-          'Disseny i organització d\'activitats en el medi natural i urbà',
-          'Gestió del risc i mesures de seguretat en el medi natural',
-          'Activitats urbanes emergents (parkour, skate, cal·listènia, plogging)',
-          'Consum responsable de recursos i de material esportiu'
-        ] }
-      ] },
-      { bloc: 'Valors, autoregulació emocional i interacció social', groups: [
-        { name: 'Gestió personal i emocional', c12: [
-          'Assumpció de diferents rols en les situacions motrius',
-          'Reconeixement de les pròpies emocions en la pràctica',
-          'Perseverança, autocontrol i tolerància a la frustració'
-        ], c34: [
-          'Autoregulació emocional en situacions d\'estrès i de competició'
-        ] },
-        { name: 'Habilitats socials i valors', c12: [
-          'Escolta activa, diàleg i resolució de conflictes',
-          'Cooperació i treball en equip',
-          'Joc net i esportivitat per sobre del resultat'
-        ], c34: [
-          'Comunicació assertiva i lideratge positiu',
-          'Valors educatius de l\'esport i de l\'activitat física'
-        ] },
-        { name: 'Activitat física, gènere i discriminació', c12: [
-          'Igualtat i coeducació en la pràctica física',
-          'Rebuig de conductes discriminatòries (gènere, origen, diversitat motriu)'
-        ], c34: [
-          'Anàlisi crítica dels estereotips de gènere i del tractament de l\'esport als mitjans',
-          'Influència social, cultural i econòmica de l\'esport'
-        ] }
-      ] }
-    ];
-
-    function getCustomSabers() {
-      const s = getSettings();
-      return Array.isArray(s.customSabers) ? s.customSabers : [];
-    }
-
-    function currentPlanSabers() {
-      return Array.from(document.querySelectorAll('#plan_sabersList .plan-saber-row')).map(r => ({
-        row: r, bloc: r.querySelector('.plan-saber-bloc').value, text: r.querySelector('.plan-saber-text').value.trim()
-      }));
-    }
-
-    function guessSaberLevel() {
-      const n = (document.getElementById('plan_nivell') || {}).value || '';
-      if (/\b(3|4)\s*(r|t|º|o)?\b|3r|4t|tercer|quart/i.test(n)) return '34';
-      if (/\b(1|2)\s*(r|n|º|o)?\b|1r|2n|primer|segon/i.test(n)) return '12';
-      return null;
-    }
-
-    window.setSaberLevel = function(l) {
-      window.appState.saberLevel = l;
-      renderSaberPicker();
-    };
-
-    window.toggleSaberBloc = function(i) {
-      if (!window.appState.saberOpen) window.appState.saberOpen = {};
-      window.appState.saberOpen[i] = !window.appState.saberOpen[i];
-      renderSaberPicker();
-    };
-
-    window.pickSaber = function(bloc, text) {
-      const existing = currentPlanSabers().find(s => s.text === text);
-      if (existing) existing.row.remove();
-      else addPlanSaberRow({ bloc, text });
-      renderSaberPicker();
-    };
-
-    window.saveSaberToCatalog = function(btn) {
-      const row = btn.closest('.plan-saber-row');
-      const bloc = row.querySelector('.plan-saber-bloc').value;
-      const text = row.querySelector('.plan-saber-text').value.trim();
-      if (!text) return;
-      const s = getSettings();
-      if (!Array.isArray(s.customSabers)) s.customSabers = [];
-      if (!s.customSabers.some(x => x.text === text)) s.customSabers.push({ bloc, text });
-      saveToStorage();
-      if (window.syncWholeAppToCloud) window.syncWholeAppToCloud();
-      btn.innerHTML = '<i class="fa-solid fa-star text-amber-500"></i>';
-      btn.title = 'Desat als teus sabers';
-      renderSaberPicker();
-    };
-
-    window.removeCustomSaber = function(text) {
-      const s = getSettings();
-      s.customSabers = getCustomSabers().filter(x => x.text !== text);
-      saveToStorage();
-      if (window.syncWholeAppToCloud) window.syncWholeAppToCloud();
-      renderSaberPicker();
-    };
-
-    function renderSaberPicker() {
-      const box = document.getElementById('plan_saberPicker');
-      if (!box) return;
-      const level = window.appState.saberLevel || guessSaberLevel() || '12';
-      const chosen = new Set(currentPlanSabers().map(s => s.text));
-      const open = window.appState.saberOpen || {};
-      const custom = getCustomSabers();
-      const chip = (bloc, text, removable = false) => {
-        const on = chosen.has(text);
-        const t = escapeHtml(JSON.stringify(text)), b = escapeHtml(JSON.stringify(bloc));
-        return `<span class="inline-flex items-stretch rounded-xl border overflow-hidden ${on ? 'bg-zinc-900 border-zinc-900 text-white' : 'bg-white border-zinc-200 text-zinc-700 hover:border-zinc-400'}">
-          <button type="button" onclick="pickSaber(${b}, ${t})" class="text-left text-[11px] leading-snug px-2.5 py-1.5 font-medium">${on ? '<i class="fa-solid fa-check text-[9px] mr-1"></i>' : '<i class="fa-solid fa-plus text-[9px] mr-1 opacity-40"></i>'}${escapeHtml(text)}</button>
-          ${removable ? `<button type="button" onclick="removeCustomSaber(${t})" title="Treure dels meus sabers" class="px-1.5 border-l ${on ? 'border-zinc-700 text-zinc-400' : 'border-zinc-200 text-zinc-300 hover:text-rose-500'}"><i class="fa-solid fa-xmark text-[10px]"></i></button>` : ''}
-        </span>`;
-      };
-      box.innerHTML = `
-        <div class="flex flex-wrap items-center justify-between gap-2 mb-2">
-          <span class="text-[11px] text-zinc-500"><i class="fa-solid fa-hand-pointer mr-1"></i>Toca un saber per afegir-lo o treure'l</span>
-          <div class="inline-flex rounded-lg bg-zinc-100 p-0.5 text-[11px] font-semibold border border-zinc-200">
-            ${[['12', '1r i 2n'], ['34', '3r i 4t'], ['all', 'Tots']].map(([k, l]) => `<button type="button" onclick="setSaberLevel('${k}')" class="px-2.5 py-1 rounded-md ${level === k ? 'bg-white shadow-subtle text-zinc-900' : 'text-zinc-500'}">${l}</button>`).join('')}
-          </div>
-        </div>
-        <div class="space-y-1.5">
-          ${SABERS_CATALOG.map((B, i) => {
-            const mine = custom.filter(c => c.bloc === B.bloc);
-            const nSel = currentPlanSabers().filter(s => s.bloc === B.bloc).length;
-            const isOpen = open[i] !== undefined ? open[i] : i === 0;
-            return `<div class="border border-zinc-200 rounded-xl bg-zinc-50/60">
-              <button type="button" onclick="toggleSaberBloc(${i})" class="w-full flex items-center gap-2 px-3 py-2 text-left">
-                <i class="fa-solid fa-chevron-${isOpen ? 'down' : 'right'} text-[9px] text-zinc-400 w-3"></i>
-                <span class="flex-1 text-xs font-bold text-zinc-800">${escapeHtml(B.bloc)}</span>
-                ${nSel ? `<span class="text-[10px] font-bold font-mono bg-zinc-900 text-white rounded-md px-1.5 py-0.5">${nSel}</span>` : ''}
-              </button>
-              ${isOpen ? `<div class="px-3 pb-3 space-y-2.5">
-                ${B.groups.map(G => {
-                  const items = level === '12' ? G.c12 : level === '34' ? G.c34 : [...G.c12, ...G.c34];
-                  return `<div><div class="text-[10px] font-bold uppercase tracking-wider text-zinc-400 mb-1">${escapeHtml(G.name)}</div>
-                    <div class="flex flex-wrap gap-1.5">${items.map(t => chip(B.bloc, t)).join('')}</div></div>`;
-                }).join('')}
-                ${mine.length ? `<div><div class="text-[10px] font-bold uppercase tracking-wider text-amber-600 mb-1"><i class="fa-solid fa-star mr-1"></i>Els meus sabers</div>
-                  <div class="flex flex-wrap gap-1.5">${mine.map(c => chip(B.bloc, c.text, true)).join('')}</div></div>` : ''}
-              </div>` : ''}
-            </div>`;
-          }).join('')}
-        </div>`;
-    }
-    window.renderSaberPicker = renderSaberPicker;
-
     window.addPlanSaberRow = function(saber = null) {
       const list = document.getElementById('plan_sabersList');
       const row = document.createElement('div');
@@ -7727,8 +6874,7 @@
           ${PLAN_BLOCS_SABERS.map(b => `<option value="${escapeHtml(b)}">${escapeHtml(b)}</option>`).join('')}
         </select>
         <input type="text" class="plan-saber-text flex-1 border border-zinc-200 rounded-lg p-1.5 bg-white text-xs outline-none" placeholder="Ex: Escalfament general i específic, autonomia en la seva execució">
-        <button type="button" onclick="saveSaberToCatalog(this)" title="Desar als meus sabers (per triar-lo amb un clic a altres SdA)" class="text-zinc-300 hover:text-amber-500 px-1.5"><i class="fa-regular fa-star"></i></button>
-        <button type="button" onclick="this.parentElement.remove(); renderSaberPicker();" class="text-zinc-400 hover:text-rose-500 px-2"><i class="fa-regular fa-trash-can"></i></button>
+        <button type="button" onclick="this.parentElement.remove()" class="text-zinc-400 hover:text-rose-500 px-2"><i class="fa-regular fa-trash-can"></i></button>
       `;
       list.appendChild(row);
       if (saber) {
@@ -7737,8 +6883,6 @@
       } else {
         row.querySelector('.plan-saber-text').focus();
       }
-      if (saber && getCustomSabers().some(x => x.text === saber.text)) row.querySelector('[title^="Desar als meus"]').innerHTML = '<i class="fa-solid fa-star text-amber-500"></i>';
-      row.querySelector('.plan-saber-text').addEventListener('change', () => renderSaberPicker());
     };
 
     window.addPlanActivityRow = function(act = null) {
@@ -7793,8 +6937,6 @@
 
       document.getElementById('plan_sabersList').innerHTML = '';
       (plan.sabers || []).forEach(s => addPlanSaberRow(s));
-      window.appState.saberLevel = null;
-      renderSaberPicker();
 
       document.getElementById('plan_activitatsList').innerHTML = '';
       (plan.activitats || []).forEach(a => addPlanActivityRow(a));
@@ -7869,7 +7011,6 @@
 
     window.editSdaFromPoster = function() {
       if (!posterSdaRef) return;
-      if (posterSdaRef.shared) { const k = posterSdaRef.shared; closeSdaPoster(); libImportShared(k); return; }
       const sdaId = posterSdaRef.sdaId;
       closeSdaPoster();
       document.getElementById('sdaSelect').value = sdaId;
@@ -7938,10 +7079,8 @@
 
     function renderSdaPoster() {
       if (!posterSdaRef) return;
-      const sharedSrc = posterSdaRef.shared ? (window.sharedSdaLibrary || {})[posterSdaRef.shared] : null;
-      const group = sharedSrc ? null : window.appData.groups[posterSdaRef.groupId];
-      const sda = sharedSrc ? { id: '__shared', ...sharedSrc, competences: sharedSrc.competences || {}, plan: sharedSrc.plan || {} }
-        : group && (group.sdas || []).find(s => s.id === posterSdaRef.sdaId);
+      const group = window.appData.groups[posterSdaRef.groupId];
+      const sda = group && (group.sdas || []).find(s => s.id === posterSdaRef.sdaId);
       if (!sda) { closeSdaPoster(); return; }
       applyPosterOptions();
 
@@ -7950,7 +7089,7 @@
       const comps = sda.competences || {};
       const activeCes = OFFICIAL_CES.filter(ce => comps[ce.id] && comps[ce.id].active);
       const totalSessions = getSdaTotalSessions(plan);
-      const groupsNames = sharedSrc ? [] : getGroupsSharingSda(sda);
+      const groupsNames = getGroupsSharingSda(sda);
       const nCriteris = activeCes.reduce((acc, ce) => acc + (comps[ce.id].curricularCriteria || '').split(/[-,\s]+/).filter(Boolean).length, 0);
       const nOas = activeCes.reduce((acc, ce) => acc + (comps[ce.id].oas || []).length, 0);
       const empty = (txt = 'Pendent de completar') => `<p class="sp-empty">${txt}</p>`;
@@ -7963,7 +7102,7 @@
       const titleHtml = titleWords.length > 2
         ? `${escapeHtml(titleWords.slice(0, splitAt).join(' '))} <span class="gold">${escapeHtml(titleWords.slice(splitAt).join(' '))}</span>`
         : `<span class="gold">${escapeHtml(titleWords.join(' '))}</span>`;
-      const subParts = ['Educació Física', plan.nivell, groupsNames.length ? groupsNames.join(', ') : (group ? group.name : (sda.author && sda.author.name ? 'Autor/a: ' + sda.author.name : '')), settings.centre, 'Decret 175/2022 (LOMLOE)'].filter(Boolean);
+      const subParts = ['Educació Física', plan.nivell, groupsNames.length ? groupsNames.join(', ') : group.name, settings.centre, 'Decret 175/2022 (LOMLOE)'].filter(Boolean);
       const dates = [formatDateCa(plan.dataInici), formatDateCa(plan.dataFi)].filter(Boolean).join(' – ');
 
       // Flux superior
@@ -8728,45 +7867,6 @@
         attCols.push({ ci, iso, title: String(h).replace(/\s+/g, ' ').trim() });
       });
 
-      // Rúbriques diàries: columna amb data i valors tipus "3.60/4", seguida de columnes de criteri amb text
-      const rubricRe = /^\s*\d+(?:[.,]\d+)?\s*\/\s*\d+/;
-      const rubrics = [];
-      header.forEach((h, ci) => {
-        const m = String(h).match(dateRe);
-        if (!m || ci === 0) return;
-        const vals = body.map(r => (r[ci] || '').trim()).filter(Boolean);
-        if (!vals.length || vals.filter(v => rubricRe.test(v)).length / vals.length < 0.6) return;
-        const dd = parseInt(m[1]), mm = parseInt(m[2]);
-        let yy = m[3] ? parseInt(m[3]) : (mm >= 8 ? startYear : startYear + 1);
-        if (yy < 100) yy += 2000;
-        const iso = `${yy}-${String(mm).padStart(2, '0')}-${String(dd).padStart(2, '0')}`;
-        const crit = [];
-        for (let k = ci + 1; k < header.length; k++) {
-          if (dateRe.test(String(header[k]))) break;
-          const cv = body.map(r => (r[k] || '').trim()).filter(Boolean);
-          if (cv.length && cv.filter(v => /^[\d.,\s%\/]+$/.test(v)).length / cv.length > 0.5) break; // columna de notes
-          const name = String(header[k]).split('\n')[0].trim();
-          if (!name) break;
-          if (!cv.length) continue; // columna buida: no és un criteri útil
-          crit.push({ ci: k, name });
-        }
-        if (crit.length) rubrics.push({ ci, iso, crit });
-      });
-      // Criteris únics i descripcions, amb la nota mitjana de la rúbrica on surten (per ordenar-les)
-      const criteria = {};
-      rubrics.forEach(rb => rb.crit.forEach(c => {
-        if (!criteria[c.name]) criteria[c.name] = { name: c.name, descs: {} };
-        body.forEach(r => {
-          const d = (r[c.ci] || '').trim();
-          if (!d) return;
-          const tm = String(r[rb.ci] || '').match(/([\d.,]+)\s*\/\s*([\d.,]+)/);
-          const tot = tm ? parseFloat(tm[1].replace(',', '.')) / parseFloat(tm[2].replace(',', '.')) : null;
-          const e = criteria[c.name].descs[d] || (criteria[c.name].descs[d] = { n: 0, sum: 0, cnt: 0 });
-          e.n++;
-          if (tot !== null && !isNaN(tot)) { e.sum += tot; e.cnt++; }
-        });
-      }));
-
       const symbols = {};
       body.forEach(r => attCols.forEach(c => {
         const v = (r[c.ci] || '').trim();
@@ -8779,9 +7879,7 @@
         rows: body,
         attCols,
         dates: Array.from(new Set(attCols.map(c => c.iso))).sort(),
-        symbols,
-        rubrics,
-        criteria
+        symbols
       };
     }
 
@@ -8854,7 +7952,6 @@
       if (tm) document.getElementById('idoTrim').value = tm[1];
       idoState.symbolMap = {};
       Object.keys(parsed.symbols).forEach(s => { idoState.symbolMap[s] = guessSymbolCode(s); });
-      guessRubricMaps(parsed);
       if (!parsed.attCols.length) {
         idoStatus('<i class="fa-solid fa-triangle-exclamation mr-1"></i>No he trobat cap columna d\'assistència amb dates en aquest full.', 'rose');
         document.getElementById('idoStatus').classList.remove('hidden');
@@ -8868,69 +7965,6 @@
       document.getElementById('idoImportBtn').classList.remove('hidden');
       renderIdoceoPreview();
     };
-
-    // Proposta inicial: quin criteri és roba i quant val cada descripció
-    function guessRubricMaps(parsed) {
-      idoState.critRole = {};
-      idoState.descVal = {};
-      Object.values(parsed.criteria || {}).forEach(c => {
-        const isRoba = /equipament|material|roba|indument|vestimenta|uniforme|higiene/i.test(c.name);
-        idoState.critRole[c.name] = isRoba ? 'roba' : 'act';
-        const descs = Object.keys(c.descs).sort((a, b) => {
-          const A = c.descs[a], B = c.descs[b];
-          return (B.cnt ? B.sum / B.cnt : 0) - (A.cnt ? A.sum / A.cnt : 0);
-        });
-        idoState.descVal[c.name] = {};
-        descs.forEach((d, i) => {
-          if (isRoba) {
-            const bad = /^no\b|no porta|no duu|sense|oblid|falta/i.test(d);
-            const good = !bad && /porta|duu|adequat|correcte|sí/i.test(d);
-            idoState.descVal[c.name][d] = bad ? 'SR' : good ? 'OK' : (i === 0 ? 'OK' : 'SR');
-          } else {
-            idoState.descVal[c.name][d] = String(Math.max(1, 4 - i));
-          }
-        });
-      });
-    }
-
-    window.setIdoCritRole = function(name, role) { idoState.critRole[name] = role; renderIdoceoPreview(false); };
-    window.setIdoDescVal = function(name, desc, val) { idoState.descVal[name][desc] = val; renderIdoceoPreview(false); };
-
-    function renderIdoRubric(p) {
-      const wrap = document.getElementById('idoRubricWrap');
-      const crits = Object.values(p.criteria || {});
-      wrap.classList.toggle('hidden', !crits.length);
-      if (!crits.length) return;
-      const ptsOpts = [['4', '4 · AE'], ['3', '3 · AN'], ['2', '2 · AS'], ['1', '1 · EPA'], ['0', '0 · NA'], ['skip', 'No comptar']];
-      document.getElementById('idoRubric').innerHTML = `<div class="text-[11px] text-zinc-500"><i class="fa-regular fa-calendar mr-1"></i>${p.rubrics.length} dies amb rúbrica: ${p.rubrics.map(r => isoToDate(r.iso).toLocaleDateString('ca-ES', { day: '2-digit', month: '2-digit' })).join(', ')}</div>` +
-        crits.map(c => {
-          const role = idoState.critRole[c.name];
-          const descs = Object.keys(c.descs).sort((a, b) => (role === 'roba' ? 0 : parseFloat(idoState.descVal[c.name][b]) - parseFloat(idoState.descVal[c.name][a])) || 0);
-          return `<div class="border ${role === 'roba' ? 'border-orange-200' : role === 'act' ? 'border-violet-200' : 'border-zinc-200'} rounded-xl overflow-hidden">
-            <div class="flex flex-wrap items-center gap-2 px-3 py-2 ${role === 'roba' ? 'bg-orange-50' : role === 'act' ? 'bg-violet-50' : 'bg-zinc-50'}">
-              <span class="flex-1 min-w-[160px] font-bold text-zinc-800">${escapeHtml(c.name)}</span>
-              <select onchange="setIdoCritRole(${escapeHtml(JSON.stringify(c.name))}, this.value)" class="border border-zinc-200 rounded-lg px-1.5 py-1 font-semibold bg-white outline-none">
-                <option value="act" ${role === 'act' ? 'selected' : ''}>Actitud</option>
-                <option value="roba" ${role === 'roba' ? 'selected' : ''}>Roba / material</option>
-                <option value="skip" ${role === 'skip' ? 'selected' : ''}>No importar</option>
-              </select>
-            </div>
-            ${role === 'skip' ? '' : `<div class="divide-y divide-zinc-100">${descs.map(d => {
-              const v = idoState.descVal[c.name][d];
-              const sel = role === 'roba'
-                ? `<option value="OK" ${v === 'OK' ? 'selected' : ''}>Porta roba</option><option value="SR" ${v === 'SR' ? 'selected' : ''}>Sense roba</option>`
-                : ptsOpts.map(([k, l]) => `<option value="${k}" ${v === k ? 'selected' : ''}>${l}</option>`).join('');
-              const safeV = role === 'roba' ? (v === 'SR' || v === 'OK' ? v : 'OK') : v;
-              if (safeV !== v) idoState.descVal[c.name][d] = safeV;
-              return `<div class="flex items-center gap-2 px-3 py-1.5">
-                <span class="flex-1 text-[11px] text-zinc-700">${escapeHtml(d)}</span>
-                <span class="text-[10px] text-zinc-400 font-mono">×${c.descs[d].n}</span>
-                <select onchange="setIdoDescVal(${escapeHtml(JSON.stringify(c.name))}, ${escapeHtml(JSON.stringify(d))}, this.value)" class="border border-zinc-200 rounded-lg px-1.5 py-1 font-semibold bg-white outline-none text-[11px]">${sel}</select>
-              </div>`;
-            }).join('')}</div>`}
-          </div>`;
-        }).join('');
-    }
 
     window.setIdoSymbol = function(sym, code) {
       idoState.symbolMap[sym] = code;
@@ -8982,8 +8016,6 @@
             ${IDO_CODES.map(c => `<option value="${c.id}" ${idoState.symbolMap[s] === c.id ? 'selected' : ''}>${c.label}</option>`).join('')}
           </select>
         </div>`).join('');
-
-      renderIdoRubric(p);
 
       // Alumnes
       const opts = st => `<option value="new">+ Afegir com a alumne nou</option><option value="skip">No importar</option>` +
@@ -9081,41 +8113,10 @@
         });
       });
 
-      // Rúbriques diàries → actitud (mitjana) i sense roba
-      let nAct = 0, nSR = 0;
-      (p.rubrics || []).forEach(rb => {
-        let s = group.sessions[rb.iso];
-        if (!s) { s = group.sessions[rb.iso] = { trim, sdaId: '', note: 'Importat d\'iDoceo', records: {} }; }
-        if (!s.records || typeof s.records !== 'object') s.records = {};
-        Object.keys(idMap).forEach(i => {
-          const stId = idMap[i];
-          const row = p.rows[i];
-          const pts = []; let sr = false, any = false;
-          rb.crit.forEach(c => {
-            const d = (row[c.ci] || '').trim();
-            if (!d) return;
-            const role = idoState.critRole[c.name];
-            const v = (idoState.descVal[c.name] || {})[d];
-            if (role === 'act' && v !== undefined && v !== 'skip') { pts.push(parseFloat(v)); any = true; }
-            if (role === 'roba' && v === 'SR') { sr = true; any = true; }
-          });
-          if (!any) return;
-          const rec = { ...(s.records[stId] || {}) };
-          const absent = rec.a === 'F' || rec.a === 'FJ';
-          if (pts.length && (overwrite || rec.act === undefined)) {
-            rec.act = Math.round((pts.reduce((a, b) => a + b, 0) / pts.length) * 100) / 100;
-            nAct++;
-          }
-          if (sr && !absent && (!rec.p || overwrite)) { rec.p = 'SR'; nSR++; }
-          s.records[stId] = rec;
-        });
-      });
-
       saveToStorage();
       if (window.syncGroupEntityToCloud) window.syncGroupEntityToCloud(target);
       closeIdoceoModal();
-      alert((`Importat a ${group.name}: ${nSessions} sessions d'assistència del ${trim}r trimestre.` +
-        ((p.rubrics || []).length ? `\nRúbriques: ${nAct} valoracions d'actitud i ${nSR} dies sense roba.` : '')).replace('2r trim', '2n trim'));
+      alert(`Importat a ${group.name}: ${nSessions} sessions d'assistència del ${trim}r trimestre.`.replace('2r', '2n'));
       window.appState.currentTrim = trim;
       enterClass(target);
       window.appState.diariMode = 'summary';
@@ -9308,10 +8309,10 @@
             </div>
           </div>`;
         }).join('') + (attRule.enabled ? `<div class="flex flex-col gap-0.5 ${absent ? 'opacity-30 pointer-events-none' : ''} ${evalCols.length ? 'lg:pl-3 lg:border-l lg:border-zinc-200' : ''}">
-            <span class="text-[9px] font-bold text-violet-500 leading-none"><i class="fa-solid fa-hand-holding-heart mr-0.5"></i>ACTITUD${typeof r.act === 'number' ? ` <span class="font-mono text-violet-400" title="Importat d'iDoceo">${r.act.toFixed(2)}</span>` : ''}${r.pos || r.neg ? ` <span class="font-mono text-zinc-400">+${r.pos || 0}/−${r.neg || 0}</span>` : ''}</span>
+            <span class="text-[9px] font-bold text-violet-500 leading-none"><i class="fa-solid fa-hand-holding-heart mr-0.5"></i>ACTITUD${r.pos || r.neg ? ` <span class="font-mono text-zinc-400">+${r.pos || 0}/−${r.neg || 0}</span>` : ''}</span>
             <div class="flex gap-0.5">
-              ${LEVEL_CODES.map(c => { const actCode = typeof r.act === 'number' ? getLevel(r.act).code : r.act; return `<button onclick="diariSetAttitudeLevel(${st.id}, '${c}')" title="Actitud d'avui: ${c} · ${LEVEL_NAMES[c]}"
-                class="h-10 min-w-[40px] px-1.5 rounded-lg border text-[11px] font-black transition ${actCode === c ? LEVEL_ON[c] : 'bg-white text-zinc-400 border-zinc-200 hover:border-zinc-400'}">${c}</button>`; }).join('')}
+              ${LEVEL_CODES.map(c => `<button onclick="diariSetAttitudeLevel(${st.id}, '${c}')" title="Actitud d'avui: ${c} · ${LEVEL_NAMES[c]}"
+                class="h-10 min-w-[40px] px-1.5 rounded-lg border text-[11px] font-black transition ${r.act === c ? LEVEL_ON[c] : 'bg-white text-zinc-400 border-zinc-200 hover:border-zinc-400'}">${c}</button>`).join('')}
             </div>
           </div>` : '');
         return `
@@ -9363,7 +8364,7 @@
       const out = [];
       Object.keys(sessions).sort().reverse().forEach(iso => {
         const s = sessions[iso];
-        const r = getRecord(s, stId);
+        const r = (s && s.records && s.records[stId]) || {};
         const types = [];
         if (r.a && r.a !== 'P') types.push(r.a);
         if (r.p && r.a !== 'F' && r.a !== 'FJ') types.push(r.p);
@@ -9374,101 +8375,6 @@
       });
       return out;
     }
-
-    function renderInjuryCard(group, st) {
-      const list = getStudentInjuries(group, st.id);
-      const today = todayISO();
-      const active = getActiveInjury(group, st.id, today);
-      const formOpen = window.appState.injuryFormFor === st.id;
-      const item = inj => {
-        const isActive = inj.from <= today && (!inj.to || today <= inj.to);
-        const future = inj.from > today;
-        return `<div class="flex items-center gap-3 px-4 py-2.5">
-          <span class="w-2 h-2 rounded-full shrink-0 ${isActive ? 'bg-sky-500' : future ? 'bg-amber-400' : 'bg-zinc-300'}"></span>
-          <div class="flex-1 min-w-0">
-            <div class="text-xs font-bold text-zinc-800 truncate">${escapeHtml(inj.reason || 'Lesió')}</div>
-            <div class="text-[11px] text-zinc-500">${injuryPeriodText(inj)}${isActive ? ' · <b class="text-sky-700">ara</b>' : future ? ' · <b class="text-amber-600">propera</b>' : ''}</div>
-          </div>
-          ${isActive && !inj.to ? `<button onclick="endInjuryToday(${st.id}, '${inj.id}')" class="text-[11px] font-bold px-2.5 py-1.5 rounded-lg bg-emerald-50 text-emerald-700 border border-emerald-200 hover:bg-emerald-100" title="Torna a fer pràctica a partir d'avui"><i class="fa-solid fa-person-running mr-1"></i>Alta</button>` : ''}
-          <button onclick="deleteInjury(${st.id}, '${inj.id}')" class="text-zinc-300 hover:text-rose-600 px-1" title="Esborrar"><i class="fa-regular fa-trash-can text-xs"></i></button>
-        </div>`;
-      };
-      return `
-        <div class="bg-white border ${active ? 'border-sky-300' : 'border-zinc-200'} rounded-3xl overflow-hidden">
-          <div class="flex flex-wrap items-center gap-2 px-4 py-3 ${active ? 'bg-sky-50' : ''}">
-            <i class="fa-solid fa-user-injured ${active ? 'text-sky-600' : 'text-zinc-400'}"></i>
-            <h3 class="text-sm font-bold text-zinc-800 flex-1">Lesions i justificants ${active ? `<span class="ml-1 text-[11px] font-bold text-sky-700 bg-white border border-sky-200 rounded-md px-1.5 py-0.5">Lesionat ara</span>` : ''}</h3>
-            ${formOpen ? '' : `<button onclick="window.appState.injuryFormFor = ${st.id}; renderStudentFitxa();" class="text-xs font-bold px-3 py-2 rounded-xl bg-zinc-900 text-white"><i class="fa-solid fa-plus mr-1"></i>Afegir justificant</button>`}
-          </div>
-          ${formOpen ? `
-            <div class="px-4 py-3 border-t border-zinc-100 bg-zinc-50 grid grid-cols-1 sm:grid-cols-4 gap-3 text-xs">
-              <label class="sm:col-span-4 font-semibold text-zinc-600">Motiu (opcional)
-                <input id="injReason" type="text" placeholder="Ex: Esquinç turmell dret · justificant mèdic" class="mt-1 w-full border border-zinc-200 rounded-xl p-2.5 bg-white outline-none focus:ring-2 focus:ring-sky-400">
-              </label>
-              <label class="font-semibold text-zinc-600">Des de
-                <input id="injFrom" type="date" value="${today}" class="mt-1 w-full border border-zinc-200 rounded-xl p-2 bg-white outline-none">
-              </label>
-              <label class="font-semibold text-zinc-600">Fins a
-                <input id="injTo" type="date" class="mt-1 w-full border border-zinc-200 rounded-xl p-2 bg-white outline-none" onchange="document.getElementById('injOpen').checked = !this.value">
-              </label>
-              <label class="flex items-center gap-2 font-semibold text-zinc-600 sm:pt-5">
-                <input id="injOpen" type="checkbox" checked onchange="if (this.checked) document.getElementById('injTo').value = ''" class="w-4 h-4 accent-sky-600"> Sense data de final
-              </label>
-              <div class="flex gap-2 sm:pt-4 sm:justify-end">
-                <button onclick="window.appState.injuryFormFor = null; renderStudentFitxa();" class="px-3 py-2 rounded-xl border border-zinc-200 bg-white font-bold text-zinc-600">Cancel·lar</button>
-                <button onclick="saveInjury(${st.id})" class="px-3 py-2 rounded-xl bg-sky-600 text-white font-bold">Desar</button>
-              </div>
-              <p class="sm:col-span-4 text-[11px] text-zinc-500">Durant aquests dies, al passar llista sortirà marcat com a <b>Lesionat</b> automàticament. No li resta % de pràctica. Si un dia sí que fa pràctica, toca <b>Lesió</b> a la llista per treure-ho només aquell dia.</p>
-            </div>` : ''}
-          ${list.length ? `<div class="divide-y divide-zinc-100 border-t border-zinc-100">${list.map(item).join('')}</div>`
-            : formOpen ? '' : `<div class="px-4 pb-3 text-[11px] text-zinc-400">Cap lesió registrada. Quan et porti un justificant, afegeix-lo aquí.</div>`}
-        </div>`;
-    }
-
-    function persistInjuries() {
-      saveToStorage();
-      if (window.syncGroupEntityToCloud) window.syncGroupEntityToCloud(window.appData.activeGroupId);
-    }
-
-    window.saveInjury = function(stId) {
-      const group = getCurrentGroup();
-      const from = document.getElementById('injFrom').value;
-      const open = document.getElementById('injOpen').checked;
-      const to = open ? '' : document.getElementById('injTo').value;
-      const reason = document.getElementById('injReason').value.trim();
-      if (!from) { alert('Posa la data d\'inici.'); return; }
-      if (to && to < from) { alert('La data de final és anterior a la d\'inici.'); return; }
-      if (!group.injuries) group.injuries = {};
-      if (!group.injuries[stId]) group.injuries[stId] = {};
-      const id = 'inj' + Date.now().toString(36);
-      group.injuries[stId][id] = { from, to, reason };
-      window.appState.injuryFormFor = null;
-      persistInjuries();
-      renderStudentFitxa();
-    };
-
-    window.endInjuryToday = function(stId, injId) {
-      const group = getCurrentGroup();
-      const inj = group.injuries && group.injuries[stId] && group.injuries[stId][injId];
-      if (!inj) return;
-      const d = isoToDate(todayISO()); d.setDate(d.getDate() - 1);
-      const y = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
-      if (y < inj.from) delete group.injuries[stId][injId];   // començava avui: l'eliminem
-      else inj.to = y;                                         // acaba ahir: avui ja fa pràctica
-      persistInjuries();
-      renderStudentFitxa();
-    };
-
-    window.deleteInjury = function(stId, injId) {
-      const group = getCurrentGroup();
-      if (!confirm('Esborrar aquesta lesió? Les sessions d\'aquells dies ja no sortiran com a lesionat (excepte les que hagis marcat a mà).')) return;
-      if (group.injuries && group.injuries[stId]) {
-        delete group.injuries[stId][injId];
-        if (!Object.keys(group.injuries[stId]).length) delete group.injuries[stId];
-      }
-      persistInjuries();
-      renderStudentFitxa();
-    };
 
     window.renderStudentFitxa = function() {
       const group = getCurrentGroup();
@@ -9527,8 +8433,6 @@
             <button onclick="moveFitxaStudent(1)" class="icon-btn" title="Següent"><i class="fa-solid fa-chevron-right text-xs"></i></button>
           </div>
         </div>
-
-        ${renderInjuryCard(group, st)}
 
         <div class="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-2">
           ${kpi('F', 'Faltes', course.F, 'bg-rose-50 border-rose-200 text-rose-700')}
@@ -9673,7 +8577,7 @@
     const _origSwitchView = window.switchView;
     window.switchView = function(view) {
       _origSwitchView(view);
-      if (['sda', 'trim', 'final', 'aval'].includes(view)) window.appState.lastQuadernView = view;
+      if (['sda', 'trim', 'final'].includes(view)) window.appState.lastQuadernView = view;
       if (['roster', 'fitxa', 'report'].includes(view)) window.appState.lastAlumnesView = view;
       updateClassTabs(view);
     };
@@ -9735,11 +8639,11 @@
     };
 
     function updateClassTabs(view) {
-      const tab = ['sda', 'trim', 'final', 'aval'].includes(view) ? 'quadern' : ['roster', 'fitxa', 'report'].includes(view) ? 'alumnes' : view;
+      const tab = ['sda', 'trim', 'final'].includes(view) ? 'quadern' : ['roster', 'fitxa', 'report'].includes(view) ? 'alumnes' : view;
       document.querySelectorAll('#classTabs .ctab').forEach(b => b.classList.toggle('active', b.dataset.tab === tab));
       const seg = document.getElementById('classSubSeg');
       const subs = tab === 'quadern'
-        ? [['sda', 'Per SdA'], ['trim', 'Resum trimestral'], ['aval', 'Sessió d\'avaluació'], ['final', 'Final de curs']]
+        ? [['sda', 'Per SdA'], ['trim', 'Resum trimestral'], ['final', 'Final de curs']]
         : tab === 'alumnes' ? [['roster', 'Llista'], ['fitxa', 'Fitxa'], ['report', 'Butlletins']] : [];
       seg.innerHTML = subs.map(([v, l]) => `<button onclick="switchView('${v}')" class="${v === view ? 'active' : ''}">${l}</button>`).join('');
     }
