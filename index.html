@@ -1286,6 +1286,23 @@
     </div>
   </div>
 
+  <div id="deptTeachersModal" class="hidden fixed inset-0 z-[70] bg-zinc-900/50 flex items-end sm:items-center justify-center p-0 sm:p-4" onclick="if (event.target === this) closeDeptTeachers()">
+    <div class="bg-white w-full sm:max-w-md rounded-t-3xl sm:rounded-3xl shadow-float overflow-hidden">
+      <div class="flex items-center justify-between px-5 py-4 border-b border-zinc-100">
+        <h3 class="text-base font-bold text-zinc-900"><i class="fa-solid fa-user-pen mr-2 text-zinc-400"></i>Noms dels professors</h3>
+        <button onclick="closeDeptTeachers()" class="text-zinc-400 hover:text-zinc-900 px-2"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div class="px-5 py-3">
+        <p class="text-[11px] text-zinc-500 mb-1">Corregeix el nom i desa: es canvia a totes les sessions dels 3 trimestres. Si poses el mateix nom a dos professors, s'ajunten.</p>
+        <div id="dtList"></div>
+      </div>
+      <div class="flex justify-end gap-2 px-5 py-4 border-t border-zinc-100 bg-zinc-50">
+        <button onclick="closeDeptTeachers()" class="px-4 py-2 rounded-xl border border-zinc-200 bg-white font-semibold text-sm">Cancel·lar</button>
+        <button onclick="saveDeptTeachers()" class="px-4 py-2 rounded-xl bg-zinc-900 text-white font-bold text-sm">Desar</button>
+      </div>
+    </div>
+  </div>
+
   <div id="deptDocViewer" class="hidden fixed inset-0 z-[75] bg-zinc-900/80 flex flex-col p-3" onclick="if (event.target === this) this.classList.add('hidden')">
     <div class="flex items-center justify-between text-white mb-2"><span id="deptDocTitle" class="font-bold text-sm"></span><button onclick="document.getElementById('deptDocViewer').classList.add('hidden')" class="px-3 py-1 text-lg"><i class="fa-solid fa-xmark"></i></button></div>
     <div class="flex-1 overflow-auto bg-white rounded-2xl"><img id="deptDocImg" class="w-full"></div>
@@ -10856,7 +10873,8 @@
       const tf = window.appState.deptTeacher || 'all';
       document.getElementById('deptTeachers').innerHTML = teachers.length ? `
         <button onclick="setDeptTeacherFilter('all')" class="dfilter ${tf === 'all' ? 'on' : ''}">Tots</button>
-        ${teachers.map(t => `<button onclick='setDeptTeacherFilter(${escapeHtml(JSON.stringify(t))})' class="dfilter ${tf === t ? 'on' : ''}"><span class="inline-block w-2.5 h-2.5 rounded-full mr-1.5" style="background:${teacherColor(t)}"></span>${escapeHtml(teacherShort(t))}</button>`).join('')}` : '';
+        ${teachers.map(t => `<button onclick='setDeptTeacherFilter(${escapeHtml(JSON.stringify(t))})' class="dfilter ${tf === t ? 'on' : ''}"><span class="inline-block w-2.5 h-2.5 rounded-full mr-1.5" style="background:${teacherColor(t)}"></span>${escapeHtml(teacherShort(t))}</button>`).join('')}
+        ${can ? `<button onclick="openDeptTeachers()" class="dfilter"><i class="fa-solid fa-pen text-[10px] mr-1.5"></i>Noms dels professors</button>` : ''}` : '';
 
       // Llegenda d'espais
       document.getElementById('deptLegend').innerHTML = d.spaces.map(sp => {
@@ -11040,6 +11058,44 @@
       const term = deptTerm();
       term.sessions = term.sessions.filter(x => x.id !== window.appState.deptEditing);
       deptSave(); closeDeptSession(); renderDept();
+    };
+
+    // ---------- Noms dels professors ----------
+    window.openDeptTeachers = function() {
+      const d = deptData();
+      const names = Array.from(new Set([1, 2, 3].flatMap(t => d.terms[t].sessions.map(s => s.teacher || '')))).filter(Boolean).sort();
+      document.getElementById('dtList').innerHTML = names.map((n, i) => `
+        <div class="flex items-center gap-2 py-2 border-b border-zinc-100">
+          <span class="w-3 h-3 rounded-full shrink-0" style="background:${teacherColor(n)}"></span>
+          <input type="text" data-old="${escapeHtml(n)}" value="${escapeHtml(n)}" class="dt-name flex-1 border border-zinc-200 rounded-xl px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-zinc-900">
+          <span class="text-[11px] text-zinc-400 font-mono w-16 text-right">${[1, 2, 3].reduce((a, t) => a + d.terms[t].sessions.filter(s => s.teacher === n).length, 0)} ses.</span>
+        </div>`).join('') || '<p class="text-xs text-zinc-400">Encara no hi ha professors.</p>';
+      document.getElementById('deptTeachersModal').classList.remove('hidden');
+    };
+    window.closeDeptTeachers = function() { document.getElementById('deptTeachersModal').classList.add('hidden'); };
+    window.saveDeptTeachers = function() {
+      if (!deptCanEdit()) return;
+      const d = deptData();
+      const map = {};
+      document.querySelectorAll('#dtList .dt-name').forEach(inp => {
+        const nv = inp.value.trim();
+        if (nv && nv !== inp.dataset.old) map[inp.dataset.old] = nv;
+      });
+      if (!Object.keys(map).length) { closeDeptTeachers(); return; }
+      [1, 2, 3].forEach(t => d.terms[t].sessions.forEach(s => { if (map[s.teacher]) s.teacher = map[s.teacher]; }));
+      if (window.appState.deptTeacher && map[window.appState.deptTeacher]) window.appState.deptTeacher = map[window.appState.deptTeacher];
+      deptSave();
+      // També el nom dels horaris originals
+      Object.entries(window.deptDocs || {}).forEach(([k, v]) => {
+        if (v && map[v.teacher] && window.publishDeptDoc) window.publishDeptDoc(k, { ...v, teacher: map[v.teacher] }).catch(() => {});
+      });
+      try {
+        const all = JSON.parse(localStorage.getItem('EF_DEPT_DOCS') || '{}');
+        Object.values(all).forEach(v => { if (map[v.teacher]) v.teacher = map[v.teacher]; });
+        localStorage.setItem('EF_DEPT_DOCS', JSON.stringify(all));
+      } catch (e) {}
+      closeDeptTeachers();
+      renderDept();
     };
 
     // ---------- Normes i espais ----------
