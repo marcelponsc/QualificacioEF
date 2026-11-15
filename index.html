@@ -314,6 +314,8 @@
         </div>
       </div>
 
+      <div id="homeNotices"></div>
+
       <div class="grid grid-cols-1 xl:grid-cols-3 gap-6">
         <div class="xl:col-span-2 space-y-5">
           <div id="homeContinueCard"></div>
@@ -1150,6 +1152,45 @@
   </div>
 
   <!-- MODAL CONFIGURAR SdA (PROGRAMACIÓ COMPLETA + QUALIFICACIÓ) -->
+  <!-- MODAL: AVÍS -->
+  <div id="noticeModal" class="hidden fixed inset-0 z-[70] bg-zinc-900/50 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-4" onclick="if (event.target === this) closeNoticeModal()">
+    <div class="bg-white w-full sm:max-w-lg rounded-t-3xl sm:rounded-3xl shadow-float overflow-hidden">
+      <div class="flex items-center justify-between px-5 py-4 border-b border-zinc-100">
+        <h3 class="text-base font-bold text-zinc-900"><i class="fa-solid fa-bullhorn text-amber-500 mr-2"></i>Nou avís</h3>
+        <button onclick="closeNoticeModal()" class="text-zinc-400 hover:text-zinc-900 px-2"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div class="p-5 space-y-4 text-xs">
+        <label class="block font-semibold text-zinc-700">Avís
+          <textarea id="noticeText" rows="3" placeholder="Ex: NO disposarem del camp de futbol" class="mt-1 w-full border border-zinc-200 rounded-xl p-3 text-sm outline-none focus:ring-2 focus:ring-zinc-900"></textarea>
+        </label>
+        <div class="grid grid-cols-2 gap-3">
+          <label class="block font-semibold text-zinc-700">Dia (opcional)
+            <input id="noticeDate" type="date" class="mt-1 w-full border border-zinc-200 rounded-xl p-2.5 bg-white outline-none">
+          </label>
+          <label class="block font-semibold text-zinc-700">Fins a (opcional)
+            <input id="noticeUntil" type="date" class="mt-1 w-full border border-zinc-200 rounded-xl p-2.5 bg-white outline-none">
+          </label>
+        </div>
+        <p class="text-[11px] text-zinc-400 -mt-2">Si poses un dia, l'avís desapareix sol quan hagi passat i també surt al Planner aquell dia. Sense data, es queda fins que l'esborris.</p>
+        <label class="block font-semibold text-zinc-700">Importància
+          <select id="noticeLevel" class="mt-1 w-full border border-zinc-200 rounded-xl p-2.5 bg-white outline-none font-semibold">
+            <option value="normal">Normal</option>
+            <option value="important">Important (destacat en vermell)</option>
+          </select>
+        </label>
+        <label class="flex items-start gap-3 bg-indigo-50/60 border border-indigo-200 rounded-2xl p-3 cursor-pointer">
+          <input type="checkbox" id="noticeShare" class="mt-0.5 w-4 h-4 accent-indigo-600 shrink-0">
+          <span><span class="font-bold text-indigo-900"><i class="fa-solid fa-people-group mr-1"></i>Compartir amb el departament</span>
+          <span id="noticeShareHint" class="block text-[11px] text-indigo-700/80 mt-0.5"></span></span>
+        </label>
+      </div>
+      <div class="flex justify-end gap-2 px-5 py-4 border-t border-zinc-100 bg-zinc-50">
+        <button onclick="closeNoticeModal()" class="px-4 py-2 rounded-xl border border-zinc-200 bg-white font-semibold text-sm">Cancel·lar</button>
+        <button onclick="saveNotice()" class="px-4 py-2 rounded-xl bg-zinc-900 text-white font-bold text-sm">Desar avís</button>
+      </div>
+    </div>
+  </div>
+
   <div id="sdaModal" class="fixed inset-0 bg-zinc-950/40 backdrop-blur-xs z-50 flex items-center justify-center p-2 sm:p-4 hidden no-print">
     <div class="bg-white rounded-3xl shadow-card max-w-5xl w-full max-h-[94vh] flex flex-col overflow-hidden border border-zinc-200">
       <div class="px-6 py-4 bg-zinc-900 text-white flex justify-between items-center">
@@ -1921,6 +1962,7 @@
       try { localStorage.removeItem('EF_AUTH_USER'); } catch (e) {}
       connectToUserCloud(currentAuthUser);
       subscribeSharedLibrary();
+      subscribeSharedNotices();
     }
 
     // ===== BIBLIOTECA COMUNA DEL DEPARTAMENT =====
@@ -1944,6 +1986,29 @@
       });
     }
     window.subscribeSharedLibrary = subscribeSharedLibrary;
+
+    // Avisos del departament
+    window.sharedNotices = {};
+    let sharedNoticesSubscribed = false;
+    function subscribeSharedNotices() {
+      if (sharedNoticesSubscribed || !fbDb) return;
+      sharedNoticesSubscribed = true;
+      onValue(ref(fbDb, 'shared/notices'), snap => {
+        window.sharedNotices = snap.val() || {};
+        if (window.onSharedNoticesChange) window.onSharedNoticesChange();
+      }, err => {
+        console.warn('Avisos del departament:', err);
+        sharedNoticesSubscribed = false;
+      });
+    }
+    window.publishSharedNotice = function(key, payload) {
+      if (!currentAuthUser || !fbDb) return Promise.reject(new Error('no-auth'));
+      return set(ref(fbDb, `shared/notices/${key}`), JSON.parse(JSON.stringify({ ...payload, author: window.currentUserInfo })));
+    };
+    window.removeSharedNotice = function(key) {
+      if (!currentAuthUser || !fbDb) return Promise.reject(new Error('no-auth'));
+      return set(ref(fbDb, `shared/notices/${key}`), null);
+    };
 
     window.publishSharedSda = function(key, payload) {
       if (!currentAuthUser || !fbDb) return Promise.reject(new Error('no-auth'));
@@ -9789,9 +9854,141 @@
       updateClassTabs(view);
     };
 
+
+    // ================== AVISOS (pantalla d'inici) ==================
+    // Personals: appData.notices { id: {text, date, until, level, createdAt} }
+    // Del departament: shared/notices { id: {..., author} }
+    function noticeIsActive(n, today) {
+      if (!n || !n.text) return false;
+      if (n.until) return today <= n.until;
+      if (n.date) return today <= n.date;
+      return true;
+    }
+
+    function getAllNotices() {
+      const today = todayISO();
+      const me = window.currentUserInfo;
+      const mine = Object.entries(window.appData.notices || {}).map(([id, n]) => ({ id, ...n, scope: 'me', own: true }));
+      const dept = Object.entries(window.sharedNotices || {}).map(([id, n]) => ({ id, ...n, scope: 'dept', own: !!(me && n.author && n.author.uid === me.uid) }));
+      return [...mine, ...dept].filter(n => noticeIsActive(n, today)).sort((a, b) => {
+        if (a.date && b.date) return a.date.localeCompare(b.date);
+        if (a.date) return -1;
+        if (b.date) return 1;
+        return (b.createdAt || 0) - (a.createdAt || 0);
+      });
+    }
+    window.getAllNotices = getAllNotices;
+
+    function getNoticesForDate(iso) {
+      return getAllNotices().filter(n => n.date && (n.date === iso || (n.until && n.date <= iso && iso <= n.until)));
+    }
+    window.getNoticesForDate = getNoticesForDate;
+
+    function noticeWhen(n) {
+      if (!n.date) return '';
+      const today = todayISO();
+      const f = d => isoToDate(d).toLocaleDateString('ca-ES', { weekday: 'short', day: 'numeric', month: 'short' });
+      const days = Math.round((isoToDate(n.date) - isoToDate(today)) / 86400000);
+      const rel = (n.date <= today && (!n.until || today <= n.until)) ? 'AVUI' : days === 1 ? 'Demà' : days > 1 && days <= 7 ? `D'aquí a ${days} dies` : '';
+      return { text: n.until && n.until !== n.date ? `${f(n.date)} → ${f(n.until)}` : f(n.date), rel };
+    }
+
+    window.renderHomeNotices = function() {
+      const box = document.getElementById('homeNotices');
+      if (!box) return;
+      const list = getAllNotices();
+      const item = n => {
+        const w = noticeWhen(n);
+        const imp = n.level === 'important';
+        const isToday = w && w.rel === 'AVUI';
+        return `<div class="flex items-start gap-3 px-4 py-3 ${isToday ? 'bg-rose-50/70' : ''}">
+          <div class="w-8 h-8 rounded-xl flex items-center justify-center shrink-0 ${imp ? 'bg-rose-100 text-rose-600' : 'bg-amber-100 text-amber-700'}"><i class="fa-solid ${imp ? 'fa-triangle-exclamation' : 'fa-bullhorn'} text-xs"></i></div>
+          <div class="flex-1 min-w-0">
+            <div class="text-sm ${imp ? 'font-bold' : 'font-semibold'} text-zinc-900 whitespace-pre-line">${escapeHtml(n.text)}</div>
+            <div class="flex flex-wrap items-center gap-x-2 gap-y-1 mt-1 text-[11px] text-zinc-500">
+              ${w ? `<span class="font-semibold text-zinc-700"><i class="fa-regular fa-calendar mr-1"></i>${w.text}</span>` : ''}
+              ${w && w.rel ? `<span class="font-bold px-1.5 py-0.5 rounded-md ${isToday ? 'bg-rose-600 text-white' : 'bg-amber-100 text-amber-800'}">${w.rel}</span>` : ''}
+              ${n.scope === 'dept' ? `<span class="text-indigo-700"><i class="fa-solid fa-people-group mr-1"></i>Departament${n.own ? '' : ' · ' + escapeHtml((n.author && n.author.name) || '')}</span>` : '<span><i class="fa-regular fa-user mr-1"></i>Personal</span>'}
+            </div>
+          </div>
+          ${n.own ? `<button onclick="deleteNotice('${n.scope}', '${n.id}')" title="Esborrar l'avís" class="text-zinc-300 hover:text-rose-600 px-1 py-1"><i class="fa-regular fa-trash-can text-xs"></i></button>` : ''}
+        </div>`;
+      };
+      box.innerHTML = `
+        <div class="bg-white border ${list.some(n => n.level === 'important') ? 'border-rose-200' : 'border-zinc-200'} rounded-3xl overflow-hidden shadow-subtle">
+          <div class="flex items-center gap-2 px-4 py-3 border-b border-zinc-100">
+            <i class="fa-solid fa-bullhorn text-amber-500"></i>
+            <h3 class="text-sm font-bold text-zinc-900 flex-1">Avisos ${list.length ? `<span class="font-mono text-xs text-zinc-400 ml-1">${list.length}</span>` : ''}</h3>
+            <button onclick="openNoticeModal()" class="text-xs font-bold px-3 py-1.5 rounded-xl bg-zinc-900 text-white"><i class="fa-solid fa-plus mr-1"></i>Afegir avís</button>
+          </div>
+          ${list.length ? `<div class="divide-y divide-zinc-100">${list.map(item).join('')}</div>`
+            : `<div class="px-4 py-3 text-xs text-zinc-400">Cap avís. Afegeix-ne per recordar coses com "El 18 de desembre no tenim el camp de futbol".</div>`}
+        </div>`;
+    };
+
+    window.openNoticeModal = function() {
+      const logged = !!window.currentUserInfo;
+      document.getElementById('noticeText').value = '';
+      document.getElementById('noticeDate').value = '';
+      document.getElementById('noticeUntil').value = '';
+      document.getElementById('noticeLevel').value = 'normal';
+      const sh = document.getElementById('noticeShare');
+      sh.checked = false; sh.disabled = !logged;
+      document.getElementById('noticeShareHint').textContent = logged
+        ? 'El veuran tots els professors d\'EF quan obrin l\'app.'
+        : 'Cal haver entrat amb Google per compartir avisos.';
+      document.getElementById('noticeModal').classList.remove('hidden');
+      setTimeout(() => document.getElementById('noticeText').focus(), 50);
+    };
+    window.closeNoticeModal = function() { document.getElementById('noticeModal').classList.add('hidden'); };
+
+    window.saveNotice = function() {
+      const text = document.getElementById('noticeText').value.trim();
+      const date = document.getElementById('noticeDate').value;
+      let until = document.getElementById('noticeUntil').value;
+      const level = document.getElementById('noticeLevel').value;
+      const share = document.getElementById('noticeShare').checked && !document.getElementById('noticeShare').disabled;
+      if (!text) { alert('Escriu el text de l\'avís.'); return; }
+      if (until && !date) { alert('Si poses "Fins a", posa també la data d\'inici.'); return; }
+      if (until && until < date) { alert('La data final és anterior a la d\'inici.'); return; }
+      if (until === date) until = '';
+      const id = 'nt' + Date.now().toString(36) + Math.random().toString(36).slice(2, 5);
+      const data = { text, date: date || '', until: until || '', level, createdAt: Date.now() };
+      if (share) {
+        if (!window.publishSharedNotice) { alert('No s\'ha pogut compartir.'); return; }
+        window.publishSharedNotice(id, data).catch(err => alert('No s\'ha pogut publicar l\'avís al departament.' +
+          (String((err && (err.code || err.message)) || '').toLowerCase().includes('permission') ? '\n\nCal actualitzar les regles de Firebase (Realtime Database → Reglas).' : '')));
+      } else {
+        if (!window.appData.notices) window.appData.notices = {};
+        window.appData.notices[id] = data;
+        saveToStorage();
+        if (window.syncWholeAppToCloud) window.syncWholeAppToCloud();
+      }
+      closeNoticeModal();
+      renderHomeNotices();
+    };
+
+    window.deleteNotice = function(scope, id) {
+      if (!confirm('Esborrar aquest avís?')) return;
+      if (scope === 'dept') {
+        if (window.removeSharedNotice) window.removeSharedNotice(id).catch(err => alert('No s\'ha pogut esborrar: ' + (err && err.message || err)));
+      } else if (window.appData.notices) {
+        delete window.appData.notices[id];
+        saveToStorage();
+        if (window.syncWholeAppToCloud) window.syncWholeAppToCloud();
+      }
+      renderHomeNotices();
+    };
+
+    window.onSharedNoticesChange = function() {
+      if (!window.appState || window.appState.currentScreen === 'home' || !window.appState.currentScreen) renderHomeNotices();
+      if (window.appState && window.appState.currentScreen === 'planner' && window.renderPlanner) window.renderPlanner();
+    };
+
     const _origRenderHome = window.renderHomeScreen;
     window.renderHomeScreen = function() {
       _origRenderHome();
+      renderHomeNotices();
       const d = new Date();
       const dateTxt = d.toLocaleDateString('ca-ES', { weekday: 'long', day: 'numeric', month: 'long' });
       const lbl = document.getElementById('homeSchoolYearLabel');
@@ -10168,6 +10365,7 @@
               <div class="py-3 text-center border-b border-l border-zinc-200 ${d.iso === todayIso ? 'bg-zinc-900 text-white' : d.hol ? 'bg-zinc-100 text-zinc-500' : ''}">
                 <div class="text-[13px] font-semibold ${d.iso === todayIso ? 'text-zinc-300' : 'text-zinc-500'}">${d.date.toLocaleDateString('ca-ES', { weekday: 'short' })} <span class="font-black ${d.iso === todayIso ? 'text-white' : 'text-zinc-900'}">${d.date.getDate()}</span></div>
                 <div class="text-[11px] ${d.iso === todayIso ? 'text-zinc-400' : 'text-zinc-400'}">${d.hol ? escapeHtml(d.hol.label) : d.date.toLocaleDateString('ca-ES', { month: 'long' })}</div>
+                ${getNoticesForDate(d.iso).map(n => `<div title="${escapeHtml(n.text)}" class="mx-1.5 mt-1 text-[10px] font-semibold leading-tight px-1.5 py-1 rounded-md text-left ${n.level === 'important' ? 'bg-rose-100 text-rose-800' : 'bg-amber-100 text-amber-900'}"><i class="fa-solid fa-bullhorn mr-1"></i>${escapeHtml(n.text.length > 40 ? n.text.slice(0, 40) + '…' : n.text)}</div>`).join('')}
               </div>`).join('')}
             <div class="relative" style="height:${height}px">
               ${hours.map(m => `<div class="absolute right-2 text-[11px] font-mono text-zinc-400 -translate-y-1/2" style="top:${yOf(m)}px">${minToTime(m)}</div>`).join('')}
