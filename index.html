@@ -102,7 +102,12 @@
     .sp-flow-step .d { color: var(--head); font-size: 11px; margin-top: 2px; }
     .sp-flow-arrow { color: var(--gold); font-weight: 900; display: flex; align-items: center; padding: 0 9px; font-size: 16px; }
     .sp-grid4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; }
-    .target-group-trim.tg-own { background: #fef3c7; border-color: #f59e0b; color: #92400e; }
+        .dchip { display: flex; flex-direction: column; align-items: flex-start; gap: 2px; width: 100%; text-align: left; background: #fff; border: 1px solid #e4e4e7; border-left: 4px solid #a1a1aa; border-radius: 10px; padding: 5px 7px; transition: box-shadow .15s; }
+    .dchip:hover { box-shadow: 0 2px 8px rgba(0,0,0,.08); }
+    .dspace { font-size: 10px; font-weight: 700; color: #fff; padding: 1px 6px; border-radius: 6px; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .dfilter { font-size: 11px; font-weight: 600; padding: 5px 10px; border-radius: 10px; border: 1px solid #e4e4e7; background: #fff; color: #52525b; display: inline-flex; align-items: center; }
+    .dfilter.on { background: #18181b; color: #fff; border-color: #18181b; }
+.target-group-trim.tg-own { background: #fef3c7; border-color: #f59e0b; color: #92400e; }
     .sp.sp-portrait { width: 1000px; padding: 26px 28px 20px; }
     .sp-masonry { column-count: var(--cols, 3); column-gap: 14px; }
     .sp-masonry.sp-masonry-js { column-count: initial; display: flex; gap: 14px; align-items: flex-start; }
@@ -262,6 +267,7 @@
       <button data-nav="timetable" onclick="goToTimetable()" class="nav-item"><i class="fa-regular fa-clock"></i><span>Horari</span></button>
       <button data-nav="planner" onclick="goToPlanner()" class="nav-item"><i class="fa-regular fa-calendar-check"></i><span>Planner</span></button>
       <button data-nav="library" onclick="goToSdaLibrary()" class="nav-item"><i class="fa-regular fa-folder-open"></i><span>SdAs</span></button>
+      <button data-nav="dept" onclick="goToDept()" class="nav-item"><i class="fa-solid fa-people-group"></i><span>Departament</span></button>
 
       <div class="hidden lg:block pt-5 pb-1 px-3 text-[10px] font-bold uppercase tracking-wider text-zinc-400">Les meves classes</div>
       <div id="sidebarClassList" class="hidden lg:block space-y-0.5"></div>
@@ -287,6 +293,7 @@
     <button data-nav="timetable" onclick="goToTimetable()" class="bnav-item"><i class="fa-regular fa-clock"></i><span>Horari</span></button>
     <button data-nav="planner" onclick="goToPlanner()" class="bnav-item"><i class="fa-regular fa-calendar-check"></i><span>Planner</span></button>
     <button data-nav="library" onclick="goToSdaLibrary()" class="bnav-item"><i class="fa-regular fa-folder-open"></i><span>SdAs</span></button>
+    <button data-nav="dept" onclick="goToDept()" class="bnav-item"><i class="fa-solid fa-people-group"></i><span>Dept.</span></button>
     <button data-nav="settings" onclick="goToSettings()" class="bnav-item"><i class="fa-solid fa-gear"></i><span>Ajustos</span></button>
   </nav>
 
@@ -528,6 +535,35 @@
 
 
     <!-- BIBLIOTECA DE SITUACIONS D'APRENENTATGE -->
+    <!-- PANTALLA: HORARI DEL DEPARTAMENT -->
+    <section id="screenDept" class="hidden space-y-4">
+      <div class="flex flex-wrap items-end justify-between gap-3">
+        <div>
+          <h1 class="text-2xl font-black tracking-tight text-zinc-900">Horari del departament</h1>
+          <p class="text-xs text-zinc-500 mt-0.5">Classes d'EF de tots els professors i repartiment dels espais.</p>
+        </div>
+        <div class="seg">
+          <button data-dterm="1" onclick="setDeptTerm(1)">1r trim.</button>
+          <button data-dterm="2" onclick="setDeptTerm(2)">2n trim.</button>
+          <button data-dterm="3" onclick="setDeptTerm(3)">3r trim.</button>
+        </div>
+      </div>
+      <div class="flex flex-wrap gap-2">
+        <button onclick="deptGenerateNow()" class="dept-edit inline-flex items-center gap-1.5 bg-zinc-900 text-white text-xs font-bold px-3.5 py-2.5 rounded-xl"><i class="fa-solid fa-wand-magic-sparkles"></i>Generar horari</button>
+        <button onclick="openDeptImport()" class="dept-edit inline-flex items-center gap-1.5 bg-white border border-zinc-200 text-zinc-800 text-xs font-bold px-3.5 py-2.5 rounded-xl"><i class="fa-solid fa-file-import"></i>Importar horari</button>
+        <button onclick="openDeptSession(null)" class="dept-edit inline-flex items-center gap-1.5 bg-white border border-zinc-200 text-zinc-800 text-xs font-bold px-3.5 py-2.5 rounded-xl"><i class="fa-solid fa-plus"></i>Afegir sessió</button>
+        <button onclick="openDeptRules()" class="inline-flex items-center gap-1.5 bg-white border border-zinc-200 text-zinc-800 text-xs font-bold px-3.5 py-2.5 rounded-xl"><i class="fa-solid fa-sliders"></i>Espais i normes</button>
+        <button onclick="printDept()" class="inline-flex items-center gap-1.5 bg-white border border-zinc-200 text-zinc-800 text-xs font-bold px-3.5 py-2.5 rounded-xl"><i class="fa-solid fa-print"></i>Imprimir</button>
+      </div>
+      <div id="deptBanner"></div>
+      <div id="deptLegend" class="flex flex-wrap gap-1.5"></div>
+      <div id="deptTeachers" class="flex flex-wrap gap-1.5"></div>
+      <div id="deptWarnings"></div>
+      <div id="deptGrid"></div>
+      <div id="deptSummary"></div>
+      <div id="deptDocs"></div>
+    </section>
+
     <section id="screenSdaLibrary" class="hidden space-y-5">
       <div class="page-head">
         <div>
@@ -1171,6 +1207,90 @@
   </div>
 
   <!-- MODAL CONFIGURAR SdA (PROGRAMACIÓ COMPLETA + QUALIFICACIÓ) -->
+  <!-- MODALS: HORARI DEL DEPARTAMENT -->
+  <div id="deptSessionModal" class="hidden fixed inset-0 z-[70] bg-zinc-900/50 flex items-end sm:items-center justify-center p-0 sm:p-4" onclick="if (event.target === this) closeDeptSession()">
+    <div class="bg-white w-full sm:max-w-md rounded-t-3xl sm:rounded-3xl shadow-float overflow-hidden">
+      <div class="flex items-center justify-between px-5 py-4 border-b border-zinc-100">
+        <h3 id="dsTitle" class="text-base font-bold text-zinc-900">Sessió</h3>
+        <button onclick="closeDeptSession()" class="text-zinc-400 hover:text-zinc-900 px-2"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div class="p-5 grid grid-cols-2 gap-3 text-xs">
+        <label class="font-semibold text-zinc-700">Grup<input id="dsGroup" type="text" placeholder="2n A" class="mt-1 w-full border border-zinc-200 rounded-xl p-2.5 text-sm font-bold outline-none"></label>
+        <label class="font-semibold text-zinc-700">Professor<input id="dsTeacher" list="dsTeacherList" type="text" class="mt-1 w-full border border-zinc-200 rounded-xl p-2.5 text-sm outline-none"><datalist id="dsTeacherList"></datalist></label>
+        <label class="font-semibold text-zinc-700 col-span-2">Dia<select id="dsDay" class="mt-1 w-full border border-zinc-200 rounded-xl p-2.5 text-sm bg-white outline-none"><option value="1">Dilluns</option><option value="2">Dimarts</option><option value="3">Dimecres</option><option value="4">Dijous</option><option value="5">Divendres</option></select></label>
+        <label class="font-semibold text-zinc-700">Inici<input id="dsStart" type="time" class="mt-1 w-full border border-zinc-200 rounded-xl p-2.5 text-sm font-mono outline-none"></label>
+        <label class="font-semibold text-zinc-700">Final<input id="dsEnd" type="time" class="mt-1 w-full border border-zinc-200 rounded-xl p-2.5 text-sm font-mono outline-none"></label>
+        <label class="font-semibold text-zinc-700 col-span-2">Espai<select id="dsSpace" class="mt-1 w-full border border-zinc-200 rounded-xl p-2.5 text-sm bg-white outline-none font-semibold"></select></label>
+        <label class="col-span-2 flex items-start gap-2 bg-zinc-50 border border-zinc-200 rounded-xl p-3 cursor-pointer"><input id="dsLock" type="checkbox" class="mt-0.5 w-4 h-4"><span><b class="text-zinc-800"><i class="fa-solid fa-lock text-[10px] mr-1"></i>Fixar aquest espai</b><span class="block text-[11px] text-zinc-500">El generador no el canviarà. La Piscina i la Polivalent sempre queden fixades.</span></span></label>
+      </div>
+      <div class="flex justify-between gap-2 px-5 py-4 border-t border-zinc-100 bg-zinc-50">
+        <button id="dsDelete" onclick="deleteDeptSession()" class="px-3 py-2 rounded-xl text-sm font-semibold text-rose-600 hover:bg-rose-50"><i class="fa-regular fa-trash-can mr-1"></i>Esborrar</button>
+        <div class="flex gap-2 ml-auto">
+          <button onclick="closeDeptSession()" class="px-4 py-2 rounded-xl border border-zinc-200 bg-white font-semibold text-sm">Tancar</button>
+          <button id="dsSave" onclick="saveDeptSession()" class="px-4 py-2 rounded-xl bg-zinc-900 text-white font-bold text-sm">Desar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="deptRulesModal" class="hidden fixed inset-0 z-[70] bg-zinc-900/50 flex items-end sm:items-center justify-center p-0 sm:p-4" onclick="if (event.target === this) closeDeptRules()">
+    <div class="bg-white w-full sm:max-w-3xl max-h-[92vh] rounded-t-3xl sm:rounded-3xl shadow-float overflow-hidden flex flex-col">
+      <div class="flex items-center justify-between px-5 py-4 border-b border-zinc-100">
+        <h3 class="text-base font-bold text-zinc-900"><i class="fa-solid fa-sliders mr-2 text-zinc-400"></i>Espais i normes</h3>
+        <button onclick="closeDeptRules()" class="text-zinc-400 hover:text-zinc-900 px-2"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div class="p-5 space-y-6 overflow-y-auto">
+        <div>
+          <div class="flex items-center justify-between mb-1"><h4 class="text-xs font-bold uppercase tracking-wider text-zinc-500">Espais</h4><button onclick="deptAddSpace()" class="dr-add text-xs font-bold text-zinc-900"><i class="fa-solid fa-plus mr-1"></i>Afegir espai</button></div>
+          <div id="drSpaces"></div>
+        </div>
+        <div>
+          <h4 class="text-xs font-bold uppercase tracking-wider text-zinc-500 mb-1">Ordre de preferència (espais automàtics)</h4>
+          <div id="drPrio"></div>
+        </div>
+        <div>
+          <div class="flex items-center justify-between mb-1"><h4 class="text-xs font-bold uppercase tracking-wider text-zinc-500">Espais tancats</h4><button onclick="deptAddClosure()" class="dr-add text-xs font-bold text-zinc-900"><i class="fa-solid fa-plus mr-1"></i>Afegir restricció</button></div>
+          <div id="drClosures"></div>
+        </div>
+        <div>
+          <h4 class="text-xs font-bold uppercase tracking-wider text-zinc-500 mb-1">Prioritats del repartiment</h4>
+          <div id="drRules"></div>
+        </div>
+      </div>
+      <div class="flex justify-end gap-2 px-5 py-4 border-t border-zinc-100 bg-zinc-50">
+        <button onclick="closeDeptRules()" class="px-4 py-2 rounded-xl border border-zinc-200 bg-white font-semibold text-sm">Tancar</button>
+        <button id="drSave" onclick="saveDeptRules()" class="px-4 py-2 rounded-xl bg-zinc-900 text-white font-bold text-sm">Desar normes</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="deptImportModal" class="hidden fixed inset-0 z-[70] bg-zinc-900/50 flex items-end sm:items-center justify-center p-0 sm:p-4" onclick="if (event.target === this) closeDeptImport()">
+    <div class="bg-white w-full sm:max-w-2xl max-h-[92vh] rounded-t-3xl sm:rounded-3xl shadow-float overflow-hidden flex flex-col">
+      <div class="flex items-center justify-between px-5 py-4 border-b border-zinc-100">
+        <h3 class="text-base font-bold text-zinc-900"><i class="fa-solid fa-file-import mr-2 text-zinc-400"></i>Importar horari · <span id="diTermLabel"></span></h3>
+        <button onclick="closeDeptImport()" class="text-zinc-400 hover:text-zinc-900 px-2"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div class="p-5 space-y-4 overflow-y-auto text-xs">
+        <p class="text-zinc-500">Puja la <b>captura de pantalla</b> de l'horari d'iEduca (o el PDF). L'app en treu les classes d'Educació Física i te les deixa revisar.</p>
+        <input id="diFile" type="file" accept="image/*,application/pdf" class="block w-full text-xs file:mr-3 file:py-2 file:px-3 file:rounded-xl file:border-0 file:bg-zinc-900 file:text-white file:font-bold">
+        <label class="block font-semibold text-zinc-700">Professor<input id="diTeacher" type="text" placeholder="Es detecta sol (p. ex. PONS CASAS, MARCEL)" class="mt-1 w-full border border-zinc-200 rounded-xl p-2.5 text-sm outline-none"></label>
+        <button onclick="runDeptImport()" class="w-full py-2.5 rounded-xl bg-zinc-900 text-white font-bold text-sm"><i class="fa-solid fa-magnifying-glass mr-1.5"></i>Llegir horari</button>
+        <div id="diStatus" class="text-sm text-zinc-700"></div>
+        <div id="diReview" class="hidden space-y-2">
+          <div class="flex items-center justify-between"><h4 class="text-xs font-bold uppercase tracking-wider text-zinc-500">Sessions detectades</h4><button onclick="deptImportAddRow()" class="text-xs font-bold text-zinc-900"><i class="fa-solid fa-plus mr-1"></i>Afegir</button></div>
+          <div id="diRows"></div>
+          <label class="flex items-center gap-2 pt-1"><input id="diReplace" type="checkbox" checked class="w-4 h-4"> Substituir les sessions que ja hi hagi d'aquest professor en aquest trimestre</label>
+          <button onclick="saveDeptImport()" class="w-full py-2.5 rounded-xl bg-emerald-600 text-white font-bold text-sm"><i class="fa-solid fa-check mr-1.5"></i>Desar a l'horari del departament</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="deptDocViewer" class="hidden fixed inset-0 z-[75] bg-zinc-900/80 flex flex-col p-3" onclick="if (event.target === this) this.classList.add('hidden')">
+    <div class="flex items-center justify-between text-white mb-2"><span id="deptDocTitle" class="font-bold text-sm"></span><button onclick="document.getElementById('deptDocViewer').classList.add('hidden')" class="px-3 py-1 text-lg"><i class="fa-solid fa-xmark"></i></button></div>
+    <div class="flex-1 overflow-auto bg-white rounded-2xl"><img id="deptDocImg" class="w-full"></div>
+  </div>
+
   <!-- MODAL: AVÍS -->
   <div id="noticeModal" class="hidden fixed inset-0 z-[70] bg-zinc-900/50 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-4" onclick="if (event.target === this) closeNoticeModal()">
     <div class="bg-white w-full sm:max-w-lg rounded-t-3xl sm:rounded-3xl shadow-float overflow-hidden">
@@ -1995,6 +2115,7 @@
       connectToUserCloud(currentAuthUser);
       subscribeSharedLibrary();
       subscribeSharedNotices();
+      subscribeDept();
     }
 
     // ===== BIBLIOTECA COMUNA DEL DEPARTAMENT =====
@@ -2018,6 +2139,33 @@
       });
     }
     window.subscribeSharedLibrary = subscribeSharedLibrary;
+
+    // Horari del departament (només l'edita qui el crea) i horaris originals
+    window.sharedDept = null; window.deptDocs = {};
+    let deptSubscribed = false;
+    function subscribeDept() {
+      if (deptSubscribed || !fbDb) return;
+      deptSubscribed = true;
+      onValue(ref(fbDb, 'shared/deptSchedule/main'), snap => {
+        window.sharedDept = snap.val();
+        if (window.onSharedDeptChange) window.onSharedDeptChange();
+      }, err => { console.warn('Horari departament:', err); deptSubscribed = false; });
+      onValue(ref(fbDb, 'shared/deptDocs'), snap => {
+        window.deptDocs = snap.val() || {};
+        if (window.onDeptDocsChange) window.onDeptDocsChange();
+      }, err => console.warn('Horaris originals:', err));
+    }
+    window.publishDeptSchedule = function(data) {
+      if (!currentAuthUser || !fbDb) return Promise.reject(new Error('no-auth'));
+      const prev = window.sharedDept && window.sharedDept.author;
+      const clean = JSON.parse(JSON.stringify({ ...data, author: prev || window.currentUserInfo, updatedAt: Date.now() }));
+      window.sharedDept = clean;
+      return set(ref(fbDb, 'shared/deptSchedule/main'), clean);
+    };
+    window.publishDeptDoc = function(key, doc) {
+      if (!currentAuthUser || !fbDb) return Promise.reject(new Error('no-auth'));
+      return set(ref(fbDb, `shared/deptDocs/${key}`), { ...doc, author: window.currentUserInfo });
+    };
 
     // Avisos del departament
     window.sharedNotices = {};
@@ -9994,7 +10142,7 @@
 
     const APP_SCREENS = {
       home: 'screenHome', classes: 'screenClasses', timetable: 'screenTimetable', planner: 'screenPlanner',
-      library: 'screenSdaLibrary', settings: 'screenSettings', class: 'screenClassWorkspace'
+      library: 'screenSdaLibrary', settings: 'screenSettings', class: 'screenClassWorkspace', dept: 'screenDept'
     };
 
     function showScreen(name) {
@@ -10398,6 +10546,756 @@
             : entries.length ? `<div class="space-y-2">${entries.map(card).join('')}</div>`
             : `<div class="text-xs text-zinc-400 bg-white border border-zinc-200 rounded-2xl px-4 py-3">Aquest dia no tens classes a l'horari.</div>`}
         </div>`;
+    };
+
+    // ===== Lectura d'horaris (iEduca): paraules amb posició → sessions d'EF =====
+    function schedNorm(t) { return String(t || '').normalize('NFD').replace(/[̀-ͯ]/g, '').toUpperCase(); }
+    const SCHED_DAYS = [['DILLUNS', 1], ['DIMARTS', 2], ['DIMECRES', 3], ['DIJOUS', 4], ['DIVENDRES', 5]];
+
+    function parseScheduleWords(words) {
+      const W = words.map(w => ({ t: String(w.text || '').trim(), x0: w.x0, y0: w.y0, x1: w.x1, y1: w.y1 }))
+        .filter(w => w.t && w.x1 > w.x0 && w.y1 > w.y0)
+        .map(w => ({ ...w, cx: (w.x0 + w.x1) / 2, cy: (w.y0 + w.y1) / 2, n: schedNorm(w.t) }));
+      const hMed = (() => { const hs = W.map(w => w.y1 - w.y0).sort((a, b) => a - b); return hs[Math.floor(hs.length / 2)] || 10; })();
+      // Línies (per trobar el nom del professor)
+      const lines = [];
+      W.slice().sort((a, b) => a.cy - b.cy).forEach(w => {
+        const l = lines.find(L => Math.abs(L.cy - w.cy) < hMed * 0.6);
+        if (l) { l.ws.push(w); l.cy = (l.cy * (l.ws.length - 1) + w.cy) / l.ws.length; } else lines.push({ cy: w.cy, ws: [w] });
+      });
+      lines.forEach(l => { l.ws.sort((a, b) => a.x0 - b.x0); l.text = l.ws.map(w => w.t).join(' '); });
+      let teacher = '';
+      const hl = lines.find(l => /HORARI/.test(schedNorm(l.text)));
+      if (hl) {
+        const m = hl.text.match(/["“”«»']\s*([^"“”«»']+?)\s*["“”«»']/) || hl.text.match(/Horari\s+(.+)$/i);
+        if (m) teacher = m[1].replace(/["“”«»]/g, '').trim();
+      }
+      // Capçaleres dels dies
+      const dayX = {};
+      W.forEach(w => { const d = SCHED_DAYS.find(([k]) => w.n.startsWith(k)); if (d && dayX[d[1]] === undefined) dayX[d[1]] = { cx: w.cx, cy: w.cy, x0: w.x0 }; });
+      const found = Object.keys(dayX).map(Number).sort();
+      if (found.length < 2) return { teacher, sessions: [], error: 'No trobo els dies de la setmana (Dilluns, Dimarts...).' };
+      // Completa dies que falten amb l'espaiat mitjà
+      const step = (dayX[found[found.length - 1]].cx - dayX[found[0]].cx) / (found[found.length - 1] - found[0]);
+      for (let d = 1; d <= 5; d++) if (!dayX[d]) dayX[d] = { cx: dayX[found[0]].cx + (d - found[0]) * step, cy: dayX[found[0]].cy };
+      const headerY = Math.max(...found.map(d => dayX[d].cy));
+      // Columna de les hores: les paraules amb format hh:mm més a l'esquerra
+      const timeLike = W.filter(w => w.cy > headerY && /^\d{1,2}[:.,]\d{2}$/.test(w.t.replace(/[^\d:.,]/g, '')));
+      const minTX = timeLike.length ? Math.min(...timeLike.map(w => w.x0)) : 0;
+      const leftCol = timeLike.filter(w => w.x0 < minTX + hMed * 2);
+      const leftEdge = leftCol.length ? Math.max(...leftCol.map(w => w.x1)) + hMed * 0.5 : dayX[1].cx - step / 2;
+      const colOf = x => { if (x < leftEdge) return 0; let best = 1, bd = Infinity; for (let d = 1; d <= 5; d++) { const dd = Math.abs(x - dayX[d].cx); if (dd < bd) { bd = dd; best = d; } } return best; };
+      // Hores de la columna esquerra
+      const times = W.filter(w => w.cy > headerY && w.cx < leftEdge && /^\d{1,2}[:.,]\d{2}$/.test(w.t.replace(/[^\d:.,]/g, '')))
+        .map(w => { const s = w.t.replace(/[^\d:.,]/g, '').replace(/[.,]/, ':'); const [h, m] = s.split(':'); return { ...w, time: `${h.padStart(2, '0')}:${m}`, min: +h * 60 + +m }; })
+        .sort((a, b) => a.cy - b.cy);
+      const rows = [];
+      for (let i = 0; i < times.length - 1; i++) {
+        const a = times[i], b = times[i + 1];
+        if (b.cy - a.cy < hMed * 3.5 && b.min > a.min && b.min - a.min <= 120) { rows.push({ start: a.time, end: b.time, top: a.y0, bot: b.y1, cy: (a.cy + b.cy) / 2 }); i++; }
+      }
+      if (!rows.length) return { teacher, sessions: [], error: 'No trobo les hores (08:20, 09:20...).' };
+      rows.forEach((r, i) => {
+        r.from = i === 0 ? headerY + hMed : (rows[i - 1].cy + r.cy) / 2;
+        r.to = i === rows.length - 1 ? r.bot + (r.bot - r.top) * 2 : (r.cy + rows[i + 1].cy) / 2;
+      });
+      const rowOf = y => rows.findIndex(r => y >= r.from && y < r.to);
+      // Paraules a cada casella
+      const cells = {};
+      W.forEach(w => {
+        if (w.cy <= headerY + hMed * 0.3) return;
+        const c = colOf(w.cx); if (!c) return;
+        const r = rowOf(w.cy); if (r < 0) return;
+        const k = c + '|' + r; (cells[k] = cells[k] || []).push(w);
+      });
+      const sessions = [];
+      Object.keys(cells).forEach(k => {
+        const [c, r] = k.split('|').map(Number);
+        const ws = cells[k].sort((a, b) => (Math.abs(a.cy - b.cy) < hMed * 0.6 ? a.x0 - b.x0 : a.cy - b.cy));
+        const text = ws.map(w => w.t).join(' ');
+        const N = schedNorm(text).replace(/(^|\s)[LI|!]\s*R\s*([A-F])\b/g, '$11R $2').replace(/\b2\s*M\s*([A-F])\b/g, '2N $1');
+        if (!/FISICA|EDUCACIO\s*F|E\.?\s*F\.?\s*\d/.test(N)) return;
+        let group = '';
+        const m = N.match(/\b([1-4])\s*(R|N|T)\s*([A-F])\b/) || N.match(/\b([1-4])\s*(R|N|T)([A-F])\b/);
+        if (m) group = `${m[1]}${m[2].toLowerCase()} ${m[3]}`;
+        const mb = !group && N.match(/\b([12])\s*(R|N)\s*BAT\w*\s*([A-F])?/);
+        if (mb) group = `${mb[1]}${mb[2].toLowerCase()} BAT${mb[3] ? ' ' + mb[3] : ''}`;
+        let level = (N.match(/FISICA\s*([1-4])/) || [])[1] || '';
+        sessions.push({ day: c, start: rows[r].start, end: rows[r].end, group, level, raw: text });
+      });
+      sessions.sort((a, b) => a.day - b.day || a.start.localeCompare(b.start));
+      return { teacher, sessions, rows: rows.map(r => ({ start: r.start, end: r.end })) };
+    }
+    // ===== Generador de repartiment d'espais =====
+    function tMin(t) { const [h, m] = String(t || '0:0').split(':').map(Number); return (h || 0) * 60 + (m || 0); }
+    function overlaps(a1, a2, b1, b2) { return tMin(a1) < tMin(b2) && tMin(b1) < tMin(a2); }
+    function groupKey(g) { return schedNorm(g).replace(/\s+/g, ''); }
+
+    function deptSpaceClosed(cfg, spaceId, s) {
+      return (cfg.closures || []).some(c => c.space === spaceId && (c.days || []).includes(s.day) && overlaps(s.start, s.end, c.from, c.to));
+    }
+
+    // Grups de sessions que coincideixen en el temps (mateix dia i hores que se solapen)
+    function deptClusters(sessions) {
+      const out = [];
+      [1, 2, 3, 4, 5].forEach(day => {
+        const list = sessions.filter(s => s.day === day).sort((a, b) => tMin(a.start) - tMin(b.start));
+        let cur = null, curEnd = -1;
+        list.forEach(s => {
+          if (cur && tMin(s.start) < curEnd) { cur.push(s); curEnd = Math.max(curEnd, tMin(s.end)); }
+          else { cur = [s]; out.push(cur); curEnd = tMin(s.end); }
+        });
+      });
+      return out;
+    }
+
+    function deptGenerate(cfg, term) {
+      const spaces = cfg.spaces || [];
+      const autos = spaces.filter(sp => sp.mode !== 'manual').sort((a, b) => (b.prio || 0) - (a.prio || 0));
+      const top = autos[0];
+      const fallback = spaces.find(sp => sp.fallback) || autos[autos.length - 1];
+      const sessions = term.sessions || [];
+      const manualIds = new Set(spaces.filter(sp => sp.mode === 'manual').map(sp => sp.id));
+      const isFixed = s => s.lock || manualIds.has(s.space);
+      sessions.forEach(s => { if (!isFixed(s)) s.space = ''; });
+      const natacio = new Set(sessions.filter(s => spaces.find(sp => sp.id === s.space && /piscina|nataci/i.test(sp.name))).map(s => groupKey(s.group)));
+      const topCount = {};
+      const cnt = g => topCount[groupKey(g)] || 0;
+      const inc = (g, d) => { topCount[groupKey(g)] = cnt(g) + d; };
+      sessions.forEach(s => { if (isFixed(s) && top && s.space === top.id) inc(s.group, 1); });
+      const clusters = deptClusters(sessions);
+      const cap = sp => sp.cap ? sp.cap : Infinity;
+      const used = (cl, id) => cl.filter(s => s.space === id).length;
+      const canUse = (cl, sp, s) => !deptSpaceClosed(cfg, sp.id, s) && used(cl, sp.id) < cap(sp);
+      // Prioritat per tenir l'espai principal
+      const need = s => {
+        const k = groupKey(s.group);
+        let p = 0;
+        if (cfg.rules.natacioPriority && natacio.has(k) && cnt(s.group) === 0) p += 1000;
+        if (cfg.rules.atLeastOnceTop && cnt(s.group) === 0) p += 500;
+        p -= cnt(s.group) * 50;
+        // Les que tenen menys alternatives primer
+        return p;
+      };
+      // Ordenem els moments: primer els que tenen més competència per l'espai principal
+      const order = clusters.slice().sort((a, b) => b.filter(s => !isFixed(s)).length - a.filter(s => !isFixed(s)).length);
+      order.forEach(cl => {
+        const free = cl.filter(s => !isFixed(s));
+        free.sort((a, b) => need(b) - need(a) || String(a.group).localeCompare(String(b.group)));
+        free.forEach(s => {
+          const sp = (cfg.rules.preferTop !== false ? autos : autos.slice().reverse()).find(sp => canUse(cl, sp, s)) || fallback;
+          s.space = sp ? sp.id : '';
+          if (top && s.space === top.id) inc(s.group, 1);
+        });
+      });
+      // Millora: grups sense espai principal → intercanvi amb qui en té de sobres
+      if (top) {
+        for (let pass = 0; pass < 4; pass++) {
+          let changed = false;
+          const groups = Array.from(new Set(sessions.map(s => groupKey(s.group))));
+          const wants = groups.filter(k => topCount[k] === undefined || topCount[k] === 0)
+            .sort((a, b) => (natacio.has(b) ? 1 : 0) - (natacio.has(a) ? 1 : 0));
+          wants.forEach(k => {
+            if ((topCount[k] || 0) > 0) return;
+            if (!cfg.rules.atLeastOnceTop && !(cfg.rules.natacioPriority && natacio.has(k))) return;
+            const mine = sessions.filter(s => groupKey(s.group) === k && !isFixed(s) && !deptSpaceClosed(cfg, top.id, s));
+            for (const s of mine) {
+              const cl = clusters.find(c => c.includes(s));
+              const holder = cl.find(o => o !== s && o.space === top.id && !isFixed(o) &&
+                ((topCount[groupKey(o.group)] || 0) > 1 || (!natacio.has(groupKey(o.group)) && natacio.has(k) && (topCount[groupKey(o.group)] || 0) > 0)));
+              if (holder) {
+                const tmp = s.space; s.space = holder.space; holder.space = tmp;
+                inc(s.group, 1); inc(holder.group, -1); changed = true; break;
+              }
+            }
+          });
+          if (!changed) break;
+        }
+      }
+      return { natacio };
+    }
+
+    function deptWarnings(cfg, term) {
+      const spaces = cfg.spaces || [];
+      const autos = spaces.filter(sp => sp.mode !== 'manual').sort((a, b) => (b.prio || 0) - (a.prio || 0));
+      const top = autos[0];
+      const sessions = term.sessions || [];
+      const W = [];
+      const name = id => (spaces.find(sp => sp.id === id) || {}).name || id;
+      sessions.forEach(s => {
+        if (!s.space) W.push({ lvl: 'warn', txt: `${s.group || 'Sense grup'} (${DEPT_DAY_NAMES[s.day]} ${s.start}): sense espai assignat` });
+        else if (deptSpaceClosed(cfg, s.space, s)) W.push({ lvl: 'err', txt: `${s.group} (${DEPT_DAY_NAMES[s.day]} ${s.start}): ${name(s.space)} està tancat a aquesta hora` });
+      });
+      deptClusters(sessions).forEach(cl => {
+        spaces.forEach(sp => {
+          const n = cl.filter(s => s.space === sp.id).length;
+          if (sp.cap && n > sp.cap) W.push({ lvl: 'err', txt: `${DEPT_DAY_NAMES[cl[0].day]} ${cl[0].start}: ${n} grups a ${sp.name} (màxim ${sp.cap})` });
+        });
+      });
+      if (top) {
+        const natacio = new Set(sessions.filter(s => spaces.find(sp => sp.id === s.space && /piscina|nataci/i.test(sp.name))).map(s => groupKey(s.group)));
+        const groups = {};
+        sessions.forEach(s => { const k = groupKey(s.group); if (!k) return; (groups[k] = groups[k] || { name: s.group, list: [] }).list.push(s); });
+        Object.values(groups).forEach(g => {
+          const has = g.list.some(s => s.space === top.id);
+          if (has) return;
+          if (natacio.has(groupKey(g.name)) && cfg.rules.natacioPriority) W.push({ lvl: 'warn', txt: `${g.name} fa natació però no té ${top.name} l'altra sessió` });
+          else if (cfg.rules.atLeastOnceTop) W.push({ lvl: 'warn', txt: `${g.name} no va cap cop a ${top.name}` });
+        });
+      }
+      return W;
+    }
+    // ================== HORARI DEL DEPARTAMENT I REPARTIMENT D'ESPAIS ==================
+    const DEPT_DAY_NAMES = ['', 'Dilluns', 'Dimarts', 'Dimecres', 'Dijous', 'Divendres'];
+    const DEPT_DAY_SHORT = ['', 'Dl', 'Dt', 'Dc', 'Dj', 'Dv'];
+    const DEPT_TEACHER_COLORS = ['#e11d48', '#2563eb', '#16a34a', '#9333ea', '#ea580c', '#0891b2', '#ca8a04', '#db2777'];
+
+    function deptDefault() {
+      const term = () => ({ sessions: [] });
+      return {
+        spaces: [
+          { id: 'poli', name: 'Poliesportiu', cap: 1, mode: 'auto', prio: 3, color: '#4f46e5' },
+          { id: 'futbol', name: 'Camp de futbol', cap: 2, mode: 'auto', prio: 2, color: '#059669' },
+          { id: 'annex', name: 'Camp annex', cap: 0, mode: 'auto', prio: 1, fallback: true, color: '#65a30d' },
+          { id: 'polivalent', name: 'Polivalent', cap: 1, mode: 'manual', prio: 0, color: '#d97706' },
+          { id: 'piscina', name: 'Piscina', cap: 0, mode: 'manual', prio: 0, color: '#0284c7' }
+        ],
+        closures: [
+          { id: 'c1', space: 'poli', days: [2, 5], from: '10:20', to: '11:20' },
+          { id: 'c2', space: 'futbol', days: [1, 2, 3, 4, 5], from: '10:20', to: '11:20' },
+          { id: 'c3', space: 'futbol', days: [1, 2, 3, 4, 5], from: '11:20', to: '11:50' }
+        ],
+        rules: { atLeastOnceTop: true, natacioPriority: true, preferTop: true },
+        terms: { 1: term(), 2: term(), 3: term() }
+      };
+    }
+
+    function deptData() {
+      if (!window.deptStore) {
+        let d = null;
+        if (window.sharedDept) d = JSON.parse(JSON.stringify(window.sharedDept));
+        if (!d) { try { d = JSON.parse(localStorage.getItem('EF_DEPT') || 'null'); } catch (e) { d = null; } }
+        window.deptStore = deptNormalize(d || deptDefault());
+      }
+      return window.deptStore;
+    }
+    function deptNormalize(d) {
+      const def = deptDefault();
+      d.spaces = Array.isArray(d.spaces) ? d.spaces : def.spaces;
+      d.closures = Array.isArray(d.closures) ? d.closures.map(c => ({ ...c, days: Array.isArray(c.days) ? c.days.map(Number) : [] })) : [];
+      d.rules = { ...def.rules, ...(d.rules || {}) };
+      d.terms = d.terms || {};
+      [1, 2, 3].forEach(t => {
+        d.terms[t] = d.terms[t] || { sessions: [] };
+        const ss = d.terms[t].sessions;
+        d.terms[t].sessions = (Array.isArray(ss) ? ss : Object.values(ss || {})).filter(Boolean).map(s => ({ ...s, day: Number(s.day) }));
+      });
+      return d;
+    }
+    function deptTerm() { return deptData().terms[window.appState.deptTerm || 1]; }
+    function deptCanEdit() {
+      const me = window.currentUserInfo;
+      const sh = window.sharedDept;
+      if (!sh || !sh.author) return true;
+      return !!(me && sh.author.uid === me.uid);
+    }
+    function deptSave() {
+      const d = deptData();
+      try { localStorage.setItem('EF_DEPT', JSON.stringify(d)); } catch (e) {}
+      if (window.publishDeptSchedule && window.currentUserInfo && deptCanEdit()) {
+        window.publishDeptSchedule(d).catch(err => {
+          const perm = String((err && (err.code || err.message)) || '').toLowerCase().includes('permission');
+          alert('No s\'ha pogut desar l\'horari al núvol.' + (perm ? '\n\nCal actualitzar les regles de Firebase (secció shared).' : ''));
+        });
+      }
+    }
+    window.onSharedDeptChange = function() {
+      if (window.appState.deptDirty) return;
+      window.deptStore = null;
+      if (window.appState.currentScreen === 'dept') renderDept();
+    };
+    window.onDeptDocsChange = function() { if (window.appState.currentScreen === 'dept') renderDeptDocs(); };
+
+    function teacherColor(name) {
+      const d = deptData();
+      const names = Array.from(new Set([1, 2, 3].flatMap(t => d.terms[t].sessions.map(s => s.teacher || '')))).filter(Boolean).sort();
+      const i = names.indexOf(name);
+      return DEPT_TEACHER_COLORS[(i < 0 ? 0 : i) % DEPT_TEACHER_COLORS.length];
+    }
+    function teacherShort(name) {
+      let n = String(name || '').trim();
+      if (!n) return '—';
+      if (n === n.toUpperCase()) n = n.toLowerCase().replace(/(^|[\s,'-])(\p{L})/gu, (m, a, c) => a + c.toUpperCase());
+      if (n.includes(',')) { const [sur, first] = n.split(','); return (first.trim().split(/\s+/)[0] + ' ' + sur.trim().split(/\s+/)[0][0] + '.').replace(/\b\w/g, c => c.toUpperCase()); }
+      return n.split(/\s+/).slice(0, 2).join(' ');
+    }
+    function spaceById(id) { return deptData().spaces.find(s => s.id === id); }
+
+    window.goToDept = function() {
+      if (!window.appState.deptTerm) window.appState.deptTerm = window.appState.currentTrim || 1;
+      showScreen('dept');
+      renderDept();
+    };
+    window.setDeptTerm = function(t) { window.appState.deptTerm = t; renderDept(); };
+    window.setDeptTeacherFilter = function(t) { window.appState.deptTeacher = t; renderDept(); };
+
+    window.renderDept = function() {
+      const d = deptData();
+      const T = window.appState.deptTerm || 1;
+      const term = d.terms[T];
+      const can = deptCanEdit();
+      document.querySelectorAll('#screenDept [data-dterm]').forEach(b => b.classList.toggle('active', Number(b.dataset.dterm) === T));
+      document.querySelectorAll('#screenDept .dept-edit').forEach(el => el.classList.toggle('hidden', !can));
+      const sh = window.sharedDept;
+      document.getElementById('deptBanner').innerHTML = !can
+        ? `<div class="text-xs bg-zinc-100 border border-zinc-200 rounded-2xl px-4 py-3 text-zinc-600"><i class="fa-solid fa-eye mr-1.5"></i>Només lectura: l'horari del departament el gestiona <b>${escapeHtml((sh.author && sh.author.name) || '')}</b>.</div>`
+        : !window.currentUserInfo ? `<div class="text-xs bg-amber-50 border border-amber-200 rounded-2xl px-4 py-3 text-amber-800"><i class="fa-solid fa-triangle-exclamation mr-1.5"></i>Sense sessió iniciada: l'horari només es desa en aquest dispositiu.</div>` : '';
+
+      const sessions = term.sessions;
+      const teachers = Array.from(new Set(sessions.map(s => s.teacher || ''))).filter(Boolean).sort();
+      const tf = window.appState.deptTeacher || 'all';
+      document.getElementById('deptTeachers').innerHTML = teachers.length ? `
+        <button onclick="setDeptTeacherFilter('all')" class="dfilter ${tf === 'all' ? 'on' : ''}">Tots</button>
+        ${teachers.map(t => `<button onclick='setDeptTeacherFilter(${escapeHtml(JSON.stringify(t))})' class="dfilter ${tf === t ? 'on' : ''}"><span class="inline-block w-2.5 h-2.5 rounded-full mr-1.5" style="background:${teacherColor(t)}"></span>${escapeHtml(teacherShort(t))}</button>`).join('')}` : '';
+
+      // Llegenda d'espais
+      document.getElementById('deptLegend').innerHTML = d.spaces.map(sp => {
+        const n = sessions.filter(s => s.space === sp.id).length;
+        return `<span class="inline-flex items-center gap-1.5 text-[11px] font-semibold px-2 py-1 rounded-lg border border-zinc-200 bg-white"><span class="w-2.5 h-2.5 rounded-sm" style="background:${sp.color}"></span>${escapeHtml(sp.name)}<span class="font-mono text-zinc-400">${n}</span>${sp.mode === 'manual' ? '<span class="text-[9px] text-zinc-400 uppercase">manual</span>' : ''}</span>`;
+      }).join('');
+
+      // Avisos
+      const W = deptWarnings(d, term);
+      document.getElementById('deptWarnings').innerHTML = sessions.length ? (W.length ? `
+        <details class="bg-white border ${W.some(w => w.lvl === 'err') ? 'border-rose-200' : 'border-amber-200'} rounded-2xl" ${W.length <= 4 ? 'open' : ''}>
+          <summary class="px-4 py-2.5 text-xs font-bold cursor-pointer ${W.some(w => w.lvl === 'err') ? 'text-rose-700' : 'text-amber-800'}"><i class="fa-solid fa-triangle-exclamation mr-1.5"></i>${W.length} avís${W.length === 1 ? '' : 'os'}</summary>
+          <ul class="px-4 pb-3 space-y-1">${W.map(w => `<li class="text-xs ${w.lvl === 'err' ? 'text-rose-700' : 'text-amber-800'}">• ${escapeHtml(w.txt)}</li>`).join('')}</ul>
+        </details>` : `<div class="text-xs bg-emerald-50 border border-emerald-200 text-emerald-800 rounded-2xl px-4 py-2.5"><i class="fa-solid fa-circle-check mr-1.5"></i>Totes les normes es compleixen.</div>`) : '';
+
+      // Graella
+      const rowsMap = {};
+      sessions.forEach(s => { const k = s.start + '-' + s.end; rowsMap[k] = { start: s.start, end: s.end }; });
+      const rows = Object.values(rowsMap).sort((a, b) => tMin(a.start) - tMin(b.start) || tMin(a.end) - tMin(b.end));
+      const grid = document.getElementById('deptGrid');
+      if (!sessions.length) {
+        grid.innerHTML = `<div class="bg-white border border-dashed border-zinc-300 rounded-3xl p-8 text-center space-y-2">
+          <i class="fa-solid fa-table-cells text-3xl text-zinc-300"></i>
+          <p class="text-sm font-bold text-zinc-800">Encara no hi ha classes en aquest trimestre</p>
+          <p class="text-xs text-zinc-500">Importa l'horari de cada professor (captura d'iEduca o PDF)${T > 1 ? ' o copia el del trimestre anterior' : ''}.</p>
+          ${can ? `<div class="flex flex-wrap gap-2 justify-center pt-1">
+            <button onclick="openDeptImport()" class="text-xs font-bold px-3 py-2 rounded-xl bg-zinc-900 text-white"><i class="fa-solid fa-file-import mr-1"></i>Importar horari</button>
+            ${T > 1 && d.terms[T - 1].sessions.length ? `<button onclick="deptCopyPrev()" class="text-xs font-bold px-3 py-2 rounded-xl bg-white border border-zinc-200 text-zinc-700"><i class="fa-regular fa-copy mr-1"></i>Copiar del ${T - 1}r trimestre</button>` : ''}
+          </div>` : ''}
+        </div>`;
+      } else {
+        const chip = s => {
+          const sp = spaceById(s.space);
+          const dim = tf !== 'all' && s.teacher !== tf;
+          return `<button onclick="openDeptSession('${s.id}')" class="dchip ${dim ? 'opacity-25' : ''}" style="border-left-color:${teacherColor(s.teacher)}">
+            <span class="flex items-center gap-1"><b class="text-[12px] text-zinc-900">${escapeHtml(s.group || '?')}</b>${s.lock ? '<i class="fa-solid fa-lock text-[8px] text-zinc-400"></i>' : ''}</span>
+            <span class="text-[10px] text-zinc-500 truncate">${escapeHtml(teacherShort(s.teacher))}</span>
+            <span class="dspace" style="${sp ? `background:${sp.color}` : 'background:#a1a1aa'}">${escapeHtml(sp ? sp.name : 'Sense espai')}</span>
+          </button>`;
+        };
+        grid.innerHTML = `
+          <div class="bg-white border border-zinc-200 rounded-3xl overflow-x-auto shadow-subtle">
+            <table class="w-full text-xs border-collapse min-w-[760px]">
+              <thead><tr class="bg-zinc-50 border-b border-zinc-200">
+                <th class="py-2.5 px-2 text-left text-zinc-500 font-semibold w-20">Hora</th>
+                ${[1, 2, 3, 4, 5].map(dd => `<th class="py-2.5 px-2 text-left text-zinc-800 font-bold">${DEPT_DAY_NAMES[dd]}</th>`).join('')}
+              </tr></thead>
+              <tbody>
+                ${rows.map(r => `<tr class="border-b border-zinc-100 align-top">
+                  <td class="py-2 px-2 font-mono text-zinc-500 whitespace-nowrap"><div class="font-bold text-zinc-800">${r.start}</div><div>${r.end}</div></td>
+                  ${[1, 2, 3, 4, 5].map(dd => {
+                    const list = sessions.filter(s => s.day === dd && s.start === r.start && s.end === r.end).sort((a, b) => String(a.group).localeCompare(String(b.group)));
+                    const closed = d.closures.filter(c => c.days.includes(dd) && overlaps(r.start, r.end, c.from, c.to)).map(c => (spaceById(c.space) || {}).name).filter(Boolean);
+                    return `<td class="py-1.5 px-1.5">
+                      <div class="flex flex-col gap-1">${list.map(chip).join('')}</div>
+                      ${closed.length && list.length ? `<div class="text-[9px] text-zinc-400 mt-1"><i class="fa-solid fa-ban mr-0.5"></i>${escapeHtml(Array.from(new Set(closed)).join(', '))}</div>` : ''}
+                    </td>`;
+                  }).join('')}
+                </tr>`).join('')}
+              </tbody>
+            </table>
+          </div>`;
+      }
+
+      // Resum per grup
+      const groups = {};
+      sessions.forEach(s => { const k = groupKey(s.group) || '?'; (groups[k] = groups[k] || { name: s.group || '?', list: [] }).list.push(s); });
+      const autos = d.spaces.filter(sp => sp.mode !== 'manual').sort((a, b) => (b.prio || 0) - (a.prio || 0));
+      const top = autos[0];
+      document.getElementById('deptSummary').innerHTML = Object.keys(groups).length ? `
+        <div class="bg-white border border-zinc-200 rounded-3xl overflow-hidden shadow-subtle">
+          <div class="px-4 py-3 border-b border-zinc-100 text-sm font-bold text-zinc-900">Resum per grup</div>
+          <div class="divide-y divide-zinc-100">
+            ${Object.values(groups).sort((a, b) => String(a.name).localeCompare(String(b.name), 'ca', { numeric: true })).map(g => {
+              const hasTop = top && g.list.some(s => s.space === top.id);
+              return `<div class="flex flex-wrap items-center gap-2 px-4 py-2">
+                <span class="w-20 text-xs font-bold text-zinc-900">${escapeHtml(g.name)}</span>
+                <span class="text-[11px] text-zinc-500 w-28 truncate">${escapeHtml(teacherShort(g.list[0].teacher))}</span>
+                <span class="flex flex-wrap gap-1 flex-1">${g.list.sort((a, b) => a.day - b.day || tMin(a.start) - tMin(b.start)).map(s => { const sp = spaceById(s.space); return `<span class="text-[10px] font-semibold px-1.5 py-0.5 rounded-md text-white" style="background:${sp ? sp.color : '#a1a1aa'}">${DEPT_DAY_SHORT[s.day]} ${s.start} · ${escapeHtml(sp ? sp.name : '—')}</span>`; }).join('')}</span>
+                ${top ? (hasTop ? `<i class="fa-solid fa-circle-check text-emerald-500" title="Va al ${escapeHtml(top.name)}"></i>` : `<i class="fa-solid fa-circle-exclamation text-amber-500" title="No va al ${escapeHtml(top.name)}"></i>`) : ''}
+              </div>`;
+            }).join('')}
+          </div>
+        </div>` : '';
+      renderDeptDocs();
+    };
+
+    function renderDeptDocs() {
+      const box = document.getElementById('deptDocs');
+      if (!box) return;
+      const T = window.appState.deptTerm || 1;
+      const docs = Object.entries(window.deptDocs || {}).filter(([, v]) => v && Number(v.term) === T);
+      let local = [];
+      if (!window.currentUserInfo) { try { local = Object.entries(JSON.parse(localStorage.getItem('EF_DEPT_DOCS') || '{}')).filter(([, v]) => Number(v.term) === T); } catch (e) {} }
+      const all = docs.length ? docs : local;
+      box.innerHTML = all.length ? `
+        <div class="bg-white border border-zinc-200 rounded-3xl p-4 shadow-subtle">
+          <div class="text-sm font-bold text-zinc-900 mb-3"><i class="fa-regular fa-file-image mr-1.5 text-zinc-400"></i>Horaris originals del ${T}r trimestre</div>
+          <div class="flex flex-wrap gap-3">
+            ${all.map(([k, v]) => `<button onclick="openDeptDoc('${k}')" class="w-36 text-left">
+              <div class="h-44 rounded-xl border border-zinc-200 bg-zinc-50 overflow-hidden"><img src="${v.img}" class="w-full h-full object-cover object-top"></div>
+              <div class="text-[11px] font-semibold text-zinc-700 mt-1 truncate">${escapeHtml(v.teacher || '')}</div>
+            </button>`).join('')}
+          </div>
+        </div>` : '';
+    }
+    window.openDeptDoc = function(k) {
+      let v = (window.deptDocs || {})[k];
+      if (!v) { try { v = JSON.parse(localStorage.getItem('EF_DEPT_DOCS') || '{}')[k]; } catch (e) {} }
+      if (!v) return;
+      document.getElementById('deptDocImg').src = v.img;
+      document.getElementById('deptDocTitle').textContent = v.teacher || '';
+      document.getElementById('deptDocViewer').classList.remove('hidden');
+    };
+
+    window.deptCopyPrev = function() {
+      if (!deptCanEdit()) return;
+      const T = window.appState.deptTerm || 1;
+      const d = deptData();
+      d.terms[T].sessions = JSON.parse(JSON.stringify(d.terms[T - 1].sessions)).map(s => ({ ...s, id: 'ds' + Math.random().toString(36).slice(2, 9) }));
+      deptSave(); renderDept();
+    };
+
+    window.deptGenerateNow = function() {
+      if (!deptCanEdit()) return;
+      const d = deptData();
+      const term = deptTerm();
+      if (!term.sessions.length) { alert('Primer cal importar o afegir les classes.'); return; }
+      const fixed = term.sessions.filter(s => s.lock || (spaceById(s.space) || {}).mode === 'manual').length;
+      if (!confirm(`Repartir els espais del ${window.appState.deptTerm || 1}r trimestre?\n\nEs mantindran les ${fixed} sessions fixades (cadenat, Piscina, Polivalent). La resta es tornaran a repartir.`)) return;
+      deptGenerate(d, term);
+      deptSave(); renderDept();
+    };
+
+    // ---------- Sessió ----------
+    window.openDeptSession = function(id) {
+      const term = deptTerm();
+      const s = id ? term.sessions.find(x => x.id === id) : null;
+      const can = deptCanEdit();
+      window.appState.deptEditing = s ? s.id : null;
+      const teachers = Array.from(new Set([1, 2, 3].flatMap(t => deptData().terms[t].sessions.map(x => x.teacher)))).filter(Boolean);
+      document.getElementById('dsTeacherList').innerHTML = teachers.map(t => `<option value="${escapeHtml(t)}">`).join('');
+      document.getElementById('dsGroup').value = s ? s.group : '';
+      document.getElementById('dsTeacher').value = s ? s.teacher : (window.appState.deptTeacher && window.appState.deptTeacher !== 'all' ? window.appState.deptTeacher : '');
+      document.getElementById('dsDay').value = s ? s.day : 1;
+      document.getElementById('dsStart').value = s ? s.start : '08:20';
+      document.getElementById('dsEnd').value = s ? s.end : '09:20';
+      document.getElementById('dsSpace').innerHTML = `<option value="">Automàtic (el tria el generador)</option>` + deptData().spaces.map(sp => `<option value="${sp.id}">${escapeHtml(sp.name)}${sp.mode === 'manual' ? ' (manual)' : ''}</option>`).join('');
+      document.getElementById('dsSpace').value = s ? (s.space || '') : '';
+      document.getElementById('dsLock').checked = !!(s && s.lock);
+      document.getElementById('dsDelete').classList.toggle('hidden', !s || !can);
+      document.getElementById('dsSave').classList.toggle('hidden', !can);
+      document.querySelectorAll('#deptSessionModal input, #deptSessionModal select').forEach(el => el.disabled = !can);
+      document.getElementById('dsTitle').textContent = s ? (can ? 'Editar sessió' : 'Sessió') : 'Nova sessió';
+      document.getElementById('deptSessionModal').classList.remove('hidden');
+    };
+    window.closeDeptSession = function() { document.getElementById('deptSessionModal').classList.add('hidden'); };
+    window.saveDeptSession = function() {
+      if (!deptCanEdit()) return;
+      const term = deptTerm();
+      const v = {
+        group: document.getElementById('dsGroup').value.trim(),
+        teacher: document.getElementById('dsTeacher').value.trim(),
+        day: Number(document.getElementById('dsDay').value),
+        start: document.getElementById('dsStart').value,
+        end: document.getElementById('dsEnd').value,
+        space: document.getElementById('dsSpace').value,
+        lock: document.getElementById('dsLock').checked
+      };
+      if (!v.group) { alert('Escriu el grup.'); return; }
+      if (!v.start || !v.end || tMin(v.end) <= tMin(v.start)) { alert('Revisa l\'hora d\'inici i de final.'); return; }
+      if (v.space && (spaceById(v.space) || {}).mode !== 'manual' && !v.lock) v.lock = true; // si tries un espai a mà, queda fixat
+      const id = window.appState.deptEditing;
+      if (id) Object.assign(term.sessions.find(x => x.id === id), v);
+      else term.sessions.push({ id: 'ds' + Math.random().toString(36).slice(2, 9), ...v });
+      deptSave(); closeDeptSession(); renderDept();
+    };
+    window.deleteDeptSession = function() {
+      if (!deptCanEdit()) return;
+      if (!confirm('Esborrar aquesta sessió de l\'horari del departament?')) return;
+      const term = deptTerm();
+      term.sessions = term.sessions.filter(x => x.id !== window.appState.deptEditing);
+      deptSave(); closeDeptSession(); renderDept();
+    };
+
+    // ---------- Normes i espais ----------
+    let deptRulesDraft = null;
+    window.openDeptRules = function() {
+      deptRulesDraft = JSON.parse(JSON.stringify({ spaces: deptData().spaces, closures: deptData().closures, rules: deptData().rules }));
+      renderDeptRules();
+      document.getElementById('deptRulesModal').classList.remove('hidden');
+    };
+    window.closeDeptRules = function() { document.getElementById('deptRulesModal').classList.add('hidden'); };
+    function renderDeptRules() {
+      const R = deptRulesDraft;
+      const can = deptCanEdit();
+      const dis = can ? '' : 'disabled';
+      const autosSorted = R.spaces.filter(sp => sp.mode !== 'manual').sort((a, b) => (b.prio || 0) - (a.prio || 0));
+      document.getElementById('drSpaces').innerHTML = R.spaces.map((sp, i) => `
+        <div class="flex flex-wrap items-center gap-2 py-2 border-b border-zinc-100">
+          <input type="color" value="${sp.color || '#71717a'}" ${dis} onchange="deptRulesDraft.spaces[${i}].color=this.value" class="w-8 h-8 rounded-lg border border-zinc-200 p-0.5 bg-white">
+          <input type="text" value="${escapeHtml(sp.name)}" ${dis} onchange="deptRulesDraft.spaces[${i}].name=this.value" class="flex-1 min-w-[120px] border border-zinc-200 rounded-lg px-2 py-1.5 text-xs font-semibold">
+          <label class="text-[11px] text-zinc-500">Grups a la vegada
+            <input type="number" min="0" value="${sp.cap || 0}" ${dis} onchange="deptRulesDraft.spaces[${i}].cap=Math.max(0,parseInt(this.value)||0)" class="w-14 border border-zinc-200 rounded-lg px-1.5 py-1 text-xs font-mono ml-1">
+          </label>
+          <select ${dis} onchange="deptRulesDraft.spaces[${i}].mode=this.value; renderDeptRules()" class="border border-zinc-200 rounded-lg px-1.5 py-1 text-xs font-semibold bg-white">
+            <option value="auto" ${sp.mode !== 'manual' ? 'selected' : ''}>Automàtic</option>
+            <option value="manual" ${sp.mode === 'manual' ? 'selected' : ''}>Només manual</option>
+          </select>
+          <label class="text-[11px] text-zinc-500 inline-flex items-center gap-1"><input type="radio" name="drFallback" ${sp.fallback ? 'checked' : ''} ${dis} onchange="deptRulesDraft.spaces.forEach((x,j)=>x.fallback=j===${i})"> Si no hi ha lloc</label>
+          ${can ? `<button onclick="deptRulesDraft.spaces.splice(${i},1); renderDeptRules()" class="text-zinc-300 hover:text-rose-600 px-1"><i class="fa-regular fa-trash-can text-xs"></i></button>` : ''}
+        </div>`).join('') + `<p class="text-[11px] text-zinc-400 mt-2">0 = sense límit. "Si no hi ha lloc": on van els grups quan els altres espais estan plens o tancats.</p>`;
+      document.getElementById('drPrio').innerHTML = autosSorted.map((sp, i) => `
+        <div class="flex items-center gap-2 py-1">
+          <span class="w-6 text-xs font-black text-zinc-400">${i + 1}.</span>
+          <span class="flex-1 text-xs font-semibold"><span class="inline-block w-2.5 h-2.5 rounded-sm mr-1.5" style="background:${sp.color}"></span>${escapeHtml(sp.name)}</span>
+          ${can ? `<button onclick="deptPrioMove('${sp.id}',-1)" ${i === 0 ? 'disabled' : ''} class="w-7 h-7 rounded-lg border border-zinc-200 text-zinc-500 disabled:opacity-30"><i class="fa-solid fa-arrow-up text-[10px]"></i></button>
+          <button onclick="deptPrioMove('${sp.id}',1)" ${i === autosSorted.length - 1 ? 'disabled' : ''} class="w-7 h-7 rounded-lg border border-zinc-200 text-zinc-500 disabled:opacity-30"><i class="fa-solid fa-arrow-down text-[10px]"></i></button>` : ''}
+        </div>`).join('');
+      document.getElementById('drClosures').innerHTML = R.closures.map((c, i) => `
+        <div class="flex flex-wrap items-center gap-2 py-2 border-b border-zinc-100">
+          <select ${dis} onchange="deptRulesDraft.closures[${i}].space=this.value" class="border border-zinc-200 rounded-lg px-1.5 py-1 text-xs font-semibold bg-white">
+            ${R.spaces.map(sp => `<option value="${sp.id}" ${sp.id === c.space ? 'selected' : ''}>${escapeHtml(sp.name)}</option>`).join('')}
+          </select>
+          <span class="text-[11px] text-zinc-500">tancat</span>
+          <span class="inline-flex gap-0.5">${[1, 2, 3, 4, 5].map(dd => `<button ${dis} onclick="deptToggleClosureDay(${i},${dd})" class="w-8 h-7 rounded-md text-[10px] font-bold border ${c.days.includes(dd) ? 'bg-zinc-900 text-white border-zinc-900' : 'bg-white text-zinc-400 border-zinc-200'}">${DEPT_DAY_SHORT[dd]}</button>`).join('')}</span>
+          <span class="text-[11px] text-zinc-500">de</span><input type="time" value="${c.from}" ${dis} onchange="deptRulesDraft.closures[${i}].from=this.value" class="border border-zinc-200 rounded-lg px-1.5 py-1 text-xs font-mono">
+          <span class="text-[11px] text-zinc-500">a</span><input type="time" value="${c.to}" ${dis} onchange="deptRulesDraft.closures[${i}].to=this.value" class="border border-zinc-200 rounded-lg px-1.5 py-1 text-xs font-mono">
+          ${can ? `<button onclick="deptRulesDraft.closures.splice(${i},1); renderDeptRules()" class="text-zinc-300 hover:text-rose-600 px-1"><i class="fa-regular fa-trash-can text-xs"></i></button>` : ''}
+        </div>`).join('') || '<p class="text-xs text-zinc-400">Cap restricció.</p>';
+      const top = autosSorted[0];
+      document.getElementById('drRules').innerHTML = [
+        ['atLeastOnceTop', `Intentar que tots els grups vagin almenys un cop a la setmana al ${top ? top.name : 'primer espai'}`],
+        ['natacioPriority', `Els grups que fan natació (tenen una sessió a la Piscina) tenen prioritat per anar al ${top ? top.name : 'primer espai'} l'altra sessió`],
+        ['preferTop', 'Sempre que es pugui, donar prioritat als espais segons l\'ordre de dalt']
+      ].map(([k, t]) => `<label class="flex items-start gap-2 py-1.5 text-xs"><input type="checkbox" ${R.rules[k] ? 'checked' : ''} ${dis} onchange="deptRulesDraft.rules.${k}=this.checked" class="mt-0.5 w-4 h-4"> <span>${escapeHtml(t)}</span></label>`).join('');
+      document.getElementById('drSave').classList.toggle('hidden', !can);
+      document.querySelectorAll('#deptRulesModal .dr-add').forEach(b => b.classList.toggle('hidden', !can));
+    }
+    window.renderDeptRules = renderDeptRules;
+    window.deptPrioMove = function(id, dir) {
+      const autos = deptRulesDraft.spaces.filter(sp => sp.mode !== 'manual').sort((a, b) => (b.prio || 0) - (a.prio || 0));
+      const i = autos.findIndex(sp => sp.id === id), j = i + dir;
+      if (j < 0 || j >= autos.length) return;
+      [autos[i], autos[j]] = [autos[j], autos[i]];
+      autos.forEach((sp, k) => { sp.prio = autos.length - k; });
+      renderDeptRules();
+    };
+    window.deptToggleClosureDay = function(i, dd) {
+      const c = deptRulesDraft.closures[i];
+      c.days = c.days.includes(dd) ? c.days.filter(x => x !== dd) : [...c.days, dd].sort();
+      renderDeptRules();
+    };
+    window.deptAddSpace = function() {
+      deptRulesDraft.spaces.push({ id: 'sp' + Math.random().toString(36).slice(2, 7), name: 'Nou espai', cap: 1, mode: 'manual', prio: 0, color: '#71717a' });
+      renderDeptRules();
+    };
+    window.deptAddClosure = function() {
+      deptRulesDraft.closures.push({ id: 'c' + Math.random().toString(36).slice(2, 7), space: (deptRulesDraft.spaces[0] || {}).id, days: [1, 2, 3, 4, 5], from: '10:20', to: '11:20' });
+      renderDeptRules();
+    };
+    window.saveDeptRules = function() {
+      if (!deptCanEdit()) return;
+      const d = deptData();
+      d.spaces = deptRulesDraft.spaces; d.closures = deptRulesDraft.closures; d.rules = deptRulesDraft.rules;
+      deptSave(); closeDeptRules(); renderDept();
+    };
+
+    // ---------- Importar un horari (captura o PDF d'iEduca) ----------
+    function loadScriptOnce(src, globalName) {
+      if (globalName && window[globalName]) return Promise.resolve(window[globalName]);
+      return new Promise((resolve, reject) => {
+        const s = document.createElement('script'); s.src = src;
+        s.onload = () => resolve(globalName ? window[globalName] : true);
+        s.onerror = () => reject(new Error('No s\'ha pogut carregar ' + src.split('/npm/')[1]));
+        document.head.appendChild(s);
+      });
+    }
+    let deptImport = null;
+    window.openDeptImport = function() {
+      deptImport = { rows: [], img: null };
+      document.getElementById('diFile').value = '';
+      document.getElementById('diTeacher').value = '';
+      document.getElementById('diStatus').innerHTML = '';
+      document.getElementById('diReview').classList.add('hidden');
+      document.getElementById('diTermLabel').textContent = `${window.appState.deptTerm || 1}r trimestre`;
+      document.getElementById('deptImportModal').classList.remove('hidden');
+    };
+    window.closeDeptImport = function() { document.getElementById('deptImportModal').classList.add('hidden'); };
+
+    function fileToImage(file) {
+      return new Promise((resolve, reject) => {
+        const r = new FileReader();
+        r.onload = () => { const img = new Image(); img.onload = () => resolve(img); img.onerror = () => reject(new Error('Imatge no vàlida')); img.src = r.result; };
+        r.onerror = () => reject(r.error);
+        r.readAsDataURL(file);
+      });
+    }
+    function preprocessForOcr(src) {
+      const w0 = src.width || src.naturalWidth, h0 = src.height || src.naturalHeight;
+      const k = Math.min(2.2, 3200 / w0);
+      const c = document.createElement('canvas');
+      c.width = Math.round(w0 * k); c.height = Math.round(h0 * k);
+      const ctx = c.getContext('2d');
+      ctx.drawImage(src, 0, 0, c.width, c.height);
+      const id = ctx.getImageData(0, 0, c.width, c.height); const p = id.data;
+      for (let i = 0; i < p.length; i += 4) { const l = 0.299 * p[i] + 0.587 * p[i + 1] + 0.114 * p[i + 2]; const v = l > 150 ? 255 : 0; p[i] = p[i + 1] = p[i + 2] = v; }
+      ctx.putImageData(id, 0, 0);
+      return { canvas: c, scale: k };
+    }
+    function compressForDoc(src) {
+      const w0 = src.width || src.naturalWidth, h0 = src.height || src.naturalHeight;
+      const k = Math.min(1, 1300 / w0);
+      const c = document.createElement('canvas'); c.width = Math.round(w0 * k); c.height = Math.round(h0 * k);
+      c.getContext('2d').drawImage(src, 0, 0, c.width, c.height);
+      return c.toDataURL('image/jpeg', 0.72);
+    }
+    async function ocrWords(canvas, status) {
+      const T = await loadScriptOnce('https://cdn.jsdelivr.net/npm/tesseract.js@5.1.1/dist/tesseract.min.js', 'Tesseract');
+      const worker = await T.createWorker('cat', 1, { logger: m => { if (m.status === 'recognizing text') status(`Llegint el text… ${Math.round((m.progress || 0) * 100)}%`); else if (/load|init/i.test(m.status || '')) status('Preparant el lector de text (només la primera vegada triga més)…'); } });
+      await worker.setParameters({ tessedit_pageseg_mode: '11' });
+      const res = await worker.recognize(canvas);
+      await worker.terminate();
+      let words = res.data.words || [];
+      if (!words.length && res.data.blocks) res.data.blocks.forEach(b => (b.paragraphs || []).forEach(p => (p.lines || []).forEach(l => (l.words || []).forEach(w => words.push(w)))));
+      return words.map(w => ({ text: w.text, x0: w.bbox.x0, y0: w.bbox.y0, x1: w.bbox.x1, y1: w.bbox.y1 }));
+    }
+    async function pdfToWordsAndImage(file, status) {
+      const lib = await loadScriptOnce('https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/build/pdf.min.js', 'pdfjsLib');
+      lib.GlobalWorkerOptions.workerSrc = 'https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/build/pdf.worker.min.js';
+      const pdf = await lib.getDocument({ data: new Uint8Array(await file.arrayBuffer()) }).promise;
+      const page = await pdf.getPage(1);
+      const vp = page.getViewport({ scale: 2 });
+      const canvas = document.createElement('canvas'); canvas.width = vp.width; canvas.height = vp.height;
+      await page.render({ canvasContext: canvas.getContext('2d'), viewport: vp }).promise;
+      const tc = await page.getTextContent();
+      const words = [];
+      tc.items.forEach(it => {
+        const str = it.str || ''; if (!str.trim()) return;
+        const tx = lib.Util.transform(vp.transform, it.transform);
+        const fh = Math.hypot(tx[2], tx[3]) || 10;
+        const x0 = tx[4], yb = tx[5], w = (it.width || 0) * vp.scale;
+        const parts = str.split(/(\s+)/); let off = 0;
+        parts.forEach(pt => {
+          const pw = w * (pt.length / str.length);
+          if (pt.trim()) words.push({ text: pt, x0: x0 + w * (off / str.length), y0: yb - fh, x1: x0 + w * (off / str.length) + pw, y1: yb });
+          off += pt.length;
+        });
+      });
+      return { words, canvas };
+    }
+
+    window.runDeptImport = async function() {
+      const file = document.getElementById('diFile').files[0];
+      const st = document.getElementById('diStatus');
+      const status = t => { st.innerHTML = `<i class="fa-solid fa-spinner fa-spin mr-1.5"></i>${escapeHtml(t)}`; };
+      if (!file) { alert('Tria una captura o un PDF de l\'horari.'); return; }
+      try {
+        let words, docSrc;
+        if (/pdf$/i.test(file.type) || /\.pdf$/i.test(file.name)) {
+          status('Obrint el PDF…');
+          const r = await pdfToWordsAndImage(file, status);
+          docSrc = r.canvas;
+          words = r.words;
+          if (words.length < 20) { status('El PDF no té text: el llegeixo com a imatge…'); words = await ocrWords(preprocessForOcr(r.canvas).canvas, status); }
+        } else {
+          status('Preparant la imatge…');
+          const img = await fileToImage(file);
+          docSrc = img;
+          const pre = preprocessForOcr(img);
+          words = await ocrWords(pre.canvas, status);
+        }
+        const res = parseScheduleWords(words);
+        deptImport = { rows: res.sessions.map(s => ({ ...s, inc: true })), img: compressForDoc(docSrc) };
+        if (res.teacher && !document.getElementById('diTeacher').value) document.getElementById('diTeacher').value = res.teacher;
+        st.innerHTML = res.sessions.length
+          ? `<i class="fa-solid fa-circle-check text-emerald-500 mr-1.5"></i>He trobat <b>${res.sessions.length}</b> sessions d'Educació Física. Revisa-les abans de desar.`
+          : `<i class="fa-solid fa-triangle-exclamation text-amber-500 mr-1.5"></i>${escapeHtml(res.error || 'No he trobat cap sessió d\'Educació Física.')} Pots afegir-les a mà.`;
+        renderDeptImportRows();
+        document.getElementById('diReview').classList.remove('hidden');
+      } catch (err) {
+        console.error(err);
+        st.innerHTML = `<i class="fa-solid fa-triangle-exclamation text-rose-500 mr-1.5"></i>No s'ha pogut llegir: ${escapeHtml((err && err.message) || String(err))}. Cal connexió a internet la primera vegada.`;
+      }
+    };
+
+    function renderDeptImportRows() {
+      document.getElementById('diRows').innerHTML = deptImport.rows.map((r, i) => `
+        <div class="flex flex-wrap items-center gap-1.5 py-1.5 border-b border-zinc-100 ${r.inc ? '' : 'opacity-40'}">
+          <input type="checkbox" ${r.inc ? 'checked' : ''} onchange="deptImport.rows[${i}].inc=this.checked; renderDeptImportRows()" class="w-4 h-4">
+          <select onchange="deptImport.rows[${i}].day=Number(this.value)" class="border border-zinc-200 rounded-lg px-1 py-1 text-xs font-semibold bg-white">${[1, 2, 3, 4, 5].map(dd => `<option value="${dd}" ${dd === r.day ? 'selected' : ''}>${DEPT_DAY_NAMES[dd]}</option>`).join('')}</select>
+          <input type="time" value="${r.start}" onchange="deptImport.rows[${i}].start=this.value" class="border border-zinc-200 rounded-lg px-1 py-1 text-xs font-mono">
+          <input type="time" value="${r.end}" onchange="deptImport.rows[${i}].end=this.value" class="border border-zinc-200 rounded-lg px-1 py-1 text-xs font-mono">
+          <input type="text" value="${escapeHtml(r.group)}" placeholder="Grup (p. ex. 2n A)" onchange="deptImport.rows[${i}].group=this.value.trim()" class="w-28 border ${r.group ? 'border-zinc-200' : 'border-rose-400 bg-rose-50'} rounded-lg px-2 py-1 text-xs font-bold">
+          ${r.raw ? `<span class="text-[10px] text-zinc-400 truncate max-w-[180px]" title="${escapeHtml(r.raw)}">${escapeHtml(r.raw)}</span>` : ''}
+        </div>`).join('') || '<p class="text-xs text-zinc-400 py-2">Cap sessió.</p>';
+    }
+    window.renderDeptImportRows = renderDeptImportRows;
+    window.deptImportAddRow = function() {
+      deptImport.rows.push({ day: 1, start: '08:20', end: '09:20', group: '', inc: true });
+      renderDeptImportRows();
+    };
+    window.saveDeptImport = function() {
+      if (!deptCanEdit()) return;
+      const teacher = document.getElementById('diTeacher').value.trim();
+      if (!teacher) { alert('Escriu el nom del professor.'); return; }
+      const rows = deptImport.rows.filter(r => r.inc);
+      if (rows.some(r => !r.group)) { alert('Hi ha alguna sessió sense grup (en vermell). Escriu-lo o desmarca-la.'); return; }
+      const T = window.appState.deptTerm || 1;
+      const term = deptTerm();
+      const replace = document.getElementById('diReplace').checked;
+      if (replace) term.sessions = term.sessions.filter(s => schedNorm(s.teacher) !== schedNorm(teacher));
+      rows.forEach(r => term.sessions.push({ id: 'ds' + Math.random().toString(36).slice(2, 9), day: r.day, start: r.start, end: r.end, group: r.group, teacher, space: '', lock: false }));
+      deptSave();
+      if (deptImport.img) {
+        const key = `t${T}_${schedNorm(teacher).replace(/[^A-Z0-9]/g, '').slice(0, 30)}`;
+        const doc = { term: T, teacher, img: deptImport.img, at: Date.now() };
+        if (window.publishDeptDoc && window.currentUserInfo) window.publishDeptDoc(key, doc).catch(() => {});
+        else { try { const all = JSON.parse(localStorage.getItem('EF_DEPT_DOCS') || '{}'); all[key] = doc; localStorage.setItem('EF_DEPT_DOCS', JSON.stringify(all)); } catch (e) {} }
+      }
+      closeDeptImport();
+      renderDept();
+    };
+
+    // ---------- Imprimir ----------
+    window.printDept = function() {
+      const grid = document.getElementById('deptGrid').innerHTML;
+      const T = window.appState.deptTerm || 1;
+      const styles = Array.from(document.querySelectorAll('head style, head link[rel="stylesheet"]')).map(n => n.outerHTML).join('\n');
+      const w = window.open('', '_blank');
+      if (!w) { window.print(); return; }
+      w.document.open();
+      w.document.write(`<!DOCTYPE html><html lang="ca"><head><meta charset="utf-8"><title>Horari EF · ${T}r trimestre</title>${styles}
+        <style>body{padding:16px;background:#fff} * {-webkit-print-color-adjust:exact;print-color-adjust:exact} @page{size:A4 landscape;margin:8mm} .dchip{pointer-events:none}</style></head>
+        <body><h1 style="font:800 18px system-ui;margin:0 0 4px">Horari d'Educació Física · ${T}r trimestre</h1>
+        <p style="font:12px system-ui;color:#555;margin:0 0 10px">${escapeHtml(getSettings().centre || '')} · ${getSchoolYearLabel()}</p>
+        <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px">${document.getElementById('deptLegend').innerHTML}</div>${grid}
+        <script>setTimeout(function(){window.print()},500)<\/script></body></html>`);
+      w.document.close();
     };
 
     const _origRenderHome = window.renderHomeScreen;
