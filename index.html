@@ -217,10 +217,12 @@
   <div id="loginOverlay" class="fixed inset-0 bg-zinc-950/80 backdrop-blur-md z-50 flex items-center justify-center p-4">
     <div class="bg-white rounded-3xl shadow-2xl max-w-md w-full overflow-hidden border border-zinc-200 p-8 space-y-6">
       <div class="text-center space-y-2">
-        <div class="w-12 h-12 rounded-2xl bg-zinc-900 text-white flex items-center justify-center mx-auto text-lg shadow-subtle">
+        <img id="loginLogo" alt="" class="hidden max-h-20 max-w-[200px] mx-auto object-contain">
+        <div id="loginLockIcon" class="w-12 h-12 rounded-2xl bg-zinc-900 text-white flex items-center justify-center mx-auto text-lg shadow-subtle">
           <i class="fa-solid fa-lock"></i>
         </div>
         <h3 class="text-xl font-black tracking-tight text-zinc-900">Quadern d'Educació Física</h3>
+        <p id="loginCentre" class="text-xs font-semibold text-zinc-600 hidden"></p>
         <p class="text-xs text-zinc-500">Inicia sessió per sincronitzar les teves classes i notes al núvol.</p>
       </div>
 
@@ -238,7 +240,7 @@
   <!-- ================= MENÚ LATERAL (iPad / ordinador) ================= -->
   <aside id="appSidebar" class="no-print hidden md:flex fixed inset-y-0 left-0 z-40 flex-col w-20 lg:w-64 bg-white border-r border-zinc-200/80">
     <button onclick="goToHome()" class="flex items-center gap-3 px-4 lg:px-5 h-20 shrink-0 text-left group">
-      <div class="w-11 h-11 rounded-2xl bg-zinc-900 text-white flex items-center justify-center p-2 shadow-subtle group-hover:bg-zinc-800 transition mx-auto lg:mx-0">
+      <div id="sidebarLogoBox" class="w-11 h-11 rounded-2xl bg-zinc-900 text-white flex items-center justify-center p-2 shadow-subtle group-hover:bg-zinc-800 transition mx-auto lg:mx-0 overflow-hidden">
         <svg viewBox="0 0 24 24" fill="none" class="w-full h-full stroke-current stroke-[2.2] stroke-linecap-round stroke-linejoin-round">
           <circle cx="16" cy="5" r="2.2" fill="currentColor" stroke="none" />
           <path d="M5 19l4-3 3 2 4-5-2-4-4 1-2 4" />
@@ -306,7 +308,7 @@
           <p id="homeSchoolYearLabel" class="page-sub">Curs actiu</p>
         </div>
         <div class="flex flex-wrap items-center gap-2">
-          <div class="seg">
+          <div class="seg hidden">
             <button id="homeTrimBtn1" onclick="setHomeTrim(1)">1r Trim</button>
             <button id="homeTrimBtn2" onclick="setHomeTrim(2)">2n Trim</button>
             <button id="homeTrimBtn3" onclick="setHomeTrim(3)">3r Trim</button>
@@ -316,14 +318,12 @@
 
       <div id="homeNotices"></div>
 
-      <div class="grid grid-cols-1 xl:grid-cols-3 gap-6">
-        <div class="xl:col-span-2 space-y-5">
-          <div id="homeContinueCard"></div>
-          <div id="homeToday"></div>
-        </div>
-        <div class="space-y-5">
-          <div id="homeKpis" class="grid grid-cols-2 gap-3"></div>
-          <div id="homeTodoSection" class="space-y-3"></div>
+      <div class="space-y-5 max-w-4xl">
+        <div id="homeToday"></div>
+        <div id="homeContinueCard"></div>
+        <div class="hidden">
+          <div id="homeKpis"></div>
+          <div id="homeTodoSection"></div>
         </div>
       </div>
     </section>
@@ -418,6 +418,19 @@
           <label class="block text-xs font-semibold text-zinc-600 mb-1">Nom del centre</label>
           <input type="text" id="setCentreInput" onchange="saveCentreSetting(this.value)" class="w-full border border-zinc-200 rounded-xl p-2.5 text-sm font-semibold outline-none focus:ring-2 focus:ring-zinc-900">
           <p class="text-xs text-zinc-500 mt-2">Curs actual: <b id="setSchoolYear"></b> · Surt a les fitxes de SdA, a l'horari imprès i als butlletins.</p>
+          <div class="mt-4 pt-4 border-t border-zinc-100">
+            <label class="block text-xs font-semibold text-zinc-600 mb-2">Logo del centre</label>
+            <div class="flex items-center gap-3">
+              <div id="setLogoPreview" class="w-20 h-20 rounded-2xl border border-dashed border-zinc-300 bg-zinc-50 flex items-center justify-center overflow-hidden shrink-0 text-zinc-300"><i class="fa-regular fa-image text-2xl"></i></div>
+              <div class="flex flex-col gap-2">
+                <label class="btn-sec cursor-pointer"><i class="fa-solid fa-upload"></i><span id="setLogoBtnTxt">Pujar logo</span>
+                  <input type="file" accept="image/*" class="hidden" onchange="uploadCentreLogo(this)">
+                </label>
+                <button id="setLogoRemove" onclick="removeCentreLogo()" class="hidden text-[11px] font-semibold text-zinc-400 hover:text-rose-600 text-left"><i class="fa-regular fa-trash-can mr-1"></i>Treure el logo</button>
+              </div>
+            </div>
+            <p class="text-[11px] text-zinc-400 mt-2">Surt al menú, a la pantalla d'entrada, a les fitxes de SdA i a la sessió d'avaluació impresa. Millor una imatge PNG amb fons transparent o blanc.</p>
+          </div>
         </div>
 
         <div class="set-card">
@@ -785,10 +798,13 @@
       <!-- VISTA: SESSIÓ D'AVALUACIÓ -->
       <section id="viewAval" class="space-y-4 hidden">
         <div class="flex flex-wrap items-end justify-between gap-4 border-b border-zinc-200/70 pb-4">
-          <div>
+          <div class="flex items-center gap-3">
+            <img id="avalLogo" alt="" class="hidden h-14 w-14 object-contain">
+            <div>
             <span class="inline-flex items-center rounded-md bg-rose-50 px-2 py-0.5 text-[11px] font-bold text-rose-700">Junta d'avaluació</span>
             <h2 id="avalTitle" class="text-xl font-bold text-zinc-900 tracking-tight mt-1">Sessió d'avaluació</h2>
-            <p class="text-xs text-zinc-500 mt-0.5">Resum de cada alumne amb alertes i comentari per a l'informe. Canvia de trimestre a dalt.</p>
+            <p class="text-xs text-zinc-500 mt-0.5"><span id="avalCentre"></span>Resum de cada alumne amb alertes i comentari per a l'informe. Canvia de trimestre a dalt.</p>
+            </div>
           </div>
         </div>
         <div id="avalContent" class="space-y-4"></div>
@@ -7333,6 +7349,10 @@
       const t = window.appState.currentTrim;
       const filter = window.appState.avalFilter || 'all';
       document.getElementById('avalTitle').textContent = `Sessió d'avaluació · ${g.name} · ${t}${['', 'r', 'n', 'r'][t]} trimestre`;
+      const lg = getSettings().logo, al = document.getElementById('avalLogo');
+      if (al) { al.src = lg || ''; al.classList.toggle('hidden', !lg); }
+      const ac = document.getElementById('avalCentre');
+      if (ac) ac.textContent = getSettings().centre ? getSettings().centre + ' · ' + getSchoolYearLabel() + '. ' : '';
       const rows = (g.students || []).map(st => ({ st, d: getAvalData(g, st, t) }));
       const n = rows.length;
       const count = code => rows.filter(r => r.d.score !== null && r.d.lvl.code === code).length;
@@ -8294,7 +8314,7 @@
       document.getElementById('sdaPoster').innerHTML = `
         <div class="sp ${posterOptions.theme === 'light' ? 'sp-light' : ''} ${posterOptions.orient === 'portrait' ? 'sp-portrait' : ''}">
           <div class="sp-head">
-            <div class="sp-logo">EF</div>
+            ${getSettings().logo ? `<div class="sp-logo" style="background:#fff;border-color:var(--gold);overflow:hidden;padding:6px"><img src="${getSettings().logo}" alt="" style="width:100%;height:100%;object-fit:contain"></div>` : '<div class="sp-logo">EF</div>'}
             <div style="min-width:0">
               <div class="sp-kicker">Situació d'aprenentatge · Educació Física</div>
               <div class="sp-title">${titleHtml}</div>
@@ -9811,8 +9831,83 @@
         <button onclick="openNewGroupModal()" class="side-class text-zinc-400 hover:text-zinc-900"><i class="fa-solid fa-plus w-3 text-[10px]"></i><span>Nova classe</span></button>`;
       const centre = document.getElementById('sidebarCentre');
       if (centre) centre.textContent = getSettings().centre || 'Quadern LOMLOE';
+      applyBranding();
     }
     window.renderSidebarClasses = renderSidebarClasses;
+
+    // ---------- Logo del centre ----------
+    const DEFAULT_SIDEBAR_ICON = document.getElementById('sidebarLogoBox') ? document.getElementById('sidebarLogoBox').innerHTML : '';
+    function applyBranding() {
+      const logo = (window.appData && window.appData.settings && window.appData.settings.logo) || '';
+      const box = document.getElementById('sidebarLogoBox');
+      if (box) {
+        if (logo) {
+          box.innerHTML = `<img src="${logo}" alt="" class="w-full h-full object-contain">`;
+          box.classList.remove('bg-zinc-900', 'group-hover:bg-zinc-800', 'p-2');
+          box.classList.add('bg-white', 'border', 'border-zinc-200', 'p-1');
+        } else if (box.querySelector('img')) {
+          box.innerHTML = DEFAULT_SIDEBAR_ICON;
+          box.classList.add('bg-zinc-900', 'group-hover:bg-zinc-800', 'p-2');
+          box.classList.remove('bg-white', 'border', 'border-zinc-200', 'p-1');
+        }
+      }
+      const li = document.getElementById('loginLogo'), lock = document.getElementById('loginLockIcon'), lc = document.getElementById('loginCentre');
+      if (li) { li.src = logo || ''; li.classList.toggle('hidden', !logo); }
+      if (lock) lock.classList.toggle('hidden', !!logo);
+      const centreName = (window.appData && window.appData.settings && window.appData.settings.centre) || '';
+      if (lc) { lc.textContent = centreName; lc.classList.toggle('hidden', !centreName || !logo); }
+      let fav = document.getElementById('dynFavicon');
+      if (logo) {
+        if (!fav) { fav = document.createElement('link'); fav.id = 'dynFavicon'; fav.rel = 'icon'; document.head.appendChild(fav); }
+        fav.href = logo;
+        let ati = document.getElementById('dynTouchIcon');
+        if (!ati) { ati = document.createElement('link'); ati.id = 'dynTouchIcon'; ati.rel = 'apple-touch-icon'; document.head.appendChild(ati); }
+        ati.href = logo;
+      } else if (fav) { fav.remove(); const a = document.getElementById('dynTouchIcon'); if (a) a.remove(); }
+      const prev = document.getElementById('setLogoPreview');
+      if (prev) prev.innerHTML = logo ? `<img src="${logo}" alt="" class="w-full h-full object-contain p-1 bg-white">` : '<i class="fa-regular fa-image text-2xl"></i>';
+      const rm = document.getElementById('setLogoRemove'); if (rm) rm.classList.toggle('hidden', !logo);
+      const bt = document.getElementById('setLogoBtnTxt'); if (bt) bt.textContent = logo ? 'Canviar logo' : 'Pujar logo';
+    }
+    window.applyBranding = applyBranding;
+    try { applyBranding(); } catch (e) {}
+
+    window.uploadCentreLogo = function(input) {
+      const file = input.files && input.files[0];
+      input.value = '';
+      if (!file) return;
+      if (!/^image\//.test(file.type)) { alert('Tria una imatge (PNG, JPG...).'); return; }
+      const reader = new FileReader();
+      reader.onload = () => {
+        const img = new Image();
+        img.onload = () => {
+          // Reduïm la imatge (màx. 320 px) perquè ocupi poc al núvol
+          const max = 320;
+          const k = Math.min(1, max / Math.max(img.width, img.height));
+          const c = document.createElement('canvas');
+          c.width = Math.max(1, Math.round(img.width * k));
+          c.height = Math.max(1, Math.round(img.height * k));
+          c.getContext('2d').drawImage(img, 0, 0, c.width, c.height);
+          let url = c.toDataURL('image/png');
+          if (url.length > 180000) url = c.toDataURL('image/jpeg', 0.85);
+          getSettings().logo = url;
+          saveToStorage();
+          if (window.syncWholeAppToCloud) window.syncWholeAppToCloud();
+          applyBranding();
+        };
+        img.onerror = () => alert('No s\'ha pogut llegir la imatge.');
+        img.src = reader.result;
+      };
+      reader.readAsDataURL(file);
+    };
+
+    window.removeCentreLogo = function() {
+      if (!confirm('Treure el logo del centre?')) return;
+      delete getSettings().logo;
+      saveToStorage();
+      if (window.syncWholeAppToCloud) window.syncWholeAppToCloud();
+      applyBranding();
+    };
 
     // --- Pantalles existents adaptades ---
     window.goToHome = function() {
@@ -9985,10 +10080,136 @@
       if (window.appState && window.appState.currentScreen === 'planner' && window.renderPlanner) window.renderPlanner();
     };
 
+
+    // ================== INICI: LES CLASSES DEL DIA ==================
+    function dayHasClasses(iso) {
+      if (getHoliday(iso)) return false;
+      const dow = isoToDate(iso).getDay();
+      return getAllEntries().some(e => e.day === dow);
+    }
+    function shiftIso(iso, n) { const d = isoToDate(iso); d.setDate(d.getDate() + n); return dateToISO(d); }
+    function findClassDay(fromIso, dir) {
+      let iso = fromIso;
+      for (let i = 0; i < 30; i++) { iso = shiftIso(iso, dir); if (dayHasClasses(iso)) return iso; }
+      return null;
+    }
+
+    window.homeDayNav = function(dir) {
+      const cur = window.appState.homeDay || window.appState.homeDayShown || todayISO();
+      if (dir === 0) { window.appState.homeDay = null; }
+      else { const n = findClassDay(cur, dir); if (n) window.appState.homeDay = n; }
+      renderHomeAgenda();
+    };
+
+    window.renderHomeAgenda = function() {
+      const box = document.getElementById('homeToday');
+      if (!box) return;
+      const today = todayISO();
+      const groups = window.appData.groups || {};
+      const hasTimetable = getAllEntries().length > 0;
+      if (!hasTimetable) {
+        box.innerHTML = `
+          <div class="bg-white border border-dashed border-zinc-300 rounded-3xl p-6 text-center space-y-2">
+            <i class="fa-regular fa-calendar text-2xl text-zinc-300"></i>
+            <p class="text-sm font-bold text-zinc-800">Encara no tens l'horari</p>
+            <p class="text-xs text-zinc-500">Afegeix el dia i l'hora de les teves classes i aquí veuràs les classes de cada dia.</p>
+            <button onclick="goToTimetable()" class="mt-1 text-xs font-bold px-3 py-2 rounded-xl bg-zinc-900 text-white">Crear l'horari</button>
+          </div>`;
+        return;
+      }
+      // Dia a mostrar: el triat, avui si té classes, o la propera jornada
+      let iso = window.appState.homeDay;
+      let auto = false;
+      if (!iso) { iso = dayHasClasses(today) ? today : (findClassDay(today, 1) || today); auto = iso !== today; }
+      window.appState.homeDayShown = iso;
+      const d = isoToDate(iso);
+      const dow = d.getDay();
+      const isToday = iso === today;
+      const isPast = iso < today;
+      const dayName = d.toLocaleDateString('ca-ES', { weekday: 'long', day: 'numeric', month: 'long' });
+      const diff = Math.round((d - isoToDate(today)) / 86400000);
+      const rel = isToday ? 'Avui' : diff === 1 ? 'Demà' : diff === -1 ? 'Ahir' : '';
+      const hol = getHoliday(iso);
+      const now = new Date(); const nowMin = now.getHours() * 60 + now.getMinutes();
+
+      const entries = getAllEntries().filter(e => e.day === dow);
+      const notices = (window.getNoticesForDate ? getNoticesForDate(iso) : []);
+
+      const card = e => {
+        const start = e.start || '--:--', end = e.end || '';
+        if (e.kind === 'other') {
+          const ty = OTHER_SLOT_TYPES[e.type] || OTHER_SLOT_TYPES.altre;
+          const c = getCancellation(e.id, iso);
+          return `<div class="flex items-center gap-3 border border-dashed ${ty.cls} ${c ? 'opacity-50' : ''} rounded-2xl px-4 py-2.5">
+            <div class="w-14 shrink-0 text-center"><div class="text-sm font-black font-mono leading-none">${start}</div><div class="text-[10px] font-mono opacity-60 mt-0.5">${end}</div></div>
+            <div class="flex-1 min-w-0 text-xs font-bold truncate"><i class="fa-solid ${ty.icon} text-[10px] mr-1 opacity-70"></i>${escapeHtml(entryTitle(e))}<span class="font-normal opacity-70">${c ? ' · No es fa' : e.place ? ' · ' + escapeHtml(e.place) : ''}</span></div>
+          </div>`;
+        }
+        const grp = e.group, gId = e.gId;
+        const theme = getGroupPastelTheme(grp);
+        const cancelled = getCancellation(e.id, iso, gId);
+        const session = grp.sessions && grp.sessions[iso];
+        const plan = getSessionPlan(grp, iso);
+        const planned = planHasContent(plan);
+        const sda = plan && plan.sdaId ? (grp.sdas || []).find(s => s.id === plan.sdaId) : null;
+        const isNow = isToday && timeToMin(e.start) <= nowMin && nowMin < timeToMin(e.end);
+        let f = 0, n = (grp.students || []).length;
+        if (session) (grp.students || []).forEach(st => { const r = getRecord(session, st.id); if (r.a === 'F' || r.a === 'FJ') f++; });
+        if (cancelled) return `<div class="flex items-center gap-3 bg-white border border-zinc-200 rounded-2xl px-4 py-3 opacity-60">
+            <div class="w-14 shrink-0 text-center"><div class="text-sm font-black font-mono leading-none line-through text-zinc-400">${start}</div></div>
+            <div class="flex-1 min-w-0"><span class="text-xs font-bold font-mono px-2 py-0.5 rounded border ${theme.badgeBg} line-through">${escapeHtml(grp.name)}</span>
+            <div class="text-[11px] text-zinc-500 mt-1"><i class="fa-solid fa-ban mr-1"></i>No es fa · ${escapeHtml(cancelReasonLabel(cancelled))}</div></div>
+          </div>`;
+        return `<div class="bg-white border ${isNow ? 'border-zinc-900 ring-2 ring-zinc-900/10' : session ? 'border-emerald-200' : 'border-zinc-200'} rounded-2xl px-4 py-3 shadow-subtle flex flex-col sm:flex-row sm:items-center gap-3">
+            <div class="flex items-center gap-3 flex-1 min-w-0">
+              <div class="w-14 shrink-0 text-center"><div class="text-base font-black font-mono leading-none text-zinc-900">${start}</div><div class="text-[11px] font-mono text-zinc-400 mt-0.5">${end}</div></div>
+              <div class="flex-1 min-w-0">
+                <div class="flex items-center gap-2 flex-wrap">
+                  <span class="text-sm font-bold px-2 py-0.5 rounded-lg border ${theme.badgeBg}">${escapeHtml(grp.name)}</span>
+                  ${isNow ? '<span class="text-[10px] font-black text-white bg-zinc-900 px-1.5 py-0.5 rounded">ARA</span>' : ''}
+                  <span class="text-[11px] text-zinc-400">${n} alumnes${e.place ? ' · ' + escapeHtml(e.place) : ''}</span>
+                </div>
+                <div class="text-xs mt-1 truncate ${planned ? 'text-zinc-800 font-semibold' : 'text-zinc-400'}">
+                  ${planned ? `<i class="fa-regular fa-calendar-check text-emerald-600 mr-1"></i>${escapeHtml(plan.title || 'Sessió planificada')}${sda ? ` <span class="font-normal text-zinc-400">· ${escapeHtml(sda.title)}</span>` : ''}` : '<i class="fa-regular fa-calendar mr-1"></i>Sense planificar'}
+                </div>
+                ${session ? `<div class="text-[11px] text-emerald-700 mt-0.5"><i class="fa-solid fa-check mr-1"></i>Llista passada · ${f} falt${f === 1 ? 'a' : 'es'}</div>` : ''}
+              </div>
+            </div>
+            <div class="flex gap-2 shrink-0 sm:justify-end">
+              <button onclick="openSessionPlanModal('${gId}', '${iso}')" class="text-xs font-semibold px-3 py-2 rounded-xl bg-zinc-100 text-zinc-700 hover:bg-zinc-200"><i class="fa-regular fa-pen-to-square mr-1"></i>${planned ? 'Planificació' : 'Planificar'}</button>
+              ${iso > today ? '' : !isPast || session || isToday ? `<button onclick="openDiariFor('${gId}', '${iso}')" class="text-xs font-bold px-3 py-2 rounded-xl ${session ? 'bg-white border border-zinc-200 text-zinc-700' : 'bg-zinc-900 text-white'}"><i class="fa-solid fa-clipboard-check mr-1"></i>${session ? 'Obrir llista' : 'Passar llista'}</button>`
+                : `<button onclick="openDiariFor('${gId}', '${iso}')" class="text-xs font-bold px-3 py-2 rounded-xl bg-amber-100 text-amber-800"><i class="fa-solid fa-clipboard-check mr-1"></i>Llista pendent</button>`}
+            </div>
+          </div>`;
+      };
+
+      const nClasses = entries.filter(e => e.kind === 'class' && !getCancellation(e.id, iso, e.gId)).length;
+      box.innerHTML = `
+        <div class="space-y-3">
+          <div class="flex flex-wrap items-center gap-2">
+            <div class="flex-1 min-w-0">
+              <div class="text-[11px] font-bold uppercase tracking-wider ${isToday ? 'text-emerald-600' : 'text-zinc-400'}">${rel || (auto ? 'Propera jornada' : (isPast ? 'Dia passat' : 'Propera jornada'))}${auto && !rel ? '' : ''}</div>
+              <h2 class="text-lg font-black text-zinc-900 tracking-tight first-letter:uppercase">${escapeHtml(dayName)}</h2>
+              <div class="text-xs text-zinc-500">${hol ? escapeHtml(hol.label) : `${nClasses} classe${nClasses === 1 ? '' : 's'}`}${auto ? ' · avui no tens classe' : ''}</div>
+            </div>
+            <div class="flex items-center gap-1">
+              <button onclick="homeDayNav(-1)" title="Dia anterior amb classes" class="w-10 h-10 rounded-xl bg-white border border-zinc-200 text-zinc-600 hover:bg-zinc-50"><i class="fa-solid fa-chevron-left text-xs"></i></button>
+              ${window.appState.homeDay ? `<button onclick="homeDayNav(0)" class="h-10 px-3 rounded-xl bg-white border border-zinc-200 text-xs font-bold text-zinc-700 hover:bg-zinc-50">Avui</button>` : ''}
+              <button onclick="homeDayNav(1)" title="Dia següent amb classes" class="w-10 h-10 rounded-xl bg-white border border-zinc-200 text-zinc-600 hover:bg-zinc-50"><i class="fa-solid fa-chevron-right text-xs"></i></button>
+            </div>
+          </div>
+          ${notices.map(nt => `<div class="flex items-center gap-2 text-xs font-semibold px-3 py-2 rounded-xl ${nt.level === 'important' ? 'bg-rose-50 text-rose-800 border border-rose-200' : 'bg-amber-50 text-amber-900 border border-amber-200'}"><i class="fa-solid fa-bullhorn"></i>${escapeHtml(nt.text)}</div>`).join('')}
+          ${hol ? `<div class="text-xs bg-zinc-100 border border-zinc-300 rounded-2xl px-4 py-3 text-zinc-700"><i class="fa-regular fa-calendar-xmark mr-1.5"></i><b>${escapeHtml(hol.label)}</b>: no hi ha classes.</div>`
+            : entries.length ? `<div class="space-y-2">${entries.map(card).join('')}</div>`
+            : `<div class="text-xs text-zinc-400 bg-white border border-zinc-200 rounded-2xl px-4 py-3">Aquest dia no tens classes a l'horari.</div>`}
+        </div>`;
+    };
+
     const _origRenderHome = window.renderHomeScreen;
     window.renderHomeScreen = function() {
       _origRenderHome();
       renderHomeNotices();
+      renderHomeAgenda();
       const d = new Date();
       const dateTxt = d.toLocaleDateString('ca-ES', { weekday: 'long', day: 'numeric', month: 'long' });
       const lbl = document.getElementById('homeSchoolYearLabel');
