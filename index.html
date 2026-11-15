@@ -105,6 +105,9 @@
     .target-group-trim.tg-own { background: #fef3c7; border-color: #f59e0b; color: #92400e; }
     .sp.sp-portrait { width: 1000px; padding: 26px 28px 20px; }
     .sp-masonry { column-count: var(--cols, 3); column-gap: 14px; }
+    .sp-masonry.sp-masonry-js { column-count: initial; display: flex; gap: 14px; align-items: flex-start; }
+    .sp-masonry-js > .sp-col { flex: 1 1 0; min-width: 0; display: flex; flex-direction: column; gap: 14px; }
+    .sp-masonry-js .sp-card { margin: 0 !important; display: block; }
     .sp-masonry > .sp-card { display: inline-block; width: 100%; margin: 0 0 14px; break-inside: avoid; -webkit-column-break-inside: avoid; page-break-inside: avoid; }
     .sp-portrait .sp-head { flex-wrap: wrap; }
     .sp-portrait .sp-flow { flex-wrap: wrap; row-gap: 6px; }
@@ -1818,7 +1821,20 @@
         <button type="button" data-fit="page" onclick="setPosterOption('fit','page')" class="pt-btn pt-opt">1 sola pàgina</button>
       </div>
       <button type="button" onclick="editSdaFromPoster()" class="pt-btn"><i class="fa-solid fa-pen"></i> Editar</button>
-      <button type="button" onclick="printSdaPoster()" class="pt-btn pt-primary"><i class="fa-solid fa-print"></i> Imprimir / PDF</button>
+      <button type="button" onclick="makeSdaPosterPdf()" class="pt-btn pt-primary"><i class="fa-solid fa-file-pdf"></i> Desar PDF</button>
+      <button type="button" onclick="printSdaPoster()" class="pt-btn"><i class="fa-solid fa-print"></i> Imprimir</button>
+      <div id="pdfPanel" class="hidden fixed inset-0 z-[80] bg-zinc-900/60 flex items-center justify-center p-4" onclick="if (event.target === this) closePdfPanel()">
+        <div class="bg-white rounded-3xl shadow-float w-full max-w-sm p-6 space-y-4 text-zinc-900 text-left">
+          <div class="flex items-center justify-between"><h3 class="text-base font-bold"><i class="fa-solid fa-file-pdf text-rose-500 mr-2"></i>Fitxa en PDF</h3>
+            <button onclick="closePdfPanel()" class="text-zinc-400 hover:text-zinc-900 px-2"><i class="fa-solid fa-xmark"></i></button></div>
+          <div id="pdfStatus" class="text-sm text-zinc-700"></div>
+          <div id="pdfActions" class="hidden space-y-2">
+            <button onclick="sharePosterPdf()" class="w-full py-3 rounded-xl bg-zinc-900 text-white font-bold text-sm"><i class="fa-solid fa-arrow-up-from-bracket mr-2"></i>Compartir · Imprimir · Desar a Fitxers</button>
+            <button onclick="downloadPosterPdf()" class="w-full py-2.5 rounded-xl bg-zinc-100 text-zinc-700 font-semibold text-sm"><i class="fa-solid fa-download mr-2"></i>Descarregar</button>
+            <p class="text-[11px] text-zinc-400">A l'iPad, al menú Compartir tens <b>Imprimir</b> i <b>Desar a Fitxers</b>. El PDF surt exactament com la fitxa, amb els colors.</p>
+          </div>
+        </div>
+      </div>
     </div>
     <div id="sdaPosterScaler"><div id="sdaPoster"></div></div>
   </div>
@@ -8071,6 +8087,162 @@
     }
     window.addEventListener('resize', () => { if (posterSdaRef) fitPosterToScreen(); });
 
+
+    // ================== FITXA SdA → PDF (funciona igual a l'iPad i a l'ordinador) ==================
+    function loadHtmlToImage() {
+      if (window.htmlToImage) return Promise.resolve(window.htmlToImage);
+      return new Promise((resolve, reject) => {
+        const s = document.createElement('script');
+        s.src = 'https://cdn.jsdelivr.net/npm/html-to-image@1.11.13/dist/html-to-image.js';
+        s.onload = () => window.htmlToImage ? resolve(window.htmlToImage) : reject(new Error('html-to-image'));
+        s.onerror = () => reject(new Error('No s\'ha pogut carregar el generador de PDF (cal connexió).'));
+        document.head.appendChild(s);
+      });
+    }
+
+    // PDF mínim amb una imatge JPEG per pàgina
+    function buildImagePdf(pages, wPt, hPt) {
+      const enc = new TextEncoder();
+      const chunks = []; let len = 0; const offs = [];
+      const push = x => { const b = typeof x === 'string' ? enc.encode(x) : x; chunks.push(b); len += b.length; };
+      const obj = (n, body) => { offs[n] = len; push(`${n} 0 obj\n`); body(); push('\nendobj\n'); };
+      push('%PDF-1.4\n%\xE2\xE3\xCF\xD3\n');
+      const n = pages.length;
+      const pageIds = pages.map((_, i) => 3 + i * 3);
+      obj(1, () => push('<< /Type /Catalog /Pages 2 0 R >>'));
+      obj(2, () => push(`<< /Type /Pages /Kids [${pageIds.map(id => id + ' 0 R').join(' ')}] /Count ${n} >>`));
+      pages.forEach((p, i) => {
+        const pid = pageIds[i], cid = pid + 1, iid = pid + 2;
+        obj(pid, () => push(`<< /Type /Page /Parent 2 0 R /MediaBox [0 0 ${wPt} ${hPt}] /Resources << /XObject << /Im${i} ${iid} 0 R >> >> /Contents ${cid} 0 R >>`));
+        const cs = `q ${wPt} 0 0 ${hPt} 0 0 cm /Im${i} Do Q`;
+        obj(cid, () => { push(`<< /Length ${cs.length} >>\nstream\n`); push(cs); push('\nendstream'); });
+        obj(iid, () => { push(`<< /Type /XObject /Subtype /Image /Width ${p.w} /Height ${p.h} /ColorSpace /DeviceRGB /BitsPerComponent 8 /Filter /DCTDecode /Length ${p.bytes.length} >>\nstream\n`); push(p.bytes); push('\nendstream'); });
+      });
+      const xref = len;
+      const total = 3 + n * 3;
+      let x = `xref\n0 ${total}\n0000000000 65535 f \n`;
+      for (let i = 1; i < total; i++) x += String(offs[i]).padStart(10, '0') + ' 00000 n \n';
+      push(x);
+      push(`trailer\n<< /Size ${total} /Root 1 0 R >>\nstartxref\n${xref}\n%%EOF`);
+      const out = new Uint8Array(len); let o = 0;
+      chunks.forEach(c => { out.set(c, o); o += c.length; });
+      return out;
+    }
+
+    function dataUrlToBytes(url) {
+      const b = atob(url.split(',')[1]);
+      const a = new Uint8Array(b.length);
+      for (let i = 0; i < b.length; i++) a[i] = b.charCodeAt(i);
+      return a;
+    }
+
+    // On es pot tallar la pàgina sense partir cap línia de text
+    function findSafeCut(rects, limit, minY) {
+      for (let y = limit; y > minY; y -= 2) {
+        if (!rects.some(r => r.t < y - 1 && r.b > y + 1)) return y;
+      }
+      return limit;
+    }
+
+    let posterPdfFile = null;
+    window.closePdfPanel = function() { document.getElementById('pdfPanel').classList.add('hidden'); };
+
+    window.makeSdaPosterPdf = async function() {
+      const panel = document.getElementById('pdfPanel');
+      const status = document.getElementById('pdfStatus');
+      const actions = document.getElementById('pdfActions');
+      panel.classList.remove('hidden');
+      actions.classList.add('hidden');
+      status.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-2"></i>Preparant el PDF…';
+      posterPdfFile = null;
+      const scaler = document.getElementById('sdaPosterScaler');
+      const prevZoom = scaler ? scaler.style.zoom : '';
+      let restorePosterLayout = () => { if (scaler) scaler.style.zoom = prevZoom; };
+      try {
+        const lib = await loadHtmlToImage();
+        const sp = document.querySelector('#sdaPoster .sp');
+        if (!sp) throw new Error('No hi ha fitxa');
+        const portrait = posterOptions.orient === 'portrait';
+        // Horitzontal: pòster d'una pàgina. Vertical: una sola columna que es reparteix en pàgines sense tallar línies.
+        const multiPage = portrait && posterOptions.fit !== 'page';
+        const masonry = sp.querySelector('.sp-masonry');
+        const prevCols = masonry ? masonry.style.getPropertyValue('--cols') : '';
+        if (scaler) scaler.style.zoom = '1';
+        if (multiPage) layoutPosterMasonry(1);
+        restorePosterLayout = () => { if (scaler) scaler.style.zoom = prevZoom; if (multiPage) layoutPosterMasonry(); };
+        await new Promise(r => setTimeout(r, 60));
+        const W = sp.offsetWidth, H = sp.offsetHeight;
+        const base = sp.getBoundingClientRect();
+        const pw = portrait ? 210 : 297, ph = portrait ? 297 : 210; // mm (A4); A3 té la mateixa proporció
+        const pageHcss = W * ph / pw;
+        // Rectangles de les línies i blocs petits (no es poden partir)
+        const rects = [];
+        sp.querySelectorAll('*').forEach(el => {
+          const r = el.getBoundingClientRect();
+          const h = r.height;
+          if (h > 0 && h < pageHcss * 0.3) rects.push({ t: r.top - base.top, b: r.bottom - base.top });
+        });
+        const bg = getComputedStyle(sp).backgroundColor || '#ffffff';
+        const opts = { pixelRatio: 2, width: W, height: H, backgroundColor: bg, cacheBust: true };
+        await lib.toCanvas(sp, opts).catch(() => null); // primera passada (Safari carrega fonts i imatges)
+        const canvas = await lib.toCanvas(sp, opts);
+        restorePosterLayout();
+        const k = canvas.width / W;
+        const pages = [];
+        const addPage = (sy, sh, fitWhole) => {
+          const pc = document.createElement('canvas');
+          pc.width = canvas.width;
+          pc.height = Math.round(canvas.width * ph / pw);
+          const ctx = pc.getContext('2d');
+          ctx.fillStyle = bg; ctx.fillRect(0, 0, pc.width, pc.height);
+          if (fitWhole) {
+            const s = Math.min(pc.width / canvas.width, pc.height / canvas.height);
+            const dw = canvas.width * s, dh = canvas.height * s;
+            ctx.drawImage(canvas, (pc.width - dw) / 2, Math.max(0, (pc.height - dh) / 2), dw, dh);
+          } else {
+            ctx.drawImage(canvas, 0, Math.round(sy * k), canvas.width, Math.round(sh * k), 0, 0, canvas.width, Math.round(sh * k));
+          }
+          const url = pc.toDataURL('image/jpeg', 0.88);
+          pages.push({ bytes: dataUrlToBytes(url), w: pc.width, h: pc.height });
+        };
+        if (!multiPage || H <= pageHcss * 1.02) {
+          addPage(0, H, H > pageHcss);
+        } else {
+          let y = 0;
+          while (y < H - 4 && pages.length < 12) {
+            const limit = Math.min(H, y + pageHcss);
+            const cut = limit >= H ? H : findSafeCut(rects, limit, y + pageHcss * 0.55);
+            addPage(y, cut - y, false);
+            y = cut;
+          }
+        }
+        const paperPt = posterOptions.paper === 'A3' ? [1191, 842] : [842, 595];
+        const [wPt, hPt] = portrait ? [paperPt[1], paperPt[0]] : paperPt;
+        const pdf = buildImagePdf(pages, wPt, hPt);
+        const titleEl = sp.querySelector('.sp-title');
+        const name = ((titleEl ? titleEl.textContent : 'SdA').trim().replace(/[\\/:*?"<>|]+/g, '').slice(0, 60) || 'SdA') + '.pdf';
+        posterPdfFile = { name, bytes: pdf };
+        status.innerHTML = `<i class="fa-solid fa-circle-check text-emerald-500 mr-2"></i>PDF a punt · ${pages.length} ${pages.length === 1 ? 'pàgina' : 'pàgines'} ${posterOptions.paper} ${portrait ? 'vertical' : 'horitzontal'}`;
+        actions.classList.remove('hidden');
+      } catch (err) {
+        restorePosterLayout();
+        console.error(err);
+        status.innerHTML = `<i class="fa-solid fa-triangle-exclamation text-rose-500 mr-2"></i>No s'ha pogut crear el PDF. ${escapeHtml((err && err.message) || '')}<br><span class="text-[11px] text-zinc-500">Prova el botó Imprimir, o torna-ho a provar amb connexió a internet.</span>`;
+      }
+    };
+
+    window.sharePosterPdf = function() {
+      if (!posterPdfFile) return;
+      saveFileToDevice(posterPdfFile.name, posterPdfFile.bytes, 'application/pdf');
+    };
+    window.downloadPosterPdf = function() {
+      if (!posterPdfFile) return;
+      const url = URL.createObjectURL(new Blob([posterPdfFile.bytes], { type: 'application/pdf' }));
+      const a = document.createElement('a'); a.href = url; a.download = posterPdfFile.name; a.rel = 'noopener';
+      document.body.appendChild(a); a.click(); a.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 8000);
+    };
+
     // Imprimir en una finestra neta (funciona a l'iPad: Safari mostra el diàleg d'impressió o Compartir → Imprimir / Desar a Fitxers)
     window.printSdaPoster = function() {
       applyPosterOptions();
@@ -8335,8 +8507,31 @@
             <span>${plan.docents ? `<b>Docent:</b> ${escapeHtml(plan.docents)}` : ''}</span>
           </div>
         </div>`;
+      layoutPosterMasonry();
       applyPosterOptions();
     }
+
+    // Reparteix les caixes en columnes (cadascuna a la columna més curta), sense columnes CSS:
+    // així s'imprimeix i es converteix a PDF igual a tot arreu (Safari de l'iPad inclòs)
+    function layoutPosterMasonry(nOverride) {
+      const m = document.querySelector('#sdaPoster .sp-masonry');
+      if (!m) return;
+      if (!m.dataset.cols) m.dataset.cols = parseInt(m.style.getPropertyValue('--cols')) || 3;
+      const n = nOverride || parseInt(m.dataset.cols) || 3;
+      let cards = Array.from(m.querySelectorAll('.sp-card'));
+      cards.forEach((c, i) => { if (c.dataset.o === undefined) c.dataset.o = i; });
+      cards.sort((a, b) => a.dataset.o - b.dataset.o);
+      m.innerHTML = '';
+      m.classList.add('sp-masonry-js');
+      const cols = Array.from({ length: n }, () => { const c = document.createElement('div'); c.className = 'sp-col'; m.appendChild(c); return c; });
+      const hs = new Array(n).fill(0);
+      cards.forEach(card => {
+        const i = hs.indexOf(Math.min(...hs));
+        cols[i].appendChild(card);
+        hs[i] += card.offsetHeight + 14;
+      });
+    }
+    window.layoutPosterMasonry = layoutPosterMasonry;
 
     // ================== OBSERVACIONS DEL BUTLLETÍ ==================
 
