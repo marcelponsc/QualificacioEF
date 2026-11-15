@@ -4223,10 +4223,10 @@
                             <span class="text-xs font-extrabold leading-tight truncate ${off ? 'line-through' : ''}">${escapeHtml(s.group.name)}</span>
                             <span class="print:hidden shrink-0">${statusIcon(st)}</span>
                           </div>
-                          <div class="text-[10px] font-mono opacity-80">${s.start}–${s.end}</div>
+                          <div class="flex items-center gap-1 min-w-0"><span class="text-[10px] font-mono opacity-80 shrink-0">${s.start}–${s.end}</span>${s.deptSpace && !off ? `<span class="min-w-0 truncate text-[9px] font-bold text-white px-1.5 py-px rounded" style="background:${s.deptSpace.color}" title="${escapeHtml(s.place)}">${escapeHtml(s.place)}</span>` : ''}</div>
                           ${st.cancel ? `<div class="text-[10px] font-semibold truncate"><i class="fa-solid fa-ban mr-0.5"></i>${escapeHtml(cancelReasonLabel(st.cancel))}</div>` : ''}
                           ${!off && planHasContent(getSessionPlan(s.group, d.iso)) && h > 40 ? `<div class="text-[10px] font-semibold truncate" title="Pla de la sessió"><i class="fa-regular fa-calendar-check mr-0.5"></i>${escapeHtml(getSessionPlan(s.group, d.iso).title || 'Planificada')}</div>` : ''}
-                          ${s.place && h > 50 && !off ? (s.deptSpace ? `<div class="mt-0.5"><span class="inline-block max-w-full truncate text-[10px] font-bold text-white px-1.5 py-0.5 rounded-md" style="background:${s.deptSpace.color}">${escapeHtml(s.place)}</span></div>` : `<div class="text-[10px] opacity-70 truncate"><i class="fa-solid fa-location-dot mr-0.5"></i>${escapeHtml(s.place)}</div>`) : ''}
+                          ${s.place && !s.deptSpace && h > 50 && !off ? `<div class="text-[10px] opacity-70 truncate"><i class="fa-solid fa-location-dot mr-0.5"></i>${escapeHtml(s.place)}</div>` : ''}
                           ${st.isNow ? '<div class="text-[9px] font-black uppercase tracking-wider mt-0.5">Ara</div>' : ''}
                         </button>
                         <div class="print:hidden absolute bottom-1 right-1 flex gap-1 opacity-0 group-hover/slot:opacity-100 transition">
