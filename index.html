@@ -1256,6 +1256,14 @@
           <h4 class="text-xs font-bold uppercase tracking-wider text-zinc-500 mb-1">Prioritats del repartiment</h4>
           <div id="drRules"></div>
         </div>
+        <div>
+          <h4 class="text-xs font-bold uppercase tracking-wider text-zinc-500 mb-1">Dates dels trimestres</h4>
+          <p class="text-[11px] text-zinc-500 mb-2">Serveix perquè al teu horari i a l'inici surti l'espai del trimestre que toca.</p>
+          <div class="flex flex-wrap items-center gap-3 text-xs">
+            <label>El 1r trimestre acaba el <input id="drEnd1" type="date" class="ml-1 border border-zinc-200 rounded-lg px-1.5 py-1 font-mono"></label>
+            <label>El 2n trimestre acaba el <input id="drEnd2" type="date" class="ml-1 border border-zinc-200 rounded-lg px-1.5 py-1 font-mono"></label>
+          </div>
+        </div>
       </div>
       <div class="flex justify-end gap-2 px-5 py-4 border-t border-zinc-100 bg-zinc-50">
         <button onclick="closeDeptRules()" class="px-4 py-2 rounded-xl border border-zinc-200 bg-white font-semibold text-sm">Tancar</button>
@@ -4218,7 +4226,7 @@
                           <div class="text-[10px] font-mono opacity-80">${s.start}–${s.end}</div>
                           ${st.cancel ? `<div class="text-[10px] font-semibold truncate"><i class="fa-solid fa-ban mr-0.5"></i>${escapeHtml(cancelReasonLabel(st.cancel))}</div>` : ''}
                           ${!off && planHasContent(getSessionPlan(s.group, d.iso)) && h > 40 ? `<div class="text-[10px] font-semibold truncate" title="Pla de la sessió"><i class="fa-regular fa-calendar-check mr-0.5"></i>${escapeHtml(getSessionPlan(s.group, d.iso).title || 'Planificada')}</div>` : ''}
-                          ${s.place && h > 50 && !off ? `<div class="text-[10px] opacity-70 truncate"><i class="fa-solid fa-location-dot mr-0.5"></i>${escapeHtml(s.place)}</div>` : ''}
+                          ${s.place && h > 50 && !off ? (s.deptSpace ? `<div class="mt-0.5"><span class="inline-block max-w-full truncate text-[10px] font-bold text-white px-1.5 py-0.5 rounded-md" style="background:${s.deptSpace.color}">${escapeHtml(s.place)}</span></div>` : `<div class="text-[10px] opacity-70 truncate"><i class="fa-solid fa-location-dot mr-0.5"></i>${escapeHtml(s.place)}</div>`) : ''}
                           ${st.isNow ? '<div class="text-[9px] font-black uppercase tracking-wider mt-0.5">Ara</div>' : ''}
                         </button>
                         <div class="print:hidden absolute bottom-1 right-1 flex gap-1 opacity-0 group-hover/slot:opacity-100 transition">
@@ -10492,7 +10500,9 @@
       const hol = getHoliday(iso);
       const now = new Date(); const nowMin = now.getHours() * 60 + now.getMinutes();
 
+      window.appState.deptRefIso = iso;
       const entries = getAllEntries().filter(e => e.day === dow);
+      window.appState.deptRefIso = null;
       const notices = (window.getNoticesForDate ? getNoticesForDate(iso) : []);
 
       const card = e => {
@@ -10527,7 +10537,8 @@
                 <div class="flex items-center gap-2 flex-wrap">
                   <span class="text-sm font-bold px-2 py-0.5 rounded-lg border ${theme.badgeBg}">${escapeHtml(grp.name)}</span>
                   ${isNow ? '<span class="text-[10px] font-black text-white bg-zinc-900 px-1.5 py-0.5 rounded">ARA</span>' : ''}
-                  <span class="text-[11px] text-zinc-400">${n} alumnes${e.place ? ' · ' + escapeHtml(e.place) : ''}</span>
+                  <span class="text-[11px] text-zinc-400">${n} alumnes${e.place && !e.deptSpace ? ' · ' + escapeHtml(e.place) : ''}</span>
+                  ${e.deptSpace ? `<span class="text-[10px] font-bold text-white px-1.5 py-0.5 rounded-md" style="background:${e.deptSpace.color}"><i class="fa-solid fa-location-dot mr-0.5"></i>${escapeHtml(e.deptSpace.name)}</span>` : ''}
                 </div>
                 <div class="text-xs mt-1 truncate ${planned ? 'text-zinc-800 font-semibold' : 'text-zinc-400'}">
                   ${planned ? `<i class="fa-regular fa-calendar-check text-emerald-600 mr-1"></i>${escapeHtml(plan.title || 'Sessió planificada')}${sda ? ` <span class="font-normal text-zinc-400">· ${escapeHtml(sda.title)}</span>` : ''}` : '<i class="fa-regular fa-calendar mr-1"></i>Sense planificar'}
@@ -10830,6 +10841,8 @@
       if (window.appState.deptDirty) return;
       window.deptStore = null;
       if (window.appState.currentScreen === 'dept') renderDept();
+      else if (window.appState.currentScreen === 'home' && window.renderHomeScreen) renderHomeScreen();
+      else if (window.appState.currentScreen === 'timetable' && window.renderTimetable) renderTimetable();
     };
     window.onDeptDocsChange = function() { if (window.appState.currentScreen === 'dept') renderDeptDocs(); };
 
@@ -11101,7 +11114,7 @@
     // ---------- Normes i espais ----------
     let deptRulesDraft = null;
     window.openDeptRules = function() {
-      deptRulesDraft = JSON.parse(JSON.stringify({ spaces: deptData().spaces, closures: deptData().closures, rules: deptData().rules }));
+      deptRulesDraft = JSON.parse(JSON.stringify({ spaces: deptData().spaces, closures: deptData().closures, rules: deptData().rules, termEnds: deptData().termEnds || { 1: '12-22', 2: '03-27' } }));
       renderDeptRules();
       document.getElementById('deptRulesModal').classList.remove('hidden');
     };
@@ -11149,6 +11162,13 @@
         ['natacioPriority', `Els grups que fan natació (tenen una sessió a la Piscina) tenen prioritat per anar al ${top ? top.name : 'primer espai'} l'altra sessió`],
         ['preferTop', 'Sempre que es pugui, donar prioritat als espais segons l\'ordre de dalt']
       ].map(([k, t]) => `<label class="flex items-start gap-2 py-1.5 text-xs"><input type="checkbox" ${R.rules[k] ? 'checked' : ''} ${dis} onchange="deptRulesDraft.rules.${k}=this.checked" class="mt-0.5 w-4 h-4"> <span>${escapeHtml(t)}</span></label>`).join('');
+      const sy = (() => { const t = new Date(); return t.getMonth() >= 7 ? t.getFullYear() : t.getFullYear() - 1; })();
+      const ends = R.termEnds || { 1: '12-22', 2: '03-27' };
+      const e1 = document.getElementById('drEnd1'), e2 = document.getElementById('drEnd2');
+      e1.value = `${sy}-${ends[1]}`; e2.value = `${sy + 1}-${ends[2]}`;
+      e1.disabled = e2.disabled = !can;
+      e1.onchange = () => { if (e1.value) { R.termEnds = { ...(R.termEnds || ends), 1: e1.value.slice(5) }; } };
+      e2.onchange = () => { if (e2.value) { R.termEnds = { ...(R.termEnds || ends), 2: e2.value.slice(5) }; } };
       document.getElementById('drSave').classList.toggle('hidden', !can);
       document.querySelectorAll('#deptRulesModal .dr-add').forEach(b => b.classList.toggle('hidden', !can));
     }
@@ -11177,7 +11197,7 @@
     window.saveDeptRules = function() {
       if (!deptCanEdit()) return;
       const d = deptData();
-      d.spaces = deptRulesDraft.spaces; d.closures = deptRulesDraft.closures; d.rules = deptRulesDraft.rules;
+      d.spaces = deptRulesDraft.spaces; d.closures = deptRulesDraft.closures; d.rules = deptRulesDraft.rules; d.termEnds = deptRulesDraft.termEnds;
       deptSave(); closeDeptRules(); renderDept();
     };
 
@@ -11354,6 +11374,42 @@
       w.document.close();
     };
 
+
+    // ---------- Vincle: l'espai de l'horari del departament surt al meu horari ----------
+    function classKey(name) {
+      const N = schedNorm(name);
+      const m = N.match(/\b([1-4])\s*(?:R|N|T|ER|ON|O)?\s*(ESO|BAT\w*)?\s*([A-F])\b/);
+      if (!m) return N.replace(/\s+/g, '');
+      return m[1] + (m[2] && m[2].startsWith('BAT') ? 'B' : '') + m[3];
+    }
+    function deptTermForDate(iso) {
+      const ends = (deptData().termEnds) || { 1: '12-22', 2: '03-27' };
+      const md = iso.slice(5), mo = Number(iso.slice(5, 7));
+      if (mo >= 8) return md <= ends[1] ? 1 : 2;
+      return md <= ends[2] ? 2 : 3;
+    }
+    window.deptTermForDate = deptTermForDate;
+    function deptSpaceForSlot(slot, iso) {
+      let d;
+      try { d = deptData(); } catch (e) { return null; }
+      const term = d.terms[deptTermForDate(iso || todayISO())];
+      if (!term || !term.sessions.length) return null;
+      const k = classKey(slot.group && slot.group.name ? slot.group.name : slot.group);
+      const s = term.sessions.find(x => x.day === slot.day && classKey(x.group) === k && overlaps(x.start, x.end, slot.start, slot.end));
+      return s && s.space ? spaceById(s.space) || null : null;
+    }
+    window.deptSpaceForSlot = deptSpaceForSlot;
+    const _getAllEntriesBase = getAllEntries;
+    getAllEntries = function() {
+      const list = _getAllEntriesBase();
+      const ref = window.appState.deptRefIso || todayISO();
+      list.forEach(e => {
+        if (e.kind !== 'class') return;
+        const sp = deptSpaceForSlot(e, ref);
+        if (sp) { e.ownPlace = e.place; e.place = sp.name; e.deptSpace = sp; }
+      });
+      return list;
+    };
     const _origRenderHome = window.renderHomeScreen;
     window.renderHomeScreen = function() {
       _origRenderHome();
