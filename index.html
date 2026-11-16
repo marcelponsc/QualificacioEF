@@ -11358,19 +11358,51 @@
     };
 
     // ---------- Imprimir ----------
+    // Fitxes d'una sola línia per imprimir (grup · professor · espai)
+    const DEPT_PRINT_CSS = `
+      #pw .dchip { pointer-events: none; flex-direction: row; flex-wrap: nowrap; align-items: center; gap: 4px; padding: 1px 5px; border-radius: 6px; border-left-width: 3px; }
+      #pw .dchip > span { white-space: nowrap; }
+      #pw .dchip .dspace { font-size: 9px; padding: 0 5px; margin-left: auto; }
+      #pw .dchip .text-\\[10px\\] { font-size: 9px; }
+      #pw .dchip .flex-col { gap: 1px; }
+      #pw table { min-width: 0 !important; }
+      #pw td, #pw th { padding: 2px 3px !important; }
+      #pw td .flex-col { gap: 2px !important; }`;
     window.printDept = function() {
       const grid = document.getElementById('deptGrid').innerHTML;
       const T = window.appState.deptTerm || 1;
       const styles = Array.from(document.querySelectorAll('head style, head link[rel="stylesheet"]')).map(n => n.outerHTML).join('\n');
+      // Calculem aquí quant cal reduir-lo perquè càpiga en un A4 horitzontal
+      const probe = document.createElement('div');
+      probe.id = 'pw';
+      probe.style.cssText = 'position:absolute;left:-99999px;top:0;width:1060px;padding:10px;box-sizing:border-box;visibility:hidden';
+      probe.innerHTML = `<style>${DEPT_PRINT_CSS}</style><div style="height:60px"></div><div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px">${document.getElementById('deptLegend').innerHTML}</div>${grid}`;
+      document.body.appendChild(probe);
+      const pz = Math.min(1, 1060 / probe.scrollWidth, 715 / probe.scrollHeight);
+      probe.remove();
       const w = window.open('', '_blank');
       if (!w) { window.print(); return; }
       w.document.open();
-      w.document.write(`<!DOCTYPE html><html lang="ca"><head><meta charset="utf-8"><title>Horari EF · ${T}r trimestre</title>${styles}
-        <style>body{padding:16px;background:#fff} * {-webkit-print-color-adjust:exact;print-color-adjust:exact} @page{size:A4 landscape;margin:8mm} .dchip{pointer-events:none}</style></head>
-        <body><h1 style="font:800 18px system-ui;margin:0 0 4px">Horari d'Educació Física · ${T}r trimestre</h1>
-        <p style="font:12px system-ui;color:#555;margin:0 0 10px">${escapeHtml(getSettings().centre || '')} · ${getSchoolYearLabel()}</p>
-        <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px">${document.getElementById('deptLegend').innerHTML}</div>${grid}
-        <script>setTimeout(function(){window.print()},500)<\/script></body></html>`);
+      w.document.write(`<!DOCTYPE html><html lang="ca"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Horari EF · ${T}r trimestre</title>
+        <script>setTimeout(function(){ try { window.print(); } catch(e){} }, 900);<\/script>${styles}
+        <style>
+          html, body { margin: 0 !important; padding: 0 !important; background: #fff !important; }
+          * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+          @page { size: A4 landscape; margin: 7mm; }
+          #pw { width: 1060px; padding: 10px; box-sizing: border-box; }
+          ${DEPT_PRINT_CSS}
+          #pw .shadow-subtle { box-shadow: none !important; }
+          #pbar { display: flex; gap: 10px; align-items: center; padding: 10px 14px; background: #18181b; color: #e4e4e7; font: 600 13px system-ui, sans-serif; }
+          #pbar button { background: #e8ad3c; color: #18181b; border: 0; border-radius: 10px; padding: 9px 16px; font: 800 14px system-ui, sans-serif; }
+          @media print { #pbar { display: none !important; } #pw { zoom: ${pz.toFixed(3)}; } tr { break-inside: avoid; } }
+        </style></head>
+        <body><div id="pbar"><button onclick="window.print()">Imprimir / Desar PDF</button><span>A4 horitzontal · una sola pàgina</span></div>
+        <div id="pw">
+          <h1 style="font:800 18px system-ui;margin:0 0 2px">Horari d'Educació Física · ${T}r trimestre</h1>
+          <p style="font:12px system-ui;color:#555;margin:0 0 8px">${escapeHtml(getSettings().centre || '')} · ${getSchoolYearLabel()}</p>
+          <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px">${document.getElementById('deptLegend').innerHTML}</div>${grid}
+        </div>
+        </body></html>`);
       w.document.close();
     };
 
