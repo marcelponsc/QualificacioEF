@@ -3101,8 +3101,11 @@
       P:  { label: 'Present', short: 'P', on: 'bg-emerald-600 text-white border-emerald-600' },
       F:  { label: 'Falta', short: 'F', on: 'bg-rose-600 text-white border-rose-600' },
       R:  { label: 'Retard', short: 'R', on: 'bg-amber-500 text-white border-amber-500' },
-      FJ: { label: 'Falta justificada', short: 'FJ', on: 'bg-sky-600 text-white border-sky-600' }
+      FJ: { label: 'Falta justificada', short: 'FJ', on: 'bg-sky-600 text-white border-sky-600' },
+      E:  { label: 'Expulsat (no compta com a falta ni resta % de pràctica)', short: 'Exp', on: 'bg-violet-600 text-white border-violet-600' }
     };
+    // No és a classe (falta, falta justificada o expulsat)
+    function isAbsentCode(a) { return a === 'F' || a === 'FJ' || a === 'E'; }
     const PRACTICE_CODES = {
       NP: { label: 'No fa pràctica', short: 'No pràct.', icon: 'fa-person-walking', on: 'bg-rose-100 text-rose-800 border-rose-300' },
       SR: { label: 'Sense roba / material (no resta assistència: resta nota de l\'objectiu configurat)', short: 'Roba', icon: 'fa-shirt', on: 'bg-orange-100 text-orange-800 border-orange-300' },
@@ -3166,7 +3169,8 @@
     // rec.p === '-' vol dir "fa pràctica malgrat la lesió"
     function getRecord(session, stId) {
       const recs = session && session.records;
-      const rec = (recs && recs[stId]) || {};
+      let rec = (recs && recs[stId]) || {};
+      if (rec.p === 'SR') { rec = { ...rec, sr: true }; delete rec.p; } // abans "sense roba" era un tipus de pràctica
       if (!session || typeof session !== 'object') return rec;
       const meta = sessionMeta(session);
       const inj = meta ? getActiveInjury(meta.group, stId, meta.iso) : null;
@@ -3184,7 +3188,7 @@
     // Estadístiques d'assistència i pràctica d'un alumne (trim = null → tot el curs)
     function getStudentAttendanceStats(group, stId, trim = null) {
       const sessions = getGroupSessions(group);
-      const st = { total: 0, P: 0, F: 0, FJ: 0, R: 0, NP: 0, SR: 0, L: 0, pos: 0, neg: 0, practiced: 0, eligible: 0, pct: null, obs: [] };
+      const st = { total: 0, P: 0, F: 0, FJ: 0, E: 0, R: 0, NP: 0, SR: 0, L: 0, pos: 0, neg: 0, practiced: 0, eligible: 0, pct: null, obs: [] };
       Object.keys(sessions).sort().forEach(date => {
         const s = sessions[date];
         if (trim !== null && s.trim !== trim) return;
@@ -3194,12 +3198,13 @@
         st.total++;
         st[a] = (st[a] || 0) + 1;
         if ((a === 'P' || a === 'R') && p) st[p] = (st[p] || 0) + 1;
+        if ((a === 'P' || a === 'R') && rec.sr) st.SR++;
         st.pos += rec.pos || 0;
         st.neg += rec.neg || 0;
-        const justified = a === 'FJ' || ((a === 'P' || a === 'R') && p === 'L');
+        const justified = a === 'FJ' || a === 'E' || ((a === 'P' || a === 'R') && p === 'L');
         if (!justified) {
           st.eligible++;
-          if ((a === 'P' || a === 'R') && (!p || p === 'SR')) st.practiced++;
+          if ((a === 'P' || a === 'R') && !p) st.practiced++;
         }
         if (rec.obs) st.obs.push({ date, text: rec.obs });
       });
@@ -3308,6 +3313,7 @@
       if (!rec.neg) delete rec.neg;
       if (!rec.obs) delete rec.obs;
       if (!rec.act) delete rec.act;
+      if (!rec.sr) delete rec.sr;
       if (Object.keys(rec).length) session.records[stId] = rec;
       else delete session.records[stId];
       persistSession(iso, rerender);
@@ -3317,11 +3323,12 @@
     window.diariSetAttendance = function(stId, code) {
       updateRecord(stId, rec => {
         rec.a = code;
-        if (code === 'F' || code === 'FJ') delete rec.p;
+        if (isAbsentCode(code)) { delete rec.p; delete rec.sr; }
       });
     };
 
     window.diariTogglePractice = function(stId, code) {
+      if (code === 'SR') { diariToggleRoba(stId); return; }
       const group = getCurrentGroup();
       const iso = window.appState.diariDate;
       const injured = !!getActiveInjury(group, stId, iso);
@@ -3329,7 +3336,20 @@
       updateRecord(stId, rec => {
         if (eff === code) rec.p = injured ? '-' : null;          // desmarcar (si està lesionat: fa pràctica igualment)
         else rec.p = injured && code === 'L' ? null : code;      // tornar a "L" automàtic o marcar un altre codi
-        if (rec.p && rec.p !== '-' && (rec.a === 'F' || rec.a === 'FJ')) rec.a = 'P';
+        if (rec.p === 'SR') { rec.sr = true; delete rec.p; }
+        if (rec.p && rec.p !== '-' && isAbsentCode(rec.a)) rec.a = 'P';
+      });
+    };
+
+    // "Sense roba" és independent: es pot combinar amb "No fa classe" o "Lesió"
+    window.diariToggleRoba = function(stId) {
+      const group = getCurrentGroup();
+      const iso = window.appState.diariDate;
+      const cur = !!getRecord((group.sessions || {})[iso], stId).sr;
+      updateRecord(stId, rec => {
+        if (rec.p === 'SR') delete rec.p;
+        rec.sr = !cur;
+        if (rec.sr && isAbsentCode(rec.a)) rec.a = 'P';
       });
     };
 
@@ -3558,13 +3578,14 @@
 
       // Comptadors
       const all = group.students || [];
-      const c = { P: 0, F: 0, FJ: 0, R: 0, NP: 0, SR: 0, L: 0 };
+      const c = { P: 0, F: 0, FJ: 0, E: 0, R: 0, NP: 0, SR: 0, L: 0 };
       all.forEach(st => {
         const r = getRecord(session, st.id);
         c[r.a || 'P']++;
-        if (r.p && (r.a || 'P') !== 'F' && r.a !== 'FJ') c[r.p]++;
+        if (r.p && !isAbsentCode(r.a)) c[r.p]++;
+        if (r.sr && !isAbsentCode(r.a)) c.SR++;
       });
-      const practicing = all.length - c.F - c.FJ - c.NP - c.L;
+      const practicing = all.length - c.F - c.FJ - c.E - c.NP - c.L;
       const counter = (n, label, cls) => `<div class="flex-1 min-w-[70px] rounded-xl border ${cls} px-2 py-1.5 text-center"><div class="text-lg font-black font-mono leading-none">${n}</div><div class="text-[10px] font-semibold mt-0.5">${label}</div></div>`;
 
       const minP = getMinPractice(group);
@@ -3574,7 +3595,7 @@
       const rows = task === 'avaluar' ? renderDiariEvalRows(group, session, sda, evalCols, students) : students.map((st, idx) => {
         const r = getRecord(session, st.id);
         const a = r.a || 'P';
-        const absent = a === 'F' || a === 'FJ';
+        const absent = isAbsentCode(a);
         const stats = getStudentAttendanceStats(group, st.id, session.trim);
         const stGrades = (sda && group.grades && group.grades[sda.id] && group.grades[sda.id][st.id]) || {};
         const obsOpen = window.appState.diariOpenObs === st.id;
@@ -3599,7 +3620,7 @@
                 </div>
                 <div class="flex gap-1 ${absent ? 'opacity-30 pointer-events-none' : ''}">
                   ${Object.keys(PRACTICE_CODES).map(code => `
-                    <button onclick="diariTogglePractice(${st.id}, '${code}')" title="${PRACTICE_CODES[code].label}" class="h-9 px-2 rounded-xl border text-[10px] font-bold transition inline-flex items-center gap-1 ${r.p === code ? PRACTICE_CODES[code].on : 'bg-white text-zinc-400 border-zinc-200 hover:border-zinc-400'}"><i class="fa-solid ${PRACTICE_CODES[code].icon} hidden sm:inline"></i><span>${PRACTICE_CODES[code].short}</span></button>
+                    <button onclick="diariTogglePractice(${st.id}, '${code}')" title="${PRACTICE_CODES[code].label}" class="h-9 px-2 rounded-xl border text-[10px] font-bold transition inline-flex items-center gap-1 ${(code === 'SR' ? r.sr : r.p === code) ? PRACTICE_CODES[code].on : 'bg-white text-zinc-400 border-zinc-200 hover:border-zinc-400'}"><i class="fa-solid ${PRACTICE_CODES[code].icon} hidden sm:inline"></i><span>${PRACTICE_CODES[code].short}</span></button>
                   `).join('')}
                 </div>
                 <div class="flex items-center gap-1">
@@ -5811,7 +5832,7 @@
         const belongs = s.sdaId ? s.sdaId === sda.id : s.trim === sda.trim;
         if (!belongs) return;
         const r = (s.records && s.records[stId]) || {};
-        if ((r.a || 'P') !== 'F' && r.a !== 'FJ' && r.p === 'SR') n++;
+        if (!isAbsentCode(r.a || 'P') && (r.sr || r.p === 'SR')) n++;
       });
       return n;
     }
@@ -5939,7 +5960,7 @@
         if (!s || s.trim !== trimNum) return;
         const r = (s.records && s.records[stId]) || {};
         const a = r.a || 'P';
-        if (a === 'F' || a === 'FJ') return;
+        if (isAbsentCode(a)) return;
         const av = typeof r.act === 'number' ? r.act : (r.act ? levelValue(r.act) : undefined);
         if (av !== undefined && av !== null && !isNaN(av)) { sum += av; info.n++; }
         info.pos += r.pos || 0;
@@ -9036,7 +9057,7 @@
         ...OFFICIAL_CES.flatMap(ce => [`${ce.id} ${ce.short}`, `Nivell ${ce.id}`]),
         `Nota final (${methodLabel})`, 'Nivell final',
         'Mín. pràctica no assolit',
-        'Sessions', 'Faltes', 'Faltes just.', 'Retards', 'No fa pràctica', 'Sense roba', '% pràctica (curs)', 'Actitud +', 'Actitud -',
+        'Sessions', 'Faltes', 'Faltes just.', 'Expulsions', 'Retards', 'No fa pràctica', 'Sense roba', '% pràctica (curs)', 'Actitud +', 'Actitud -',
         'Actitud T1', 'Actitud T2', 'Actitud T3',
         'Observacions',
         'Grup'
@@ -9057,7 +9078,7 @@
           num(finalScore), lvlCode(finalScore),
           txt(penalizedTrims),
           ...(() => { const a = getStudentAttendanceStats(curGroup, st.id, null);
-            return [a.total, a.F, a.FJ, a.R, a.NP, a.SR, num(a.pct), a.pos, a.neg]; })(),
+            return [a.total, a.F, a.FJ, a.E, a.R, a.NP, a.SR, num(a.pct), a.pos, a.neg]; })(),
           ...[1, 2, 3].map(t => num(getStudentAttitudeTrim(curGroup, st.id, t))),
           txt(obs.replace(/\r?\n/g, ' ')),
           txt(curGroup.name)
@@ -9216,7 +9237,7 @@
     const IDO_CODES = [
       { id: 'P', label: 'Present' }, { id: 'F', label: 'Falta' }, { id: 'R', label: 'Retard' },
       { id: 'FJ', label: 'Falta justificada' }, { id: 'NP', label: 'Present, no fa pràctica' },
-      { id: 'SR', label: 'Present, sense roba' }, { id: 'L', label: 'Present, lesió/justif.' }, { id: 'IGN', label: 'No comptar' }
+      { id: 'SR', label: 'Present, sense roba' }, { id: 'L', label: 'Present, lesió/justif.' }, { id: 'E', label: 'Expulsat' }, { id: 'IGN', label: 'No comptar' }
     ];
     let idoState = null; // { sheets: {name: rows}, sheetName, parsed, symbolMap, studentMap }
 
@@ -9231,6 +9252,7 @@
       if (/[❌✘✗✖❎]/.test(s) || /^(x|f|a|0|falta|absent)$/i.test(s)) return 'F';
       if (/[⏰⏱⌚🕐🕑🕒🕓🕔🕕🕖🕗🕘🕙🕚🕛⌛⏳]/u.test(s) || /^(r|retard|retraso)$/i.test(s)) return 'R';
       if (/[📄📝🩺⚕💊🏥]/u.test(s) || /^(j|fj|just|justificada)$/i.test(s)) return 'FJ';
+      if (/^(e|exp|expulsat|expulsio|expulsió)$/i.test(s)) return 'E';
       return 'IGN';
     }
 
@@ -9635,12 +9657,13 @@
           const stId = idMap[i];
           // Si hi ha dues columnes el mateix dia, mana la pitjor (falta > retard > present)
           const codes = cols.map(c => idoState.symbolMap[(p.rows[i][c.ci] || '').trim().replace(/️/g, '')] || 'P').filter(c => c !== 'IGN');
-          const rank = { F: 5, FJ: 4, NP: 3, SR: 3, L: 2, R: 1, P: 0 };
+          const rank = { F: 5, FJ: 4, E: 4, NP: 3, SR: 3, L: 2, R: 1, P: 0 };
           const code = codes.sort((a, b) => rank[b] - rank[a])[0] || 'P';
           const prev = s.records[stId] || {};
           const rec = { ...(prev.pos ? { pos: prev.pos } : {}), ...(prev.neg ? { neg: prev.neg } : {}), ...(prev.obs ? { obs: prev.obs } : {}) };
-          if (['F', 'FJ', 'R'].includes(code)) rec.a = code;
-          if (['NP', 'SR', 'L'].includes(code)) rec.p = code;
+          if (['F', 'FJ', 'R', 'E'].includes(code)) rec.a = code;
+          if (['NP', 'L'].includes(code)) rec.p = code;
+          if (code === 'SR') rec.sr = true;
           if (Object.keys(rec).length) s.records[stId] = rec; else delete s.records[stId];
         });
       });
@@ -9665,12 +9688,12 @@
           });
           if (!any) return;
           const rec = { ...(s.records[stId] || {}) };
-          const absent = rec.a === 'F' || rec.a === 'FJ';
+          const absent = isAbsentCode(rec.a);
           if (pts.length && (overwrite || rec.act === undefined)) {
             rec.act = Math.round((pts.reduce((a, b) => a + b, 0) / pts.length) * 100) / 100;
             nAct++;
           }
-          if (sr && !absent && (!rec.p || overwrite)) { rec.p = 'SR'; nSR++; }
+          if (sr && !absent && (!rec.sr || overwrite)) { if (rec.p === 'SR') delete rec.p; rec.sr = true; nSR++; }
           s.records[stId] = rec;
         });
       });
@@ -9896,6 +9919,7 @@
     const INCIDENT_TYPES = {
       F: { label: 'Falta', cls: 'bg-rose-50 text-rose-700 border-rose-200', icon: 'fa-user-xmark' },
       FJ: { label: 'Falta justificada', cls: 'bg-sky-50 text-sky-700 border-sky-200', icon: 'fa-file-medical' },
+      E: { label: 'Expulsat', cls: 'bg-violet-50 text-violet-700 border-violet-200', icon: 'fa-door-open' },
       R: { label: 'Retard', cls: 'bg-amber-50 text-amber-700 border-amber-200', icon: 'fa-clock' },
       NP: { label: 'No fa pràctica', cls: 'bg-rose-50 text-rose-700 border-rose-200', icon: 'fa-person-walking' },
       SR: { label: 'Sense roba', cls: 'bg-orange-50 text-orange-700 border-orange-200', icon: 'fa-shirt' },
@@ -9930,7 +9954,8 @@
         const r = getRecord(s, stId);
         const types = [];
         if (r.a && r.a !== 'P') types.push(r.a);
-        if (r.p && r.a !== 'F' && r.a !== 'FJ') types.push(r.p);
+        if (r.p && !isAbsentCode(r.a)) types.push(r.p);
+        if (r.sr && !isAbsentCode(r.a)) types.push('SR');
         if (r.pos) types.push('pos');
         if (r.neg) types.push('neg');
         if (r.obs) types.push('obs');
@@ -10098,6 +10123,7 @@
           ${kpi('F', 'Faltes', course.F, 'bg-rose-50 border-rose-200 text-rose-700')}
           ${kpi('FJ', 'Justificades', course.FJ, 'bg-sky-50 border-sky-200 text-sky-700')}
           ${kpi('R', 'Retards', course.R, 'bg-amber-50 border-amber-200 text-amber-700')}
+          ${course.E ? kpi('E', 'Expulsions', course.E, 'bg-violet-50 border-violet-200 text-violet-700') : ''}
           ${kpi('SR', 'Sense roba', course.SR, 'bg-orange-50 border-orange-200 text-orange-700')}
           ${kpi('NP', 'No pràctica', course.NP, 'bg-rose-50 border-rose-200 text-rose-700')}
           ${kpi('L', 'Lesió', course.L, 'bg-sky-50 border-sky-200 text-sky-700')}
