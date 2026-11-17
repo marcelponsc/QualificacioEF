@@ -2681,7 +2681,7 @@
       let filled = 0, studentsPending = 0;
       students.forEach(st => {
         const g = (group.grades && group.grades[sda.id] && group.grades[sda.id][st.id]) || {};
-        const penalized = isStudentPenalized(group, sda.trim, st.id);
+        const penalized = isStudentPenalized(group, sda.trim, st.id) || isStudentExempt(group, sda.id, st.id);
         const n = penalized ? keys.length : keys.filter(k => g[k] !== undefined && g[k] !== null && g[k] !== '').length;
         filled += n;
         if (n < keys.length) studentsPending++;
@@ -5856,8 +5856,42 @@
     }
     window.getEffectiveGrade = getEffectiveGrade;
 
+    // Alumne exempt d'una SdA: no té nota i la SdA no pondera al seu trimestre
+    function isStudentExempt(group, sdaId, stId) {
+      return !!(group && group.sdaExempt && group.sdaExempt[sdaId] && group.sdaExempt[sdaId][stId]);
+    }
+    window.isStudentExempt = isStudentExempt;
+    const EXEMPT_BADGE = '<span class="inline-flex items-center text-[10px] font-bold text-sky-700 bg-sky-50 border border-sky-200 px-1.5 py-0.5 rounded"><i class="fa-solid fa-user-slash mr-1"></i>Exempt</span>';
+
+    window.toggleSdaExempt = function(sdaId, stId, gId = null) {
+      const group = gId ? window.appData.groups[gId] : getCurrentGroup();
+      if (!group) return;
+      const sda = (group.sdas || []).find(x => x.id === sdaId);
+      const st = (group.students || []).find(x => x.id === stId);
+      const on = !isStudentExempt(group, sdaId, stId);
+      const msg = on
+        ? `Marcar ${st ? st.name : "l'alumne"} com a EXEMPT de «${sda ? sda.title : 'la SdA'}»?\n\nNo caldrà posar-li nota i aquesta SdA no comptarà a la seva nota del trimestre (el pes es repartirà entre les altres SdA).`
+        : `Treure l'exempció de «${sda ? sda.title : 'la SdA'}»? Tornarà a comptar amb les notes que tingui.`;
+      if (!confirm(msg)) return;
+      if (!group.sdaExempt) group.sdaExempt = {};
+      if (!group.sdaExempt[sdaId]) group.sdaExempt[sdaId] = {};
+      if (on) group.sdaExempt[sdaId][stId] = true;
+      else {
+        delete group.sdaExempt[sdaId][stId];
+        if (!Object.keys(group.sdaExempt[sdaId]).length) delete group.sdaExempt[sdaId];
+      }
+      saveToStorage();
+      if (window.syncGroupEntityToCloud) window.syncGroupEntityToCloud(gId || window.appData.activeGroupId);
+      const v = window.appState.currentView;
+      if (v === 'sda') renderSdaGrid();
+      if (v === 'trim') renderTrimView();
+      if (v === 'final') renderFinalView();
+      if (v === 'fitxa') renderStudentFitxa();
+    };
+
     function getStudentCeScoreInSda(sda, stId, ceId, group = null) {
       if (!sda || !sda.competences) return null;
+      if (isStudentExempt(group || getCurrentGroup(), sda.id, stId)) return null;
       const conf = sda.competences[ceId];
       if (!conf || !conf.active) return null;
       const curGroup = group || getCurrentGroup();
@@ -5880,6 +5914,7 @@
 
     function getStudentOverallSdaScore(sda, stId, group = null) {
       if (!sda || !sda.competences) return null;
+      if (isStudentExempt(group || getCurrentGroup(), sda.id, stId)) return null;
       let totalWeightedScore = 0;
       let totalActiveWeight = 0;
 
@@ -5916,6 +5951,7 @@
         if (trimNum !== null && sda.trim !== trimNum) return;
         const conf = sda.competences && sda.competences[ceId];
         if (!conf || !conf.active) return;
+        if (isStudentExempt(curGroup, sda.id, stId)) return;
         if (isStudentPenalized(curGroup, sda.trim, stId)) {
           sum += PENALTY_SCORE; c++;
           return;
@@ -6238,13 +6274,17 @@
         const stGrades = currentGrades[st.id] || {};
         let colCounter = 0;
         const isPenalized = !!curGroup.attendancePenalty?.[window.appState.currentTrim]?.[st.id];
+        const isExempt = isStudentExempt(curGroup, sda.id, st.id);
 
-        rowsHtml += `<tr id="row_${sda.id}_${st.id}" class="hover:bg-zinc-50/70 transition-colors group">
+        rowsHtml += `<tr id="row_${sda.id}_${st.id}" class="${isExempt ? 'bg-sky-50/40 ' : ''}hover:bg-zinc-50/70 transition-colors group">
           <td class="py-1 px-2.5 w-12 min-w-[48px] max-w-[48px] text-center text-zinc-400 font-mono text-xs border-r border-zinc-200 bg-white sticky left-0 z-20">${rIdx + 1}</td>
           <td class="py-1 px-3.5 w-56 min-w-[224px] max-w-[224px] font-semibold text-zinc-900 border-r border-zinc-200 bg-white sticky left-12 z-20 shadow-[4px_0_8px_-4px_rgba(0,0,0,0.06)]">
             <div class="flex items-center justify-between gap-1.5">
               <span class="truncate text-xs" title="${st.name}">${st.name}</span>
+              <span class="flex items-center gap-1 shrink-0">
               ${isPenalized ? '<span class="inline-flex items-center text-[9px] font-bold text-rose-700 bg-rose-50 border border-rose-200 px-1 rounded shrink-0"><i class="fa-solid fa-person-running mr-0.5"></i>< %</span>' : ''}
+              <button type="button" onclick="toggleSdaExempt('${sda.id}', ${st.id})" class="exempt-btn inline-flex items-center text-[9px] font-bold px-1.5 py-0.5 rounded border transition ${isExempt ? 'bg-sky-600 text-white border-sky-600' : 'bg-white text-zinc-300 border-zinc-200 hover:text-sky-700 hover:border-sky-300'}" title="${isExempt ? 'Exempt d\'aquesta SdA. Clica per treure-ho.' : 'Marcar com a exempt d\'aquesta SdA'}"><i class="fa-solid fa-user-slash${isExempt ? ' mr-0.5' : ''}"></i>${isExempt ? 'Exempt' : ''}</button>
+              </span>
             </div>
           </td>`;
 
@@ -6268,8 +6308,8 @@
                     data-row="${rIdx}" data-col="${colCounter}"
                     onkeydown="handleSpreadsheetInput(event, ${rIdx}, ${colCounter}, '${sda.id}', ${st.id}, '${gradeKey}')"
                     onfocus="this.select()"
-                    onblur="saveCellCommit('${sda.id}', ${st.id}, '${gradeKey}', this)"
-                    class="grade-cell-input w-full h-8 text-center rounded-lg font-mono text-xs outline-none transition focus:ring-2 focus:ring-zinc-900 focus:bg-white ${colorClass}">
+                    onblur="saveCellCommit('${sda.id}', ${st.id}, '${gradeKey}', this)" ${isExempt ? 'disabled' : ''}
+                    class="grade-cell-input ${isExempt ? 'opacity-30 cursor-not-allowed ' : ''}w-full h-8 text-center rounded-lg font-mono text-xs outline-none transition focus:ring-2 focus:ring-zinc-900 focus:bg-white ${colorClass}">
                   ${robaBadge(sda, st.id, gradeKey, val)}
                 </td>`;
                 colCounter++;
@@ -6285,8 +6325,8 @@
                   data-row="${rIdx}" data-col="${colCounter}"
                   onkeydown="handleSpreadsheetInput(event, ${rIdx}, ${colCounter}, '${sda.id}', ${st.id}, '${gradeKey}')"
                   onfocus="this.select()"
-                  onblur="saveCellCommit('${sda.id}', ${st.id}, '${gradeKey}', this)"
-                  class="grade-cell-input w-full h-8 text-center rounded-lg font-mono text-xs outline-none transition focus:ring-2 focus:ring-zinc-900 focus:bg-white ${colorClass}">
+                  onblur="saveCellCommit('${sda.id}', ${st.id}, '${gradeKey}', this)" ${isExempt ? 'disabled' : ''}
+                  class="grade-cell-input ${isExempt ? 'opacity-30 cursor-not-allowed ' : ''}w-full h-8 text-center rounded-lg font-mono text-xs outline-none transition focus:ring-2 focus:ring-zinc-900 focus:bg-white ${colorClass}">
                 ${robaBadge(sda, st.id, gradeKey, val)}
               </td>`;
               colCounter++;
@@ -6307,12 +6347,12 @@
         const overallSdaLvl = getLevel(overallSdaScore);
 
         rowsHtml += `
-          <td id="cell_${sda.id}_${st.id}_overall_score" class="py-1 px-2.5 text-center font-mono font-black text-zinc-900 border-l border-zinc-300 bg-zinc-50 text-xs">
-            ${overallSdaScore !== null ? overallSdaScore.toFixed(2) : '<span class="text-zinc-300 font-normal">—</span>'}
+          <td id="cell_${sda.id}_${st.id}_overall_score" class="py-1 px-2.5 text-center font-mono font-black text-zinc-900 border-l border-zinc-300 bg-zinc-50 text-xs"${isExempt ? ' colspan="2"' : ''}>
+            ${isExempt ? EXEMPT_BADGE : (overallSdaScore !== null ? overallSdaScore.toFixed(2) : '<span class="text-zinc-300 font-normal">—</span>')}
           </td>
-          <td id="cell_${sda.id}_${st.id}_overall_lvl" class="py-1 px-2 text-center bg-zinc-50">
+          ${isExempt ? '' : `<td id="cell_${sda.id}_${st.id}_overall_lvl" class="py-1 px-2 text-center bg-zinc-50">
             <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold ring-1 ring-inset ${overallSdaLvl.badge}">${overallSdaLvl.code}</span>
-          </td>
+          </td>`}
         </tr>`;
       });
 
@@ -7094,6 +7134,10 @@
         trimSdas.forEach(sda => {
           const sdaScore = getStudentOverallSdaScore(sda, st.id);
           const lvl = getLevel(sdaScore);
+          if (isStudentExempt(curGroup, sda.id, st.id)) {
+            rowsHtml += `<td class="py-2 px-3 text-center border-l border-zinc-100 bg-sky-50/40">${EXEMPT_BADGE}</td>`;
+            return;
+          }
           rowsHtml += `<td class="py-2 px-3 text-center border-l border-zinc-100">
             <div class="font-bold font-mono text-zinc-800 text-xs">${sdaScore !== null ? sdaScore.toFixed(2) : '<span class="text-zinc-300 font-normal">—</span>'}</div>
             <span class="inline-flex items-center mt-0.5 text-[9px] px-1.5 py-0.2 rounded font-bold ring-1 ring-inset ${lvl.badge}">${lvl.code}</span>
@@ -10087,9 +10131,16 @@
         const sc = getStudentOverallSdaScore(sda, st.id, group);
         const lvl = getLevel(sc);
         const robaN = countRobaForSda(group, sda, st.id);
+        const exempt = isStudentExempt(group, sda.id, st.id);
+        const exBtn = `<button type="button" onclick="toggleSdaExempt('${sda.id}', ${st.id})" class="ml-2 inline-flex items-center text-[10px] font-bold px-1.5 py-0.5 rounded border ${exempt ? 'bg-sky-600 text-white border-sky-600' : 'bg-white text-zinc-400 border-zinc-200 hover:text-sky-700 hover:border-sky-300'}" title="${exempt ? 'Treure exempció' : 'Marcar com a exempt d\'aquesta SdA'}"><i class="fa-solid fa-user-slash mr-1"></i>${exempt ? 'Exempt' : 'Exempció'}</button>`;
+        if (exempt) return `<tr class="border-t border-zinc-100 bg-sky-50/40">
+          <td class="py-2 px-3 text-xs text-zinc-400 font-mono">T${sda.trim}</td>
+          <td class="py-2 px-3 text-xs font-semibold text-zinc-500">${escapeHtml(sda.title)}${exBtn}</td>
+          <td colspan="2" class="py-2 px-3 text-right text-[11px] text-sky-700 font-semibold">No compta al trimestre</td>
+        </tr>`;
         return `<tr class="border-t border-zinc-100">
           <td class="py-2 px-3 text-xs text-zinc-400 font-mono">T${sda.trim}</td>
-          <td class="py-2 px-3 text-xs font-semibold text-zinc-800">${escapeHtml(sda.title)}${robaN && getRobaTargetKey(sda) ? ` <span class="text-[10px] text-orange-600 font-bold ml-1"><i class="fa-solid fa-shirt"></i> ${robaN}</span>` : ''}</td>
+          <td class="py-2 px-3 text-xs font-semibold text-zinc-800">${escapeHtml(sda.title)}${robaN && getRobaTargetKey(sda) ? ` <span class="text-[10px] text-orange-600 font-bold ml-1"><i class="fa-solid fa-shirt"></i> ${robaN}</span>` : ''}${exBtn}</td>
           <td class="py-2 px-3 text-right font-mono font-bold text-sm">${sc !== null ? sc.toFixed(2) : '—'}</td>
           <td class="py-2 px-3 text-center"><span class="inline-flex px-1.5 py-0.5 rounded text-[10px] font-bold ring-1 ring-inset ${lvl.badge}">${lvl.code}</span></td>
         </tr>`;
