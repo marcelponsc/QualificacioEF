@@ -49,6 +49,11 @@
       #viewAval textarea { display: none !important; }
       #viewAval .aval-print-comment { display: block !important; }
       #viewAval .aval-row { break-inside: avoid; border-color: #ddd !important; }
+      #viewAval .aval-print-row { display: table-row !important; }
+      #viewAval .aval-table { overflow: visible !important; border: 0 !important; }
+      #viewAval .aval-table table { font-size: 9px !important; }
+      #viewAval .aval-table th, #viewAval .aval-table td { position: static !important; padding: 2px 3px !important; }
+      #viewAval tbody tr { break-inside: avoid; }
     }
     @media print {
       .no-print { display: none !important; }
@@ -7447,7 +7452,7 @@
     }
 
     function getAvalData(group, st, trim) {
-      const score = getStudentTrimScore(st.id, group);
+      const score = getStudentTrimScoreByTrim(st.id, trim, group);
       const comp = getStudentTrimCompScore(st.id, trim, group);
       const lvl = getLevel(score);
       const att = getStudentAttendanceStats(group, st.id, trim);
@@ -7595,6 +7600,114 @@
     };
 
     window.setAvalFilter = function(f) { window.appState.avalFilter = f; renderAvalView(); };
+    window.setAvalMode = function(m) { window.appState.avalMode = m; renderAvalView(); };
+    window.setAvalSort = function(s) { window.appState.avalSort = s; renderAvalView(); };
+    window.toggleAvalRow = function(stId) {
+      window.appState.avalOpen = window.appState.avalOpen === stId ? null : stId;
+      renderAvalView();
+      if (window.appState.avalOpen) setTimeout(() => { const el = document.getElementById('avalRow_' + stId); if (el) el.scrollIntoView({ block: 'nearest', behavior: 'smooth' }); }, 30);
+    };
+    window.avalGoStudent = function(stId) { window.appState.avalStudent = stId; window.appState.avalMode = 'alumne'; renderAvalView(); };
+    window.avalMoveStudent = function(dir) {
+      const list = window.appState._avalOrder || [];
+      const i = list.indexOf(window.appState.avalStudent);
+      const next = list[(i + dir + list.length) % list.length];
+      if (next !== undefined) { window.appState.avalStudent = next; renderAvalView(); window.scrollTo({ top: 0, behavior: 'smooth' }); }
+    };
+
+    const avalLvl = (v, big) => { const l = getLevel(v); return `<span class="inline-flex items-center ${big ? 'text-xs px-2' : 'text-[10px] px-1.5'} py-0.5 rounded font-bold ring-1 ring-inset ${l.badge}">${l.code}</span>`; };
+    const avalNum = v => v !== null && v !== undefined && !isNaN(v) ? v.toFixed(2) : '—';
+    const AVAL_EXEMPT = '<span class="inline-flex items-center text-[10px] font-bold text-sky-700 bg-sky-50 border border-sky-200 px-1.5 py-0.5 rounded">Exempt</span>';
+
+    // Panell de detall d'un alumne (s'usa desplegat a la graella i al mode alumne a alumne)
+    function renderAvalDetail(g, st, t, d) {
+      const sdas = (g.sdas || []).filter(s => s.trim === t);
+      const activeCes = OFFICIAL_CES.filter(ce => sdas.some(s => s.competences && s.competences[ce.id] && s.competences[ce.id].active));
+      const ai = getStudentAttitudeInfo(g, st.id, t);
+      const rule = getAttitudeRule();
+      const c = getComment(g, t, st.id);
+      const obs = (g.observations && g.observations[st.id]) || '';
+      const inc = getStudentIncidents(g, st.id).filter(x => x.session && x.session.trim === t);
+      const notes = inc.filter(x => x.rec.obs);
+      const trimFrom = Object.keys(g.sessions || {}).filter(k => g.sessions[k] && g.sessions[k].trim === t).sort();
+      const injs = getStudentInjuries(g, st.id).filter(i => !trimFrom.length || ((!i.to || i.to >= trimFrom[0]) && i.from <= trimFrom[trimFrom.length - 1]));
+      const fmt = iso => isoToDate(iso).toLocaleDateString('ca-ES', { day: 'numeric', month: 'short' });
+      const stat = (label, val, warn) => `<div class="rounded-xl border ${warn ? 'border-rose-200 bg-rose-50 text-rose-800' : 'border-zinc-200 bg-white text-zinc-800'} px-2 py-1.5 text-center"><div class="text-base font-black font-mono leading-none">${val}</div><div class="text-[10px] font-semibold opacity-70 mt-0.5">${label}</div></div>`;
+      const evo = [1, 2, 3].map(n => ({ n, v: getStudentTrimScoreByTrim(st.id, n, g) }));
+
+      const sdaTable = sdas.length ? `
+        <div class="overflow-x-auto -mx-1 px-1">
+        <table class="w-full text-xs">
+          <thead><tr class="text-[10px] text-zinc-400 uppercase tracking-wider">
+            <th class="text-left font-semibold py-1">SdA</th>
+            ${activeCes.map(ce => `<th class="font-semibold px-1" title="${escapeHtml(ce.name)}">${ce.id}</th>`).join('')}
+            <th class="font-semibold px-1 text-right">Nota</th>
+          </tr></thead>
+          <tbody class="divide-y divide-zinc-100">
+          ${sdas.map(s => {
+            const ex = isStudentExempt(g, s.id, st.id);
+            const sc = getStudentOverallSdaScore(s, st.id, g);
+            const roba = countRobaForSda(g, s, st.id);
+            return `<tr>
+              <td class="py-1.5 pr-2"><div class="font-semibold text-zinc-800 leading-tight">${escapeHtml(s.title)}</div><div class="text-[10px] text-zinc-400 font-mono">${s.trimWeight !== undefined ? s.trimWeight : Math.round(100 / sdas.length)}%${roba && getRobaTargetKey(s) ? ` · <span class="text-orange-600"><i class="fa-solid fa-shirt"></i> ${roba}</span>` : ''}</div></td>
+              ${ex ? `<td colspan="${activeCes.length + 1}" class="text-right">${AVAL_EXEMPT}</td>` : `
+              ${activeCes.map(ce => { const on = s.competences && s.competences[ce.id] && s.competences[ce.id].active; const v = on ? getStudentCeScoreInSda(s, st.id, ce.id, g) : null; return `<td class="text-center px-1" title="${on && v !== null ? v.toFixed(2) : ''}">${on ? avalLvl(v) : '<span class="text-zinc-200">·</span>'}</td>`; }).join('')}
+              <td class="text-right whitespace-nowrap"><b class="font-mono">${avalNum(sc)}</b> ${avalLvl(sc)}</td>`}
+            </tr>`;
+          }).join('')}
+          </tbody>
+          <tfoot class="border-t-2 border-zinc-200">
+            <tr><td class="py-1.5 font-semibold text-zinc-500">Mitjana CE</td>
+              ${activeCes.map(ce => `<td class="text-center px-1" title="${d.ces[ce.id] !== null ? d.ces[ce.id].toFixed(2) : ''}">${avalLvl(d.ces[ce.id])}</td>`).join('')}
+              <td class="text-right whitespace-nowrap"><b class="font-mono">${avalNum(d.comp)}</b> ${avalLvl(d.comp)}</td></tr>
+          </tfoot>
+        </table></div>` : '<p class="text-xs text-zinc-400">Cap SdA en aquest trimestre.</p>';
+
+      return `
+      <div class="grid gap-3 lg:grid-cols-12">
+        <div class="lg:col-span-5 bg-white border border-zinc-200 rounded-2xl p-3 space-y-3">
+          <div class="flex items-center justify-between"><h4 class="text-[11px] font-bold text-zinc-500 uppercase tracking-wider">Notes del trimestre</h4>
+            <button onclick="toggleAttendancePenalty(${st.id}, ${t}); renderAvalView();" class="no-print text-[10px] font-bold px-2 py-1 rounded-lg ${d.penalized ? 'bg-rose-600 text-white' : 'bg-zinc-100 text-zinc-500'}" title="Suspendre per no arribar al mínim de pràctica"><i class="fa-solid fa-person-running mr-1"></i>${d.penalized ? 'Suspès per pràctica' : 'Mínim pràctica OK'}</button></div>
+          ${sdaTable}
+          <div class="grid grid-cols-3 gap-2 text-center">
+            <div class="rounded-xl bg-zinc-50 border border-zinc-200 py-1.5"><div class="text-[10px] text-zinc-500 font-semibold">Competencial</div><div class="font-mono font-black">${avalNum(d.comp)}</div></div>
+            <div class="rounded-xl bg-violet-50 border border-violet-200 py-1.5"><div class="text-[10px] text-violet-700 font-semibold">Actitud ${rule.enabled ? rule.weight + '%' : '(off)'}</div><div class="font-mono font-black text-violet-800">${avalNum(d.act)}</div><div class="text-[10px] text-zinc-500">${ai.n ? ai.n + ' val. · ' : ''}<span class="text-emerald-600">+${ai.pos}</span> <span class="text-rose-600">−${ai.neg}</span>${ai.override !== null ? ' · manual' : ''}</div></div>
+            <div class="rounded-xl bg-zinc-900 text-white py-1.5"><div class="text-[10px] opacity-70 font-semibold">Nota T${t}</div><div class="font-mono font-black text-lg leading-tight">${avalNum(d.score)}</div></div>
+          </div>
+          <div class="flex items-center gap-2 text-[11px] text-zinc-500"><span class="font-semibold">Evolució:</span>
+            ${evo.map(e => `<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg ${e.n === t ? 'bg-zinc-900 text-white' : 'bg-zinc-100'}">T${e.n} <b class="font-mono">${avalNum(e.v)}</b></span>`).join('<i class="fa-solid fa-arrow-right text-[9px] text-zinc-300"></i>')}
+          </div>
+        </div>
+
+        <div class="lg:col-span-3 bg-white border border-zinc-200 rounded-2xl p-3 space-y-3">
+          <h4 class="text-[11px] font-bold text-zinc-500 uppercase tracking-wider">Assistència i pràctica</h4>
+          <div class="grid grid-cols-3 gap-1.5">
+            ${stat('% pràctica', d.att.pct !== null ? Math.round(d.att.pct) + '%' : '—', d.att.pct !== null && d.att.pct < d.min)}
+            ${stat('Sessions', d.att.total)}
+            ${stat('Faltes', d.att.F, d.att.F >= AVAL_LIMITS.F)}
+            ${stat('Justif.', d.att.FJ)}
+            ${stat('Retards', d.att.R, d.att.R >= AVAL_LIMITS.R)}
+            ${stat('Sense roba', d.att.SR, d.att.SR >= AVAL_LIMITS.SR)}
+            ${stat('No pràct.', d.att.NP)}
+            ${stat('Lesió', d.att.L)}
+            ${stat('Expuls.', d.att.E || 0, (d.att.E || 0) > 0)}
+          </div>
+          ${injs.length ? `<div class="space-y-1">${injs.map(i => `<div class="text-[11px] rounded-lg bg-sky-50 border border-sky-200 text-sky-800 px-2 py-1"><i class="fa-solid fa-kit-medical mr-1"></i><b>${escapeHtml(i.reason || 'Lesió')}</b> · ${injuryPeriodText(i)}</div>`).join('')}</div>` : ''}
+          ${notes.length ? `<div><div class="text-[10px] font-bold text-zinc-400 uppercase tracking-wider mb-1">Observacions del diari</div><div class="space-y-1 max-h-40 overflow-y-auto">${notes.slice(0, 12).map(x => `<div class="text-[11px] text-zinc-700"><span class="font-mono text-zinc-400">${fmt(x.iso)}</span> ${escapeHtml(x.rec.obs)}</div>`).join('')}</div></div>` : ''}
+        </div>
+
+        <div class="lg:col-span-4 bg-white border border-zinc-200 rounded-2xl p-3 flex flex-col gap-2">
+          <h4 class="text-[11px] font-bold text-zinc-500 uppercase tracking-wider">Comentari per a l'informe</h4>
+          <textarea rows="6" onchange="avalEditComment(${st.id}, this.value)" placeholder="Sense comentari. Prem «Generar» o escriu-lo." class="w-full flex-1 text-xs leading-relaxed border border-zinc-200 rounded-xl p-2.5 outline-none focus:ring-2 focus:ring-zinc-900 resize-y">${escapeHtml(c)}</textarea>
+          <div class="flex flex-wrap gap-1.5 justify-end no-print">
+            <button onclick="openStudentFitxa(${st.id})" class="mr-auto text-[11px] font-bold px-2.5 py-1.5 rounded-lg bg-white border border-zinc-200 text-zinc-700"><i class="fa-regular fa-id-card mr-1"></i>Fitxa</button>
+            <button onclick="avalRegenerate(${st.id})" class="text-[11px] font-bold px-2.5 py-1.5 rounded-lg bg-zinc-100 text-zinc-700 hover:bg-zinc-200"><i class="fa-solid fa-wand-magic-sparkles mr-1"></i>${c ? 'Tornar a generar' : 'Generar'}</button>
+            <button onclick="avalCopyOne(${st.id}, this)" ${c ? '' : 'disabled'} class="text-[11px] font-bold px-2.5 py-1.5 rounded-lg bg-white border border-zinc-200 text-zinc-700 disabled:opacity-40"><i class="fa-regular fa-copy mr-1"></i>Copiar</button>
+          </div>
+          ${obs ? `<div class="text-[11px] text-zinc-600 bg-zinc-50 border border-zinc-200 rounded-lg p-2"><b class="text-zinc-500">Observacions del butlletí:</b> ${escapeHtml(obs)}</div>` : ''}
+        </div>
+      </div>`;
+    }
 
     window.renderAvalView = function() {
       const box = document.getElementById('avalContent');
@@ -7602,12 +7715,14 @@
       const g = getCurrentGroup();
       const t = window.appState.currentTrim;
       const filter = window.appState.avalFilter || 'all';
+      const mode = window.appState.avalMode || 'graella';
+      const sort = window.appState.avalSort || 'llista';
       document.getElementById('avalTitle').textContent = `Sessió d'avaluació · ${g.name} · ${t}${['', 'r', 'n', 'r'][t]} trimestre`;
       const lg = getSettings().logo, al = document.getElementById('avalLogo');
       if (al) { al.src = lg || ''; al.classList.toggle('hidden', !lg); }
       const ac = document.getElementById('avalCentre');
       if (ac) ac.textContent = getSettings().centre ? getSettings().centre + ' · ' + getSchoolYearLabel() + '. ' : '';
-      const rows = (g.students || []).map(st => ({ st, d: getAvalData(g, st, t) }));
+      const rows = (g.students || []).map((st, i) => ({ st, i, d: getAvalData(g, st, t) }));
       const n = rows.length;
       const count = code => rows.filter(r => r.d.score !== null && r.d.lvl.code === code).length;
       const susp = rows.filter(r => r.d.alerts.some(a => a.k === 'susp' || a.k === 'prac')).length;
@@ -7615,13 +7730,19 @@
       const graded = rows.filter(r => r.d.score !== null);
       const mean = graded.length ? graded.reduce((a, r) => a + r.d.score, 0) / graded.length : null;
       const nComments = rows.filter(r => getComment(g, t, r.st.id)).length;
+      const sdas = (g.sdas || []).filter(s => s.trim === t);
+      const activeCes = OFFICIAL_CES.filter(ce => sdas.some(s => s.competences && s.competences[ce.id] && s.competences[ce.id].active));
+      const actOn = getAttitudeRule().enabled;
+
+      let shown = rows.filter(r => filter === 'all' || (filter === 'risk' && r.d.risk) || (filter === 'nocomment' && !getComment(g, t, r.st.id)));
+      if (sort === 'nota') shown = shown.slice().sort((a, b) => (a.d.score === null ? 99 : a.d.score) - (b.d.score === null ? 99 : b.d.score));
+      window.appState._avalOrder = shown.map(r => r.st.id);
 
       const kpi = (label, val, cls) => `<div class="rounded-2xl border ${cls} px-3 py-2.5"><div class="text-xl font-black font-mono leading-none">${val}</div><div class="text-[11px] font-semibold mt-1 opacity-80">${label}</div></div>`;
-      const shown = rows.filter(r => filter === 'all' || (filter === 'risk' && r.d.risk) || (filter === 'nocomment' && !getComment(g, t, r.st.id)));
+      const distr = ['NA', 'EPA', 'AS', 'AN', 'AE'].map(code => ({ code, n: count(code) }));
+      const distrCls = { NA: 'bg-rose-400', EPA: 'bg-amber-400', AS: 'bg-sky-400', AN: 'bg-indigo-400', AE: 'bg-emerald-500' };
 
-      const lvlBadge = d => `<span class="inline-flex items-center text-[10px] px-1.5 py-0.5 rounded font-bold ring-1 ring-inset ${d.lvl.badge}">${d.lvl.code}</span>`;
-
-      box.innerHTML = `
+      const header = `
         <div class="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-2">
           ${kpi('Alumnes', n, 'bg-white border-zinc-200 text-zinc-900')}
           ${kpi('Mitjana', mean !== null ? mean.toFixed(2) : '—', 'bg-white border-zinc-200 text-zinc-900')}
@@ -7631,54 +7752,109 @@
           ${kpi('No superen', susp, 'bg-rose-50 border-rose-200 text-rose-800')}
           ${kpi('Amb alertes', risk, 'bg-amber-50 border-amber-200 text-amber-800')}
         </div>
+        ${graded.length ? `<div class="flex h-2.5 rounded-full overflow-hidden bg-zinc-100" title="Distribució de nivells">${distr.filter(x => x.n).map(x => `<div class="${distrCls[x.code]}" style="width:${x.n / graded.length * 100}%" title="${x.code}: ${x.n}"></div>`).join('')}</div>` : ''}
 
         <div class="flex flex-wrap items-center gap-2 no-print">
           <div class="seg !text-xs">
+            <button onclick="setAvalMode('graella')" class="${mode === 'graella' ? 'active' : ''}"><i class="fa-solid fa-table-list mr-1"></i>Graella</button>
+            <button onclick="setAvalMode('alumne')" class="${mode === 'alumne' ? 'active' : ''}"><i class="fa-regular fa-user mr-1"></i>Alumne a alumne</button>
+          </div>
+          <div class="seg !text-xs">
             <button onclick="setAvalFilter('all')" class="${filter === 'all' ? 'active' : ''}">Tots (${n})</button>
-            <button onclick="setAvalFilter('risk')" class="${filter === 'risk' ? 'active' : ''}">Amb alertes (${risk})</button>
+            <button onclick="setAvalFilter('risk')" class="${filter === 'risk' ? 'active' : ''}">Alertes (${risk})</button>
             <button onclick="setAvalFilter('nocomment')" class="${filter === 'nocomment' ? 'active' : ''}">Sense comentari (${n - nComments})</button>
+          </div>
+          <div class="seg !text-xs">
+            <button onclick="setAvalSort('llista')" class="${sort === 'llista' ? 'active' : ''}">Llista</button>
+            <button onclick="setAvalSort('nota')" class="${sort === 'nota' ? 'active' : ''}">Nota ↑</button>
           </div>
           <div class="flex-1"></div>
           <button onclick="avalGenerateAll()" class="inline-flex items-center gap-1.5 bg-zinc-900 text-white text-xs font-bold px-3 py-2 rounded-xl"><i class="fa-solid fa-wand-magic-sparkles"></i>Generar comentaris</button>
-          <button onclick="avalCopyAll(this)" class="inline-flex items-center gap-1.5 bg-white border border-zinc-200 text-zinc-700 text-xs font-bold px-3 py-2 rounded-xl" title="Copia nom, nivell, nota i comentari de tots (per enganxar a un full de càlcul)"><i class="fa-regular fa-copy"></i>Copiar-ho tot</button>
+          <button onclick="avalCopyAll(this)" class="inline-flex items-center gap-1.5 bg-white border border-zinc-200 text-zinc-700 text-xs font-bold px-3 py-2 rounded-xl" title="Copia nom, nivell, nota i comentari de tots (per enganxar a un full de càlcul)"><i class="fa-regular fa-copy"></i>Copiar</button>
           <button onclick="window.print()" class="inline-flex items-center gap-1.5 bg-white border border-zinc-200 text-zinc-700 text-xs font-bold px-3 py-2 rounded-xl"><i class="fa-solid fa-print"></i>Imprimir</button>
-        </div>
+        </div>`;
 
-        <div class="space-y-2">
-          ${shown.length ? shown.map(({ st, d }) => {
-            const c = getComment(g, t, st.id);
-            return `
-            <div class="aval-row bg-white border ${d.risk ? 'border-rose-200' : 'border-zinc-200'} rounded-2xl p-3 flex flex-col lg:flex-row gap-3">
-              <div class="lg:w-[42%] space-y-2">
-                <div class="flex items-start gap-2">
-                  <button onclick="openStudentFitxa(${st.id})" class="flex-1 text-left text-sm font-bold text-zinc-900 hover:underline">${escapeHtml(st.name)}</button>
-                  <div class="text-right shrink-0">
-                    <div class="text-base font-black font-mono leading-none">${d.score !== null ? d.score.toFixed(2) : '—'}</div>
-                    <div class="mt-0.5">${lvlBadge(d)}</div>
-                  </div>
-                </div>
-                <div class="flex flex-wrap gap-1">
-                  ${OFFICIAL_CES.filter(ce => d.ces[ce.id] !== null).map(ce => { const l = getLevel(d.ces[ce.id]); return `<span title="${escapeHtml(ce.name)}: ${d.ces[ce.id].toFixed(2)}" class="inline-flex items-center gap-1 text-[10px] font-bold px-1.5 py-0.5 rounded-md ring-1 ring-inset ${l.badge}">${ce.id} ${l.code}</span>`; }).join('')}
-                </div>
-                <div class="text-[11px] text-zinc-500 font-mono flex flex-wrap gap-x-3 gap-y-0.5">
-                  <span title="% de pràctica">Pràct. <b class="${d.att.pct !== null && d.att.pct < d.min ? 'text-rose-600' : 'text-zinc-800'}">${d.att.pct !== null ? Math.round(d.att.pct) + '%' : '—'}</b></span>
-                  <span>F <b class="text-zinc-800">${d.att.F}</b></span><span>R <b class="text-zinc-800">${d.att.R}</b></span><span>Roba <b class="text-zinc-800">${d.att.SR}</b></span>
-                  ${d.act !== null ? `<span>Actitud <b class="text-zinc-800">${d.act.toFixed(2)}</b></span>` : ''}
-                </div>
-                ${d.alerts.length ? `<div class="flex flex-wrap gap-1">${d.alerts.map(a => `<span class="text-[10px] font-bold px-1.5 py-0.5 rounded-md border ${a.c}">${a.t}</span>`).join('')}</div>` : ''}
+      const legend = `<p class="text-[11px] text-zinc-400">Alertes: nivell NA o EPA, pràctica per sota del ${getMinPractice(g)}%, ${AVAL_LIMITS.F}+ faltes sense justificar, ${AVAL_LIMITS.R}+ retards, ${AVAL_LIMITS.SR}+ dies sense roba, actitud per sota d'AS. Els comentaris es desen per trimestre.</p>`;
+
+      if (!shown.length) { box.innerHTML = header + `<div class="bg-white border border-zinc-200 rounded-2xl p-8 text-center text-xs text-zinc-400">Cap alumne en aquest filtre.</div>`; return; }
+
+      // ---------- Mode alumne a alumne ----------
+      if (mode === 'alumne') {
+        let cur = shown.find(r => r.st.id === window.appState.avalStudent) || shown[0];
+        window.appState.avalStudent = cur.st.id;
+        const pos = shown.indexOf(cur);
+        const d = cur.d;
+        box.innerHTML = header + `
+          <div class="bg-white border ${d.risk ? 'border-rose-200' : 'border-zinc-200'} rounded-3xl p-4 space-y-3">
+            <div class="flex flex-wrap items-center gap-3">
+              <button onclick="avalMoveStudent(-1)" class="no-print w-10 h-10 rounded-xl bg-zinc-100 hover:bg-zinc-200 text-zinc-700"><i class="fa-solid fa-chevron-left"></i></button>
+              <div class="flex-1 min-w-[180px]">
+                <select onchange="window.appState.avalStudent=+this.value; renderAvalView();" class="no-print text-xl font-black text-zinc-900 bg-transparent outline-none max-w-full">${shown.map(r => `<option value="${r.st.id}" ${r.st.id === cur.st.id ? 'selected' : ''}>${escapeHtml(r.st.name)}</option>`).join('')}</select>
+                <div class="text-[11px] text-zinc-500 font-semibold">${pos + 1} de ${shown.length}${d.alerts.length ? ' · ' : ''}${d.alerts.map(a => `<span class="text-[10px] font-bold px-1.5 py-0.5 rounded-md border ${a.c} ml-0.5">${a.t}</span>`).join('')}</div>
               </div>
-              <div class="flex-1 flex flex-col gap-1.5">
-                <textarea rows="4" onchange="avalEditComment(${st.id}, this.value)" placeholder="Sense comentari. Prem «Generar» o escriu-lo." class="w-full text-xs leading-relaxed border border-zinc-200 rounded-xl p-2.5 outline-none focus:ring-2 focus:ring-zinc-900 resize-y">${escapeHtml(c)}</textarea>
-                <div class="aval-print-comment hidden text-xs leading-relaxed">${escapeHtml(c) || '—'}</div>
-                <div class="flex gap-1.5 justify-end no-print">
-                  <button onclick="avalRegenerate(${st.id})" class="text-[11px] font-bold px-2.5 py-1.5 rounded-lg bg-zinc-100 text-zinc-700 hover:bg-zinc-200"><i class="fa-solid fa-wand-magic-sparkles mr-1"></i>${c ? 'Tornar a generar' : 'Generar'}</button>
-                  <button onclick="avalCopyOne(${st.id}, this)" ${c ? '' : 'disabled'} class="text-[11px] font-bold px-2.5 py-1.5 rounded-lg bg-white border border-zinc-200 text-zinc-700 disabled:opacity-40"><i class="fa-regular fa-copy mr-1"></i>Copiar</button>
-                </div>
-              </div>
-            </div>`;
-          }).join('') : `<div class="bg-white border border-zinc-200 rounded-2xl p-8 text-center text-xs text-zinc-400">Cap alumne en aquest filtre.</div>`}
+              <div class="text-right"><div class="text-3xl font-black font-mono leading-none">${avalNum(d.score)}</div><div class="mt-1">${avalLvl(d.score, true)}</div></div>
+              <button onclick="avalMoveStudent(1)" class="no-print w-10 h-10 rounded-xl bg-zinc-900 text-white"><i class="fa-solid fa-chevron-right"></i></button>
+            </div>
+            ${renderAvalDetail(g, cur.st, t, d)}
+          </div>` + legend;
+        return;
+      }
+
+      // ---------- Mode graella ----------
+      const th = 'py-2 px-1.5 font-semibold text-[10px] text-zinc-500 uppercase tracking-wide whitespace-nowrap';
+      const colCount = 4 + sdas.length + activeCes.length + (actOn ? 1 : 0) + (t > 1 ? 1 : 0) + 5;
+      const openId = window.appState.avalOpen;
+      const table = `
+        <div class="bg-white border border-zinc-200 rounded-2xl overflow-x-auto aval-table">
+          <table class="w-full text-xs border-collapse">
+            <thead class="bg-zinc-50 border-b border-zinc-200">
+              <tr>
+                <th class="${th} w-8 sticky left-0 bg-zinc-50 z-10">#</th>
+                <th class="${th} text-left sticky left-8 bg-zinc-50 z-10 min-w-[170px]">Alumne/a</th>
+                ${sdas.map(s => `<th class="${th} border-l border-zinc-200" title="${escapeHtml(s.title)}"><div class="truncate normal-case text-left text-zinc-700 text-[11px] max-w-[92px] mx-auto">${escapeHtml(s.title)}</div><div class="font-mono text-zinc-400 normal-case">${s.trimWeight !== undefined ? s.trimWeight : Math.round(100 / sdas.length)}%</div></th>`).join('')}
+                ${activeCes.map((ce, i) => `<th class="${th} ${i === 0 ? 'border-l border-zinc-200' : ''}" title="${escapeHtml(ce.name)}">${ce.id}</th>`).join('')}
+                ${actOn ? `<th class="${th} border-l border-zinc-200" title="Actitud">Act.</th>` : ''}
+                <th class="${th} border-l border-zinc-300 bg-zinc-900 text-white">Nota T${t}</th>
+                ${t > 1 ? `<th class="${th}" title="Notes dels trimestres anteriors">Abans</th>` : ''}
+                <th class="${th} border-l border-zinc-200" title="% de pràctica">Pràct.</th>
+                <th class="${th}" title="Faltes sense justificar">F</th>
+                <th class="${th}" title="Retards">R</th>
+                <th class="${th}" title="Sense roba">Roba</th>
+                <th class="${th} text-left border-l border-zinc-200">Alertes</th>
+              </tr>
+            </thead>
+            <tbody>
+            ${shown.map(({ st, i, d }) => {
+              const open = openId === st.id;
+              const c = getComment(g, t, st.id);
+              const prev = [1, 2].filter(x => x < t).map(x => ({ x, v: getStudentTrimScoreByTrim(st.id, x, g) }));
+              return `
+              <tr id="avalRow_${st.id}" onclick="toggleAvalRow(${st.id})" class="cursor-pointer border-t border-zinc-100 ${open ? 'bg-zinc-50' : d.risk ? 'bg-rose-50/30 hover:bg-rose-50/60' : 'hover:bg-zinc-50'}">
+                <td class="py-2 px-1.5 text-center font-mono text-zinc-400 sticky left-0 ${open ? 'bg-zinc-50' : 'bg-white'}">${i + 1}</td>
+                <td class="py-2 px-1.5 font-bold text-zinc-900 sticky left-8 ${open ? 'bg-zinc-50' : 'bg-white'}"><i class="fa-solid fa-chevron-${open ? 'down' : 'right'} text-[9px] text-zinc-300 mr-1 no-print"></i>${escapeHtml(st.name)}${c ? '<i class="fa-regular fa-comment text-[9px] text-emerald-500 ml-1" title="Té comentari"></i>' : ''}</td>
+                ${sdas.map(s => {
+                  if (isStudentExempt(g, s.id, st.id)) return `<td class="text-center border-l border-zinc-100">${AVAL_EXEMPT}</td>`;
+                  const sc = getStudentOverallSdaScore(s, st.id, g);
+                  return `<td class="text-center border-l border-zinc-100 px-1 whitespace-nowrap" title="${getLevel(sc).code}"><span class="inline-block min-w-[40px] px-1.5 py-0.5 rounded-md font-mono font-semibold ${sc !== null ? getScoreColorClass(sc) : 'text-zinc-300'}">${avalNum(sc)}</span></td>`;
+                }).join('')}
+                ${activeCes.map((ce, k) => `<td class="text-center px-0.5 ${k === 0 ? 'border-l border-zinc-100' : ''}" title="${d.ces[ce.id] !== null ? ce.id + ': ' + d.ces[ce.id].toFixed(2) : ''}">${avalLvl(d.ces[ce.id])}</td>`).join('')}
+                ${actOn ? `<td class="text-center font-mono border-l border-zinc-100 ${d.act !== null && d.act < gradeThresholds.as ? 'text-violet-700 font-bold' : 'text-zinc-600'}">${avalNum(d.act)}</td>` : ''}
+                <td class="text-center border-l border-zinc-300 bg-zinc-50 px-2 whitespace-nowrap"><b class="font-mono text-sm">${avalNum(d.score)}</b> ${avalLvl(d.score)}</td>
+                ${t > 1 ? `<td class="text-center px-1 whitespace-nowrap text-[10px] font-mono text-zinc-500">${prev.map(p => `<span title="T${p.x}" class="mr-1">${avalNum(p.v)}</span>`).join('')}</td>` : ''}
+                <td class="text-center border-l border-zinc-100 px-1">${practicePctBadge(d.att.pct, d.min)}</td>
+                <td class="text-center font-mono ${d.att.F >= AVAL_LIMITS.F ? 'text-rose-600 font-bold' : 'text-zinc-500'}">${d.att.F || '·'}</td>
+                <td class="text-center font-mono ${d.att.R >= AVAL_LIMITS.R ? 'text-amber-600 font-bold' : 'text-zinc-500'}">${d.att.R || '·'}</td>
+                <td class="text-center font-mono ${d.att.SR >= AVAL_LIMITS.SR ? 'text-orange-600 font-bold' : 'text-zinc-500'}">${d.att.SR || '·'}</td>
+                <td class="px-1.5 border-l border-zinc-100"><div class="flex flex-wrap gap-0.5 max-w-[130px]">${d.alerts.map(a => `<span class="text-[9px] font-bold px-1 py-0.5 rounded border ${a.c} whitespace-nowrap">${a.t}</span>`).join('')}</div></td>
+              </tr>
+              ${open ? `<tr class="no-print"><td colspan="${colCount}" class="p-3 bg-zinc-50 border-t border-zinc-100" onclick="event.stopPropagation()">${renderAvalDetail(g, st, t, d)}</td></tr>` : ''}
+              <tr class="aval-print-row hidden"><td></td><td colspan="${colCount - 1}" class="pb-2 text-[10px] text-zinc-600 leading-snug">${escapeHtml(c) || ''}</td></tr>`;
+            }).join('')}
+            </tbody>
+          </table>
         </div>
-        <p class="text-[11px] text-zinc-400">Alertes: nivell NA o EPA, pràctica per sota del ${getMinPractice(g)}%, ${AVAL_LIMITS.F}+ faltes sense justificar, ${AVAL_LIMITS.R}+ retards, ${AVAL_LIMITS.SR}+ dies sense roba, actitud per sota d'AS. Els comentaris es desen per trimestre.</p>`;
+        <p class="text-[11px] text-zinc-500 no-print"><i class="fa-solid fa-hand-pointer mr-1"></i>Toca un alumne per veure'n tota la informació i escriure el comentari.</p>`;
+      box.innerHTML = header + table + legend;
     };
 
     window.renderIndividualReport = function() {
