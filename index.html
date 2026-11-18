@@ -3147,9 +3147,23 @@
     }
     window.getStudentInjuries = getStudentInjuries;
 
-    function getActiveInjury(group, stId, iso) {
+    // Tipus de període: L = lesió (no fa pràctica), FJ = falta justificada, E = expulsió (no compta com a falta)
+    const PERIOD_TYPES = {
+      L: { label: 'Lesió', badge: 'Lesionat', icon: 'fa-user-injured', dot: 'bg-sky-500', chip: 'bg-sky-100 text-sky-700', btn: 'bg-sky-600', ring: 'focus:ring-sky-400' },
+      FJ: { label: 'Falta justificada', badge: 'Falta justificada', icon: 'fa-file-medical', dot: 'bg-teal-500', chip: 'bg-teal-100 text-teal-700', btn: 'bg-teal-600', ring: 'focus:ring-teal-400' },
+      E: { label: 'Expulsió', badge: 'Expulsat', icon: 'fa-door-open', dot: 'bg-violet-500', chip: 'bg-violet-100 text-violet-700', btn: 'bg-violet-600', ring: 'focus:ring-violet-400' }
+    };
+    window.PERIOD_TYPES = PERIOD_TYPES;
+    const periodType = i => (i && PERIOD_TYPES[i.type]) ? i.type : 'L';
+
+    function getActivePeriod(group, stId, iso, types) {
       if (!group || !group.injuries || !group.injuries[stId] || !iso) return null;
-      return getStudentInjuries(group, stId).find(i => i.from <= iso && (!i.to || iso <= i.to)) || null;
+      return getStudentInjuries(group, stId).find(i => types.includes(periodType(i)) && i.from <= iso && (!i.to || iso <= i.to)) || null;
+    }
+    window.getActivePeriod = getActivePeriod;
+
+    function getActiveInjury(group, stId, iso) {
+      return getActivePeriod(group, stId, iso, ['L']);
     }
     window.getActiveInjury = getActiveInjury;
 
@@ -3178,6 +3192,14 @@
       if (rec.p === 'SR') { rec = { ...rec, sr: true }; delete rec.p; } // abans "sense roba" era un tipus de pràctica
       if (!session || typeof session !== 'object') return rec;
       const meta = sessionMeta(session);
+      // Expulsió o falta justificada amb dates: l'alumne surt absent automàticament (si no s'ha marcat res a mà)
+      const absPer = meta ? getActivePeriod(meta.group, stId, meta.iso, ['E', 'FJ']) : null;
+      if (absPer) {
+        if (rec.aOff || rec.a) return { ...rec, absPer };
+        const c = { ...rec, a: periodType(absPer), absPer, aAuto: true };
+        delete c.p; delete c.sr;
+        return c;
+      }
       const inj = meta ? getActiveInjury(meta.group, stId, meta.iso) : null;
       if (rec.p === '-') { const c = { ...rec }; delete c.p; if (inj) { c.inj = inj; c.injOff = true; } return c; }
       if (!inj) return rec;
@@ -3326,11 +3348,21 @@
     }
 
     window.diariSetAttendance = function(stId, code) {
+      const group = getCurrentGroup();
+      const per = getActivePeriod(group, stId, window.appState.diariDate, ['E', 'FJ']);
       updateRecord(stId, rec => {
         rec.a = code;
+        delete rec.aOff;
+        if (per && code === periodType(per)) delete rec.a;           // tornar a l'automàtic
+        else if (per && code === 'P') rec.aOff = true;               // avui sí que ha vingut
         if (isAbsentCode(code)) { delete rec.p; delete rec.sr; }
       });
     };
+    // Si l'alumne surt absent per un període i li marques pràctica o roba, vol dir que sí que ha vingut
+    function presentIfAutoAbsent(rec, stId) {
+      const group = getCurrentGroup();
+      if (!rec.a && !rec.aOff && getActivePeriod(group, stId, window.appState.diariDate, ['E', 'FJ'])) rec.aOff = true;
+    }
 
     window.diariTogglePractice = function(stId, code) {
       if (code === 'SR') { diariToggleRoba(stId); return; }
@@ -3343,6 +3375,7 @@
         else rec.p = injured && code === 'L' ? null : code;      // tornar a "L" automàtic o marcar un altre codi
         if (rec.p === 'SR') { rec.sr = true; delete rec.p; }
         if (rec.p && rec.p !== '-' && isAbsentCode(rec.a)) rec.a = 'P';
+        if (rec.p && rec.p !== '-') presentIfAutoAbsent(rec, stId);
       });
     };
 
@@ -3355,6 +3388,7 @@
         if (rec.p === 'SR') delete rec.p;
         rec.sr = !cur;
         if (rec.sr && isAbsentCode(rec.a)) rec.a = 'P';
+        if (rec.sr) presentIfAutoAbsent(rec, stId);
       });
     };
 
@@ -3612,6 +3646,7 @@
                 <span class="text-[10px] font-mono text-zinc-400 w-5 text-right shrink-0">${idx + 1}</span>
                 <div class="min-w-0">
                   <div class="text-xs font-bold text-zinc-900 truncate">${escapeHtml(st.name)}</div>
+                  ${r.absPer ? (() => { const T = PERIOD_TYPES[periodType(r.absPer)]; return `<button onclick="openStudentFitxa(${st.id})" title="${escapeHtml((r.absPer.reason ? r.absPer.reason + ' · ' : '') + injuryPeriodText(r.absPer))}" class="mt-0.5 inline-flex items-center gap-1 text-[10px] font-bold px-1.5 py-0.5 rounded-md ${r.aAuto ? T.chip : 'bg-zinc-100 text-zinc-500 line-through'}"><i class="fa-solid ${T.icon}"></i>${T.badge}${r.absPer.reason ? ': ' + escapeHtml(r.absPer.reason.length > 22 ? r.absPer.reason.slice(0, 22) + '…' : r.absPer.reason) : ''}</button>`; })() : ''}
                   ${r.inj ? `<button onclick="openStudentFitxa(${st.id})" title="${escapeHtml((r.inj.reason ? r.inj.reason + ' · ' : '') + injuryPeriodText(r.inj))}" class="mt-0.5 inline-flex items-center gap-1 text-[10px] font-bold px-1.5 py-0.5 rounded-md ${r.injOff ? 'bg-zinc-100 text-zinc-500 line-through' : 'bg-sky-100 text-sky-700'}"><i class="fa-solid fa-user-injured"></i>Lesionat${r.inj.reason ? ': ' + escapeHtml(r.inj.reason.length > 22 ? r.inj.reason.slice(0, 22) + '…' : r.inj.reason) : ''}</button>` : ''}
                   <div class="text-[10px] text-zinc-400 flex items-center gap-1.5">Pràctica T${session.trim}: ${practicePctBadge(stats.pct, minP)}${stats.pos || stats.neg ? `<span class="font-mono">+${stats.pos} / −${stats.neg}</span>` : ''}</div>
                 </div>
@@ -7692,7 +7727,7 @@
             ${stat('Lesió', d.att.L)}
             ${stat('Expuls.', d.att.E || 0, (d.att.E || 0) > 0)}
           </div>
-          ${injs.length ? `<div class="space-y-1">${injs.map(i => `<div class="text-[11px] rounded-lg bg-sky-50 border border-sky-200 text-sky-800 px-2 py-1"><i class="fa-solid fa-kit-medical mr-1"></i><b>${escapeHtml(i.reason || 'Lesió')}</b> · ${injuryPeriodText(i)}</div>`).join('')}</div>` : ''}
+          ${injs.length ? `<div class="space-y-1">${injs.map(i => `<div class="text-[11px] rounded-lg px-2 py-1 ${PERIOD_TYPES[periodType(i)].chip}"><i class="fa-solid ${PERIOD_TYPES[periodType(i)].icon} mr-1"></i><b>${PERIOD_TYPES[periodType(i)].label}</b>${i.reason ? ': ' + escapeHtml(i.reason) : ''} · ${injuryPeriodText(i)}</div>`).join('')}</div>` : ''}
           ${notes.length ? `<div><div class="text-[10px] font-bold text-zinc-400 uppercase tracking-wider mb-1">Observacions del diari</div><div class="space-y-1 max-h-40 overflow-y-auto">${notes.slice(0, 12).map(x => `<div class="text-[11px] text-zinc-700"><span class="font-mono text-zinc-400">${fmt(x.iso)}</span> ${escapeHtml(x.rec.obs)}</div>`).join('')}</div></div>` : ''}
         </div>
 
@@ -10187,32 +10222,44 @@
     function renderInjuryCard(group, st) {
       const list = getStudentInjuries(group, st.id);
       const today = todayISO();
-      const active = getActiveInjury(group, st.id, today);
+      const activeAny = getActivePeriod(group, st.id, today, ['L', 'FJ', 'E']);
+      const active = activeAny ? PERIOD_TYPES[periodType(activeAny)] : null;
       const formOpen = window.appState.injuryFormFor === st.id;
+      const ftype = PERIOD_TYPES[window.appState.periodFormType] ? window.appState.periodFormType : 'L';
+      const FT = PERIOD_TYPES[ftype];
       const item = inj => {
+        const T = PERIOD_TYPES[periodType(inj)];
         const isActive = inj.from <= today && (!inj.to || today <= inj.to);
         const future = inj.from > today;
         return `<div class="flex items-center gap-3 px-4 py-2.5">
-          <span class="w-2 h-2 rounded-full shrink-0 ${isActive ? 'bg-sky-500' : future ? 'bg-amber-400' : 'bg-zinc-300'}"></span>
+          <span class="w-2 h-2 rounded-full shrink-0 ${isActive ? T.dot : future ? 'bg-amber-400' : 'bg-zinc-300'}"></span>
           <div class="flex-1 min-w-0">
-            <div class="text-xs font-bold text-zinc-800 truncate">${escapeHtml(inj.reason || 'Lesió')}</div>
-            <div class="text-[11px] text-zinc-500">${injuryPeriodText(inj)}${isActive ? ' · <b class="text-sky-700">ara</b>' : future ? ' · <b class="text-amber-600">propera</b>' : ''}</div>
+            <div class="text-xs font-bold text-zinc-800 truncate"><span class="inline-flex items-center gap-1 text-[10px] font-bold px-1.5 py-0.5 rounded-md mr-1 ${T.chip}"><i class="fa-solid ${T.icon}"></i>${T.label}</span>${escapeHtml(inj.reason || '')}</div>
+            <div class="text-[11px] text-zinc-500">${injuryPeriodText(inj)}${isActive ? ' · <b class="text-zinc-800">ara</b>' : future ? ' · <b class="text-amber-600">proper</b>' : ''}</div>
           </div>
-          ${isActive && !inj.to ? `<button onclick="endInjuryToday(${st.id}, '${inj.id}')" class="text-[11px] font-bold px-2.5 py-1.5 rounded-lg bg-emerald-50 text-emerald-700 border border-emerald-200 hover:bg-emerald-100" title="Torna a fer pràctica a partir d'avui"><i class="fa-solid fa-person-running mr-1"></i>Alta</button>` : ''}
+          ${isActive && !inj.to ? `<button onclick="endInjuryToday(${st.id}, '${inj.id}')" class="text-[11px] font-bold px-2.5 py-1.5 rounded-lg bg-emerald-50 text-emerald-700 border border-emerald-200 hover:bg-emerald-100" title="${periodType(inj) === 'L' ? 'Torna a fer pràctica a partir d\'avui' : 'Torna a classe a partir d\'avui'}"><i class="fa-solid fa-person-running mr-1"></i>${periodType(inj) === 'L' ? 'Alta' : 'Torna avui'}</button>` : ''}
           <button onclick="deleteInjury(${st.id}, '${inj.id}')" class="text-zinc-300 hover:text-rose-600 px-1" title="Esborrar"><i class="fa-regular fa-trash-can text-xs"></i></button>
         </div>`;
       };
+      const helpTxt = {
+        L: 'Durant aquests dies, al passar llista sortirà marcat com a <b>Lesionat</b> automàticament. No li resta % de pràctica. Si un dia sí que fa pràctica, toca <b>Lesió</b> a la llista per treure-ho només aquell dia.',
+        FJ: 'Durant aquests dies, al passar llista sortirà com a <b>falta justificada</b> automàticament. Si un dia sí que ve, toca <b>P</b> a la llista.',
+        E: 'Durant aquests dies, al passar llista sortirà com a <b>expulsat</b>. No compta com a falta ni li resta % de pràctica. Si un dia sí que ve, toca <b>P</b> a la llista.'
+      };
       return `
-        <div class="bg-white border ${active ? 'border-sky-300' : 'border-zinc-200'} rounded-3xl overflow-hidden">
-          <div class="flex flex-wrap items-center gap-2 px-4 py-3 ${active ? 'bg-sky-50' : ''}">
-            <i class="fa-solid fa-user-injured ${active ? 'text-sky-600' : 'text-zinc-400'}"></i>
-            <h3 class="text-sm font-bold text-zinc-800 flex-1">Lesions i justificants ${active ? `<span class="ml-1 text-[11px] font-bold text-sky-700 bg-white border border-sky-200 rounded-md px-1.5 py-0.5">Lesionat ara</span>` : ''}</h3>
-            ${formOpen ? '' : `<button onclick="window.appState.injuryFormFor = ${st.id}; renderStudentFitxa();" class="text-xs font-bold px-3 py-2 rounded-xl bg-zinc-900 text-white"><i class="fa-solid fa-plus mr-1"></i>Afegir justificant</button>`}
+        <div class="bg-white border ${active ? 'border-zinc-300' : 'border-zinc-200'} rounded-3xl overflow-hidden">
+          <div class="flex flex-wrap items-center gap-2 px-4 py-3 ${active ? 'bg-zinc-50' : ''}">
+            <i class="fa-solid fa-calendar-xmark ${active ? 'text-zinc-700' : 'text-zinc-400'}"></i>
+            <h3 class="text-sm font-bold text-zinc-800 flex-1">Lesions, justificants i expulsions ${active ? `<span class="ml-1 text-[11px] font-bold rounded-md px-1.5 py-0.5 ${active.chip}">${active.badge} ara</span>` : ''}</h3>
+            ${formOpen ? '' : `<button onclick="window.appState.injuryFormFor = ${st.id}; renderStudentFitxa();" class="text-xs font-bold px-3 py-2 rounded-xl bg-zinc-900 text-white"><i class="fa-solid fa-plus mr-1"></i>Afegir període</button>`}
           </div>
           ${formOpen ? `
             <div class="px-4 py-3 border-t border-zinc-100 bg-zinc-50 grid grid-cols-1 sm:grid-cols-4 gap-3 text-xs">
+              <div class="sm:col-span-4 flex flex-wrap gap-1.5">
+                ${Object.keys(PERIOD_TYPES).map(k => `<button type="button" onclick="periodFormSetType('${k}')" class="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl border font-bold ${k === ftype ? PERIOD_TYPES[k].btn + ' text-white border-transparent' : 'bg-white text-zinc-500 border-zinc-200'}"><i class="fa-solid ${PERIOD_TYPES[k].icon}"></i>${PERIOD_TYPES[k].label}</button>`).join('')}
+              </div>
               <label class="sm:col-span-4 font-semibold text-zinc-600">Motiu (opcional)
-                <input id="injReason" type="text" placeholder="Ex: Esquinç turmell dret · justificant mèdic" class="mt-1 w-full border border-zinc-200 rounded-xl p-2.5 bg-white outline-none focus:ring-2 focus:ring-sky-400">
+                <input id="injReason" type="text" placeholder="${ftype === 'L' ? 'Ex: Esquinç turmell dret · justificant mèdic' : ftype === 'E' ? 'Ex: Expulsió 3 dies · conducta' : 'Ex: Viatge familiar · justificant'}" class="mt-1 w-full border border-zinc-200 rounded-xl p-2.5 bg-white outline-none focus:ring-2 ${FT.ring}">
               </label>
               <label class="font-semibold text-zinc-600">Des de
                 <input id="injFrom" type="date" value="${today}" class="mt-1 w-full border border-zinc-200 rounded-xl p-2 bg-white outline-none">
@@ -10225,12 +10272,12 @@
               </label>
               <div class="flex gap-2 sm:pt-4 sm:justify-end">
                 <button onclick="window.appState.injuryFormFor = null; renderStudentFitxa();" class="px-3 py-2 rounded-xl border border-zinc-200 bg-white font-bold text-zinc-600">Cancel·lar</button>
-                <button onclick="saveInjury(${st.id})" class="px-3 py-2 rounded-xl bg-sky-600 text-white font-bold">Desar</button>
+                <button onclick="saveInjury(${st.id})" class="px-3 py-2 rounded-xl ${FT.btn} text-white font-bold">Desar</button>
               </div>
-              <p class="sm:col-span-4 text-[11px] text-zinc-500">Durant aquests dies, al passar llista sortirà marcat com a <b>Lesionat</b> automàticament. No li resta % de pràctica. Si un dia sí que fa pràctica, toca <b>Lesió</b> a la llista per treure-ho només aquell dia.</p>
+              <p class="sm:col-span-4 text-[11px] text-zinc-500">${helpTxt[ftype]}</p>
             </div>` : ''}
           ${list.length ? `<div class="divide-y divide-zinc-100 border-t border-zinc-100">${list.map(item).join('')}</div>`
-            : formOpen ? '' : `<div class="px-4 pb-3 text-[11px] text-zinc-400">Cap lesió registrada. Quan et porti un justificant, afegeix-lo aquí.</div>`}
+            : formOpen ? '' : `<div class="px-4 pb-3 text-[11px] text-zinc-400">Res registrat. Afegeix aquí lesions, faltes justificades o expulsions amb les seves dates.</div>`}
         </div>`;
     }
 
@@ -10245,15 +10292,26 @@
       const open = document.getElementById('injOpen').checked;
       const to = open ? '' : document.getElementById('injTo').value;
       const reason = document.getElementById('injReason').value.trim();
+      const type = PERIOD_TYPES[window.appState.periodFormType] ? window.appState.periodFormType : 'L';
       if (!from) { alert('Posa la data d\'inici.'); return; }
       if (to && to < from) { alert('La data de final és anterior a la d\'inici.'); return; }
       if (!group.injuries) group.injuries = {};
       if (!group.injuries[stId]) group.injuries[stId] = {};
       const id = 'inj' + Date.now().toString(36);
       group.injuries[stId][id] = { from, to, reason };
+      if (type !== 'L') group.injuries[stId][id].type = type;
       window.appState.injuryFormFor = null;
+      window.appState.periodFormType = 'L';
       persistInjuries();
       renderStudentFitxa();
+    };
+
+    window.periodFormSetType = function(t) {
+      const keep = { r: (document.getElementById('injReason') || {}).value || '', f: (document.getElementById('injFrom') || {}).value, to: (document.getElementById('injTo') || {}).value, o: (document.getElementById('injOpen') || {}).checked };
+      window.appState.periodFormType = t;
+      renderStudentFitxa();
+      const set = (id, v, prop = 'value') => { const el = document.getElementById(id); if (el && v !== undefined) el[prop] = v; };
+      set('injReason', keep.r); set('injFrom', keep.f); set('injTo', keep.to); set('injOpen', keep.o, 'checked');
     };
 
     window.endInjuryToday = function(stId, injId) {
@@ -10270,7 +10328,7 @@
 
     window.deleteInjury = function(stId, injId) {
       const group = getCurrentGroup();
-      if (!confirm('Esborrar aquesta lesió? Les sessions d\'aquells dies ja no sortiran com a lesionat (excepte les que hagis marcat a mà).')) return;
+      if (!confirm('Esborrar aquest període? Les sessions d\'aquells dies ja no sortiran marcades automàticament (excepte les que hagis marcat a mà).')) return;
       if (group.injuries && group.injuries[stId]) {
         delete group.injuries[stId][injId];
         if (!Object.keys(group.injuries[stId]).length) delete group.injuries[stId];
@@ -10346,7 +10404,7 @@
 
         ${renderInjuryCard(group, st)}
 
-        <div class="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-2">
+        <div class="grid gap-2" style="grid-template-columns:repeat(auto-fit,minmax(76px,1fr))">
           ${kpi('F', 'Faltes', course.F, 'bg-rose-50 border-rose-200 text-rose-700')}
           ${kpi('FJ', 'Justificades', course.FJ, 'bg-sky-50 border-sky-200 text-sky-700')}
           ${kpi('R', 'Retards', course.R, 'bg-amber-50 border-amber-200 text-amber-700')}
