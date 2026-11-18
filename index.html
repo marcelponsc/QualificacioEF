@@ -580,6 +580,9 @@
           <p id="libSummary" class="page-sub"></p>
         </div>
         <div class="flex flex-wrap items-center gap-2">
+          <button onclick="openProgAnual()" class="inline-flex items-center gap-1.5 bg-white hover:bg-zinc-50 border border-zinc-200 text-zinc-700 text-xs font-semibold px-3.5 py-2 rounded-xl shadow-subtle transition">
+            <i class="fa-solid fa-book-open text-amber-500 text-[10px]"></i> Programació anual
+          </button>
           <button onclick="openSdaFromLibraryNew()" class="inline-flex items-center gap-1.5 bg-zinc-900 hover:bg-zinc-800 text-white text-xs font-semibold px-3.5 py-2 rounded-xl shadow-subtle transition">
             <i class="fa-solid fa-plus text-[10px]"></i> Nova SdA
           </button>
@@ -1859,6 +1862,32 @@
       <div class="px-6 py-3.5 bg-zinc-50 border-t border-zinc-200 flex justify-end gap-2 text-xs">
         <button onclick="closeDistributeModal()" class="px-3.5 py-1.5 border border-zinc-300 rounded-xl font-semibold text-zinc-600">Cancel·lar</button>
         <button onclick="applyDistribute()" class="px-4 py-1.5 bg-zinc-900 hover:bg-zinc-800 text-white rounded-xl font-semibold">Planificar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL PROGRAMACIÓ ANUAL -->
+  <div id="progAnualModal" class="fixed inset-0 bg-zinc-950/40 backdrop-blur-xs z-50 flex items-center justify-center p-4 hidden no-print">
+    <div class="bg-white rounded-3xl shadow-card max-w-lg w-full max-h-[92vh] flex flex-col overflow-hidden border border-zinc-200">
+      <div class="px-6 py-4 bg-zinc-900 text-white flex justify-between items-center">
+        <h3 class="text-sm font-bold flex items-center gap-2"><i class="fa-solid fa-book-open text-amber-400"></i> Programació anual</h3>
+        <button onclick="closeProgAnual()" class="text-zinc-400 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div class="p-6 space-y-4 text-xs overflow-y-auto">
+        <p class="text-zinc-600 leading-relaxed">Genera un document amb tota la programació del curs, a punt per imprimir o desar en PDF: seqüenciació de les SdA per trimestre, competències i criteris, sabers, metodologia, criteris de qualificació i el seguiment real de cada grup.</p>
+        <div>
+          <div class="font-semibold text-zinc-700 mb-1.5">Cursos</div>
+          <div id="paLevels" class="flex flex-wrap gap-1.5"></div>
+        </div>
+        <div class="space-y-2">
+          <label class="flex items-center gap-2 font-semibold text-zinc-700"><input type="checkbox" id="paDetail" checked class="w-4 h-4 accent-zinc-900"> Incloure la fitxa completa de cada SdA</label>
+          <label class="flex items-center gap-2 font-semibold text-zinc-700"><input type="checkbox" id="paReal" checked class="w-4 h-4 accent-zinc-900"> Incloure el seguiment real (sessions fetes per grup)</label>
+          <label class="flex items-center gap-2 font-semibold text-zinc-700 ml-6"><input type="checkbox" id="paList" class="w-4 h-4 accent-zinc-900"> I el registre de totes les sessions (data i contingut)</label>
+        </div>
+      </div>
+      <div class="px-6 py-3.5 bg-zinc-50 border-t border-zinc-200 flex justify-end gap-2 text-xs">
+        <button onclick="closeProgAnual()" class="px-3.5 py-1.5 border border-zinc-300 rounded-xl font-semibold text-zinc-600">Cancel·lar</button>
+        <button onclick="generateProgAnual()" class="px-4 py-1.5 bg-zinc-900 hover:bg-zinc-800 text-white rounded-xl font-semibold"><i class="fa-solid fa-file-pdf mr-1"></i>Generar document</button>
       </div>
     </div>
   </div>
@@ -5028,6 +5057,246 @@
       refreshAfterPlanChange();
     };
 
+
+
+    // ================== PROGRAMACIÓ ANUAL (per a inspecció) ==================
+    function groupLevelName(g) {
+      const n = String((g && g.name) || '').trim();
+      const m = n.match(/^(.*?)[\s·-]*([A-Z]|[A-Z]\d?)$/);
+      return (m && m[1].trim()) || n || 'Sense curs';
+    }
+    function progAnualLevels() {
+      const lv = {};
+      Object.entries(window.appData.groups || {}).forEach(([gId, g]) => {
+        const k = groupLevelName(g);
+        (lv[k] = lv[k] || []).push({ gId, g });
+      });
+      return lv;
+    }
+
+    window.openProgAnual = function() {
+      const lv = progAnualLevels();
+      const keys = Object.keys(lv).sort();
+      document.getElementById('paLevels').innerHTML = keys.map(k => `
+        <label class="plan-chip"><input type="checkbox" class="pa-level" value="${escapeHtml(k)}" checked><span>${escapeHtml(k)} <span class="opacity-60">(${lv[k].map(x => escapeHtml(x.g.name)).join(', ')})</span></span></label>`).join('') || '<span class="text-zinc-400">No tens cap classe.</span>';
+      document.getElementById('progAnualModal').classList.remove('hidden');
+    };
+    window.closeProgAnual = function() { document.getElementById('progAnualModal').classList.add('hidden'); };
+
+    function openPrintableDoc(doc) {
+      let w = null;
+      try { w = window.open('', '_blank'); } catch (e) { w = null; }
+      if (w && w.document) { w.document.open(); w.document.write(doc); w.document.close(); return; }
+      try {
+        const url = URL.createObjectURL(new Blob([doc], { type: 'text/html' }));
+        const a = document.createElement('a'); a.href = url; a.target = '_blank'; a.rel = 'noopener';
+        document.body.appendChild(a); a.click(); a.remove();
+        setTimeout(() => URL.revokeObjectURL(url), 60000);
+      } catch (e) { alert('El navegador no deixa obrir el document. Prova-ho des de Safari.'); }
+    }
+
+    window.generateProgAnual = function() {
+      const levels = Array.from(document.querySelectorAll('#paLevels .pa-level')).filter(c => c.checked).map(c => c.value);
+      if (!levels.length) { alert('Tria almenys un curs.'); return; }
+      const opts = {
+        detail: document.getElementById('paDetail').checked,
+        real: document.getElementById('paReal').checked,
+        list: document.getElementById('paList').checked
+      };
+      openPrintableDoc(buildProgAnualDoc(levels, opts));
+    };
+
+    function buildProgAnualDoc(levels, opts) {
+      const E = escapeHtml;
+      const R = richText;
+      const ORD = t => ['', '1r', '2n', '3r'][t] || (t + 'r');
+      const settings = getSettings();
+      const lv = progAnualLevels();
+      const teacher = (window.currentUserInfo && window.currentUserInfo.name) || '';
+      const today = todayISO();
+      const fmt = iso => iso ? isoToDate(iso).toLocaleDateString('ca-ES', { day: 'numeric', month: 'short', year: 'numeric' }) : '';
+      const fmtS = iso => iso ? isoToDate(iso).toLocaleDateString('ca-ES', { day: 'numeric', month: 'short' }) : '';
+      const list = arr => arr && arr.length ? arr.map(E).join(' · ') : '<span class="muted">—</span>';
+      const bullets = txt => { const l = String(txt || '').split(/\r?\n/).map(x => x.replace(/^\s*[-•·*◆]\s+/, '').trim()).filter(Boolean); return l.length ? `<ul>${l.map(x => `<li>${R(x)}</li>`).join('')}</ul>` : ''; };
+      const critLabel = (ceId, code) => { const c = getCriteriaForCe(ceId).find(x => x.code === code); return c ? c.label.replace(new RegExp('^' + code.replace('.', '\\.') + '\\.?\\s*'), '') : ''; };
+      const crits = conf => (conf.curricularCriteria || '').split(/[-,\s]+/).filter(Boolean);
+
+      let body = '';
+      levels.forEach((levelName, li) => {
+        const groups = lv[levelName] || [];
+        // Agrupar SdA iguals (enllaçades o mateix títol) entre grups
+        const sdaMap = new Map();
+        groups.forEach(({ gId, g }) => (g.sdas || []).forEach(s => {
+          const key = s.linkId || ('t:' + String(s.title || '').trim().toLowerCase());
+          if (!sdaMap.has(key)) sdaMap.set(key, { sda: s, uses: [] });
+          sdaMap.get(key).uses.push({ gId, g, s });
+        }));
+        const items = [...sdaMap.values()].sort((a, b) => Math.min(...a.uses.map(u => u.s.trim)) - Math.min(...b.uses.map(u => u.s.trim)) || String(a.sda.title).localeCompare(String(b.sda.title)));
+        const trimsOf = it => [...new Set(it.uses.map(u => u.s.trim))].sort();
+        const usesTxt = it => { const by = {}; it.uses.forEach(u => (by[u.s.trim] = by[u.s.trim] || []).push(u.g.name)); return Object.keys(by).sort().map(t => `${ORD(+t)} T: ${by[t].join(', ')}`).join('<br>'); };
+        const realOf = (u) => {
+          const ses = Object.keys(u.g.sessions || {}).filter(d => { const S = u.g.sessions[d]; const P = (u.g.plans || {})[d]; return (S && S.sdaId === u.s.id) || (S && !S.sdaId && P && P.sdaId === u.s.id); }).sort();
+          const planned = Object.keys(u.g.plans || {}).filter(d => u.g.plans[d] && u.g.plans[d].sdaId === u.s.id && planHasContent(u.g.plans[d])).sort();
+          return { ses, planned };
+        };
+        const g0 = groups[0] && groups[0].g;
+        const tw = (g0 && g0.finalTrimWeights) || DEFAULT_FINAL_TRIM_WEIGHTS;
+        const cw = (g0 && g0.finalCeWeights) || DEFAULT_FINAL_CE_WEIGHTS;
+        const rule = getAttitudeRule();
+
+        // ---- Taula resum
+        let h = `<section class="${li ? 'pb' : ''}">
+          <h1>${E(levelName)}</h1>
+          <p class="sub">Grups: ${groups.map(x => E(x.g.name)).join(', ')} · ${items.length} situacions d'aprenentatge</p>
+          <h2>1. Seqüenciació de les situacions d'aprenentatge</h2>
+          <table class="t">
+            <thead><tr><th>Trim.</th><th>Situació d'aprenentatge</th><th>Competències específiques</th><th class="c">Sessions</th><th>Grups</th></tr></thead>
+            <tbody>${items.map(it => {
+              const s = it.sda, comps = s.competences || {};
+              const ces = OFFICIAL_CES.filter(ce => comps[ce.id] && comps[ce.id].active);
+              const pl = s.plan || {};
+              const nSes = getSdaTotalSessions(pl);
+              const dates = pl.dataInici || pl.dataFi ? `<div class="muted small">${fmtS(pl.dataInici)}${pl.dataFi ? ' – ' + fmtS(pl.dataFi) : ''}</div>` : '';
+              return `<tr>
+                <td class="c b">${trimsOf(it).map(ORD).join(', ')}</td>
+                <td><b>${E(s.title)}</b>${pl.pregunta ? `<div class="muted small">${E(pl.pregunta)}</div>` : ''}${dates}</td>
+                <td>${ces.map(ce => `<span class="ce ${ce.id}">${ce.id}</span> <span class="small">${comps[ce.id].weight || 0}%</span>`).join('<br>') || '—'}</td>
+                <td class="c">${nSes || '—'}</td>
+                <td class="small">${usesTxt(it)}</td>
+              </tr>`; }).join('') || '<tr><td colspan="5" class="muted">Cap SdA.</td></tr>'}</tbody>
+          </table>`;
+
+        // ---- Matriu de cobertura
+        h += `<h2>2. Competències específiques i criteris d'avaluació treballats</h2>
+          <table class="t mx"><thead><tr><th>Competència</th>${items.map((it, i) => `<th class="c" title="${E(it.sda.title)}">SdA ${i + 1}</th>`).join('')}<th>Criteris treballats</th></tr></thead><tbody>
+          ${OFFICIAL_CES.map(ce => {
+            const all = new Set();
+            const cells = items.map(it => { const conf = (it.sda.competences || {})[ce.id]; if (!conf || !conf.active) return '<td class="c muted">·</td>'; crits(conf).forEach(c => all.add(c)); return `<td class="c on">✓<div class="small">${conf.weight || 0}%</div></td>`; }).join('');
+            return `<tr><td><span class="ce ${ce.id}">${ce.id}</span> ${E(ce.name.replace(/^CE\d\.\s*/, ''))}</td>${cells}<td class="small">${[...all].sort().map(c => `<b>${E(c)}</b> ${E(critLabel(ce.id, c))}`).join('<br>') || '<span class="muted">—</span>'}</td></tr>`;
+          }).join('')}
+          </tbody></table>
+          <p class="small muted">${items.map((it, i) => `SdA ${i + 1}: ${E(it.sda.title)}`).join(' · ')}</p>`;
+
+        // ---- Sabers
+        const sab = {};
+        items.forEach((it, i) => ((it.sda.plan || {}).sabers || []).forEach(sb => { const b = sb.bloc || 'Altres'; sab[b] = sab[b] || new Map(); const k = sb.text; if (!sab[b].has(k)) sab[b].set(k, []); sab[b].get(k).push(i + 1); }));
+        const blocs = Object.keys(sab);
+        h += `<h2>3. Sabers</h2>${blocs.length ? blocs.map(b => `<h3>${E(b)}</h3><ul class="sab">${[...sab[b].entries()].map(([t, ix]) => `<li>${E(t)} <span class="muted small">(SdA ${[...new Set(ix)].join(', ')})</span></li>`).join('')}</ul>`).join('') : '<p class="muted">Encara no s\'han indicat sabers a les SdA.</p>'}`;
+
+        // ---- Metodologia i avaluació (agregat)
+        const agg = f => [...new Set(items.flatMap(it => ((it.sda.plan || {})[f]) || []))];
+        h += `<h2>4. Metodologia, avaluació i qualificació</h2>
+          <table class="t kv"><tbody>
+            <tr><th>Metodologies</th><td>${list(agg('metodologies'))}</td></tr>
+            <tr><th>Agrupaments</th><td>${list(agg('agrupaments'))}</td></tr>
+            <tr><th>Instruments d'avaluació</th><td>${list(agg('instruments'))}</td></tr>
+            <tr><th>Moments d'avaluació</th><td>${list(agg('moments'))}</td></tr>
+            <tr><th>Vectors</th><td>${list(agg('vectors'))}</td></tr>
+            <tr><th>Qualificació del trimestre</th><td>Mitjana ponderada de les SdA del trimestre segons el seu pes${rule.enabled ? `; l'actitud compta un <b>${rule.weight}%</b> de la nota` : ''}. Nivells d'assoliment: NA, AS, AN, AE.</td></tr>
+            <tr><th>Qualificació final</th><td>Trimestres: ${['t1', 't2', 't3'].map((k, i) => `${i + 1}r ${Math.round(tw[k] || 0)}%`).join(' · ')}<br>Competències: ${OFFICIAL_CES.map(ce => `${ce.id} ${Math.round(cw[ce.id] || 0)}%`).join(' · ')}</td></tr>
+            <tr><th>Assistència i pràctica</th><td>Cal un mínim del <b>${getMinPractice(g0 || {})}%</b> de pràctica efectiva. Les faltes justificades, lesions i expulsions no compten en contra del percentatge.</td></tr>
+          </tbody></table>`;
+
+        // ---- Seguiment real
+        if (opts.real) {
+          h += `<h2>5. Seguiment de la programació (curs ${E(getSchoolYearLabel())})</h2>
+            <p class="small muted">Dades a ${fmt(today)}. «Fetes» = sessions amb llista passada al quadern.</p>
+            <table class="t"><thead><tr><th>Grup</th><th>Trim.</th><th>SdA</th><th class="c">Previstes</th><th class="c">Planificades</th><th class="c">Fetes</th><th>Període</th></tr></thead><tbody>
+            ${groups.map(({ gId, g }) => (g.sdas || []).slice().sort((a, b) => a.trim - b.trim).map((s, k, arr) => {
+              const r = realOf({ g, s });
+              return `<tr>${k === 0 ? `<td rowspan="${arr.length}" class="b">${E(g.name)}</td>` : ''}<td class="c">${ORD(s.trim)}</td><td>${E(s.title)}</td><td class="c">${getSdaTotalSessions(s.plan || {}) || '—'}</td><td class="c">${r.planned.length || '—'}</td><td class="c b">${r.ses.length || '—'}</td><td class="small">${r.ses.length ? fmtS(r.ses[0]) + ' – ' + fmtS(r.ses[r.ses.length - 1]) : r.planned.length ? 'previst ' + fmtS(r.planned[0]) + ' – ' + fmtS(r.planned[r.planned.length - 1]) : '—'}</td></tr>`;
+            }).join('')).join('')}
+            </tbody></table>`;
+          if (opts.list) {
+            h += groups.map(({ g }) => {
+              const ds = Object.keys(g.sessions || {}).sort();
+              if (!ds.length) return '';
+              const sName = id => { const s = (g.sdas || []).find(x => x.id === id); return s ? s.title : ''; };
+              return `<h3>Registre de sessions · ${E(g.name)} (${ds.length})</h3>
+                <table class="t small"><thead><tr><th>Data</th><th>Sessió</th><th>SdA</th></tr></thead><tbody>
+                ${ds.map(d => { const S = g.sessions[d], P = (g.plans || {})[d] || {}; return `<tr><td class="nw">${fmtS(d)}</td><td>${E(P.title || S.note || '')}</td><td>${E(sName(S.sdaId || P.sdaId))}</td></tr>`; }).join('')}
+                </tbody></table>`;
+            }).join('');
+          }
+        }
+
+        // ---- Fitxes de cada SdA
+        if (opts.detail && items.length) {
+          h += `<h2 class="pb">${opts.real ? '6' : '5'}. Fitxes de les situacions d'aprenentatge</h2>`;
+          h += items.map((it, i) => {
+            const s = it.sda, pl = s.plan || {}, comps = s.competences || {};
+            const ces = OFFICIAL_CES.filter(ce => comps[ce.id] && comps[ce.id].active);
+            const row = (k, v) => v ? `<tr><th>${k}</th><td>${v}</td></tr>` : '';
+            const acts = pl.activitats || [];
+            return `<div class="sda">
+              <h3 class="sdat">SdA ${i + 1}. ${E(s.title)}</h3>
+              <p class="small muted">${trimsOf(it).map(t => ORD(t) + ' trimestre').join(', ')} · ${getSdaTotalSessions(pl) || '—'} sessions · ${it.uses.map(u => E(u.g.name)).join(', ')}</p>
+              <table class="t kv"><tbody>
+                ${row('Pregunta / repte', R([pl.pregunta, pl.repte].filter(Boolean).join(' — ')))}
+                ${row('Justificació', bullets(pl.justificacio))}
+                ${row('Competències i criteris', ces.map(ce => { const conf = comps[ce.id]; return `<div><span class="ce ${ce.id}">${ce.id}</span> <b>${E(ce.name.replace(/^CE\d\.\s*/, ''))}</b> (${conf.weight || 0}%)${crits(conf).map(c => `<div class="small ind"><b>${E(c)}</b> ${E(critLabel(ce.id, c))}</div>`).join('')}${(conf.oas || []).filter(o => o.label).map(o => `<div class="small ind">◇ ${E(o.label)} (${o.weight || 0}%)</div>`).join('')}</div>`; }).join(''))}
+                ${row('Sabers', (pl.sabers || []).length ? `<ul>${pl.sabers.map(sb => `<li>${E(sb.text)}</li>`).join('')}</ul>` : '')}
+                ${row('Activitats', acts.length ? `<ol>${acts.map(a => `<li><b>${E(a.titol || '')}</b>${a.sessions ? ` (${a.sessions} ses.)` : ''}${a.descripcio ? ` — ${E(a.descripcio)}` : ''}</li>`).join('')}</ol>` : '')}
+                ${row('Metodologia', [list(pl.metodologies || []), R(pl.metodologiaText || '')].filter(x => x && !x.includes('muted')).join('<br>'))}
+                ${row('Agrupaments', (pl.agrupaments || []).length ? list(pl.agrupaments) : '')}
+                ${row('Atenció a la diversitat (DUA)', [pl.duaImplicacio, pl.duaRepresentacio, pl.duaAccio, pl.mesures].filter(Boolean).map(R).join('<br>'))}
+                ${row('Avaluació', [(pl.instruments || []).length ? 'Instruments: ' + list(pl.instruments) : '', (pl.moments || []).length ? 'Moments: ' + list(pl.moments) : '', R(pl.avaluacioText || '')].filter(Boolean).join('<br>'))}
+                ${row('Producte final', R([pl.producteTitol, pl.producte].filter(Boolean).join(': ')))}
+                ${row('Materials i espais', R([pl.materials, pl.espais].filter(Boolean).join(' · ')))}
+                ${row('Connexions', R(pl.connexions || ''))}
+              </tbody></table>
+            </div>`;
+          }).join('');
+        }
+        h += '</section>';
+        body += h;
+      });
+
+      const logo = settings.logo ? `<img src="${settings.logo}" class="logo">` : '';
+      return `<!DOCTYPE html><html lang="ca"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Programació anual d'Educació Física · ${E(getSchoolYearLabel())}</title>
+<style>
+  * { box-sizing: border-box; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  body { margin: 0; font: 11px/1.45 -apple-system, system-ui, "Segoe UI", Roboto, sans-serif; color: #18181b; background: #f4f4f5; }
+  #pbar { position: sticky; top: 0; z-index: 5; display: flex; gap: 10px; align-items: center; flex-wrap: wrap; padding: 10px 14px; background: #18181b; color: #e4e4e7; font: 600 13px system-ui; }
+  #pbar button { background: #e8ad3c; color: #18181b; border: 0; border-radius: 10px; padding: 9px 16px; font: 800 14px system-ui; }
+  #pbar span { opacity: .75; font-weight: 500; font-size: 12px; }
+  .page { max-width: 800px; margin: 16px auto; background: #fff; padding: 36px 40px; box-shadow: 0 1px 4px rgba(0,0,0,.08); }
+  .cover { display: flex; align-items: center; gap: 16px; border-bottom: 3px solid #18181b; padding-bottom: 14px; margin-bottom: 18px; }
+  .cover .logo { height: 54px; }
+  .cover h0 { display: block; font-size: 22px; font-weight: 900; letter-spacing: -.02em; }
+  h1 { font-size: 20px; margin: 0 0 2px; letter-spacing: -.01em; }
+  h2 { font-size: 13px; margin: 22px 0 8px; padding-bottom: 4px; border-bottom: 1.5px solid #e4e4e7; text-transform: uppercase; letter-spacing: .04em; }
+  h3 { font-size: 12px; margin: 14px 0 6px; }
+  .sub { color: #52525b; margin: 0 0 6px; }
+  .muted { color: #71717a; } .small { font-size: 9.5px; } .b { font-weight: 700; } .c { text-align: center; } .nw { white-space: nowrap; }
+  .ind { margin-left: 14px; }
+  table.t { width: 100%; border-collapse: collapse; margin: 4px 0 8px; }
+  table.t th, table.t td { border: 1px solid #e4e4e7; padding: 4px 6px; vertical-align: top; text-align: left; }
+  table.t thead th { background: #f4f4f5; font-size: 9.5px; text-transform: uppercase; letter-spacing: .03em; }
+  table.t th.c, table.t td.c { text-align: center; }
+  table.kv th { width: 25%; background: #fafafa; font-weight: 700; }
+  table.mx td.on { background: #ecfdf5; color: #047857; font-weight: 700; }
+  ul, ol { margin: 2px 0; padding-left: 16px; } li { margin: 1px 0; }
+  ul.sab { columns: 2; column-gap: 24px; } ul.sab li { break-inside: avoid; }
+  .ce { display: inline-block; font-size: 9px; font-weight: 800; padding: 0 5px; border-radius: 4px; color: #18181b; }
+  .ce.CE1 { background: #7cc4ec; } .ce.CE2 { background: #6fd0a8; } .ce.CE3 { background: #c4a3f0; } .ce.CE4 { background: #f2c46b; } .ce.CE5 { background: #f4a0b4; }
+  .sda { break-inside: avoid-page; margin-bottom: 14px; }
+  .sdat { font-size: 13px; margin-bottom: 0; }
+  tr { break-inside: avoid; }
+  @page { size: A4 portrait; margin: 14mm 12mm; }
+  @media print { #pbar { display: none !important; } body { background: #fff; } .page { margin: 0; padding: 0; box-shadow: none; max-width: none; } .pb { break-before: page; } }
+</style></head><body>
+<div id="pbar"><button onclick="window.print()">Imprimir / Desar PDF</button><span>A l'iPad: botó Compartir → Imprimir (o Desar a Fitxers) per obtenir el PDF.</span></div>
+<div class="page">
+  <div class="cover">${logo}<div><h0>Programació anual d'Educació Física</h0>
+    <div class="sub">${E(settings.centre || '')} · Curs ${E(getSchoolYearLabel())}${teacher ? ' · Docent: ' + E(teacher) : ''}</div>
+    <div class="small muted">Document generat el ${fmt(today)} a partir del quadern EF Competencial (LOMLOE · Decret 175/2022).</div></div></div>
+  ${body}
+</div>
+<script>window.addEventListener('load', function(){ setTimeout(function(){ try { window.print(); } catch(e){} }, 600); });<\/script>
+</body></html>`;
+    }
 
     // ================== DESAR SESSIONS A LA SdA ==================
     // sda.plan.sessionsDesades = [{ title, objectiu, parts, material, actIdx, evalKeys }] (sense dates)
