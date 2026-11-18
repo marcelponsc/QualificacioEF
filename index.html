@@ -404,6 +404,9 @@
             <button onclick="openDistributeModal()" class="inline-flex items-center gap-1.5 bg-white hover:bg-zinc-50 border border-zinc-200 text-zinc-700 text-xs font-semibold px-3 py-2 rounded-xl shadow-subtle transition">
               <i class="fa-solid fa-wand-magic-sparkles text-amber-500 text-[10px]"></i> Repartir una SdA
             </button>
+            <button onclick="openSdaSessionsModal()" class="inline-flex items-center gap-1.5 bg-white hover:bg-zinc-50 border border-zinc-200 text-zinc-700 text-xs font-semibold px-3 py-2 rounded-xl shadow-subtle transition">
+              <i class="fa-solid fa-floppy-disk text-emerald-600 text-[10px]"></i> Desar sessions a la SdA
+            </button>
             <button onclick="printPlanif()" class="inline-flex items-center gap-1.5 bg-white hover:bg-zinc-50 border border-zinc-200 text-zinc-700 text-xs font-semibold px-3 py-2 rounded-xl shadow-subtle transition">
               <i class="fa-solid fa-print text-zinc-400 text-[10px]"></i> Imprimir
             </button>
@@ -1840,6 +1843,13 @@
             <select id="distStart" onchange="renderDistributePreview()" class="w-full border border-zinc-200 rounded-xl p-2.5 outline-none font-semibold bg-white"></select>
           </div>
         </div>
+        <div>
+          <label class="block font-semibold text-zinc-700 mb-1">Quins dies es fa aquesta SdA</label>
+          <div id="distDays" class="flex flex-wrap gap-1.5"></div>
+        </div>
+        <label id="distUseSavedWrap" class="hidden flex items-center gap-2 font-semibold text-emerald-800 bg-emerald-50 border border-emerald-200 rounded-xl px-3 py-2">
+          <input type="checkbox" id="distUseSaved" checked onchange="renderDistributePreview()" class="w-4 h-4 accent-emerald-600"> <span id="distUseSavedTxt">Fer servir les sessions desades a la SdA</span>
+        </label>
         <label class="flex items-center gap-2 font-semibold text-zinc-700">
           <input type="checkbox" id="distOverwrite" onchange="renderDistributePreview()" class="w-4 h-4 accent-zinc-900"> Substituir les sessions que ja estan planificades
         </label>
@@ -1848,6 +1858,41 @@
       <div class="px-6 py-3.5 bg-zinc-50 border-t border-zinc-200 flex justify-end gap-2 text-xs">
         <button onclick="closeDistributeModal()" class="px-3.5 py-1.5 border border-zinc-300 rounded-xl font-semibold text-zinc-600">Cancel·lar</button>
         <button onclick="applyDistribute()" class="px-4 py-1.5 bg-zinc-900 hover:bg-zinc-800 text-white rounded-xl font-semibold">Planificar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL ENDARRERIR PLANIFICACIÓ -->
+  <div id="planShiftModal" class="fixed inset-0 bg-zinc-950/40 backdrop-blur-xs z-50 flex items-center justify-center p-4 hidden no-print">
+    <div class="bg-white rounded-3xl shadow-card max-w-lg w-full max-h-[92vh] flex flex-col overflow-hidden border border-zinc-200">
+      <div class="px-6 py-4 bg-zinc-900 text-white flex justify-between items-center">
+        <h3 class="text-sm font-bold flex items-center gap-2"><i class="fa-solid fa-forward text-amber-400"></i> Endarrerir la planificació?</h3>
+        <button onclick="closePlanShift()" class="text-zinc-400 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div class="p-6 space-y-3 text-xs overflow-y-auto">
+        <p id="planShiftInfo" class="text-zinc-600 leading-relaxed"></p>
+        <div id="planShiftList" class="border border-zinc-200 rounded-xl divide-y divide-zinc-100 max-h-72 overflow-y-auto"></div>
+      </div>
+      <div class="px-6 py-3.5 bg-zinc-50 border-t border-zinc-200 flex justify-end gap-2 text-xs">
+        <button onclick="closePlanShift()" class="px-3.5 py-1.5 border border-zinc-300 rounded-xl font-semibold text-zinc-600">No, deixar-ho igual</button>
+        <button onclick="applyPlanShift()" class="px-4 py-1.5 bg-zinc-900 hover:bg-zinc-800 text-white rounded-xl font-semibold"><i class="fa-solid fa-forward mr-1"></i>Endarrerir</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL DESAR SESSIONS A LA SdA -->
+  <div id="sdaSessionsModal" class="fixed inset-0 bg-zinc-950/40 backdrop-blur-xs z-50 flex items-center justify-center p-4 hidden no-print">
+    <div class="bg-white rounded-3xl shadow-card max-w-lg w-full max-h-[92vh] flex flex-col overflow-hidden border border-zinc-200">
+      <div class="px-6 py-4 bg-zinc-900 text-white flex justify-between items-center">
+        <h3 class="text-sm font-bold flex items-center gap-2"><i class="fa-solid fa-floppy-disk text-emerald-400"></i> Desar les sessions dins la SdA</h3>
+        <button onclick="closeSdaSessionsModal()" class="text-zinc-400 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div class="p-6 space-y-3 text-xs overflow-y-auto">
+        <p class="text-zinc-600 leading-relaxed">Les sessions que has planificat (títol, objectiu, escalfament, part principal, tornada a la calma i material) es guarden a la SdA, sense dates. Quan facis <b>Repartir una SdA</b> en un altre grup o l'any que ve, es posaran soles als dies de classe.</p>
+        <div id="sdaSesList" class="space-y-2"></div>
+      </div>
+      <div class="px-6 py-3.5 bg-zinc-50 border-t border-zinc-200 flex justify-end text-xs">
+        <button onclick="closeSdaSessionsModal()" class="px-4 py-1.5 bg-zinc-900 text-white rounded-xl font-semibold">Fet</button>
       </div>
     </div>
   </div>
@@ -4503,8 +4548,20 @@
       if (!cancelTarget) return;
       const data = { reason: window.appState.cancelReason, note: document.getElementById('cancelNote').value.trim() };
       cancelTarget.keys.forEach(k => { getCancellations()[k] = { ...data }; });
+      const { iso } = cancelTarget;
+      let gId = cancelTarget.gId;
+      if (!gId || gId === 'undefined') {
+        const slotId = (cancelTarget.keys[0] || '').split('|')[0];
+        const e = getAllEntries().find(x => x.id === slotId);
+        gId = e && (e.gId || e.groupId);
+      }
       closeCancelModal();
       afterCalendarChange();
+      // Si aquell dia hi havia una sessió planificada, proposar endarrerir la planificació
+      const group = gId && window.appData.groups[gId];
+      if (group && getClassDayStatus(group, gId, iso).off && planHasContent(getSessionPlan(group, iso))) {
+        setTimeout(() => openPlanShift(gId, iso, true), 50);
+      }
     };
 
     window.restoreCancelledFromModal = function() {
@@ -4870,6 +4927,8 @@
       const firstFree = dates.find(d => !planHasContent(getSessionPlan(group, d.iso)));
       if (firstFree) document.getElementById('distStart').value = firstFree.iso;
       document.getElementById('distOverwrite').checked = false;
+      const DN = ['Dg', 'Dl', 'Dt', 'Dc', 'Dj', 'Dv', 'Ds'];
+      document.getElementById('distDays').innerHTML = getGroupDays(group).map(d => `<label class="plan-chip"><input type="checkbox" class="dist-day" value="${d}" checked onchange="renderDistributePreview()"><span>${DN[d]}</span></label>`).join('');
       renderDistributePreview();
       document.getElementById('distributeModal').classList.remove('hidden');
     };
@@ -4887,17 +4946,21 @@
       if (!sda || !start) return { units: [], rows: [] };
       const acts = (sda.plan && sda.plan.activitats) || [];
       const units = [];
-      acts.forEach((a, idx) => {
+      const saved = (sda.plan && sda.plan.sessionsDesades) || [];
+      const useSaved = saved.length && document.getElementById('distUseSaved').checked;
+      if (useSaved) saved.forEach(sv => units.push({ title: sv.title || 'Sessió', saved: sv, actIdx: sv.actIdx }));
+      if (!useSaved) acts.forEach((a, idx) => {
         const n = Math.max(1, Math.round(a.sessions || 1));
         for (let k = 1; k <= n; k++) {
           units.push({ title: `${a.titol || 'Activitat'}${n > 1 ? ` (${k}/${n})` : ''}`, text: a.descripcio || '', actIdx: idx, fase: a.fase });
         }
       });
-      if (!units.length) {
+      if (!units.length && !useSaved) {
         const n = (sda.plan && sda.plan.sessions) || 0;
         for (let k = 1; k <= n; k++) units.push({ title: `${sda.title} · sessió ${k}/${n}`, text: '', actIdx: -1 });
       }
-      const dates = getClassDates(group, gId, start, { count: 200, includeOff: false });
+      const selDays = Array.from(document.querySelectorAll('#distDays .dist-day')).filter(c => c.checked).map(c => +c.value);
+      const dates = getClassDates(group, gId, start, { count: 200, includeOff: false }).filter(d => !selDays.length || selDays.includes(isoToDate(d.iso).getDay()));
       const rows = [];
       let u = 0;
       for (const d of dates) {
@@ -4914,6 +4977,11 @@
     }
 
     window.renderDistributePreview = function() {
+      const group0 = getCurrentGroup();
+      const sda0 = (group0.sdas || []).find(s => s.id === document.getElementById('distSda').value);
+      const nSaved = ((sda0 && sda0.plan && sda0.plan.sessionsDesades) || []).length;
+      document.getElementById('distUseSavedWrap').classList.toggle('hidden', !nSaved);
+      document.getElementById('distUseSavedTxt').textContent = `Fer servir les ${nSaved} sessions desades a la SdA (amb tot el contingut)`;
       const { sda, units, rows, missing } = buildDistribution();
       const box = document.getElementById('distPreview');
       if (!units.length) {
@@ -4945,6 +5013,7 @@
       const slotMinFor = iso => { const s = getSlotForDate(group, iso); return s ? timeToMin(s.end) - timeToMin(s.start) : 55; };
       toWrite.forEach(r => {
         const total = slotMinFor(r.iso);
+        if (r.unit.saved) { plans[r.iso] = { ...JSON.parse(JSON.stringify(r.unit.saved)), sdaId: sda.id, reflexio: '' }; return; }
         plans[r.iso] = {
           title: r.unit.title, sdaId: sda.id, actIdx: r.unit.actIdx, objectiu: '',
           parts: { escalfament: { text: '', min: 10 }, principal: { text: r.unit.text, min: Math.max(10, total - 15) }, tornada: { text: '', min: 5 } },
@@ -4955,6 +5024,172 @@
       if (window.syncGroupEntityToCloud) window.syncGroupEntityToCloud(gId);
       closeDistributeModal();
       window.appState.planifRange = 'next';
+      refreshAfterPlanChange();
+    };
+
+
+    // ================== DESAR SESSIONS A LA SdA ==================
+    // sda.plan.sessionsDesades = [{ title, objectiu, parts, material, actIdx, evalKeys }] (sense dates)
+    function collectPlannedSessionsForSda(group, sdaId) {
+      const plans = group.plans || {};
+      return Object.keys(plans).filter(iso => plans[iso] && plans[iso].sdaId === sdaId && planHasContent(plans[iso])).sort()
+        .map(iso => { const p = JSON.parse(JSON.stringify(plans[iso])); delete p.reflexio; delete p.sdaId; return p; });
+    }
+
+    window.openSdaSessionsModal = function() {
+      const group = getCurrentGroup();
+      const sdas = (group.sdas || []).slice().sort((a, b) => a.trim - b.trim);
+      document.getElementById('sdaSesList').innerHTML = sdas.length ? sdas.map(s => {
+        const nPlan = collectPlannedSessionsForSda(group, s.id).length;
+        const nSaved = ((s.plan && s.plan.sessionsDesades) || []).length;
+        return `<div class="flex items-center gap-3 bg-white border border-zinc-200 rounded-xl px-3 py-2.5">
+          <div class="flex-1 min-w-0">
+            <div class="text-xs font-bold text-zinc-800 truncate">T${s.trim} · ${escapeHtml(s.title)}</div>
+            <div class="text-[11px] text-zinc-500">${nPlan} sessions planificades en aquesta classe${nSaved ? ` · <b class="text-emerald-700">${nSaved} desades a la SdA</b>` : ''}</div>
+          </div>
+          <button ${nPlan ? '' : 'disabled'} onclick="saveSessionsToSda('${s.id}')" class="text-[11px] font-bold px-3 py-2 rounded-lg bg-zinc-900 text-white disabled:opacity-30"><i class="fa-solid fa-floppy-disk mr-1"></i>${nSaved ? 'Actualitzar' : 'Desar'}</button>
+        </div>`;
+      }).join('') : '<div class="text-center text-zinc-400 py-4">Aquesta classe no té SdA.</div>';
+      document.getElementById('sdaSessionsModal').classList.remove('hidden');
+    };
+    window.closeSdaSessionsModal = function() { document.getElementById('sdaSessionsModal').classList.add('hidden'); };
+
+    window.saveSessionsToSda = function(sdaId) {
+      const group = getCurrentGroup();
+      const sda = (group.sdas || []).find(s => s.id === sdaId);
+      if (!sda) return;
+      const list = collectPlannedSessionsForSda(group, sdaId);
+      if (!list.length) return;
+      const prev = ((sda.plan && sda.plan.sessionsDesades) || []).length;
+      if (!confirm(`Desar les ${list.length} sessions planificades dins la SdA «${sda.title}»?${prev ? `\n\nSubstituirà les ${prev} que ja hi havia desades.` : ''}\n\nQuan facis «Repartir una SdA» (aquest curs en un altre grup o l'any que ve) sortiran aquestes sessions amb tot el contingut.`)) return;
+      // Totes les còpies enllaçades (mateixa SdA en altres classes) reben les sessions
+      const copies = [];
+      Object.values(window.appData.groups || {}).forEach(g => (g.sdas || []).forEach(s => {
+        if (s === sda || (sda.linkId && s.linkId === sda.linkId)) copies.push({ g, s });
+      }));
+      copies.forEach(({ s }) => { if (!s.plan) s.plan = {}; s.plan.sessionsDesades = JSON.parse(JSON.stringify(list)); });
+      saveToStorage();
+      const gIds = new Set();
+      Object.entries(window.appData.groups || {}).forEach(([gId, g]) => { if (copies.some(c => c.g === g)) gIds.add(gId); });
+      if (window.syncGroupEntityToCloud) gIds.forEach(id => window.syncGroupEntityToCloud(id));
+      if (sda.shared && sda.shareKey && window.publishSharedSda) {
+        try { window.publishSharedSda(sda.shareKey, { title: sda.title, trim: sda.trim, trimWeight: sda.trimWeight, competences: sda.competences, plan: sda.plan }); } catch (e) {}
+      }
+      openSdaSessionsModal();
+    };
+
+    // ================== ENDARRERIR LA PLANIFICACIÓ ==================
+    // Quan un dia no es fa classe, les sessions planificades es mouen al següent dia de classe
+    // que tingui el MATEIX dia de la setmana que fa servir aquella SdA (dimecres → dimecres, etc.)
+    // mode 'sda': cada SdA es mou només als dies de la setmana en què la fas (si la fas dimecres i divendres, a tots dos;
+    //             si només la fas el dimecres, només als dimecres). Si en topar amb una altra SdA cal moure-la, aquella també
+    //             es mou però només als seus dies.
+    // mode 'seguit': totes les sessions següents passen al proper dia de classe, sigui quin sigui.
+    function computePlanShift(group, gId, iso, mode = 'sda') {
+      const plans = group.plans || {};
+      if (!planHasContent(plans[iso])) return null;
+      const dow = d => isoToDate(d).getDay();
+      const sessions = group.sessions || {};
+      const classDays = getGroupDays(group);
+      const movable = d => d >= iso && planHasContent(plans[d]) && (d === iso || !sessions[d]);
+      const all = getClassDates(group, gId, iso, { count: 400, includeOff: false }).map(x => x.iso).filter(d => d !== iso && !sessions[d]);
+      const keyOf = d => (plans[d] && plans[d].sdaId) ? plans[d].sdaId : '_' + d;
+
+      if (mode === 'seguit') {
+        const items = Object.keys(plans).filter(movable).sort();
+        const cands = all.slice(0, items.length);
+        if (cands.length < items.length) return { moves: [], tooFew: true, mode };
+        return { moves: items.map((d, i) => ({ from: d, to: cands[i], plan: plans[d] })).filter(m => m.from !== m.to), mode };
+      }
+
+      // Dies de la setmana de cada SdA (segons on la tens planificada)
+      const daysOf = {};
+      Object.keys(plans).forEach(d => {
+        if (!planHasContent(plans[d])) return;
+        const k = keyOf(d);
+        (daysOf[k] = daysOf[k] || new Set()).add(dow(d));
+      });
+      Object.keys(daysOf).forEach(k => {
+        if (k.startsWith('_')) daysOf[k] = new Set(classDays);            // sessions sense SdA: qualsevol dia
+        else [...daysOf[k]].forEach(x => { if (!classDays.includes(x)) daysOf[k].delete(x); });
+      });
+
+      const start = { [keyOf(iso)]: iso };    // SdA que s'ha de moure → des de quina data
+      let result = null;
+      for (let it = 0; it < 30; it++) {
+        const reserved = new Map();            // data → clau
+        const newPos = {};                      // data antiga → data nova
+        const order = Object.keys(start).sort((x, y) => start[x].localeCompare(start[y]));
+        let ok = true;
+        for (const k of order) {
+          const seq = Object.keys(plans).filter(d => movable(d) && keyOf(d) === k && d >= start[k]).sort();
+          const W = daysOf[k] || new Set([dow(seq[0] || iso)]);
+          const free = all.filter(d => W.has(dow(d)) && d >= start[k] && !reserved.has(d));
+          if (free.length < seq.length) { ok = false; break; }
+          seq.forEach((d, i) => { newPos[d] = free[i]; reserved.set(free[i], k); });
+        }
+        if (!ok) return { moves: [], tooFew: true, mode };
+        // Conflictes: una data reservada on hi ha una sessió que no es mou
+        let changed = false;
+        reserved.forEach((k, d) => {
+          if (planHasContent(plans[d]) && !(d in newPos) && keyOf(d) !== k && d !== iso) {
+            const ko = keyOf(d);
+            if (!start[ko] || d < start[ko]) { start[ko] = d; changed = true; }
+          }
+        });
+        result = newPos;
+        if (!changed) break;
+      }
+      const moves = Object.keys(result).sort().map(d => ({ from: d, to: result[d], plan: plans[d] })).filter(m => m.from !== m.to);
+      return { moves, mode };
+    }
+
+    let planShiftCtx = null;
+    window.openPlanShift = function(gId, iso, auto = false, mode = null) {
+      const group = window.appData.groups[gId];
+      if (!group) return;
+      mode = mode || (planShiftCtx && planShiftCtx.gId === gId && planShiftCtx.iso === iso && planShiftCtx.mode) || 'sda';
+      const res = computePlanShift(group, gId, iso, mode);
+      if (!res || !res.moves.length) {
+        if (!auto) alert(res && res.tooFew ? 'No hi ha prou dies de classe per endarrerir les sessions (revisa l\'horari i els festius).' : 'Aquest dia no té cap sessió planificada per moure.');
+        return;
+      }
+      planShiftCtx = { gId, iso, moves: res.moves, mode };
+      const DOW = ['diumenge', 'dilluns', 'dimarts', 'dimecres', 'dijous', 'divendres', 'dissabte'];
+      const f = d => isoToDate(d).toLocaleDateString('ca-ES', { weekday: 'short', day: 'numeric', month: 'short' });
+      const sdaName = id => { const s = (group.sdas || []).find(x => x.id === id); return s ? s.title : ''; };
+      const plan0 = (group.plans || {})[iso] || {};
+      const sdasMoved = [...new Set(res.moves.map(m => m.plan.sdaId).filter(Boolean))];
+      const daysTxt = id => [...new Set(Object.keys(group.plans || {}).filter(d => group.plans[d] && group.plans[d].sdaId === id).map(d => isoToDate(d).getDay()))].sort().map(d => DOW[d]).join(' i ');
+      document.getElementById('planShiftInfo').innerHTML = `${escapeHtml(group.name)} · el <b>${f(iso)}</b> tenies planificada «${escapeHtml(plan0.title || 'sessió')}».
+        <div class="seg !text-[11px] mt-2 mb-1">
+          <button onclick="openPlanShift('${gId}','${iso}',false,'sda')" class="${mode === 'sda' ? 'active' : ''}">Cada SdA als seus dies</button>
+          <button onclick="openPlanShift('${gId}','${iso}',false,'seguit')" class="${mode === 'seguit' ? 'active' : ''}">Tot correlatiu</button>
+        </div>
+        <div class="text-[11px] text-zinc-500">${mode === 'sda'
+          ? `Cada SdA només es mou als dies que la fas: ${sdasMoved.map(id => `<b>${escapeHtml(sdaName(id))}</b> (${daysTxt(id)})`).join(', ') || '—'}. La resta no es toca.`
+          : 'Totes les sessions següents passen al proper dia de classe, sigui el dia que sigui.'} Es mouen <b>${res.moves.length} sessions</b>.</div>`;
+      document.getElementById('planShiftList').innerHTML = res.moves.map(m => `
+        <div class="flex items-center gap-2 px-3 py-1.5">
+          <span class="font-mono text-[11px] text-zinc-400 line-through w-28 shrink-0 whitespace-nowrap">${f(m.from)}</span>
+          <i class="fa-solid fa-arrow-right text-[9px] text-zinc-300"></i>
+          <span class="font-mono text-[11px] font-bold text-zinc-800 w-28 shrink-0 whitespace-nowrap">${f(m.to)}</span>
+          <span class="flex-1 min-w-0 truncate text-zinc-700">${escapeHtml(m.plan.title || 'Sessió')}${m.plan.sdaId ? ` <span class="text-[10px] text-zinc-400">· ${escapeHtml(sdaName(m.plan.sdaId))}</span>` : ''}</span>
+        </div>`).join('');
+      document.getElementById('planShiftModal').classList.remove('hidden');
+    };
+    window.closePlanShift = function() { document.getElementById('planShiftModal').classList.add('hidden'); planShiftCtx = null; };
+    window.applyPlanShift = function() {
+      if (!planShiftCtx) return;
+      const { gId, moves } = planShiftCtx;
+      const group = window.appData.groups[gId];
+      const plans = getGroupPlans(group);
+      const copy = moves.map(m => ({ to: m.to, plan: JSON.parse(JSON.stringify(m.plan)) }));
+      moves.forEach(m => { delete plans[m.from]; });
+      copy.forEach(m => { plans[m.to] = m.plan; });
+      saveToStorage();
+      if (window.syncGroupEntityToCloud) window.syncGroupEntityToCloud(gId);
+      closePlanShift();
       refreshAfterPlanChange();
     };
 
@@ -5061,9 +5296,10 @@
                   </div>`;
                 if (d.status.off) {
                   return `
-                    <div class="flex gap-3 items-center bg-zinc-50 border border-zinc-200 rounded-2xl p-2.5 opacity-60" style="background-image:repeating-linear-gradient(135deg, rgba(228,228,231,.5) 0 8px, transparent 8px 16px)">
+                    <div class="flex gap-3 items-center bg-zinc-50 border ${planHasContent(getSessionPlan(group, d.iso)) ? 'border-amber-300' : 'border-zinc-200 opacity-60'} rounded-2xl p-2.5" style="background-image:repeating-linear-gradient(135deg, rgba(228,228,231,.5) 0 8px, transparent 8px 16px)">
                       ${dateBlock}
-                      <div class="text-xs font-semibold text-zinc-600"><i class="fa-solid ${d.status.holiday ? 'fa-calendar-xmark' : 'fa-ban'} mr-1"></i>${d.status.holiday ? escapeHtml(d.status.holiday.label) : 'No es fa · ' + escapeHtml(cancelReasonLabel(d.status.cancel))}</div>
+                      <div class="flex-1 text-xs font-semibold text-zinc-600"><i class="fa-solid ${d.status.holiday ? 'fa-calendar-xmark' : 'fa-ban'} mr-1"></i>${d.status.holiday ? escapeHtml(d.status.holiday.label) : 'No es fa · ' + escapeHtml(cancelReasonLabel(d.status.cancel))}${planHasContent(getSessionPlan(group, d.iso)) ? `<div class="mt-1 text-[11px] text-amber-800 font-semibold">Hi havia planificat: «${escapeHtml(getSessionPlan(group, d.iso).title || 'sessió')}»</div>` : ''}</div>
+                      ${planHasContent(getSessionPlan(group, d.iso)) ? `<button onclick="openPlanShift('${gId}','${d.iso}')" class="planif-noprint shrink-0 text-[11px] font-bold px-2.5 py-1.5 rounded-lg bg-amber-500 text-white"><i class="fa-solid fa-forward mr-1"></i>Endarrerir</button>` : ''}
                     </div>`;
                 }
                 const totalMin = has && p.parts ? SESSION_PARTS.reduce((a, sp) => a + ((p.parts[sp.id] && p.parts[sp.id].min) || 0), 0) : 0;
@@ -5094,6 +5330,7 @@
                     <div class="flex flex-col gap-1 shrink-0 planif-noprint">
                       <button onclick="openSessionPlanModal('${gId}','${d.iso}')" class="text-[11px] font-semibold px-2.5 py-1.5 rounded-lg ${has ? 'bg-zinc-100 hover:bg-zinc-200 text-zinc-700' : 'bg-zinc-900 hover:bg-zinc-800 text-white'}">${has ? '<i class="fa-solid fa-pen text-[9px] mr-1"></i>Editar' : '<i class="fa-solid fa-plus text-[9px] mr-1"></i>Planificar'}</button>
                       <button onclick="openDiariFor('${gId}','${d.iso}')" class="text-[11px] font-semibold px-2.5 py-1.5 rounded-lg text-zinc-500 hover:text-zinc-900 hover:bg-zinc-100"><i class="fa-solid fa-clipboard-check text-[9px] mr-1"></i>Diari</button>
+                      ${has && !session && range === 'next' ? `<button onclick="openPlanShift('${gId}','${d.iso}')" title="Moure aquesta sessió i les següents al proper dia de classe" class="text-[11px] font-semibold px-2.5 py-1.5 rounded-lg text-zinc-500 hover:text-amber-700 hover:bg-amber-50"><i class="fa-solid fa-forward text-[9px] mr-1"></i>Endarrerir</button>` : ''}
                     </div>
                   </div>`;
               }).join('')}
@@ -6955,6 +7192,8 @@
 
         if (!targetSda) {
           const alreadyUsed = grp.sdas.some(s => s.id === sdaIdToUse);
+          const keepSes = window.appState.modalSourceSda && window.appState.modalSourceSda.plan && window.appState.modalSourceSda.plan.sessionsDesades;
+          if (keepSes && !plan.sessionsDesades) plan.sessionsDesades = JSON.parse(JSON.stringify(keepSes));
           targetSda = {
             id: alreadyUsed ? ('sda_' + Date.now() + '_' + Math.floor(Math.random() * 1000)) : sdaIdToUse,
             trim: gTrim,
@@ -6969,7 +7208,9 @@
           targetSda.title = title;
           targetSda.trimWeight = trimWeight;
           targetSda.competences = JSON.parse(JSON.stringify(competences));
+          const keepSes2 = (targetSda.plan && targetSda.plan.sessionsDesades) || (window.appState.modalSourceSda && window.appState.modalSourceSda.plan && window.appState.modalSourceSda.plan.sessionsDesades);
           targetSda.plan = JSON.parse(JSON.stringify(plan));
+          if (keepSes2 && !targetSda.plan.sessionsDesades) targetSda.plan.sessionsDesades = JSON.parse(JSON.stringify(keepSes2));
         }
 
         targetSda.linkId = linkId;
