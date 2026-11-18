@@ -67,6 +67,7 @@
     .sda-tab-btn.active { color: #fff; background: #18181b; }
     .plan-textarea { width: 100%; border: 1px solid #e4e4e7; border-radius: 12px; padding: 8px 10px; font-size: 12px; outline: none; resize: vertical; background: #fff; }
     .plan-textarea:focus { box-shadow: 0 0 0 2px #18181b; }
+    @media (hover: none) { .group\/slot .opacity-0 { opacity: 1 !important; } }
     .plan-chip { display: inline-flex; align-items: center; cursor: pointer; user-select: none; }
     .plan-chip input { display: none; }
     .plan-chip span { padding: 4px 10px; border-radius: 999px; border: 1px solid #e4e4e7; background: #fff; color: #52525b; font-weight: 600; font-size: 11px; transition: all .15s; }
@@ -5330,6 +5331,7 @@
                     <div class="flex flex-col gap-1 shrink-0 planif-noprint">
                       <button onclick="openSessionPlanModal('${gId}','${d.iso}')" class="text-[11px] font-semibold px-2.5 py-1.5 rounded-lg ${has ? 'bg-zinc-100 hover:bg-zinc-200 text-zinc-700' : 'bg-zinc-900 hover:bg-zinc-800 text-white'}">${has ? '<i class="fa-solid fa-pen text-[9px] mr-1"></i>Editar' : '<i class="fa-solid fa-plus text-[9px] mr-1"></i>Planificar'}</button>
                       <button onclick="openDiariFor('${gId}','${d.iso}')" class="text-[11px] font-semibold px-2.5 py-1.5 rounded-lg text-zinc-500 hover:text-zinc-900 hover:bg-zinc-100"><i class="fa-solid fa-clipboard-check text-[9px] mr-1"></i>Diari</button>
+                      ${!session && range === 'next' ? `<button onclick="openCancelModal({ gId: '${gId}', iso: '${d.iso}', wholeDay: true })" title="Aquest dia no es fa classe" class="text-[11px] font-semibold px-2.5 py-1.5 rounded-lg text-zinc-500 hover:text-rose-700 hover:bg-rose-50"><i class="fa-solid fa-ban text-[9px] mr-1"></i>No es fa</button>` : ''}
                       ${has && !session && range === 'next' ? `<button onclick="openPlanShift('${gId}','${d.iso}')" title="Moure aquesta sessió i les següents al proper dia de classe" class="text-[11px] font-semibold px-2.5 py-1.5 rounded-lg text-zinc-500 hover:text-amber-700 hover:bg-amber-50"><i class="fa-solid fa-forward text-[9px] mr-1"></i>Endarrerir</button>` : ''}
                     </div>
                   </div>`;
