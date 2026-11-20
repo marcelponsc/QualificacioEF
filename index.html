@@ -1867,6 +1867,38 @@
     </div>
   </div>
 
+  <!-- MODAL PUJAR NOTA DEL TRIMESTRE -->
+  <div id="trimBonusModal" class="fixed inset-0 bg-zinc-950/40 backdrop-blur-xs z-50 flex items-center justify-center p-4 hidden no-print">
+    <div class="bg-white rounded-3xl shadow-card max-w-md w-full flex flex-col overflow-hidden border border-zinc-200">
+      <div class="px-6 py-4 bg-zinc-900 text-white flex justify-between items-center">
+        <h3 class="text-sm font-bold flex items-center gap-2"><i class="fa-solid fa-arrow-up text-emerald-400"></i> Pujar la nota del trimestre</h3>
+        <button onclick="closeTrimBonus()" class="text-zinc-400 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div class="p-6 space-y-4 text-xs">
+        <div id="tbStudent" class="text-sm font-bold text-zinc-900"></div>
+        <div>
+          <div class="font-semibold text-zinc-700 mb-1.5">Punts a sumar <span class="font-normal text-zinc-400">(escala 0–4)</span></div>
+          <div class="flex flex-wrap items-center gap-1.5">
+            <button type="button" onclick="setTrimBonusQuick(0.25)" class="px-3 py-2 rounded-xl border border-zinc-200 font-mono font-bold hover:bg-emerald-50">+0,25</button>
+            <button type="button" onclick="setTrimBonusQuick(0.5)" class="px-3 py-2 rounded-xl border border-zinc-200 font-mono font-bold hover:bg-emerald-50">+0,5</button>
+            <button type="button" onclick="setTrimBonusQuick(0.75)" class="px-3 py-2 rounded-xl border border-zinc-200 font-mono font-bold hover:bg-emerald-50">+0,75</button>
+            <button type="button" onclick="setTrimBonusQuick(1)" class="px-3 py-2 rounded-xl border border-zinc-200 font-mono font-bold hover:bg-emerald-50">+1</button>
+            <input id="tbValue" type="text" inputmode="decimal" oninput="renderTrimBonusPreview()" placeholder="altre" class="w-20 border border-zinc-200 rounded-xl p-2 font-mono font-bold text-center outline-none focus:ring-2 focus:ring-emerald-500">
+          </div>
+        </div>
+        <label class="block font-semibold text-zinc-700">Motiu
+          <input id="tbReason" type="text" placeholder="Ex: Treball extra sobre hàbits saludables" class="mt-1 w-full border border-zinc-200 rounded-xl p-2.5 outline-none focus:ring-2 focus:ring-emerald-500">
+        </label>
+        <div id="tbPreview" class="bg-zinc-50 border border-zinc-200 rounded-xl p-3 text-zinc-700"></div>
+      </div>
+      <div class="px-6 py-3.5 bg-zinc-50 border-t border-zinc-200 flex items-center gap-2 text-xs">
+        <button id="tbRemove" onclick="saveTrimBonus(true)" class="mr-auto px-3 py-1.5 rounded-xl font-semibold text-rose-600 hover:bg-rose-50"><i class="fa-regular fa-trash-can mr-1"></i>Treure l'ajust</button>
+        <button onclick="closeTrimBonus()" class="ml-auto px-3.5 py-1.5 border border-zinc-300 rounded-xl font-semibold text-zinc-600">Cancel·lar</button>
+        <button onclick="saveTrimBonus()" class="px-4 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-semibold">Desar</button>
+      </div>
+    </div>
+  </div>
+
   <!-- MODAL DIA SENSE CLASSE -->
   <div id="dayOffModal" class="fixed inset-0 bg-zinc-950/40 backdrop-blur-xs z-50 flex items-center justify-center p-4 hidden no-print">
     <div class="bg-white rounded-3xl shadow-card max-w-lg w-full max-h-[92vh] flex flex-col overflow-hidden border border-zinc-200">
@@ -5086,6 +5118,74 @@
 
 
 
+
+    // ================== PUJAR LA NOTA DEL TRIMESTRE (treball extra) ==================
+    // group.trimBonus[t][stId] = { v: punts a sumar (escala 0-4), reason }
+    function getTrimBonus(group, t, stId) {
+      const b = group && group.trimBonus && group.trimBonus[t] && group.trimBonus[t][stId];
+      return b && b.v ? b : null;
+    }
+    window.getTrimBonus = getTrimBonus;
+    function trimBonusTag(group, t, stId, small) {
+      const b = getTrimBonus(group, t, stId);
+      return b ? `<span title="${escapeHtml(b.reason || 'Ajust de nota')}" class="inline-flex items-center ${small ? 'text-[9px] px-1' : 'text-[10px] px-1.5'} py-0.5 rounded font-bold font-mono bg-emerald-100 text-emerald-800 border border-emerald-200"><i class="fa-solid fa-arrow-up mr-0.5"></i>${b.v > 0 ? '+' : ''}${b.v.toFixed(2)}</span>` : '';
+    }
+    window.trimBonusTag = trimBonusTag;
+
+    let trimBonusCtx = null;
+    window.openTrimBonus = function(stId, t = null) {
+      const group = getCurrentGroup();
+      t = t || window.appState.currentTrim;
+      const st = (group.students || []).find(x => x.id === stId);
+      if (!st) return;
+      trimBonusCtx = { stId, t };
+      const b = getTrimBonus(group, t, stId);
+      document.getElementById('tbStudent').textContent = `${st.name} · ${['', '1r', '2n', '3r'][t]} trimestre`;
+      document.getElementById('tbValue').value = b ? b.v : '';
+      document.getElementById('tbReason').value = b ? (b.reason || '') : 'Treball extra';
+      document.getElementById('tbRemove').classList.toggle('hidden', !b);
+      renderTrimBonusPreview();
+      document.getElementById('trimBonusModal').classList.remove('hidden');
+      setTimeout(() => document.getElementById('tbValue').focus(), 50);
+    };
+    window.closeTrimBonus = function() { document.getElementById('trimBonusModal').classList.add('hidden'); trimBonusCtx = null; };
+    window.setTrimBonusQuick = function(v) { document.getElementById('tbValue').value = v; renderTrimBonusPreview(); };
+    window.renderTrimBonusPreview = function() {
+      if (!trimBonusCtx) return;
+      const group = getCurrentGroup();
+      const { stId, t } = trimBonusCtx;
+      const base = getStudentTrimScoreBase(stId, t, group);
+      const v = parseFloat(String(document.getElementById('tbValue').value).replace(',', '.')) || 0;
+      const box = document.getElementById('tbPreview');
+      if (isStudentPenalized(group, t, stId)) { box.innerHTML = '<span class="text-rose-700">Aquest alumne està suspès per no arribar al mínim de pràctica: l\'ajust no s\'aplicarà mentre ho estigui.</span>'; return; }
+      if (base === null) { box.innerHTML = '<span class="text-zinc-500">Encara no té nota aquest trimestre. L\'ajust s\'aplicarà quan en tingui.</span>'; return; }
+      const res = Math.max(0, Math.min(4, base + v));
+      const l0 = getLevel(base), l1 = getLevel(res);
+      box.innerHTML = `Nota actual <b class="font-mono">${base.toFixed(2)}</b> <span class="inline-flex px-1.5 rounded text-[10px] ring-1 ring-inset ${l0.badge}">${l0.code}</span>
+        <i class="fa-solid fa-arrow-right mx-1.5 text-zinc-400"></i> amb l'ajust <b class="font-mono text-base">${res.toFixed(2)}</b> <span class="inline-flex px-1.5 rounded text-[10px] ring-1 ring-inset ${l1.badge}">${l1.code}</span>${base + v > 4 ? '<div class="text-[11px] text-zinc-500 mt-1">La nota màxima és 4.</div>' : ''}`;
+    };
+    window.saveTrimBonus = function(remove = false) {
+      if (!trimBonusCtx) return;
+      const group = getCurrentGroup();
+      const { stId, t } = trimBonusCtx;
+      const v = parseFloat(String(document.getElementById('tbValue').value).replace(',', '.'));
+      if (!group.trimBonus) group.trimBonus = {};
+      if (!group.trimBonus[t]) group.trimBonus[t] = {};
+      if (remove || !v) delete group.trimBonus[t][stId];
+      else {
+        if (Math.abs(v) > 4) { alert('El valor ha d\'estar entre -4 i 4 (escala de 0 a 4).'); return; }
+        group.trimBonus[t][stId] = { v: Math.round(v * 100) / 100, reason: document.getElementById('tbReason').value.trim() };
+      }
+      saveToStorage();
+      if (window.syncGroupEntityToCloud) window.syncGroupEntityToCloud(window.appData.activeGroupId);
+      closeTrimBonus();
+      const view = window.appState.currentView;
+      if (view === 'trim') renderTrimView();
+      if (view === 'aval') renderAvalView();
+      if (view === 'final' && window.renderFinalView) renderFinalView();
+      if (view === 'fitxa' && window.renderStudentFitxa) renderStudentFitxa();
+    };
+
     // ================== DIA SENSE CLASSE (amb antelació) ==================
     window.openDayOffModal = function(iso) {
       const inp = document.getElementById('dayOffDate');
@@ -6572,11 +6672,19 @@
     }
 
     // Nota del trimestre: part competencial (SdA) + actitud
-    function getStudentTrimScoreByTrim(stId, trimNum, group = null) {
+    function getStudentTrimScoreBase(stId, trimNum, group = null) {
       const curGroup = group || getCurrentGroup();
       if (isStudentPenalized(curGroup, trimNum, stId)) return PENALTY_SCORE;
       const comp = getStudentTrimCompScore(stId, trimNum, curGroup);
       return mixWithAttitude(comp, getStudentAttitudeTrim(curGroup, stId, trimNum));
+    }
+    // Nota del trimestre + ajust manual (treball extra), sense passar de 4
+    function getStudentTrimScoreByTrim(stId, trimNum, group = null) {
+      const curGroup = group || getCurrentGroup();
+      const base = getStudentTrimScoreBase(stId, trimNum, curGroup);
+      if (base === null || isStudentPenalized(curGroup, trimNum, stId)) return base;
+      const b = getTrimBonus(curGroup, trimNum, stId);
+      return b ? Math.max(0, Math.min(4, base + b.v)) : base;
     }
 
     // Només la part competencial (mitjana ponderada de les SdA)
@@ -6627,7 +6735,13 @@
           }
         });
         const comp = activeWeight > 0 ? (totalWeighted * 100) / activeWeight : null;
-        return mixWithAttitude(comp, getStudentAttitudeCourse(curGroup, stId));
+        const fin = mixWithAttitude(comp, getStudentAttitudeCourse(curGroup, stId));
+        if (fin === null) return null;
+        // Ajustos de nota dels trimestres (treball extra), ponderats pel pes de cada trimestre
+        const tw = curGroup.finalTrimWeights || DEFAULT_FINAL_TRIM_WEIGHTS;
+        let bs = 0, bw = 0;
+        [1, 2, 3].forEach(t => { if (getStudentTrimScoreBase(stId, t, curGroup) !== null) { const b = getTrimBonus(curGroup, t, stId); bs += (b && !isStudentPenalized(curGroup, t, stId) ? b.v : 0) * (tw['t' + t] || 0); bw += (tw['t' + t] || 0); } });
+        return bw ? Math.max(0, Math.min(4, fin + bs / bw)) : fin;
       }
     }
 
@@ -7722,6 +7836,7 @@
           <div class="text-sm font-black font-mono ${isPenalized ? 'text-rose-700' : 'text-zinc-950'}">${overallTrimScore !== null ? overallTrimScore.toFixed(2) : '<span class="text-zinc-300 font-normal">—</span>'}</div>
           <span class="inline-flex items-center mt-0.5 text-[10px] px-2.5 py-0.5 rounded font-bold ring-1 ring-inset ${overallLvl.badge}">${overallLvl.code}</span>
           ${!isPenalized && attInfo && attInfo.value !== null && compScore !== null ? `<div class="text-[9px] font-mono font-normal text-zinc-400 mt-0.5" title="Part competencial · actitud">SdA ${compScore.toFixed(2)} · Act. ${attInfo.value.toFixed(2)}</div>` : ''}
+          <div class="mt-1 flex items-center justify-center gap-1">${trimBonusTag(curGroup, window.appState.currentTrim, st.id, true)}<button onclick="openTrimBonus(${st.id})" title="Pujar la nota (treball extra)" class="no-print text-[9px] font-semibold px-1.5 py-0.5 rounded border ${getTrimBonus(curGroup, window.appState.currentTrim, st.id) ? 'border-emerald-300 text-emerald-700' : 'border-zinc-200 text-zinc-400 hover:text-emerald-700 hover:border-emerald-300'}"><i class="fa-solid ${getTrimBonus(curGroup, window.appState.currentTrim, st.id) ? 'fa-pen' : 'fa-arrow-up'}"></i>${getTrimBonus(curGroup, window.appState.currentTrim, st.id) ? '' : ' Pujar'}</button></div>
         </td></tr>`;
       });
 
@@ -8212,6 +8327,10 @@
             <div class="rounded-xl bg-violet-50 border border-violet-200 py-1.5"><div class="text-[10px] text-violet-700 font-semibold">Actitud ${rule.enabled ? rule.weight + '%' : '(off)'}</div><div class="font-mono font-black text-violet-800">${avalNum(d.act)}</div><div class="text-[10px] text-zinc-500">${ai.n ? ai.n + ' val. · ' : ''}<span class="text-emerald-600">+${ai.pos}</span> <span class="text-rose-600">−${ai.neg}</span>${ai.override !== null ? ' · manual' : ''}</div></div>
             <div class="rounded-xl bg-zinc-900 text-white py-1.5"><div class="text-[10px] opacity-70 font-semibold">Nota T${t}</div><div class="font-mono font-black text-lg leading-tight">${avalNum(d.score)}</div></div>
           </div>
+          <div class="flex items-center gap-2 text-[11px]">
+            ${getTrimBonus(g, t, st.id) ? `<span class="text-emerald-800 font-semibold">${trimBonusTag(g, t, st.id)} ${escapeHtml(getTrimBonus(g, t, st.id).reason || 'Ajust de nota')}</span>` : '<span class="text-zinc-400">Sense ajust de nota</span>'}
+            <button onclick="openTrimBonus(${st.id}, ${t})" class="no-print ml-auto text-[10px] font-bold px-2 py-1 rounded-lg bg-emerald-50 text-emerald-700 border border-emerald-200"><i class="fa-solid fa-arrow-up mr-1"></i>${getTrimBonus(g, t, st.id) ? 'Canviar ajust' : 'Pujar nota'}</button>
+          </div>
           <div class="flex items-center gap-2 text-[11px] text-zinc-500"><span class="font-semibold">Evolució:</span>
             ${evo.map(e => `<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg ${e.n === t ? 'bg-zinc-900 text-white' : 'bg-zinc-100'}">T${e.n} <b class="font-mono">${avalNum(e.v)}</b></span>`).join('<i class="fa-solid fa-arrow-right text-[9px] text-zinc-300"></i>')}
           </div>
@@ -8377,7 +8496,7 @@
                 }).join('')}
                 ${activeCes.map((ce, k) => `<td class="text-center px-0.5 ${k === 0 ? 'border-l border-zinc-100' : ''}" title="${d.ces[ce.id] !== null ? ce.id + ': ' + d.ces[ce.id].toFixed(2) : ''}">${avalLvl(d.ces[ce.id])}</td>`).join('')}
                 ${actOn ? `<td class="text-center font-mono border-l border-zinc-100 ${d.act !== null && d.act < gradeThresholds.as ? 'text-violet-700 font-bold' : 'text-zinc-600'}">${avalNum(d.act)}</td>` : ''}
-                <td class="text-center border-l border-zinc-300 bg-zinc-50 px-2 whitespace-nowrap"><b class="font-mono text-sm">${avalNum(d.score)}</b> ${avalLvl(d.score)}</td>
+                <td class="text-center border-l border-zinc-300 bg-zinc-50 px-2 whitespace-nowrap"><b class="font-mono text-sm">${avalNum(d.score)}</b> ${avalLvl(d.score)}${getTrimBonus(g, t, st.id) ? '<div>' + trimBonusTag(g, t, st.id, true) + '</div>' : ''}</td>
                 ${t > 1 ? `<td class="text-center px-1 whitespace-nowrap text-[10px] font-mono text-zinc-500">${prev.map(p => `<span title="T${p.x}" class="mr-1">${avalNum(p.v)}</span>`).join('')}</td>` : ''}
                 <td class="text-center border-l border-zinc-100 px-1">${practicePctBadge(d.att.pct, d.min)}</td>
                 <td class="text-center font-mono ${d.att.F >= AVAL_LIMITS.F ? 'text-rose-600 font-bold' : 'text-zinc-500'}">${d.att.F || '·'}</td>
