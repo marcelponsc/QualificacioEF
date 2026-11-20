@@ -1192,7 +1192,15 @@
       <div class="p-6 space-y-4 text-xs">
         <div>
           <label class="block font-semibold text-zinc-700 mb-1">Nom del Grup o Curs</label>
-          <input type="text" id="modalGroupNameInput" placeholder="Ex: 1r ESO C, 2n ESO A..." class="w-full text-sm border border-zinc-200 rounded-xl p-2.5 outline-none font-semibold focus:ring-2 focus:ring-zinc-900">
+          <input type="text" id="modalGroupNameInput" oninput="if (!window.appState.editingGroupId && /batx/i.test(this.value)) setGroupScaleRadio('n10')" placeholder="Ex: 1r ESO C, 2n ESO A, 1r Batx..." class="w-full text-sm border border-zinc-200 rounded-xl p-2.5 outline-none font-semibold focus:ring-2 focus:ring-zinc-900">
+        </div>
+
+        <div>
+          <label class="block font-semibold text-zinc-700 mb-1.5">Tipus de qualificació</label>
+          <div class="grid grid-cols-2 gap-2">
+            <label class="flex items-center gap-2 border border-zinc-200 rounded-xl p-2.5 cursor-pointer has-[:checked]:border-zinc-900 has-[:checked]:bg-zinc-50"><input type="radio" name="modalGroupScale" value="lvl" class="accent-zinc-900"><span><b>Assoliments</b><br><span class="text-zinc-500">NA · AS · AN · AE (ESO)</span></span></label>
+            <label class="flex items-center gap-2 border border-zinc-200 rounded-xl p-2.5 cursor-pointer has-[:checked]:border-zinc-900 has-[:checked]:bg-zinc-50"><input type="radio" name="modalGroupScale" value="n10" class="accent-zinc-900"><span><b>Numèrica 0–10</b><br><span class="text-zinc-500">Batxillerat</span></span></label>
+          </div>
         </div>
 
         <div>
@@ -1877,12 +1885,9 @@
       <div class="p-6 space-y-4 text-xs">
         <div id="tbStudent" class="text-sm font-bold text-zinc-900"></div>
         <div>
-          <div class="font-semibold text-zinc-700 mb-1.5">Punts a sumar <span class="font-normal text-zinc-400">(escala 0–4)</span></div>
+          <div class="font-semibold text-zinc-700 mb-1.5">Punts a sumar <span id="tbScale" class="font-normal text-zinc-400">(escala 0–4)</span></div>
           <div class="flex flex-wrap items-center gap-1.5">
-            <button type="button" onclick="setTrimBonusQuick(0.25)" class="px-3 py-2 rounded-xl border border-zinc-200 font-mono font-bold hover:bg-emerald-50">+0,25</button>
-            <button type="button" onclick="setTrimBonusQuick(0.5)" class="px-3 py-2 rounded-xl border border-zinc-200 font-mono font-bold hover:bg-emerald-50">+0,5</button>
-            <button type="button" onclick="setTrimBonusQuick(0.75)" class="px-3 py-2 rounded-xl border border-zinc-200 font-mono font-bold hover:bg-emerald-50">+0,75</button>
-            <button type="button" onclick="setTrimBonusQuick(1)" class="px-3 py-2 rounded-xl border border-zinc-200 font-mono font-bold hover:bg-emerald-50">+1</button>
+            <span id="tbChips" class="contents"></span>
             <input id="tbValue" type="text" inputmode="decimal" oninput="renderTrimBonusPreview()" placeholder="altre" class="w-20 border border-zinc-200 rounded-xl p-2 font-mono font-bold text-center outline-none focus:ring-2 focus:ring-emerald-500">
           </div>
         </div>
@@ -3070,7 +3075,7 @@
         const theme = getGroupPastelTheme(group);
         const s = summaries[gId];
         const studentCount = (group.students || []).length;
-        const avgLvl = getLevel(s.avg);
+        const avgLvl = getLevel(s.avg, group);
         const firstPending = s.sdaRows.find(r => r.progress.pct < 100) || s.sdaRows[0];
 
         const distTotal = Object.values(s.counts).reduce((a, b) => a + b, 0);
@@ -3118,8 +3123,8 @@
               <div class="flex items-center justify-between">
                 <span class="text-[10px] font-bold uppercase tracking-wider text-zinc-400">Nota mitjana del trimestre</span>
                 <span class="flex items-center gap-1.5">
-                  <span class="font-mono font-black text-sm text-zinc-900">${s.avg !== null ? s.avg.toFixed(2) : '—'}</span>
-                  <span class="inline-flex px-1.5 py-0.5 rounded text-[10px] font-bold ring-1 ring-inset ${avgLvl.badge}">${avgLvl.code}</span>
+                  <span class="font-mono font-black text-sm text-zinc-900">${s.avg !== null ? fs(s.avg, group) : '—'}</span>
+                  <span class="inline-flex px-1.5 py-0.5 rounded text-[10px] font-bold ring-1 ring-inset ${avgLvl.badge}">${avgLvl.label}</span>
                 </span>
               </div>
               ${distBar}
@@ -5128,7 +5133,7 @@
     window.getTrimBonus = getTrimBonus;
     function trimBonusTag(group, t, stId, small) {
       const b = getTrimBonus(group, t, stId);
-      return b ? `<span title="${escapeHtml(b.reason || 'Ajust de nota')}" class="inline-flex items-center ${small ? 'text-[9px] px-1' : 'text-[10px] px-1.5'} py-0.5 rounded font-bold font-mono bg-emerald-100 text-emerald-800 border border-emerald-200"><i class="fa-solid fa-arrow-up mr-0.5"></i>${b.v > 0 ? '+' : ''}${b.v.toFixed(2)}</span>` : '';
+      return b ? `<span title="${escapeHtml(b.reason || 'Ajust de nota')}" class="inline-flex items-center ${small ? 'text-[9px] px-1' : 'text-[10px] px-1.5'} py-0.5 rounded font-bold font-mono bg-emerald-100 text-emerald-800 border border-emerald-200"><i class="fa-solid fa-arrow-up mr-0.5"></i>${b.v > 0 ? '+' : ''}${fs(b.v, group)}</span>` : '';
     }
     window.trimBonusTag = trimBonusTag;
 
@@ -5141,7 +5146,10 @@
       trimBonusCtx = { stId, t };
       const b = getTrimBonus(group, t, stId);
       document.getElementById('tbStudent').textContent = `${st.name} · ${['', '1r', '2n', '3r'][t]} trimestre`;
-      document.getElementById('tbValue').value = b ? b.v : '';
+      document.getElementById('tbValue').value = b ? toDisp(b.v, group) : '';
+      const chips = isN10(group) ? [0.5, 1, 1.5, 2] : [0.25, 0.5, 0.75, 1];
+      document.getElementById('tbChips').innerHTML = chips.map(c => `<button type="button" onclick="setTrimBonusQuick(${c})" class="px-3 py-2 rounded-xl border border-zinc-200 font-mono font-bold hover:bg-emerald-50">+${String(c).replace('.', ',')}</button>`).join('');
+      document.getElementById('tbScale').textContent = isN10(group) ? '(escala 0–10)' : '(escala 0–4)';
       document.getElementById('tbReason').value = b ? (b.reason || '') : 'Treball extra';
       document.getElementById('tbRemove').classList.toggle('hidden', !b);
       renderTrimBonusPreview();
@@ -5155,26 +5163,27 @@
       const group = getCurrentGroup();
       const { stId, t } = trimBonusCtx;
       const base = getStudentTrimScoreBase(stId, t, group);
-      const v = parseFloat(String(document.getElementById('tbValue').value).replace(',', '.')) || 0;
+      const v = fromDisp(parseFloat(String(document.getElementById('tbValue').value).replace(',', '.')) || 0, group);
       const box = document.getElementById('tbPreview');
       if (isStudentPenalized(group, t, stId)) { box.innerHTML = '<span class="text-rose-700">Aquest alumne està suspès per no arribar al mínim de pràctica: l\'ajust no s\'aplicarà mentre ho estigui.</span>'; return; }
       if (base === null) { box.innerHTML = '<span class="text-zinc-500">Encara no té nota aquest trimestre. L\'ajust s\'aplicarà quan en tingui.</span>'; return; }
       const res = Math.max(0, Math.min(4, base + v));
       const l0 = getLevel(base), l1 = getLevel(res);
-      box.innerHTML = `Nota actual <b class="font-mono">${base.toFixed(2)}</b> <span class="inline-flex px-1.5 rounded text-[10px] ring-1 ring-inset ${l0.badge}">${l0.code}</span>
-        <i class="fa-solid fa-arrow-right mx-1.5 text-zinc-400"></i> amb l'ajust <b class="font-mono text-base">${res.toFixed(2)}</b> <span class="inline-flex px-1.5 rounded text-[10px] ring-1 ring-inset ${l1.badge}">${l1.code}</span>${base + v > 4 ? '<div class="text-[11px] text-zinc-500 mt-1">La nota màxima és 4.</div>' : ''}`;
+      box.innerHTML = `Nota actual <b class="font-mono">${fs(base)}</b> <span class="inline-flex px-1.5 rounded text-[10px] ring-1 ring-inset ${l0.badge}">${l0.label}</span>
+        <i class="fa-solid fa-arrow-right mx-1.5 text-zinc-400"></i> amb l'ajust <b class="font-mono text-base">${fs(res)}</b> <span class="inline-flex px-1.5 rounded text-[10px] ring-1 ring-inset ${l1.badge}">${l1.label}</span>${base + v > 4 ? `<div class="text-[11px] text-zinc-500 mt-1">La nota màxima és ${gradeMax(group)}.</div>` : ''}`;
     };
     window.saveTrimBonus = function(remove = false) {
       if (!trimBonusCtx) return;
       const group = getCurrentGroup();
       const { stId, t } = trimBonusCtx;
-      const v = parseFloat(String(document.getElementById('tbValue').value).replace(',', '.'));
+      const vRaw = parseFloat(String(document.getElementById('tbValue').value).replace(',', '.'));
+      const v = isNaN(vRaw) ? vRaw : fromDisp(vRaw, group);
       if (!group.trimBonus) group.trimBonus = {};
       if (!group.trimBonus[t]) group.trimBonus[t] = {};
       if (remove || !v) delete group.trimBonus[t][stId];
       else {
-        if (Math.abs(v) > 4) { alert('El valor ha d\'estar entre -4 i 4 (escala de 0 a 4).'); return; }
-        group.trimBonus[t][stId] = { v: Math.round(v * 100) / 100, reason: document.getElementById('tbReason').value.trim() };
+        if (Math.abs(v) > 4) { alert(`El valor ha d'estar entre -${gradeMax(group)} i ${gradeMax(group)}.`); return; }
+        group.trimBonus[t][stId] = { v: Math.round(v * 10000) / 10000, reason: document.getElementById('tbReason').value.trim() };
       }
       saveToStorage();
       if (window.syncGroupEntityToCloud) window.syncGroupEntityToCloud(window.appData.activeGroupId);
@@ -6178,6 +6187,7 @@
       document.getElementById('groupModalTitle').innerHTML = `<i class="fa-solid fa-graduation-cap text-zinc-400"></i> Crear Nova Classe`;
       document.getElementById('modalGroupNameInput').value = '';
       document.getElementById('groupModalSaveBtn').textContent = "Crear Classe";
+      setGroupScaleRadio('');
       
       const defaultColor = 'pastel-blue';
       document.getElementById('modalGroupColorInput').value = defaultColor;
@@ -6195,6 +6205,7 @@
       document.getElementById('groupModalTitle').innerHTML = `<i class="fa-solid fa-pen text-zinc-400"></i> Modificar Classe`;
       document.getElementById('modalGroupNameInput').value = group.name;
       document.getElementById('groupModalSaveBtn').textContent = "Actualitzar Classe";
+      setGroupScaleRadio(isN10(group) ? 'n10' : 'lvl');
       
       const color = group.color || 'pastel-blue';
       document.getElementById('modalGroupColorInput').value = color;
@@ -6203,6 +6214,10 @@
       document.getElementById('groupModalSdaSection').classList.add('hidden');
       document.getElementById('groupModal').classList.remove('hidden');
     };
+
+    window.setGroupScaleRadio = setGroupScaleRadio;
+    function setGroupScaleRadio(v) { document.querySelectorAll('input[name="modalGroupScale"]').forEach(r => { r.checked = r.value === v; }); }
+    function getGroupScaleRadio(name) { const r = document.querySelector('input[name="modalGroupScale"]:checked'); return r ? r.value : (/batx/i.test(name || '') ? 'n10' : 'lvl'); }
 
     window.closeGroupModal = function() {
       document.getElementById('groupModal').classList.add('hidden');
@@ -6245,6 +6260,7 @@
         const gId = window.appState.editingGroupId;
         window.appData.groups[gId].name = name;
         window.appData.groups[gId].color = color;
+        window.appData.groups[gId].scale = getGroupScaleRadio(name);
         saveToStorage();
         if (window.syncGroupEntityToCloud) window.syncGroupEntityToCloud(gId);
         closeGroupModal();
@@ -6280,6 +6296,7 @@
         window.appData.groups[gId] = {
           name: name,
           color: color,
+          scale: getGroupScaleRadio(name),
           students: [],
           sdas: importedSdas,
           grades: {},
@@ -6420,14 +6437,39 @@
 
     // ================== CÀLCULS I NIVELLS ==================
 
-    function getLevel(val) {
-      if (val === null || val === undefined || isNaN(val)) return { code: "—", badge: "bg-zinc-100 text-zinc-400 ring-zinc-200" };
+    // ---- Escala de qualificació per grup: 'lvl' = assoliments (ESO, intern 0-4) · 'n10' = numèrica 0-10 (Batxillerat)
+    // Internament totes les notes es guarden en escala 0-4; en els grups 'n10' es mostren i s'escriuen ×2,5 (0-10).
+    function isN10(g) {
+      if (!g) { try { g = getCurrentGroup(); } catch (e) { g = null; } }
+      if (!g) return false;
+      return g.scale ? g.scale === 'n10' : /batx/i.test(g.name || '');
+    }
+    window.isN10 = isN10;
+    function gradeMax(g) { return isN10(g) ? 10 : 4; }
+    function toDisp(v, g) { return v === null || v === undefined || v === '' || isNaN(v) ? v : (isN10(g) ? Math.round(v * 2.5 * 100) / 100 : v); }
+    function fromDisp(v, g) { return isN10(g) ? v / 2.5 : v; }
+    function fs(v, g) { if (v === null || v === undefined || isNaN(v)) return '—'; return isN10(g) ? (v * 2.5).toFixed(2) : v.toFixed(2); }
+    window.fs = fs;
+
+    function getLevel(val, g = null) {
+      if (val === null || val === undefined || isNaN(val)) return { code: "—", label: "—", badge: "bg-zinc-100 text-zinc-400 ring-zinc-200" };
       const th = gradeThresholds;
-      if (val < th.epa) return { code: "NA", badge: "bg-rose-50 text-rose-700 ring-rose-200 font-bold" };
-      if (val < th.as) return { code: "EPA", badge: "bg-amber-50 text-amber-800 ring-amber-200 font-bold" };
-      if (val < th.an) return { code: "AS", badge: "bg-sky-50 text-sky-800 ring-sky-200 font-bold" };
-      if (val < th.ae) return { code: "AN", badge: "bg-indigo-50 text-indigo-800 ring-indigo-200 font-bold" };
-      return { code: "AE", badge: "bg-emerald-50 text-emerald-800 ring-emerald-200 font-bold" };
+      let r;
+      if (val < th.epa) r = { code: "NA", badge: "bg-rose-50 text-rose-700 ring-rose-200 font-bold" };
+      else if (val < th.as) r = { code: "EPA", badge: "bg-amber-50 text-amber-800 ring-amber-200 font-bold" };
+      else if (val < th.an) r = { code: "AS", badge: "bg-sky-50 text-sky-800 ring-sky-200 font-bold" };
+      else if (val < th.ae) r = { code: "AN", badge: "bg-indigo-50 text-indigo-800 ring-indigo-200 font-bold" };
+      else r = { code: "AE", badge: "bg-emerald-50 text-emerald-800 ring-emerald-200 font-bold" };
+      r.label = r.code;
+      if (isN10(g)) {
+        const v = val * 2.5;
+        if (v < 5) { r.label = 'INS'; r.badge = "bg-rose-50 text-rose-700 ring-rose-200 font-bold"; }
+        else if (v < 6) { r.label = 'SUF'; r.badge = "bg-sky-50 text-sky-800 ring-sky-200 font-bold"; }
+        else if (v < 7) { r.label = 'BÉ'; r.badge = "bg-sky-50 text-sky-800 ring-sky-200 font-bold"; }
+        else if (v < 9) { r.label = 'NOT'; r.badge = "bg-indigo-50 text-indigo-800 ring-indigo-200 font-bold"; }
+        else { r.label = 'EXC'; r.badge = "bg-emerald-50 text-emerald-800 ring-emerald-200 font-bold"; }
+      }
+      return r;
     }
 
     function getScoreColorClass(val) {
@@ -6955,9 +6997,10 @@
                 const gradeKey = `${ce.id}_${oa.id}`;
                 const val = stGrades[gradeKey] !== undefined ? stGrades[gradeKey] : '';
                 const colorClass = getScoreColorClass(val);
+                const dval = toDisp(val);
 
                 rowsHtml += `<td class="p-0.5 border-r border-zinc-200 text-center ${oaTheme.cell}">
-                  <input type="text" value="${val !== '' ? val : ''}"
+                  <input type="text" value="${val !== '' ? toDisp(val) : ''}"
                     data-row="${rIdx}" data-col="${colCounter}"
                     onkeydown="handleSpreadsheetInput(event, ${rIdx}, ${colCounter}, '${sda.id}', ${st.id}, '${gradeKey}')"
                     onfocus="this.select()"
@@ -6974,7 +7017,7 @@
               const colorClass = getScoreColorClass(val);
 
               rowsHtml += `<td class="p-0.5 border-r border-zinc-200 text-center ${oaTheme.cell}">
-                <input type="text" value="${val !== '' ? val : ''}"
+                <input type="text" value="${val !== '' ? toDisp(val) : ''}"
                   data-row="${rIdx}" data-col="${colCounter}"
                   onkeydown="handleSpreadsheetInput(event, ${rIdx}, ${colCounter}, '${sda.id}', ${st.id}, '${gradeKey}')"
                   onfocus="this.select()"
@@ -6988,10 +7031,10 @@
 
           rowsHtml += `
             <td id="cell_${sda.id}_${st.id}_${ce.id}_score" class="py-1 px-2 text-center font-mono font-bold border-r border-zinc-200 ${theme.scoreCe} text-xs">
-              ${ceScore !== null ? ceScore.toFixed(2) : '<span class="text-zinc-300 font-normal">—</span>'}
+              ${ceScore !== null ? fs(ceScore) : '<span class="text-zinc-300 font-normal">—</span>'}
             </td>
             <td id="cell_${sda.id}_${st.id}_${ce.id}_lvl" class="py-1 px-2 text-center border-r border-zinc-200 ${theme.levelCe}">
-              <span class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-bold ring-1 ring-inset ${lvl.badge}">${lvl.code}</span>
+              <span class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-bold ring-1 ring-inset ${lvl.badge}">${lvl.label}</span>
             </td>
           `;
         });
@@ -7001,10 +7044,10 @@
 
         rowsHtml += `
           <td id="cell_${sda.id}_${st.id}_overall_score" class="py-1 px-2.5 text-center font-mono font-black text-zinc-900 border-l border-zinc-300 bg-zinc-50 text-xs"${isExempt ? ' colspan="2"' : ''}>
-            ${isExempt ? EXEMPT_BADGE : (overallSdaScore !== null ? overallSdaScore.toFixed(2) : '<span class="text-zinc-300 font-normal">—</span>')}
+            ${isExempt ? EXEMPT_BADGE : (overallSdaScore !== null ? fs(overallSdaScore) : '<span class="text-zinc-300 font-normal">—</span>')}
           </td>
           ${isExempt ? '' : `<td id="cell_${sda.id}_${st.id}_overall_lvl" class="py-1 px-2 text-center bg-zinc-50">
-            <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold ring-1 ring-inset ${overallSdaLvl.badge}">${overallSdaLvl.code}</span>
+            <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold ring-1 ring-inset ${overallSdaLvl.badge}">${overallSdaLvl.label}</span>
           </td>`}
         </tr>`;
       });
@@ -7042,9 +7085,11 @@
       if (raw !== '') {
         let num = parseFloat(raw);
         if (isNaN(num) || num < 0) num = 0;
-        if (num > 4) num = 4;
-        val = Math.round(num * 100) / 100;
-        inputEl.value = val;
+        const mx = gradeMax();
+        if (num > mx) num = mx;
+        num = Math.round(num * 100) / 100;
+        inputEl.value = num;
+        val = isN10() ? Math.round(fromDisp(num) * 10000) / 10000 : num;
       } else {
         inputEl.value = '';
       }
@@ -7082,15 +7127,15 @@
         const lvl = getLevel(sc);
         const cellSc = document.getElementById(`cell_${sda.id}_${stId}_${ce.id}_score`);
         const cellLvl = document.getElementById(`cell_${sda.id}_${stId}_${ce.id}_lvl`);
-        if (cellSc) cellSc.innerHTML = sc !== null ? sc.toFixed(2) : '<span class="text-zinc-300 font-normal">—</span>';
-        if (cellLvl) cellLvl.innerHTML = `<span class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-bold ring-1 ring-inset ${lvl.badge}">${lvl.code}</span>`;
+        if (cellSc) cellSc.innerHTML = sc !== null ? fs(sc) : '<span class="text-zinc-300 font-normal">—</span>';
+        if (cellLvl) cellLvl.innerHTML = `<span class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-bold ring-1 ring-inset ${lvl.badge}">${lvl.label}</span>`;
       });
 
       const ov = getStudentOverallSdaScore(sda, stId);
       const ovLvl = getLevel(ov);
       const cellOvSc = document.getElementById(`cell_${sda.id}_${stId}_overall_score`);
       const cellOvLvl = document.getElementById(`cell_${sda.id}_${stId}_overall_lvl`);
-      if (cellOvSc) cellOvSc.innerHTML = ov !== null ? ov.toFixed(2) : '<span class="text-zinc-300 font-normal">—</span>';
+      if (cellOvSc) cellOvSc.innerHTML = ov !== null ? fs(ov) : '<span class="text-zinc-300 font-normal">—</span>';
       if (cellOvLvl) cellOvLvl.innerHTML = `<span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold ring-1 ring-inset ${ovLvl.badge}">${ovLvl.code}</span>`;
     }
 
@@ -7796,8 +7841,8 @@
             return;
           }
           rowsHtml += `<td class="py-2 px-3 text-center border-l border-zinc-100">
-            <div class="font-bold font-mono text-zinc-800 text-xs">${sdaScore !== null ? sdaScore.toFixed(2) : '<span class="text-zinc-300 font-normal">—</span>'}</div>
-            <span class="inline-flex items-center mt-0.5 text-[9px] px-1.5 py-0.2 rounded font-bold ring-1 ring-inset ${lvl.badge}">${lvl.code}</span>
+            <div class="font-bold font-mono text-zinc-800 text-xs">${sdaScore !== null ? fs(sdaScore) : '<span class="text-zinc-300 font-normal">—</span>'}</div>
+            <span class="inline-flex items-center mt-0.5 text-[9px] px-1.5 py-0.2 rounded font-bold ring-1 ring-inset ${lvl.badge}">${lvl.label}</span>
           </td>`;
         });
 
@@ -7806,8 +7851,8 @@
           const lvl = getLevel(avg);
 
           rowsHtml += `<td class="py-2 px-2 text-center border-l border-zinc-100 bg-zinc-50/30">
-            <div class="font-semibold font-mono text-zinc-700 text-xs">${avg !== null ? avg.toFixed(2) : '<span class="text-zinc-300 font-normal">—</span>'}</div>
-            <span class="inline-flex items-center text-[9px] px-1 rounded font-semibold ${lvl.badge}">${lvl.code}</span>
+            <div class="font-semibold font-mono text-zinc-700 text-xs">${avg !== null ? fs(avg) : '<span class="text-zinc-300 font-normal">—</span>'}</div>
+            <span class="inline-flex items-center text-[9px] px-1 rounded font-semibold ${lvl.badge}">${lvl.label}</span>
           </td>`;
         });
 
@@ -7817,12 +7862,12 @@
           const shown = attInfo.value;
           const aLvl = getLevel(shown);
           rowsHtml += `<td class="py-2 px-2 text-center border-l border-zinc-100 bg-violet-50/30">
-            <input type="text" inputmode="decimal" value="${attInfo.override !== null ? attInfo.override : ''}" placeholder="${attInfo.auto !== null ? attInfo.auto.toFixed(2) : '—'}"
+            <input type="text" inputmode="decimal" value="${attInfo.override !== null ? toDisp(attInfo.override) : ''}" placeholder="${attInfo.auto !== null ? fs(attInfo.auto) : '—'}"
               onfocus="this.select()" onchange="setAttitudeOverride(${st.id}, this.value)"
               title="${attInfo.n ? attInfo.n + ' valoracions' : 'Sense valoracions'}${attInfo.pos || attInfo.neg ? ' · +' + attInfo.pos + ' / −' + attInfo.neg : ''}${attInfo.override !== null ? ' · Nota posada a mà (esborra-la per tornar a l\'automàtica)' : ''}"
               class="w-14 h-8 text-center rounded-lg font-mono text-xs font-bold outline-none border ${attInfo.override !== null ? 'border-violet-400 bg-white text-violet-800' : 'border-zinc-200 bg-white/70 placeholder:text-zinc-700'} focus:ring-2 focus:ring-violet-500">
             <div class="mt-0.5 flex items-center justify-center gap-1">
-              <span class="inline-flex items-center text-[9px] px-1 rounded font-semibold ${aLvl.badge}">${aLvl.code}</span>
+              <span class="inline-flex items-center text-[9px] px-1 rounded font-semibold ${aLvl.badge}">${aLvl.label}</span>
               ${attInfo.n || attInfo.pos || attInfo.neg ? `<span class="text-[9px] font-mono text-zinc-400">${attInfo.n}v${attInfo.pos || attInfo.neg ? ` +${attInfo.pos}/−${attInfo.neg}` : ''}</span>` : ''}
             </div>
           </td>`;
@@ -7833,9 +7878,9 @@
         const compScore = getStudentTrimCompScore(st.id, window.appState.currentTrim, curGroup);
 
         rowsHtml += `<td class="py-2 px-4 text-center border-l-2 border-zinc-800 ${isPenalized ? 'bg-rose-100/50' : 'bg-zinc-50/70'} font-bold">
-          <div class="text-sm font-black font-mono ${isPenalized ? 'text-rose-700' : 'text-zinc-950'}">${overallTrimScore !== null ? overallTrimScore.toFixed(2) : '<span class="text-zinc-300 font-normal">—</span>'}</div>
-          <span class="inline-flex items-center mt-0.5 text-[10px] px-2.5 py-0.5 rounded font-bold ring-1 ring-inset ${overallLvl.badge}">${overallLvl.code}</span>
-          ${!isPenalized && attInfo && attInfo.value !== null && compScore !== null ? `<div class="text-[9px] font-mono font-normal text-zinc-400 mt-0.5" title="Part competencial · actitud">SdA ${compScore.toFixed(2)} · Act. ${attInfo.value.toFixed(2)}</div>` : ''}
+          <div class="text-sm font-black font-mono ${isPenalized ? 'text-rose-700' : 'text-zinc-950'}">${overallTrimScore !== null ? fs(overallTrimScore) : '<span class="text-zinc-300 font-normal">—</span>'}</div>
+          <span class="inline-flex items-center mt-0.5 text-[10px] px-2.5 py-0.5 rounded font-bold ring-1 ring-inset ${overallLvl.badge}">${overallLvl.label}</span>
+          ${!isPenalized && attInfo && attInfo.value !== null && compScore !== null ? `<div class="text-[9px] font-mono font-normal text-zinc-400 mt-0.5" title="Part competencial · actitud">SdA ${fs(compScore)} · Act. ${fs(attInfo.value)}</div>` : ''}
           <div class="mt-1 flex items-center justify-center gap-1">${trimBonusTag(curGroup, window.appState.currentTrim, st.id, true)}<button onclick="openTrimBonus(${st.id})" title="Pujar la nota (treball extra)" class="no-print text-[9px] font-semibold px-1.5 py-0.5 rounded border ${getTrimBonus(curGroup, window.appState.currentTrim, st.id) ? 'border-emerald-300 text-emerald-700' : 'border-zinc-200 text-zinc-400 hover:text-emerald-700 hover:border-emerald-300'}"><i class="fa-solid ${getTrimBonus(curGroup, window.appState.currentTrim, st.id) ? 'fa-pen' : 'fa-arrow-up'}"></i>${getTrimBonus(curGroup, window.appState.currentTrim, st.id) ? '' : ' Pujar'}</button></div>
         </td></tr>`;
       });
@@ -7852,8 +7897,9 @@
       if (v === '') delete group.attitudeOverride[t][stId];
       else {
         const n = parseFloat(v);
-        if (isNaN(n) || n < 0 || n > attitudeMax()) { alert(`La nota d'actitud ha d'anar de 0 a ${attitudeMax()}.`); renderTrimView(); return; }
-        group.attitudeOverride[t][stId] = Math.round(n * 100) / 100;
+        const amx = isN10(group) ? 10 : attitudeMax();
+        if (isNaN(n) || n < 0 || n > amx) { alert(`La nota d'actitud ha d'anar de 0 a ${amx}.`); renderTrimView(); return; }
+        group.attitudeOverride[t][stId] = isN10(group) ? Math.round(n / 2.5 * 10000) / 10000 : Math.round(n * 100) / 100;
       }
       saveToStorage();
       if (window.syncGroupEntityToCloud) window.syncGroupEntityToCloud(window.appData.activeGroupId);
@@ -8003,8 +8049,8 @@
             const isPen = curGroup.attendancePenalty?.[tNum]?.[st.id];
 
             html += `<td class="py-2 px-3 text-center border-l border-zinc-100 ${isPen ? 'bg-rose-50/30' : ''}">
-              <div class="font-bold font-mono ${isPen ? 'text-rose-700' : 'text-zinc-800'} text-xs">${sc !== null ? sc.toFixed(2) : '<span class="text-zinc-300 font-normal">—</span>'}</div>
-              <span class="inline-flex items-center mt-0.5 text-[9px] px-1.5 py-0.2 rounded font-bold ring-1 ring-inset ${lvl.badge}">${lvl.code}</span>
+              <div class="font-bold font-mono ${isPen ? 'text-rose-700' : 'text-zinc-800'} text-xs">${sc !== null ? fs(sc) : '<span class="text-zinc-300 font-normal">—</span>'}</div>
+              <span class="inline-flex items-center mt-0.5 text-[9px] px-1.5 py-0.2 rounded font-bold ring-1 ring-inset ${lvl.badge}">${lvl.label}</span>
               ${isPen ? '<div class="text-[8px] font-bold text-rose-600 uppercase mt-0.5">No pràctica</div>' : ''}
             </td>`;
           });
@@ -8014,15 +8060,15 @@
             const lvl = getLevel(avg);
 
             html += `<td class="py-2 px-3 text-center border-l border-zinc-100">
-              <div class="font-bold font-mono text-zinc-800 text-xs">${avg !== null ? avg.toFixed(2) : '<span class="text-zinc-300 font-normal">—</span>'}</div>
-              <span class="inline-flex items-center mt-0.5 text-[9px] px-1.5 py-0.2 rounded font-bold ring-1 ring-inset ${lvl.badge}">${lvl.code}</span>
+              <div class="font-bold font-mono text-zinc-800 text-xs">${avg !== null ? fs(avg) : '<span class="text-zinc-300 font-normal">—</span>'}</div>
+              <span class="inline-flex items-center mt-0.5 text-[9px] px-1.5 py-0.2 rounded font-bold ring-1 ring-inset ${lvl.badge}">${lvl.label}</span>
             </td>`;
           });
         }
 
         html += `<td class="py-2 px-4 text-center border-l-2 border-zinc-800 bg-zinc-50/70 font-bold">
-          <div class="text-sm font-black font-mono text-zinc-950">${finalScore !== null ? finalScore.toFixed(2) : '<span class="text-zinc-300 font-normal">—</span>'}</div>
-          <span class="inline-flex items-center mt-0.5 text-[10px] px-2.5 py-0.5 rounded font-bold ring-1 ring-inset ${finalLvl.badge}">${finalLvl.code}</span>
+          <div class="text-sm font-black font-mono text-zinc-950">${finalScore !== null ? fs(finalScore) : '<span class="text-zinc-300 font-normal">—</span>'}</div>
+          <span class="inline-flex items-center mt-0.5 text-[10px] px-2.5 py-0.5 rounded font-bold ring-1 ring-inset ${finalLvl.badge}">${finalLvl.label}</span>
         </td></tr>`;
       });
 
@@ -8118,7 +8164,7 @@
       const penalized = isStudentPenalized(group, trim, st.id);
       const alerts = [];
       if (score === null) alerts.push({ k: 'nonotes', t: 'Sense notes', c: 'bg-zinc-100 text-zinc-500 border-zinc-200' });
-      else if (lvl.code === 'NA' || lvl.code === 'EPA') alerts.push({ k: 'susp', t: lvl.code === 'NA' ? 'No assolit' : 'En procés', c: 'bg-rose-50 text-rose-700 border-rose-200' });
+      else if (lvl.code === 'NA' || lvl.code === 'EPA') alerts.push({ k: 'susp', t: isN10(group) ? 'Suspès' : lvl.code === 'NA' ? 'No assolit' : 'En procés', c: 'bg-rose-50 text-rose-700 border-rose-200' });
       if (penalized || (att.pct !== null && att.pct < min)) alerts.push({ k: 'prac', t: `Pràctica ${att.pct !== null ? Math.round(att.pct) + '%' : '—'}`, c: 'bg-rose-50 text-rose-700 border-rose-200' });
       if (att.F >= AVAL_LIMITS.F) alerts.push({ k: 'F', t: `${att.F} faltes`, c: 'bg-amber-50 text-amber-800 border-amber-200' });
       if (att.R >= AVAL_LIMITS.R) alerts.push({ k: 'R', t: `${att.R} retards`, c: 'bg-amber-50 text-amber-800 border-amber-200' });
@@ -8141,6 +8187,10 @@
 
       if (d.penalized || (d.att.pct !== null && d.att.pct < d.min)) {
         parts.push(`${nom} només ha fet pràctica en el ${Math.round(d.att.pct || 0)}% de les sessions i no arriba al mínim exigit (${d.min}%)${d.penalized ? ', per això no pot superar la matèria aquest trimestre' : ', cosa que pot impedir superar la matèria'}.`);
+      } else if (isN10(group)) {
+        const n = d.score * 2.5;
+        const q = n < 5 ? 'insuficient' : n < 6 ? 'suficient' : n < 7 ? 'bé' : n < 9 ? 'notable' : 'excel·lent';
+        parts.push(n < 5 ? `${nom} no ha superat el ${trimTxt} (${fs(d.score, group).replace('.', ',')}).` : `${nom} ha superat el ${trimTxt} amb una qualificació de ${fs(d.score, group).replace('.', ',')} (${q}).`);
       } else if (d.lvl.code === 'AE') parts.push(`${nom} ha assolit amb excel·lència els aprenentatges d'aquest ${trimTxt}.`);
       else if (d.lvl.code === 'AN') parts.push(`${nom} ha assolit els aprenentatges del ${trimTxt} amb un nivell notable.`);
       else if (d.lvl.code === 'AS') parts.push(`${nom} ha assolit satisfactòriament els aprenentatges del ${trimTxt}.`);
@@ -8247,7 +8297,7 @@
       const g = getCurrentGroup(); const t = window.appState.currentTrim;
       const lines = (g.students || []).map(st => {
         const d = getAvalData(g, st, t);
-        return [st.name, d.lvl.code, d.score !== null ? d.score.toFixed(2).replace('.', ',') : '', getComment(g, t, st.id).replace(/\s+/g, ' ')].join('\t');
+        return [st.name, d.lvl.label, d.score !== null ? fs(d.score).replace('.', ',') : '', getComment(g, t, st.id).replace(/\s+/g, ' ')].join('\t');
       });
       copyText(lines.join('\n'), btn);
     };
@@ -8268,8 +8318,8 @@
       if (next !== undefined) { window.appState.avalStudent = next; renderAvalView(); window.scrollTo({ top: 0, behavior: 'smooth' }); }
     };
 
-    const avalLvl = (v, big) => { const l = getLevel(v); return `<span class="inline-flex items-center ${big ? 'text-xs px-2' : 'text-[10px] px-1.5'} py-0.5 rounded font-bold ring-1 ring-inset ${l.badge}">${l.code}</span>`; };
-    const avalNum = v => v !== null && v !== undefined && !isNaN(v) ? v.toFixed(2) : '—';
+    const avalLvl = (v, big) => { const l = getLevel(v); return `<span class="inline-flex items-center ${big ? 'text-xs px-2' : 'text-[10px] px-1.5'} py-0.5 rounded font-bold ring-1 ring-inset ${l.badge}">${l.label}</span>`; };
+    const avalNum = v => v !== null && v !== undefined && !isNaN(v) ? fs(v) : '—';
     const AVAL_EXEMPT = '<span class="inline-flex items-center text-[10px] font-bold text-sky-700 bg-sky-50 border border-sky-200 px-1.5 py-0.5 rounded">Exempt</span>';
 
     // Panell de detall d'un alumne (s'usa desplegat a la graella i al mode alumne a alumne)
@@ -8304,14 +8354,14 @@
             return `<tr>
               <td class="py-1.5 pr-2"><div class="font-semibold text-zinc-800 leading-tight">${escapeHtml(s.title)}</div><div class="text-[10px] text-zinc-400 font-mono">${s.trimWeight !== undefined ? s.trimWeight : Math.round(100 / sdas.length)}%${roba && getRobaTargetKey(s) ? ` · <span class="text-orange-600"><i class="fa-solid fa-shirt"></i> ${roba}</span>` : ''}</div></td>
               ${ex ? `<td colspan="${activeCes.length + 1}" class="text-right">${AVAL_EXEMPT}</td>` : `
-              ${activeCes.map(ce => { const on = s.competences && s.competences[ce.id] && s.competences[ce.id].active; const v = on ? getStudentCeScoreInSda(s, st.id, ce.id, g) : null; return `<td class="text-center px-1" title="${on && v !== null ? v.toFixed(2) : ''}">${on ? avalLvl(v) : '<span class="text-zinc-200">·</span>'}</td>`; }).join('')}
+              ${activeCes.map(ce => { const on = s.competences && s.competences[ce.id] && s.competences[ce.id].active; const v = on ? getStudentCeScoreInSda(s, st.id, ce.id, g) : null; return `<td class="text-center px-1" title="${on && v !== null ? fs(v) : ''}">${on ? avalLvl(v) : '<span class="text-zinc-200">·</span>'}</td>`; }).join('')}
               <td class="text-right whitespace-nowrap"><b class="font-mono">${avalNum(sc)}</b> ${avalLvl(sc)}</td>`}
             </tr>`;
           }).join('')}
           </tbody>
           <tfoot class="border-t-2 border-zinc-200">
             <tr><td class="py-1.5 font-semibold text-zinc-500">Mitjana CE</td>
-              ${activeCes.map(ce => `<td class="text-center px-1" title="${d.ces[ce.id] !== null ? d.ces[ce.id].toFixed(2) : ''}">${avalLvl(d.ces[ce.id])}</td>`).join('')}
+              ${activeCes.map(ce => `<td class="text-center px-1" title="${d.ces[ce.id] !== null ? fs(d.ces[ce.id]) : ''}">${avalLvl(d.ces[ce.id])}</td>`).join('')}
               <td class="text-right whitespace-nowrap"><b class="font-mono">${avalNum(d.comp)}</b> ${avalLvl(d.comp)}</td></tr>
           </tfoot>
         </table></div>` : '<p class="text-xs text-zinc-400">Cap SdA en aquest trimestre.</p>';
@@ -8382,6 +8432,7 @@
       const rows = (g.students || []).map((st, i) => ({ st, i, d: getAvalData(g, st, t) }));
       const n = rows.length;
       const count = code => rows.filter(r => r.d.score !== null && r.d.lvl.code === code).length;
+      const countL = lb => rows.filter(r => r.d.score !== null && r.d.lvl.label === lb).length;
       const susp = rows.filter(r => r.d.alerts.some(a => a.k === 'susp' || a.k === 'prac')).length;
       const risk = rows.filter(r => r.d.risk).length;
       const graded = rows.filter(r => r.d.score !== null);
@@ -8402,10 +8453,14 @@
       const header = `
         <div class="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-2">
           ${kpi('Alumnes', n, 'bg-white border-zinc-200 text-zinc-900')}
-          ${kpi('Mitjana', mean !== null ? mean.toFixed(2) : '—', 'bg-white border-zinc-200 text-zinc-900')}
+          ${kpi('Mitjana', mean !== null ? fs(mean) : '—', 'bg-white border-zinc-200 text-zinc-900')}
+          ${isN10(g) ? `
+          ${kpi('Excel·lent (9-10)', countL('EXC'), 'bg-emerald-50 border-emerald-200 text-emerald-800')}
+          ${kpi('Notable (7-9)', countL('NOT'), 'bg-indigo-50 border-indigo-200 text-indigo-800')}
+          ${kpi('Bé / Suficient', countL('BÉ') + countL('SUF'), 'bg-sky-50 border-sky-200 text-sky-800')}` : `
           ${kpi('AE', count('AE'), 'bg-emerald-50 border-emerald-200 text-emerald-800')}
           ${kpi('AN', count('AN'), 'bg-indigo-50 border-indigo-200 text-indigo-800')}
-          ${kpi('AS', count('AS'), 'bg-sky-50 border-sky-200 text-sky-800')}
+          ${kpi('AS', count('AS'), 'bg-sky-50 border-sky-200 text-sky-800')}`}
           ${kpi('No superen', susp, 'bg-rose-50 border-rose-200 text-rose-800')}
           ${kpi('Amb alertes', risk, 'bg-amber-50 border-amber-200 text-amber-800')}
         </div>
@@ -8431,7 +8486,7 @@
           <button onclick="window.print()" class="inline-flex items-center gap-1.5 bg-white border border-zinc-200 text-zinc-700 text-xs font-bold px-3 py-2 rounded-xl"><i class="fa-solid fa-print"></i>Imprimir</button>
         </div>`;
 
-      const legend = `<p class="text-[11px] text-zinc-400">Alertes: nivell NA o EPA, pràctica per sota del ${getMinPractice(g)}%, ${AVAL_LIMITS.F}+ faltes sense justificar, ${AVAL_LIMITS.R}+ retards, ${AVAL_LIMITS.SR}+ dies sense roba, actitud per sota d'AS. Els comentaris es desen per trimestre.</p>`;
+      const legend = `<p class="text-[11px] text-zinc-400">Alertes: ${isN10(g) ? 'nota inferior a 5' : 'nivell NA o EPA'}, pràctica per sota del ${getMinPractice(g)}%, ${AVAL_LIMITS.F}+ faltes sense justificar, ${AVAL_LIMITS.R}+ retards, ${AVAL_LIMITS.SR}+ dies sense roba, actitud per sota d'AS. Els comentaris es desen per trimestre.</p>`;
 
       if (!shown.length) { box.innerHTML = header + `<div class="bg-white border border-zinc-200 rounded-2xl p-8 text-center text-xs text-zinc-400">Cap alumne en aquest filtre.</div>`; return; }
 
@@ -8492,9 +8547,9 @@
                 ${sdas.map(s => {
                   if (isStudentExempt(g, s.id, st.id)) return `<td class="text-center border-l border-zinc-100">${AVAL_EXEMPT}</td>`;
                   const sc = getStudentOverallSdaScore(s, st.id, g);
-                  return `<td class="text-center border-l border-zinc-100 px-1 whitespace-nowrap" title="${getLevel(sc).code}"><span class="inline-block min-w-[40px] px-1.5 py-0.5 rounded-md font-mono font-semibold ${sc !== null ? getScoreColorClass(sc) : 'text-zinc-300'}">${avalNum(sc)}</span></td>`;
+                  return `<td class="text-center border-l border-zinc-100 px-1 whitespace-nowrap" title="${getLevel(sc).label}"><span class="inline-block min-w-[40px] px-1.5 py-0.5 rounded-md font-mono font-semibold ${sc !== null ? getScoreColorClass(sc) : 'text-zinc-300'}">${avalNum(sc)}</span></td>`;
                 }).join('')}
-                ${activeCes.map((ce, k) => `<td class="text-center px-0.5 ${k === 0 ? 'border-l border-zinc-100' : ''}" title="${d.ces[ce.id] !== null ? ce.id + ': ' + d.ces[ce.id].toFixed(2) : ''}">${avalLvl(d.ces[ce.id])}</td>`).join('')}
+                ${activeCes.map((ce, k) => `<td class="text-center px-0.5 ${k === 0 ? 'border-l border-zinc-100' : ''}" title="${d.ces[ce.id] !== null ? ce.id + ': ' + fs(d.ces[ce.id]) : ''}">${avalLvl(d.ces[ce.id])}</td>`).join('')}
                 ${actOn ? `<td class="text-center font-mono border-l border-zinc-100 ${d.act !== null && d.act < gradeThresholds.as ? 'text-violet-700 font-bold' : 'text-zinc-600'}">${avalNum(d.act)}</td>` : ''}
                 <td class="text-center border-l border-zinc-300 bg-zinc-50 px-2 whitespace-nowrap"><b class="font-mono text-sm">${avalNum(d.score)}</b> ${avalLvl(d.score)}${getTrimBonus(g, t, st.id) ? '<div>' + trimBonusTag(g, t, st.id, true) + '</div>' : ''}</td>
                 ${t > 1 ? `<td class="text-center px-1 whitespace-nowrap text-[10px] font-mono text-zinc-500">${prev.map(p => `<span title="T${p.x}" class="mr-1">${avalNum(p.v)}</span>`).join('')}</td>` : ''}
@@ -8562,8 +8617,8 @@
               <div class="text-[11px] text-zinc-400">${ce.short}</div>
             </div>
             <div class="text-right">
-              <span class="font-bold font-mono text-zinc-900 mr-2 text-xs">${avg !== null ? avg.toFixed(2) : '—'}</span>
-              <span class="inline-flex items-center text-[10px] font-bold px-2 py-0.5 rounded ring-1 ring-inset ${lvl.badge}">${lvl.code}</span>
+              <span class="font-bold font-mono text-zinc-900 mr-2 text-xs">${avg !== null ? fs(avg) : '—'}</span>
+              <span class="inline-flex items-center text-[10px] font-bold px-2 py-0.5 rounded ring-1 ring-inset ${lvl.badge}">${lvl.label}</span>
             </div>
           </div>
         `;
@@ -8572,7 +8627,7 @@
       const globalScore = getStudentCourseFinalScore(st.id, curGroup);
       const globalLvl = getLevel(globalScore);
       const repBadge = document.getElementById('repGlobalBadge');
-      repBadge.textContent = `${globalScore !== null ? globalScore.toFixed(2) : '—'} (${globalLvl.code})`;
+      repBadge.textContent = `${globalScore !== null ? fs(globalScore) : '—'} (${globalLvl.label})`;
       repBadge.className = `inline-flex items-center mt-1 px-3 py-1 rounded-md text-xs font-bold ring-1 ring-inset ${globalLvl.badge}`;
 
       document.getElementById('repDetailsContainer').innerHTML = detailsHtml;
@@ -9774,7 +9829,7 @@
       const successRate = totalStudents > 0 ? ((successStudents / totalStudents) * 100).toFixed(1) : "0.0";
       const globalLvl = getLevel(globalAvg);
 
-      document.getElementById('kpiAvgVal').textContent = globalAvg !== null ? globalAvg.toFixed(2) : "—";
+      document.getElementById('kpiAvgVal').textContent = globalAvg !== null ? fs(globalAvg) : "—";
       document.getElementById('kpiAvgLvl').textContent = globalLvl.code;
       document.getElementById('kpiAvgLvl').className = `text-[10px] font-bold px-1.5 py-0.5 rounded ring-1 ring-inset ${globalLvl.badge}`;
       document.getElementById('kpiSuccessRate').textContent = `${successRate}%`;
@@ -9794,9 +9849,9 @@
         const best = validCeAvgs[0];
         const worst = validCeAvgs[validCeAvgs.length - 1];
         document.getElementById('kpiBestCe').textContent = `${best.id} · ${best.short}`;
-        document.getElementById('kpiBestCeVal').textContent = `Mitjana: ${best.avg.toFixed(2)}`;
+        document.getElementById('kpiBestCeVal').textContent = `Mitjana: ${fs(best.avg)}`;
         document.getElementById('kpiWorstCe').textContent = `${worst.id} · ${worst.short}`;
-        document.getElementById('kpiWorstCeVal').textContent = `Mitjana: ${worst.avg.toFixed(2)}`;
+        document.getElementById('kpiWorstCeVal').textContent = `Mitjana: ${fs(worst.avg)}`;
       } else {
         document.getElementById('kpiBestCe').textContent = "--";
         document.getElementById('kpiBestCeVal').textContent = "Mitjana: --";
@@ -9860,7 +9915,7 @@
         data: {
           labels: OFFICIAL_CES.map(c => c.id),
           datasets: [{
-            data: ceAvgs.map(c => c.avg !== null ? Number(c.avg.toFixed(2)) : 0),
+            data: ceAvgs.map(c => c.avg !== null ? Number(fs(c.avg)) : 0),
             backgroundColor: 'rgba(24, 24, 27, 0.8)',
             borderRadius: 6
           }]
@@ -9872,8 +9927,8 @@
           scales: {
             y: {
               min: 0,
-              max: 4,
-              ticks: { stepSize: 1, font: { family: 'Plus Jakarta Sans', size: 10 } },
+              max: gradeMax(),
+              ticks: { stepSize: isN10() ? 2 : 1, font: { family: 'Plus Jakarta Sans', size: 10 } },
               grid: { color: 'rgba(244, 244, 245, 0.9)' }
             },
             x: {
@@ -9908,9 +9963,9 @@
           <tr class="hover:bg-zinc-50/50 transition">
             <td class="py-2 px-4 font-mono font-bold text-zinc-700">${ce.id}</td>
             <td class="py-2 px-4 font-semibold text-zinc-900">${ce.name}</td>
-            <td class="py-2 px-3 text-center font-mono font-black">${avg !== null ? avg.toFixed(2) : "—"}</td>
+            <td class="py-2 px-3 text-center font-mono font-black">${avg !== null ? fs(avg) : "—"}</td>
             <td class="py-2 px-3 text-center">
-              <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold ring-1 ring-inset ${lvl.badge}">${lvl.code}</span>
+              <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold ring-1 ring-inset ${lvl.badge}">${lvl.label}</span>
             </td>
             <td class="py-2 px-4 text-center font-mono font-semibold">${succPct !== '—' ? succPct + '%' : '—'}</td>
             <td class="py-2 px-4 text-center">${statusBadge}</td>
@@ -9922,7 +9977,7 @@
     // CSV pensat per a l'Excel en català/castellà: separador ";", coma decimal i BOM perquè surtin bé els accents
     window.exportCSV = function() {
       const curGroup = getCurrentGroup();
-      const num = v => (v === null || v === undefined || isNaN(v)) ? '' : v.toFixed(2).replace('.', ',');
+      const num = v => (v === null || v === undefined || isNaN(v)) ? '' : fs(v).replace('.', ',');
       const txt = v => `"${String(v ?? '').replace(/"/g, '""')}"`;
       const methodLabel = (curGroup.finalMethod || 'trim') === 'trim' ? 'per trimestres' : 'per competències';
 
@@ -10772,7 +10827,7 @@
             </div>
           </div>`;
         }).join('') + (attRule.enabled ? `<div class="flex flex-col gap-0.5 ${absent ? 'opacity-30 pointer-events-none' : ''} ${evalCols.length ? 'lg:pl-3 lg:border-l lg:border-zinc-200' : ''}">
-            <span class="text-[9px] font-bold text-violet-500 leading-none"><i class="fa-solid fa-hand-holding-heart mr-0.5"></i>ACTITUD${typeof r.act === 'number' ? ` <span class="font-mono text-violet-400" title="Importat d'iDoceo">${r.act.toFixed(2)}</span>` : ''}${r.pos || r.neg ? ` <span class="font-mono text-zinc-400">+${r.pos || 0}/−${r.neg || 0}</span>` : ''}</span>
+            <span class="text-[9px] font-bold text-violet-500 leading-none"><i class="fa-solid fa-hand-holding-heart mr-0.5"></i>ACTITUD${typeof r.act === 'number' ? ` <span class="font-mono text-violet-400" title="Importat d'iDoceo">${fs(r.act)}</span>` : ''}${r.pos || r.neg ? ` <span class="font-mono text-zinc-400">+${r.pos || 0}/−${r.neg || 0}</span>` : ''}</span>
             <div class="flex gap-0.5">
               ${LEVEL_CODES.map(c => { const actCode = typeof r.act === 'number' ? getLevel(r.act).code : r.act; return `<button onclick="diariSetAttitudeLevel(${st.id}, '${c}')" title="Actitud d'avui: ${c} · ${LEVEL_NAMES[c]}"
                 class="h-10 min-w-[40px] px-1.5 rounded-lg border text-[11px] font-black transition ${actCode === c ? LEVEL_ON[c] : 'bg-white text-zinc-400 border-zinc-200 hover:border-zinc-400'}">${c}</button>`; }).join('')}
@@ -10997,8 +11052,8 @@
         return `<tr class="border-t border-zinc-100">
           <td class="py-2 px-3 text-xs text-zinc-400 font-mono">T${sda.trim}</td>
           <td class="py-2 px-3 text-xs font-semibold text-zinc-800">${escapeHtml(sda.title)}${robaN && getRobaTargetKey(sda) ? ` <span class="text-[10px] text-orange-600 font-bold ml-1"><i class="fa-solid fa-shirt"></i> ${robaN}</span>` : ''}${exBtn}</td>
-          <td class="py-2 px-3 text-right font-mono font-bold text-sm">${sc !== null ? sc.toFixed(2) : '—'}</td>
-          <td class="py-2 px-3 text-center"><span class="inline-flex px-1.5 py-0.5 rounded text-[10px] font-bold ring-1 ring-inset ${lvl.badge}">${lvl.code}</span></td>
+          <td class="py-2 px-3 text-right font-mono font-bold text-sm">${sc !== null ? fs(sc) : '—'}</td>
+          <td class="py-2 px-3 text-center"><span class="inline-flex px-1.5 py-0.5 rounded text-[10px] font-bold ring-1 ring-inset ${lvl.badge}">${lvl.label}</span></td>
         </tr>`;
       }).join('');
       const trimScores = [1, 2, 3].map(t => getStudentTrimScoreByTrim(st.id, t, group));
@@ -11077,10 +11132,10 @@
                       <td>${s.total}</td><td class="${s.F ? 'text-rose-600 font-bold' : 'text-zinc-300'}">${s.F}</td><td class="${s.R ? 'text-amber-600 font-bold' : 'text-zinc-300'}">${s.R}</td>
                       <td class="${s.SR ? 'text-orange-600 font-bold' : 'text-zinc-300'}">${s.SR}</td><td class="${s.NP ? 'text-rose-600 font-bold' : 'text-zinc-300'}">${s.NP}</td>
                       <td>${practicePctBadge(s.pct, min)}</td>
-                      ${getAttitudeRule().enabled ? (() => { const v = getStudentAttitudeTrim(group, st.id, t); return `<td class="text-violet-700">${v !== null ? v.toFixed(2) : '—'}</td>`; })() : ''}
-                      <td class="font-bold">${trimScores[k] !== null ? trimScores[k].toFixed(2) : '—'}</td>
+                      ${getAttitudeRule().enabled ? (() => { const v = getStudentAttitudeTrim(group, st.id, t); return `<td class="text-violet-700">${v !== null ? fs(v) : '—'}</td>`; })() : ''}
+                      <td class="font-bold">${trimScores[k] !== null ? fs(trimScores[k]) : '—'}</td>
                     </tr>`).join('')}
-                    <tr class="border-t border-zinc-200 bg-zinc-50 font-bold"><td class="py-2 px-2 text-left font-sans">Curs</td><td>${course.total}</td><td>${course.F}</td><td>${course.R}</td><td>${course.SR}</td><td>${course.NP}</td><td>${practicePctBadge(course.pct, min)}</td>${getAttitudeRule().enabled ? (() => { const v = getStudentAttitudeCourse(group, st.id); return `<td class="text-violet-700">${v !== null ? v.toFixed(2) : '—'}</td>`; })() : ''}<td>${finalScore !== null ? finalScore.toFixed(2) : '—'}</td></tr>
+                    <tr class="border-t border-zinc-200 bg-zinc-50 font-bold"><td class="py-2 px-2 text-left font-sans">Curs</td><td>${course.total}</td><td>${course.F}</td><td>${course.R}</td><td>${course.SR}</td><td>${course.NP}</td><td>${practicePctBadge(course.pct, min)}</td>${getAttitudeRule().enabled ? (() => { const v = getStudentAttitudeCourse(group, st.id); return `<td class="text-violet-700">${v !== null ? fs(v) : '—'}</td>`; })() : ''}<td>${finalScore !== null ? fs(finalScore) : '—'}</td></tr>
                   </tbody>
                 </table>
               </div>
@@ -12496,7 +12551,7 @@
         ${keys.map(gId => {
           const g = groups[gId];
           const s = getClassTrimSummary(g, trim);
-          const lvl = getLevel(s.avg);
+          const lvl = getLevel(s.avg, g);
           const next = getNextClassSlot(g, gId);
           const nextTxt = next ? `${next.iso === today ? 'Avui' : isoToDate(next.iso).toLocaleDateString('ca-ES', { weekday: 'short', day: 'numeric' })} ${next.slot.start}` : '';
           const nextPlan = next ? getSessionPlan(g, next.iso) : null;
@@ -12516,8 +12571,8 @@
                 ${progressBar(s.progressPct || 0)}
               </div>
               <div class="w-16 text-right shrink-0">
-                <span class="font-mono font-black text-sm text-zinc-900">${s.avg !== null ? s.avg.toFixed(2) : '—'}</span>
-                <div><span class="inline-flex px-1.5 py-0.5 rounded text-[10px] font-bold ring-1 ring-inset ${lvl.badge}">${lvl.code}</span></div>
+                <span class="font-mono font-black text-sm text-zinc-900">${s.avg !== null ? fs(s.avg, g) : '—'}</span>
+                <div><span class="inline-flex px-1.5 py-0.5 rounded text-[10px] font-bold ring-1 ring-inset ${lvl.badge}">${lvl.label}</span></div>
               </div>
               <div class="flex items-center gap-0.5 shrink-0">
                 <button onclick="event.stopPropagation(); openEditGroupModal('${gId}')" title="Modificar" class="p-2 text-zinc-400 hover:text-zinc-900 rounded-lg hover:bg-zinc-100"><i class="fa-solid fa-pen text-xs"></i></button>
