@@ -803,6 +803,7 @@
                 <tr>
                   <th class="py-2.5 px-3 w-12 text-center font-mono">#</th>
                   <th class="py-2.5 px-4">Nom i Cognoms (Fes clic per editar)</th>
+                  <th id="rosterSummaryHead" class="py-2.5 px-3 hidden sm:table-cell">Resum del trimestre</th>
                   <th class="py-2.5 px-3 w-20 text-center">Acció</th>
                 </tr>
               </thead>
@@ -7196,16 +7197,45 @@
       tabBadge.textContent = totalCount;
 
       if (students.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="3" class="p-8 text-center text-zinc-400 text-xs">Cap alumne trobat.</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="4" class="p-8 text-center text-zinc-400 text-xs">Cap alumne trobat.</td></tr>`;
         return;
       }
+
+      const t = window.appState.currentTrim;
+      const head = document.getElementById('rosterSummaryHead');
+      if (head) head.textContent = `Resum del ${['', '1r', '2n', '3r'][t]} trimestre`;
+      const today = todayISO();
+      const chip = (txt, cls, title = '') => `<span ${title ? `title="${escapeHtml(title)}"` : ''} class="inline-flex items-center gap-1 text-[10px] font-bold px-1.5 py-0.5 rounded-md border whitespace-nowrap ${cls}">${txt}</span>`;
+      const summary = st => {
+        const d = getAvalData(curGroup, st, t);
+        const out = [];
+        if (d.score !== null) {
+          const l = getLevel(d.score);
+          out.push(`<span class="inline-flex items-center gap-1 text-[11px] font-black font-mono px-1.5 py-0.5 rounded-md bg-zinc-900 text-white" title="Nota del trimestre">${fs(d.score)}${l.label ? ` <span class="text-[9px] font-bold opacity-80">${l.label}</span>` : ''}</span>`);
+        }
+        out.push(trimBonusTag(curGroup, t, st.id, true));
+        if (d.penalized) out.push(chip('<i class="fa-solid fa-person-running"></i>Suspès per pràctica', 'bg-rose-50 text-rose-700 border-rose-200'));
+        if (d.att.total) out.push(chip(`${d.att.pct !== null ? Math.round(d.att.pct) : '—'}% pràct.`, d.att.pct !== null && d.att.pct < d.min ? 'bg-rose-50 text-rose-700 border-rose-200' : 'bg-zinc-50 text-zinc-600 border-zinc-200', `${d.att.total} sessions · mínim ${d.min}%`));
+        if (d.att.F) out.push(chip(`F ${d.att.F}`, 'bg-rose-50 text-rose-700 border-rose-200', 'Faltes sense justificar'));
+        if (d.att.FJ) out.push(chip(`FJ ${d.att.FJ}`, 'bg-teal-50 text-teal-700 border-teal-200', 'Faltes justificades'));
+        if (d.att.R) out.push(chip(`R ${d.att.R}`, 'bg-amber-50 text-amber-700 border-amber-200', 'Retards'));
+        if (d.att.SR) out.push(chip(`<i class="fa-solid fa-shirt"></i>Roba ${d.att.SR}`, 'bg-orange-50 text-orange-700 border-orange-200', 'Dies sense roba'));
+        if (d.att.E) out.push(chip(`Exp ${d.att.E}`, 'bg-violet-50 text-violet-700 border-violet-200', 'Expulsions'));
+        const per = getActivePeriod(curGroup, st.id, today, ['L', 'FJ', 'E']);
+        if (per) { const T = PERIOD_TYPES[per.type && PERIOD_TYPES[per.type] ? per.type : 'L']; out.push(chip(`<i class="fa-solid ${T.icon}"></i>${T.badge} ara`, T.chip + ' border-transparent', (per.reason ? per.reason + ' · ' : '') + injuryPeriodText(per))); }
+        const ex = (curGroup.sdas || []).filter(s => s.trim === t && isStudentExempt(curGroup, s.id, st.id));
+        if (ex.length) out.push(chip(`<i class="fa-solid fa-user-slash"></i>Exempt ${ex.length > 1 ? ex.length + ' SdA' : ''}`, 'bg-sky-50 text-sky-700 border-sky-200', ex.map(s => s.title).join(', ')));
+        if (getComment(curGroup, t, st.id)) out.push(`<i class="fa-regular fa-comment text-[10px] text-emerald-500" title="Té comentari per a l'informe"></i>`);
+        return out.filter(Boolean).join('');
+      };
 
       tbody.innerHTML = students.map((st, idx) => `
         <tr class="hover:bg-zinc-50/60 transition">
           <td class="py-2 px-3 text-center text-zinc-400 font-mono text-xs">${idx + 1}</td>
-          <td class="py-2 px-4">
+          <td class="py-2 px-4 w-[38%]">
             <input type="text" value="${st.name || ''}" onchange="updateStudentName(${st.id}, this.value)" class="w-full bg-transparent border-0 border-b border-transparent hover:border-zinc-300 focus:border-zinc-900 rounded-none py-1 font-semibold text-zinc-800 outline-none text-xs">
           </td>
+          <td class="py-2 px-3 hidden sm:table-cell cursor-pointer" onclick="openStudentFitxa(${st.id})" title="Obrir la fitxa"><div class="flex flex-wrap items-center gap-1">${summary(st)}</div></td>
           <td class="py-2 px-3 text-center whitespace-nowrap">
             <button onclick="openStudentFitxa(${st.id})" class="text-zinc-500 hover:text-zinc-900 px-2 py-1 rounded-lg hover:bg-zinc-100 text-[11px] font-semibold transition mr-1" title="Fitxa de l'alumne"><i class="fa-regular fa-id-card mr-1"></i>Fitxa</button>
             <button onclick="deleteStudent(${st.id})" class="text-zinc-400 hover:text-rose-500 p-1 transition" title="Eliminar alumne">
