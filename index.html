@@ -67,7 +67,7 @@
     .sda-tab-btn.active { color: #fff; background: #18181b; }
     .plan-textarea { width: 100%; border: 1px solid #e4e4e7; border-radius: 12px; padding: 8px 10px; font-size: 12px; outline: none; resize: vertical; background: #fff; }
     .plan-textarea:focus { box-shadow: 0 0 0 2px #18181b; }
-    @media (hover: none) { .group\/slot .opacity-0 { opacity: 1 !important; } }
+    @media (hover: none) { .group\/slot .opacity-0, .group\/pb .opacity-0 { opacity: 1 !important; } }
     .plan-chip { display: inline-flex; align-items: center; cursor: pointer; user-select: none; }
     .plan-chip input { display: none; }
     .plan-chip span { padding: 4px 10px; border-radius: 999px; border: 1px solid #e4e4e7; background: #fff; color: #52525b; font-weight: 600; font-size: 11px; transition: all .15s; }
@@ -381,6 +381,7 @@
             <button data-m="week" onclick="setPlannerMode('week')">Setmana</button>
             <button data-m="class" onclick="setPlannerMode('class')">Per classe</button>
           </div>
+          <button onclick="openDayOffModal()" class="inline-flex items-center gap-1.5 h-9 px-3 rounded-xl border border-zinc-200 bg-white hover:bg-rose-50 hover:border-rose-200 text-xs font-semibold text-zinc-700"><i class="fa-solid fa-ban text-rose-500 text-[10px]"></i> Dia sense classe</button>
           <div id="plannerNav" class="flex items-center gap-1">
             <button onclick="movePlanner(-1)" class="icon-btn" title="Anterior"><i class="fa-solid fa-chevron-left text-xs"></i></button>
             <button onclick="movePlanner(0)" class="h-9 px-3 rounded-xl border border-zinc-200 bg-white hover:bg-zinc-50 text-xs font-semibold text-zinc-700">Avui</button>
@@ -1862,6 +1863,36 @@
       <div class="px-6 py-3.5 bg-zinc-50 border-t border-zinc-200 flex justify-end gap-2 text-xs">
         <button onclick="closeDistributeModal()" class="px-3.5 py-1.5 border border-zinc-300 rounded-xl font-semibold text-zinc-600">Cancel·lar</button>
         <button onclick="applyDistribute()" class="px-4 py-1.5 bg-zinc-900 hover:bg-zinc-800 text-white rounded-xl font-semibold">Planificar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL DIA SENSE CLASSE -->
+  <div id="dayOffModal" class="fixed inset-0 bg-zinc-950/40 backdrop-blur-xs z-50 flex items-center justify-center p-4 hidden no-print">
+    <div class="bg-white rounded-3xl shadow-card max-w-lg w-full max-h-[92vh] flex flex-col overflow-hidden border border-zinc-200">
+      <div class="px-6 py-4 bg-zinc-900 text-white flex justify-between items-center">
+        <h3 class="text-sm font-bold flex items-center gap-2"><i class="fa-solid fa-ban text-rose-400"></i> Dia sense classe</h3>
+        <button onclick="closeDayOffModal()" class="text-zinc-400 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div class="p-6 space-y-4 text-xs overflow-y-auto">
+        <label class="block font-semibold text-zinc-700">Data
+          <input type="date" id="dayOffDate" onchange="renderDayOffModal()" class="mt-1 w-full border border-zinc-200 rounded-xl p-2.5 bg-white outline-none focus:ring-2 focus:ring-zinc-900">
+        </label>
+        <div>
+          <div class="font-semibold text-zinc-700 mb-1.5">Classes que no faràs · <span id="dayOffWhen" class="text-zinc-500 font-normal"></span></div>
+          <div id="dayOffClasses" class="space-y-1.5"></div>
+        </div>
+        <div>
+          <div class="font-semibold text-zinc-700 mb-1.5">Motiu</div>
+          <div id="dayOffReasons" class="flex flex-wrap gap-1.5"></div>
+        </div>
+        <label class="block font-semibold text-zinc-700">Nota (opcional)
+          <input type="text" id="dayOffNote" placeholder="Ex: Sortida a Port Aventura amb 2n ESO" class="mt-1 w-full border border-zinc-200 rounded-xl p-2.5 bg-white outline-none focus:ring-2 focus:ring-zinc-900">
+        </label>
+      </div>
+      <div class="px-6 py-3.5 bg-zinc-50 border-t border-zinc-200 flex justify-end gap-2 text-xs">
+        <button onclick="closeDayOffModal()" class="px-3.5 py-1.5 border border-zinc-300 rounded-xl font-semibold text-zinc-600">Cancel·lar</button>
+        <button onclick="saveDayOff()" class="px-4 py-1.5 bg-zinc-900 hover:bg-zinc-800 text-white rounded-xl font-semibold"><i class="fa-solid fa-ban mr-1"></i>Marcar que no es fa</button>
       </div>
     </div>
   </div>
@@ -5054,6 +5085,69 @@
 
 
 
+
+    // ================== DIA SENSE CLASSE (amb antelació) ==================
+    window.openDayOffModal = function(iso) {
+      const inp = document.getElementById('dayOffDate');
+      const base = iso || window.appState.plannerDate || todayISO();
+      inp.value = base;
+      window.appState.dayOffReason = 'sortida';
+      document.getElementById('dayOffNote').value = '';
+      renderDayOffModal();
+      document.getElementById('dayOffModal').classList.remove('hidden');
+    };
+    window.closeDayOffModal = function() { document.getElementById('dayOffModal').classList.add('hidden'); };
+    window.setDayOffReason = function(id) { window.appState.dayOffReason = id; renderDayOffModal(true); };
+
+    window.renderDayOffModal = function(keepChecks) {
+      const iso = document.getElementById('dayOffDate').value;
+      const box = document.getElementById('dayOffClasses');
+      const prev = keepChecks ? new Set(Array.from(box.querySelectorAll('.dayoff-cls')).filter(c => c.checked).map(c => c.value)) : null;
+      document.getElementById('dayOffReasons').innerHTML = CANCEL_REASONS.map(r => `
+        <button type="button" onclick="setDayOffReason('${r.id}')" class="px-2.5 py-1.5 rounded-xl border text-[11px] font-semibold transition ${window.appState.dayOffReason === r.id ? 'bg-zinc-900 text-white border-zinc-900' : 'bg-white text-zinc-600 border-zinc-200'}"><i class="fa-solid ${r.icon} text-[10px] mr-1"></i>${r.label}</button>`).join('');
+      if (!iso) { box.innerHTML = ''; return; }
+      const dow = isoToDate(iso).getDay();
+      const hol = getHoliday(iso);
+      const ds = getAllEntries().filter(e => e.kind !== 'other' && e.day === dow).sort((a, b) => timeToMin(a.start) - timeToMin(b.start));
+      document.getElementById('dayOffWhen').textContent = formatLongDateCa(iso);
+      if (hol) { box.innerHTML = `<div class="text-zinc-500 bg-zinc-100 rounded-xl p-3">Aquest dia ja és festiu: ${escapeHtml(hol.label)}.</div>`; return; }
+      if (!ds.length) { box.innerHTML = '<div class="text-zinc-400 bg-zinc-50 rounded-xl p-3">Aquest dia no tens cap classe a l\'horari.</div>'; return; }
+      box.innerHTML = ds.map(e => {
+        const c = getCancellation(e.id, iso, e.gId);
+        const p = getSessionPlan(e.group, iso);
+        const checked = prev ? prev.has(e.id) : !c;
+        return `<label class="flex items-center gap-3 bg-white border border-zinc-200 rounded-xl px-3 py-2.5">
+          <input type="checkbox" class="dayoff-cls w-4 h-4 accent-zinc-900" value="${e.id}" ${checked ? 'checked' : ''} ${c ? 'disabled' : ''}>
+          <span class="font-mono text-[11px] text-zinc-400 w-20 shrink-0">${e.start}–${e.end}</span>
+          <span class="flex-1 min-w-0"><b class="text-zinc-800">${escapeHtml(e.group.name)}</b>${planHasContent(p) ? `<span class="text-zinc-500"> · ${escapeHtml(p.title || 'sessió planificada')}</span>` : ''}</span>
+          ${c ? `<span class="text-[10px] font-bold text-rose-600">Ja anul·lada</span>` : ''}
+        </label>`;
+      }).join('');
+    };
+
+    window.saveDayOff = function() {
+      const iso = document.getElementById('dayOffDate').value;
+      if (!iso) { alert('Tria la data.'); return; }
+      const ids = Array.from(document.querySelectorAll('#dayOffClasses .dayoff-cls')).filter(c => c.checked && !c.disabled).map(c => c.value);
+      if (!ids.length) { alert('Marca almenys una classe.'); return; }
+      const data = { reason: window.appState.dayOffReason || 'altres', note: document.getElementById('dayOffNote').value.trim() };
+      const entries = getAllEntries();
+      const gIds = new Set();
+      ids.forEach(id => { getCancellations()[`${id}|${iso}`] = { ...data }; const e = entries.find(x => x.id === id); if (e && e.gId) gIds.add(e.gId); });
+      closeDayOffModal();
+      afterCalendarChange();
+      // Proposar endarrerir la planificació de cada classe afectada que tingués sessió planificada
+      const queue = [...gIds].filter(gId => { const g = window.appData.groups[gId]; return g && getClassDayStatus(g, gId, iso).off && planHasContent(getSessionPlan(g, iso)); }).map(gId => ({ gId, iso }));
+      window.appState.shiftQueue = queue;
+      runNextPlanShift();
+    };
+
+    window.runNextPlanShift = function() {
+      const q = window.appState.shiftQueue || [];
+      const next = q.shift();
+      if (next) setTimeout(() => openPlanShift(next.gId, next.iso, true), 60);
+    };
+
     // ================== PROGRAMACIÓ ANUAL (per a inspecció) ==================
     function groupLevelName(g) {
       const n = String((g && g.name) || '').trim();
@@ -5345,7 +5439,7 @@
         </div>`).join('');
       document.getElementById('planShiftModal').classList.remove('hidden');
     };
-    window.closePlanShift = function() { document.getElementById('planShiftModal').classList.add('hidden'); planShiftCtx = null; };
+    window.closePlanShift = function() { document.getElementById('planShiftModal').classList.add('hidden'); planShiftCtx = null; runNextPlanShift(); };
     window.applyPlanShift = function() {
       if (!planShiftCtx) return;
       const { gId, moves } = planShiftCtx;
@@ -12575,6 +12669,7 @@
                           ${cancel ? `<div class="text-[11px] font-extrabold line-through">${escapeHtml(e.group.name)}</div><div class="text-[10px] font-semibold"><i class="fa-solid fa-ban mr-0.5"></i>${escapeHtml(cancelReasonLabel(cancel))}</div>` : plannerBlockInner(e, d.iso, h < 70)}
                         </button>
                         ${!cancel ? `<button onclick="event.stopPropagation(); openDiariFor('${e.gId}','${d.iso}')" title="Passar llista" class="absolute bottom-1 right-1 w-7 h-7 rounded-lg bg-white/90 hover:bg-white text-zinc-600 opacity-0 group-hover/pb:opacity-100 transition"><i class="fa-solid fa-clipboard-check text-[10px]"></i></button>` : ''}
+                        ${!d.hol ? `<button onclick="event.stopPropagation(); openCancelModal({ slotId: '${e.id}', gId: '${e.gId}', iso: '${d.iso}' })" title="${cancel ? 'Sí que es fa / canviar motiu' : 'Aquest dia no es fa'}" class="absolute top-1 right-1 w-6 h-6 rounded-md bg-white/90 hover:bg-rose-50 ${cancel ? 'text-emerald-600' : 'text-zinc-400 hover:text-rose-600 opacity-0 group-hover/pb:opacity-100'} transition"><i class="fa-solid ${cancel ? 'fa-rotate-left' : 'fa-ban'} text-[9px]"></i></button>` : ''}
                       </div>`;
                   }).join('')}
                 </div>`;
@@ -12638,10 +12733,11 @@
                       : has ? `<div class="text-lg font-bold text-zinc-900 mt-2">${escapeHtml(p.title || 'Sessió planificada')}</div>${sda ? `<div class="text-xs font-semibold text-amber-800">${escapeHtml(sda.title)}</div>` : ''}`
                       : `<div class="text-base font-semibold text-zinc-400 mt-2">Sense planificar</div>`}
                   </div>
-                  ${!cancel ? `<div class="flex gap-2 shrink-0">
+                  ${!cancel ? `<div class="flex flex-wrap gap-2 shrink-0">
                     <button onclick="openSessionPlanModal('${e.gId}','${iso}')" class="btn-sec"><i class="fa-solid ${has ? 'fa-pen' : 'fa-plus'}"></i>${has ? 'Editar' : 'Planificar'}</button>
                     <button onclick="openDiariFor('${e.gId}','${iso}')" class="btn-sec"><i class="fa-solid fa-clipboard-check"></i>Diari</button>
-                  </div>` : ''}
+                    ${!session ? `<button onclick="openCancelModal({ slotId: '${e.id}', gId: '${e.gId}', iso: '${iso}' })" class="btn-sec"><i class="fa-solid fa-ban"></i>No es fa</button>` : ''}
+                  </div>` : `<button onclick="openCancelModal({ slotId: '${e.id}', gId: '${e.gId}', iso: '${iso}' })" class="btn-sec shrink-0" style="opacity:1"><i class="fa-solid fa-rotate-left"></i>Sí que es fa</button>`}
                 </div>
                 ${has && !cancel ? `
                   ${p.objectiu ? `<div class="text-sm text-zinc-700"><i class="fa-solid fa-bullseye text-zinc-400 mr-1.5"></i>${escapeHtml(p.objectiu)}</div>` : ''}
