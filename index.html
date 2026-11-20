@@ -6462,12 +6462,11 @@
       else r = { code: "AE", badge: "bg-emerald-50 text-emerald-800 ring-emerald-200 font-bold" };
       r.label = r.code;
       if (isN10(g)) {
+        // Batxillerat: només nota numèrica, sense etiquetes de nivell
         const v = val * 2.5;
-        if (v < 5) { r.label = 'INS'; r.badge = "bg-rose-50 text-rose-700 ring-rose-200 font-bold"; }
-        else if (v < 6) { r.label = 'SUF'; r.badge = "bg-sky-50 text-sky-800 ring-sky-200 font-bold"; }
-        else if (v < 7) { r.label = 'BÉ'; r.badge = "bg-sky-50 text-sky-800 ring-sky-200 font-bold"; }
-        else if (v < 9) { r.label = 'NOT'; r.badge = "bg-indigo-50 text-indigo-800 ring-indigo-200 font-bold"; }
-        else { r.label = 'EXC'; r.badge = "bg-emerald-50 text-emerald-800 ring-emerald-200 font-bold"; }
+        r.band = v < 5 ? 'fail' : v < 7 ? 'mid' : v < 9 ? 'good' : 'top';
+        r.label = '';
+        r.badge = 'hidden';
       }
       return r;
     }
@@ -6907,7 +6906,7 @@
         if (!isCollapsed) {
           r2 += `<th colspan="${oasCount}" class="py-1 px-2 text-center border-r border-zinc-200 font-mono text-[10px] ${theme.critHeader} font-semibold">${conf.curricularCriteria || '<span class="text-zinc-300 italic font-normal">Sense criteris</span>'}</th>`;
         }
-        r2 += `<th colspan="2" rowspan="2" class="py-1 px-2 text-center border-r border-zinc-200 ${theme.scoreCe} text-[11px]">Assoliment ${ce.id}</th>`;
+        r2 += `<th colspan="2" rowspan="2" class="py-1 px-2 text-center border-r border-zinc-200 ${theme.scoreCe} text-[11px]">${isN10() ? 'Nota' : 'Assoliment'} ${ce.id}</th>`;
       });
       r2 += `<th colspan="2" rowspan="2" class="py-1 px-2 text-center border-l border-zinc-300 bg-zinc-800 text-zinc-200 font-semibold text-[11px]">Consolidació SdA</th></tr>`;
 
@@ -6950,10 +6949,10 @@
           }
         }
         r4 += `<th class="py-1 px-2 text-center border-r border-zinc-200 ${theme.weightHeader} font-mono">${conf.weight || 0}%</th>`;
-        r4 += `<th class="py-1 px-2 text-center border-r border-zinc-200 ${theme.weightHeader} text-[10px]">Nivell</th>`;
+        r4 += `<th class="py-1 px-2 text-center border-r border-zinc-200 ${theme.weightHeader} text-[10px]">${isN10() ? '' : 'Nivell'}</th>`;
       });
       r4 += `<th class="py-1 px-2 text-center border-l border-zinc-300 bg-zinc-900 text-white font-mono text-[10px]">Nota</th>`;
-      r4 += `<th class="py-1 px-2 text-center bg-zinc-900 text-white text-[10px]">Nivell</th></tr>`;
+      r4 += `<th class="py-1 px-2 text-center bg-zinc-900 text-white text-[10px]">${isN10() ? '' : 'Nivell'}</th></tr>`;
 
       head.innerHTML = r1 + r2 + r3 + r4;
 
@@ -8189,8 +8188,7 @@
         parts.push(`${nom} només ha fet pràctica en el ${Math.round(d.att.pct || 0)}% de les sessions i no arriba al mínim exigit (${d.min}%)${d.penalized ? ', per això no pot superar la matèria aquest trimestre' : ', cosa que pot impedir superar la matèria'}.`);
       } else if (isN10(group)) {
         const n = d.score * 2.5;
-        const q = n < 5 ? 'insuficient' : n < 6 ? 'suficient' : n < 7 ? 'bé' : n < 9 ? 'notable' : 'excel·lent';
-        parts.push(n < 5 ? `${nom} no ha superat el ${trimTxt} (${fs(d.score, group).replace('.', ',')}).` : `${nom} ha superat el ${trimTxt} amb una qualificació de ${fs(d.score, group).replace('.', ',')} (${q}).`);
+        parts.push(n < 5 ? `${nom} no ha superat el ${trimTxt} (${fs(d.score, group).replace('.', ',')}).` : `${nom} ha superat el ${trimTxt} amb una qualificació de ${fs(d.score, group).replace('.', ',')}.`);
       } else if (d.lvl.code === 'AE') parts.push(`${nom} ha assolit amb excel·lència els aprenentatges d'aquest ${trimTxt}.`);
       else if (d.lvl.code === 'AN') parts.push(`${nom} ha assolit els aprenentatges del ${trimTxt} amb un nivell notable.`);
       else if (d.lvl.code === 'AS') parts.push(`${nom} ha assolit satisfactòriament els aprenentatges del ${trimTxt}.`);
@@ -8297,7 +8295,7 @@
       const g = getCurrentGroup(); const t = window.appState.currentTrim;
       const lines = (g.students || []).map(st => {
         const d = getAvalData(g, st, t);
-        return [st.name, d.lvl.label, d.score !== null ? fs(d.score).replace('.', ',') : '', getComment(g, t, st.id).replace(/\s+/g, ' ')].join('\t');
+        return [st.name, ...(isN10(g) ? [] : [d.lvl.label]), d.score !== null ? fs(d.score).replace('.', ',') : '', getComment(g, t, st.id).replace(/\s+/g, ' ')].join('\t');
       });
       copyText(lines.join('\n'), btn);
     };
@@ -8318,7 +8316,12 @@
       if (next !== undefined) { window.appState.avalStudent = next; renderAvalView(); window.scrollTo({ top: 0, behavior: 'smooth' }); }
     };
 
-    const avalLvl = (v, big) => { const l = getLevel(v); return `<span class="inline-flex items-center ${big ? 'text-xs px-2' : 'text-[10px] px-1.5'} py-0.5 rounded font-bold ring-1 ring-inset ${l.badge}">${l.label}</span>`; };
+    const avalLvl = (v, big, solo) => {
+      if (isN10()) {
+        if (!solo) return '';
+        return v === null || v === undefined || isNaN(v) ? '<span class="text-zinc-300">—</span>' : `<span class="font-mono font-bold ${big ? 'text-xs' : 'text-[11px]'} ${v * 2.5 < 5 ? 'text-rose-600' : 'text-zinc-700'}">${fs(v)}</span>`;
+      }
+      const l = getLevel(v); return `<span class="inline-flex items-center ${big ? 'text-xs px-2' : 'text-[10px] px-1.5'} py-0.5 rounded font-bold ring-1 ring-inset ${l.badge}">${l.label}</span>`; };
     const avalNum = v => v !== null && v !== undefined && !isNaN(v) ? fs(v) : '—';
     const AVAL_EXEMPT = '<span class="inline-flex items-center text-[10px] font-bold text-sky-700 bg-sky-50 border border-sky-200 px-1.5 py-0.5 rounded">Exempt</span>';
 
@@ -8354,14 +8357,14 @@
             return `<tr>
               <td class="py-1.5 pr-2"><div class="font-semibold text-zinc-800 leading-tight">${escapeHtml(s.title)}</div><div class="text-[10px] text-zinc-400 font-mono">${s.trimWeight !== undefined ? s.trimWeight : Math.round(100 / sdas.length)}%${roba && getRobaTargetKey(s) ? ` · <span class="text-orange-600"><i class="fa-solid fa-shirt"></i> ${roba}</span>` : ''}</div></td>
               ${ex ? `<td colspan="${activeCes.length + 1}" class="text-right">${AVAL_EXEMPT}</td>` : `
-              ${activeCes.map(ce => { const on = s.competences && s.competences[ce.id] && s.competences[ce.id].active; const v = on ? getStudentCeScoreInSda(s, st.id, ce.id, g) : null; return `<td class="text-center px-1" title="${on && v !== null ? fs(v) : ''}">${on ? avalLvl(v) : '<span class="text-zinc-200">·</span>'}</td>`; }).join('')}
+              ${activeCes.map(ce => { const on = s.competences && s.competences[ce.id] && s.competences[ce.id].active; const v = on ? getStudentCeScoreInSda(s, st.id, ce.id, g) : null; return `<td class="text-center px-1" title="${on && v !== null ? fs(v) : ''}">${on ? avalLvl(v, false, true) : '<span class="text-zinc-200">·</span>'}</td>`; }).join('')}
               <td class="text-right whitespace-nowrap"><b class="font-mono">${avalNum(sc)}</b> ${avalLvl(sc)}</td>`}
             </tr>`;
           }).join('')}
           </tbody>
           <tfoot class="border-t-2 border-zinc-200">
             <tr><td class="py-1.5 font-semibold text-zinc-500">Mitjana CE</td>
-              ${activeCes.map(ce => `<td class="text-center px-1" title="${d.ces[ce.id] !== null ? fs(d.ces[ce.id]) : ''}">${avalLvl(d.ces[ce.id])}</td>`).join('')}
+              ${activeCes.map(ce => `<td class="text-center px-1" title="${d.ces[ce.id] !== null ? fs(d.ces[ce.id]) : ''}">${avalLvl(d.ces[ce.id], false, true)}</td>`).join('')}
               <td class="text-right whitespace-nowrap"><b class="font-mono">${avalNum(d.comp)}</b> ${avalLvl(d.comp)}</td></tr>
           </tfoot>
         </table></div>` : '<p class="text-xs text-zinc-400">Cap SdA en aquest trimestre.</p>';
@@ -8432,7 +8435,7 @@
       const rows = (g.students || []).map((st, i) => ({ st, i, d: getAvalData(g, st, t) }));
       const n = rows.length;
       const count = code => rows.filter(r => r.d.score !== null && r.d.lvl.code === code).length;
-      const countL = lb => rows.filter(r => r.d.score !== null && r.d.lvl.label === lb).length;
+      const countB = bd => rows.filter(r => r.d.score !== null && r.d.lvl.band === bd).length;
       const susp = rows.filter(r => r.d.alerts.some(a => a.k === 'susp' || a.k === 'prac')).length;
       const risk = rows.filter(r => r.d.risk).length;
       const graded = rows.filter(r => r.d.score !== null);
@@ -8455,9 +8458,9 @@
           ${kpi('Alumnes', n, 'bg-white border-zinc-200 text-zinc-900')}
           ${kpi('Mitjana', mean !== null ? fs(mean) : '—', 'bg-white border-zinc-200 text-zinc-900')}
           ${isN10(g) ? `
-          ${kpi('Excel·lent (9-10)', countL('EXC'), 'bg-emerald-50 border-emerald-200 text-emerald-800')}
-          ${kpi('Notable (7-9)', countL('NOT'), 'bg-indigo-50 border-indigo-200 text-indigo-800')}
-          ${kpi('Bé / Suficient', countL('BÉ') + countL('SUF'), 'bg-sky-50 border-sky-200 text-sky-800')}` : `
+          ${kpi('Nota 9 – 10', countB('top'), 'bg-emerald-50 border-emerald-200 text-emerald-800')}
+          ${kpi('Nota 7 – 9', countB('good'), 'bg-indigo-50 border-indigo-200 text-indigo-800')}
+          ${kpi('Nota 5 – 7', countB('mid'), 'bg-sky-50 border-sky-200 text-sky-800')}` : `
           ${kpi('AE', count('AE'), 'bg-emerald-50 border-emerald-200 text-emerald-800')}
           ${kpi('AN', count('AN'), 'bg-indigo-50 border-indigo-200 text-indigo-800')}
           ${kpi('AS', count('AS'), 'bg-sky-50 border-sky-200 text-sky-800')}`}
@@ -8549,7 +8552,7 @@
                   const sc = getStudentOverallSdaScore(s, st.id, g);
                   return `<td class="text-center border-l border-zinc-100 px-1 whitespace-nowrap" title="${getLevel(sc).label}"><span class="inline-block min-w-[40px] px-1.5 py-0.5 rounded-md font-mono font-semibold ${sc !== null ? getScoreColorClass(sc) : 'text-zinc-300'}">${avalNum(sc)}</span></td>`;
                 }).join('')}
-                ${activeCes.map((ce, k) => `<td class="text-center px-0.5 ${k === 0 ? 'border-l border-zinc-100' : ''}" title="${d.ces[ce.id] !== null ? ce.id + ': ' + fs(d.ces[ce.id]) : ''}">${avalLvl(d.ces[ce.id])}</td>`).join('')}
+                ${activeCes.map((ce, k) => `<td class="text-center px-0.5 ${k === 0 ? 'border-l border-zinc-100' : ''}" title="${d.ces[ce.id] !== null ? ce.id + ': ' + fs(d.ces[ce.id]) : ''}">${avalLvl(d.ces[ce.id], false, true)}</td>`).join('')}
                 ${actOn ? `<td class="text-center font-mono border-l border-zinc-100 ${d.act !== null && d.act < gradeThresholds.as ? 'text-violet-700 font-bold' : 'text-zinc-600'}">${avalNum(d.act)}</td>` : ''}
                 <td class="text-center border-l border-zinc-300 bg-zinc-50 px-2 whitespace-nowrap"><b class="font-mono text-sm">${avalNum(d.score)}</b> ${avalLvl(d.score)}${getTrimBonus(g, t, st.id) ? '<div>' + trimBonusTag(g, t, st.id, true) + '</div>' : ''}</td>
                 ${t > 1 ? `<td class="text-center px-1 whitespace-nowrap text-[10px] font-mono text-zinc-500">${prev.map(p => `<span title="T${p.x}" class="mr-1">${avalNum(p.v)}</span>`).join('')}</td>` : ''}
