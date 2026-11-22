@@ -1555,7 +1555,7 @@
               <div class="font-semibold text-zinc-700">Sessions de la SdA <span id="plan_sesCount" class="ml-1 text-[11px] font-mono font-bold text-zinc-500 bg-zinc-100 px-2 py-0.5 rounded-md">0</span></div>
               <div class="text-[11px] text-zinc-500">Escriu cada sessió (escalfament, part principal, tornada a la calma i material). Després es posen soles al Planner amb «Repartir una SdA».</div>
             </div>
-            <button type="button" onclick="planSesFromActivities()" class="text-[11px] font-semibold px-2.5 py-1.5 rounded-lg border border-zinc-200 bg-white text-zinc-700 hover:bg-zinc-50"><i class="fa-solid fa-list-ol text-[10px] mr-1"></i>Crear des de la seqüència</button>
+            <button type="button" onclick="planSesFromActivities()" class="text-[11px] font-semibold px-2.5 py-1.5 rounded-lg border border-zinc-200 bg-white text-zinc-700 hover:bg-zinc-50"><i class="fa-solid fa-list-ol text-[10px] mr-1"></i>Completar des de la seqüència</button>
             <button type="button" onclick="addPlanSesRow(null, true)" class="text-[11px] font-semibold px-2.5 py-1.5 rounded-lg bg-zinc-900 text-white"><i class="fa-solid fa-plus text-[10px] mr-1"></i>Afegir sessió</button>
           </div>
           <div id="plan_sesList" class="space-y-2"></div>
@@ -9217,14 +9217,26 @@
       if (open && !ses) setTimeout(() => { row.scrollIntoView({ block: 'nearest' }); row.querySelector('.plan-ses-title').focus(); }, 30);
       return row;
     };
+    // Completa les sessions a partir de la seqüència SENSE esborrar ni tocar les que ja hi ha
     window.planSesFromActivities = function() {
       const acts = Array.from(document.querySelectorAll('#plan_activitatsList .plan-act-row')).map((r, i) => ({ i, titol: r.querySelector('.plan-act-titol').value.trim(), n: Math.max(0, Math.round(parseFloat(r.querySelector('.plan-act-ses').value) || 0)), desc: r.querySelector('.plan-act-desc').value.trim() })).filter(a => a.titol && a.n);
       if (!acts.length) { alert("Primer omple la «Seqüència d'activitats» amb el títol i les sessions de cada activitat."); return; }
-      const total = acts.reduce((a, x) => a + x.n, 0);
-      const has = document.querySelectorAll('#plan_sesList .plan-ses-row').length;
-      if (has && !confirm(`Ja hi ha ${has} sessions. Vols substituir-les per ${total} sessions noves creades a partir de la seqüència?`)) return;
-      document.getElementById('plan_sesList').innerHTML = '';
-      acts.forEach(a => { for (let k = 1; k <= a.n; k++) addPlanSesRow({ title: a.n > 1 ? `${a.titol} (${k}/${a.n})` : a.titol, actIdx: a.i, parts: { principal: { text: k === 1 ? a.desc : '', min: 35 } } }); });
+      const list = document.getElementById('plan_sesList');
+      const rows = () => Array.from(list.querySelectorAll('.plan-ses-row'));
+      const actOf = r => parseInt(r.querySelector('.plan-ses-act').value);
+      const plan = acts.map(a => ({ ...a, have: rows().filter(r => actOf(r) === a.i).length })).filter(a => a.have < a.n);
+      const toAdd = plan.reduce((x, a) => x + (a.n - a.have), 0);
+      if (!toAdd) { alert('Ja tens totes les sessions de la seqüència. No cal afegir-ne cap.'); return; }
+      const has = rows().length;
+      if (!confirm(`S'afegiran ${toAdd} sessions que falten segons la seqüència.${has ? `\n\nLes ${has} sessions que ja tens NO es toquen ni s'esborren.` : ''}`)) return;
+      plan.forEach(a => {
+        for (let k = a.have + 1; k <= a.n; k++) {
+          const nr = addPlanSesRow({ title: a.n > 1 ? `${a.titol} (${k}/${a.n})` : a.titol, actIdx: a.i, parts: { principal: { text: k === 1 ? a.desc : '', min: 35 } } });
+          // Col·locar-la després de l'última sessió d'aquesta activitat (o d'activitats anteriors)
+          const before = rows().filter(r => r !== nr && actOf(r) >= 0 && actOf(r) <= a.i);
+          if (before.length) before[before.length - 1].after(nr);
+        }
+      });
       renumberPlanSes();
     };
 
