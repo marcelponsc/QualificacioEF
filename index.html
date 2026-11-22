@@ -1392,7 +1392,8 @@
         <button type="button" data-tab="ces" onclick="switchSdaModalTab('ces')" class="sda-tab-btn">3 · Competències i qualificació</button>
         <button type="button" data-tab="sabers" onclick="switchSdaModalTab('sabers')" class="sda-tab-btn">4 · Sabers i metodologia</button>
         <button type="button" data-tab="activitats" onclick="switchSdaModalTab('activitats')" class="sda-tab-btn">5 · Seqüència d'activitats</button>
-        <button type="button" data-tab="avaluacio" onclick="switchSdaModalTab('avaluacio')" class="sda-tab-btn">6 · DUA, avaluació i producte</button>
+        <button type="button" data-tab="sessions" onclick="switchSdaModalTab('sessions'); refreshPlanSesActs();" class="sda-tab-btn">6 · Sessions</button>
+        <button type="button" data-tab="avaluacio" onclick="switchSdaModalTab('avaluacio')" class="sda-tab-btn">7 · DUA, avaluació i producte</button>
       </nav>
 
       <div class="p-5 sm:p-6 overflow-y-auto flex-1 text-xs">
@@ -1545,6 +1546,20 @@
               <textarea id="plan_connexions" rows="4" placeholder="Ex: Biologia (aparell locomotor), Tecnologia (apps de registre)..." class="plan-textarea"></textarea>
             </div>
           </div>
+        </div>
+
+        <!-- PESTANYA 6: SESSIONS -->
+        <div data-panel="sessions" class="sda-tab-panel space-y-3 hidden">
+          <div class="flex flex-wrap items-center gap-2">
+            <div class="flex-1 min-w-[200px]">
+              <div class="font-semibold text-zinc-700">Sessions de la SdA <span id="plan_sesCount" class="ml-1 text-[11px] font-mono font-bold text-zinc-500 bg-zinc-100 px-2 py-0.5 rounded-md">0</span></div>
+              <div class="text-[11px] text-zinc-500">Escriu cada sessió (escalfament, part principal, tornada a la calma i material). Després es posen soles al Planner amb «Repartir una SdA».</div>
+            </div>
+            <button type="button" onclick="planSesFromActivities()" class="text-[11px] font-semibold px-2.5 py-1.5 rounded-lg border border-zinc-200 bg-white text-zinc-700 hover:bg-zinc-50"><i class="fa-solid fa-list-ol text-[10px] mr-1"></i>Crear des de la seqüència</button>
+            <button type="button" onclick="addPlanSesRow(null, true)" class="text-[11px] font-semibold px-2.5 py-1.5 rounded-lg bg-zinc-900 text-white"><i class="fa-solid fa-plus text-[10px] mr-1"></i>Afegir sessió</button>
+          </div>
+          <div id="plan_sesList" class="space-y-2"></div>
+          <div id="plan_sesEmpty" class="text-center text-zinc-400 bg-zinc-50 border border-dashed border-zinc-200 rounded-xl p-6">Encara no hi ha sessions. Afegeix-ne una o crea-les a partir de la seqüència d'activitats.</div>
         </div>
 
         <!-- PESTANYA 5: SEQÜÈNCIA D'ACTIVITATS -->
@@ -7712,6 +7727,17 @@
         renderHomeScreen();
       }
 
+      // Si la SdA té sessions i encara no són al Planner d'aquesta classe, proposar posar-les-hi
+      if (!openPosterAfter && activeGroupSdaId && window.appState.currentScreen === 'class') {
+        const g = getCurrentGroup();
+        const sd = (g.sdas || []).find(x => x.id === activeGroupSdaId);
+        const nS = ((sd && sd.plan && sd.plan.sessionsDesades) || []).length;
+        const already = Object.values(g.plans || {}).some(pl => pl && pl.sdaId === activeGroupSdaId);
+        if (nS && !already && getGroupDays(g).length && confirm(`La SdA té ${nS} sessions. Vols posar-les ara al Planner de ${g.name}?`)) {
+          setTimeout(() => openDistributeModal(activeGroupSdaId), 50);
+        }
+      }
+
       if (openPosterAfter) {
         if (activeGroupSdaId) openSdaPoster(activeGroupSdaId);
         else alert("La SdA s'ha desat, però no s'aplica a la classe oberta. Entra a una de les classes on s'aplica per veure'n la fitxa.");
@@ -9095,6 +9121,113 @@
       updatePlanSessionsBadge();
     };
 
+
+    // ---------- Sessions dins l'editor de la SdA (plan.sessionsDesades) ----------
+    function planSesActOptions(sel) {
+      const acts = Array.from(document.querySelectorAll('#plan_activitatsList .plan-act-row')).map(r => r.querySelector('.plan-act-titol').value.trim());
+      return `<option value="-1">— Activitat —</option>` + acts.map((t, i) => t ? `<option value="${i}" ${i === sel ? 'selected' : ''}>${escapeHtml(t)}</option>` : '').join('');
+    }
+    window.refreshPlanSesActs = function() {
+      document.querySelectorAll('#plan_sesList .plan-ses-act').forEach(sel => { const v = parseInt(sel.value); sel.innerHTML = planSesActOptions(v); });
+    };
+    window.renumberPlanSes = function() {
+      const rows = document.querySelectorAll('#plan_sesList .plan-ses-row');
+      rows.forEach((r, i) => { r.querySelector('.plan-ses-num').textContent = i + 1; });
+      const c = document.getElementById('plan_sesCount'); if (c) c.textContent = rows.length;
+      const e = document.getElementById('plan_sesEmpty'); if (e) e.classList.toggle('hidden', rows.length > 0);
+    };
+    window.updatePlanSesHead = function(row) {
+      const t = row.querySelector('.plan-ses-title').value.trim();
+      row.querySelector('.plan-ses-head').textContent = t || 'Sessió sense títol';
+      const tot = Array.from(row.querySelectorAll('.plan-ses-min')).reduce((a, i) => a + (parseFloat(i.value) || 0), 0);
+      row.querySelector('.plan-ses-tot').textContent = tot ? tot + ' min' : '';
+    };
+    window.movePlanSes = function(btn, dir) {
+      const row = btn.closest('.plan-ses-row');
+      const sib = dir < 0 ? row.previousElementSibling : row.nextElementSibling;
+      if (!sib) return;
+      if (dir < 0) row.parentNode.insertBefore(row, sib); else row.parentNode.insertBefore(sib, row);
+      renumberPlanSes();
+    };
+    window.dupPlanSes = function(btn) {
+      const row = btn.closest('.plan-ses-row');
+      const data = readPlanSesRow(row);
+      const nr = addPlanSesRow(data, true);
+      row.after(nr);
+      renumberPlanSes();
+    };
+    function readPlanSesRow(r) {
+      const parts = {};
+      SESSION_PARTS.forEach(pp => { parts[pp.id] = { text: r.querySelector(`.plan-ses-txt-${pp.id}`).value.trim(), min: parseFloat(r.querySelector(`.plan-ses-min-${pp.id}`).value) || 0 }; });
+      return {
+        title: r.querySelector('.plan-ses-title').value.trim(),
+        objectiu: r.querySelector('.plan-ses-obj').value.trim(),
+        actIdx: parseInt(r.querySelector('.plan-ses-act').value),
+        parts,
+        material: r.querySelector('.plan-ses-mat').value.trim(),
+        evalKeys: r._evalKeys || []
+      };
+    }
+    window.addPlanSesRow = function(ses = null, open = false) {
+      const list = document.getElementById('plan_sesList');
+      const row = document.createElement('details');
+      row.className = 'plan-ses-row bg-zinc-50 border border-zinc-200 rounded-xl overflow-hidden';
+      if (open) row.open = true;
+      row.innerHTML = `
+        <summary class="flex items-center gap-2 px-3 py-2.5 cursor-pointer select-none list-none">
+          <span class="plan-ses-num w-6 h-6 rounded-lg bg-zinc-900 text-white text-[11px] font-mono font-bold flex items-center justify-center shrink-0">1</span>
+          <span class="plan-ses-head flex-1 min-w-0 truncate font-semibold text-zinc-800">Sessió sense títol</span>
+          <span class="plan-ses-tot text-[10px] font-mono text-zinc-400"></span>
+          <button type="button" onclick="event.preventDefault(); movePlanSes(this, -1)" class="text-zinc-400 hover:text-zinc-900 px-1" title="Pujar"><i class="fa-solid fa-arrow-up text-[10px]"></i></button>
+          <button type="button" onclick="event.preventDefault(); movePlanSes(this, 1)" class="text-zinc-400 hover:text-zinc-900 px-1" title="Baixar"><i class="fa-solid fa-arrow-down text-[10px]"></i></button>
+          <button type="button" onclick="event.preventDefault(); dupPlanSes(this)" class="text-zinc-400 hover:text-zinc-900 px-1" title="Duplicar"><i class="fa-regular fa-copy text-[10px]"></i></button>
+          <button type="button" onclick="event.preventDefault(); if (confirm('Esborrar aquesta sessió?')) { this.closest('.plan-ses-row').remove(); renumberPlanSes(); }" class="text-zinc-400 hover:text-rose-500 px-1" title="Esborrar"><i class="fa-regular fa-trash-can text-[11px]"></i></button>
+        </summary>
+        <div class="px-3 pb-3 space-y-2 border-t border-zinc-200 pt-2.5 bg-white">
+          <div class="flex flex-wrap gap-2">
+            <input type="text" class="plan-ses-title flex-1 min-w-[180px] border border-zinc-200 rounded-lg p-2 text-xs font-semibold outline-none focus:ring-2 focus:ring-zinc-900" placeholder="Títol de la sessió" oninput="updatePlanSesHead(this.closest('.plan-ses-row'))">
+            <select class="plan-ses-act border border-zinc-200 rounded-lg p-2 bg-white text-[11px] outline-none max-w-[220px]" onfocus="this.innerHTML = planSesActOptions(parseInt(this.value))">${planSesActOptions(-1)}</select>
+          </div>
+          <input type="text" class="plan-ses-obj w-full border border-zinc-200 rounded-lg p-2 text-xs outline-none focus:ring-2 focus:ring-zinc-900" placeholder="Objectiu de la sessió">
+          ${SESSION_PARTS.map(pp => `
+            <div>
+              <div class="flex items-center gap-2 mb-1">
+                <span class="font-semibold text-zinc-700"><i class="fa-solid ${pp.icon} text-[10px] text-zinc-400 mr-1"></i>${pp.label}</span>
+                <input type="number" min="0" class="plan-ses-min plan-ses-min-${pp.id} w-14 border border-zinc-200 rounded-lg p-1 text-[11px] text-center font-mono outline-none" value="${pp.def}" oninput="updatePlanSesHead(this.closest('.plan-ses-row'))"><span class="text-[10px] text-zinc-400">min</span>
+              </div>
+              <textarea rows="${pp.id === 'principal' ? 3 : 2}" class="plan-ses-txt-${pp.id} plan-textarea" placeholder="${pp.ph}"></textarea>
+            </div>`).join('')}
+          <input type="text" class="plan-ses-mat w-full border border-zinc-200 rounded-lg p-2 text-xs outline-none focus:ring-2 focus:ring-zinc-900" placeholder="Material i espai">
+        </div>`;
+      list.appendChild(row);
+      if (ses) {
+        row.querySelector('.plan-ses-title').value = ses.title || '';
+        row.querySelector('.plan-ses-obj').value = ses.objectiu || '';
+        row.querySelector('.plan-ses-act').innerHTML = planSesActOptions(ses.actIdx ?? -1);
+        row.querySelector('.plan-ses-mat').value = ses.material || '';
+        SESSION_PARTS.forEach(pp => {
+          const pt = (ses.parts || {})[pp.id] || {};
+          row.querySelector(`.plan-ses-txt-${pp.id}`).value = pt.text || '';
+          if (pt.min !== undefined && pt.min !== null) row.querySelector(`.plan-ses-min-${pp.id}`).value = pt.min;
+        });
+        row._evalKeys = ses.evalKeys || [];
+      }
+      updatePlanSesHead(row);
+      renumberPlanSes();
+      if (open && !ses) setTimeout(() => { row.scrollIntoView({ block: 'nearest' }); row.querySelector('.plan-ses-title').focus(); }, 30);
+      return row;
+    };
+    window.planSesFromActivities = function() {
+      const acts = Array.from(document.querySelectorAll('#plan_activitatsList .plan-act-row')).map((r, i) => ({ i, titol: r.querySelector('.plan-act-titol').value.trim(), n: Math.max(0, Math.round(parseFloat(r.querySelector('.plan-act-ses').value) || 0)), desc: r.querySelector('.plan-act-desc').value.trim() })).filter(a => a.titol && a.n);
+      if (!acts.length) { alert("Primer omple la «Seqüència d'activitats» amb el títol i les sessions de cada activitat."); return; }
+      const total = acts.reduce((a, x) => a + x.n, 0);
+      const has = document.querySelectorAll('#plan_sesList .plan-ses-row').length;
+      if (has && !confirm(`Ja hi ha ${has} sessions. Vols substituir-les per ${total} sessions noves creades a partir de la seqüència?`)) return;
+      document.getElementById('plan_sesList').innerHTML = '';
+      acts.forEach(a => { for (let k = 1; k <= a.n; k++) addPlanSesRow({ title: a.n > 1 ? `${a.titol} (${k}/${a.n})` : a.titol, actIdx: a.i, parts: { principal: { text: k === 1 ? a.desc : '', min: 35 } } }); });
+      renumberPlanSes();
+    };
+
     window.updatePlanSessionsBadge = function() {
       let total = 0;
       document.querySelectorAll('#plan_activitatsList .plan-act-ses').forEach(i => total += parseFloat(i.value) || 0);
@@ -9120,6 +9253,10 @@
       document.getElementById('plan_activitatsList').innerHTML = '';
       (plan.activitats || []).forEach(a => addPlanActivityRow(a));
       updatePlanSessionsBadge();
+
+      document.getElementById('plan_sesList').innerHTML = '';
+      (plan.sessionsDesades || []).forEach(ss => addPlanSesRow(ss));
+      renumberPlanSes();
     }
 
     function collectPlanFromEditor() {
@@ -9144,6 +9281,8 @@
           descripcio: r.querySelector('.plan-act-desc').value.trim()
         }))
         .filter(a => a.titol || a.descripcio);
+      plan.sessionsDesades = Array.from(document.querySelectorAll('#plan_sesList .plan-ses-row')).map(readPlanSesRow)
+        .filter(ss => ss.title || ss.objectiu || ss.material || SESSION_PARTS.some(pp => ss.parts[pp.id].text));
       return plan;
     }
 
