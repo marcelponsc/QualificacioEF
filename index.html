@@ -1197,10 +1197,10 @@
         </div>
 
         <div>
-          <label class="block font-semibold text-zinc-700 mb-1.5">Tipus de qualificació</label>
+          <label class="block font-semibold text-zinc-700 mb-1.5">Etapa</label>
           <div class="grid grid-cols-2 gap-2">
-            <label class="flex items-center gap-2 border border-zinc-200 rounded-xl p-2.5 cursor-pointer has-[:checked]:border-zinc-900 has-[:checked]:bg-zinc-50"><input type="radio" name="modalGroupScale" value="lvl" class="accent-zinc-900"><span><b>Assoliments</b><br><span class="text-zinc-500">NA · AS · AN · AE (ESO)</span></span></label>
-            <label class="flex items-center gap-2 border border-zinc-200 rounded-xl p-2.5 cursor-pointer has-[:checked]:border-zinc-900 has-[:checked]:bg-zinc-50"><input type="radio" name="modalGroupScale" value="n10" class="accent-zinc-900"><span><b>Numèrica 0–10</b><br><span class="text-zinc-500">Batxillerat</span></span></label>
+            <label class="flex items-center gap-2 border border-zinc-200 rounded-xl p-2.5 cursor-pointer has-[:checked]:border-zinc-900 has-[:checked]:bg-zinc-50"><input type="radio" name="modalGroupScale" value="lvl" class="accent-zinc-900"><span><b>ESO</b><br><span class="text-zinc-500">Assoliments NA · AS · AN · AE</span></span></label>
+            <label class="flex items-center gap-2 border border-zinc-200 rounded-xl p-2.5 cursor-pointer has-[:checked]:border-zinc-900 has-[:checked]:bg-zinc-50"><input type="radio" name="modalGroupScale" value="n10" class="accent-zinc-900"><span><b>Batxillerat</b><br><span class="text-zinc-500">Nota 0–10 · currículum de Batx</span></span></label>
           </div>
         </div>
 
@@ -1402,7 +1402,12 @@
         <div data-panel="basics" class="sda-tab-panel space-y-5">
           <div class="grid grid-cols-1 sm:grid-cols-4 gap-3">
             <div class="sm:col-span-2">
-              <label class="block font-semibold text-zinc-700 mb-1">Títol de la SdA</label>
+              <div class="flex items-center justify-between mb-1"><label class="font-semibold text-zinc-700">Títol de la SdA</label>
+                <span class="inline-flex rounded-lg bg-zinc-100 p-0.5 text-[11px] font-semibold border border-zinc-200" title="Currículum que fa servir aquesta SdA">
+                  <button type="button" id="sdaEtapaEso" onclick="setSdaEditorEtapa('eso')" class="px-2.5 py-0.5 rounded-md">ESO</button>
+                  <button type="button" id="sdaEtapaBatx" onclick="setSdaEditorEtapa('batx')" class="px-2.5 py-0.5 rounded-md">Batxillerat</button>
+                </span>
+              </div>
               <input type="text" id="modalSdaTitle" placeholder="Ex: Ens posem en forma!" class="w-full text-sm border border-zinc-200 rounded-xl p-2.5 outline-none font-semibold focus:ring-2 focus:ring-zinc-900">
             </div>
             <div>
@@ -2577,6 +2582,42 @@
       { id: 'CE5', name: 'CE5. Valors, inclusió i convivència', short: 'Valors' }
     ];
 
+    // ===== Currículum de BATXILLERAT (Decret 171/2022) · Educació Física 1r Batx =====
+    const OFFICIAL_CES_BATX = [
+      { id: 'CE1', name: 'CE1. Autogestió de la condició física i estil de vida saludable', short: 'Condició física' },
+      { id: 'CE2', name: 'CE2. Situacions motrius diverses i superació de reptes', short: 'Motricitat' },
+      { id: 'CE3', name: 'CE3. Organització d\'activitats fisicoesportives i lleure', short: 'Organització' },
+      { id: 'CE4', name: 'CE4. Actituds, valors i habilitats socials', short: 'Valors' }
+    ];
+    const DEFAULT_CRITERIA_BATX = {
+      CE1: [
+        { code: "1.1", label: "1.1. Elaborar un pla de treball personalitzat per al manteniment o la millora de la salut." },
+        { code: "1.2", label: "1.2. Consolidar els hàbits saludables valorant els beneficis que suposen al llarg de la vida." },
+        { code: "1.3", label: "1.3. Utilitzar els protocols d'actuació dels primers auxilis i de prevenció de lesions." },
+        { code: "1.4", label: "1.4. Aplicar recursos digitals per a la monitorització de l'activitat física i l'adquisició d'hàbits saludables." }
+      ],
+      CE2: [
+        { code: "2.1", label: "2.1. Resoldre situacions en diferents modalitats esportives i medis aplicant habilitats tècniques, tàctiques i estratègiques." },
+        { code: "2.2", label: "2.2. Aplicar els elements i tècniques d'expressió corporal adequats a cada composició." }
+      ],
+      CE3: [
+        { code: "3.1", label: "3.1. Gestionar activitats, sessions o jornades esportives desenvolupant funcions d'organització i dinamització." },
+        { code: "3.2", label: "3.2. Crear produccions d'expressió corporal incorporant elements de crítica social." },
+        { code: "3.3", label: "3.3. Organitzar activitats físiques en el medi natural i urbà aplicant normes de seguretat i de conservació del medi ambient." },
+        { code: "3.4", label: "3.4. Valorar les sortides professionals associades a l'activitat física i l'esport." }
+      ],
+      CE4: [
+        { code: "4.1", label: "4.1. Cooperar en diferents situacions motrius mostrant maduresa en la gestió emocional i personal en l'assumpció dels diferents rols." },
+        { code: "4.2", label: "4.2. Resoldre conflictes mitjançant l'aplicació d'habilitats socials i valors davant situacions discriminatòries i de violència en la pràctica fisicoesportiva." }
+      ]
+    };
+    // Etapa: 'batx' (Batxillerat, nota 0-10) o 'eso'
+    function stageOf(g) { return isN10(g) ? 'batx' : 'eso'; }
+    function curStage() { return (window.appState && window.appState.sdaEditorEtapa) || stageOf(); }
+    function cesFor(etapa) { return etapa === 'batx' ? OFFICIAL_CES_BATX : OFFICIAL_CES; }
+    function CES(g) { return cesFor(g ? stageOf(g) : curStage()); }
+    window.CES = CES;
+
     const DEFAULT_THRESHOLDS = { epa: 1.0, as: 2.0, an: 3.0, ae: 4.0 };
     const DEFAULT_FINAL_CE_WEIGHTS = { CE1: 20, CE2: 20, CE3: 20, CE4: 20, CE5: 20 };
     const DEFAULT_FINAL_TRIM_WEIGHTS = { t1: 33.33, t2: 33.33, t3: 33.34 };
@@ -2796,7 +2837,8 @@
       return grp;
     }
 
-    function getCriteriaForCe(ceId) {
+    function getCriteriaForCe(ceId, etapa = null) {
+      if ((etapa || curStage()) === 'batx') return (window.appData.criteriaCatalogBatx && window.appData.criteriaCatalogBatx[ceId]) || DEFAULT_CRITERIA_BATX[ceId] || [];
       if (!window.appData.criteriaCatalog || !window.appData.criteriaCatalog[ceId]) {
         return DEFAULT_CURRICULAR_CRITERIA_CATALOG[ceId] || [];
       }
@@ -2849,7 +2891,7 @@
 
     function getSdaInputKeys(sda) {
       const keys = [];
-      OFFICIAL_CES.forEach(ce => {
+      CES().forEach(ce => {
         const conf = sda.competences && sda.competences[ce.id];
         if (!conf || !conf.active) return;
         if (conf.oas && conf.oas.length) conf.oas.forEach(oa => keys.push(`${ce.id}_${oa.id}`));
@@ -4798,7 +4840,7 @@
     function getSdaEvalOptions(sda) {
       const out = [];
       if (!sda) return out;
-      OFFICIAL_CES.forEach(ce => {
+      CES().forEach(ce => {
         const conf = sda.competences && sda.competences[ce.id];
         if (!conf || !conf.active) return;
         if (conf.oas && conf.oas.length) conf.oas.forEach((oa, i) => out.push({ key: `${ce.id}_${oa.id}`, ce: ce.id, short: `${ce.id} OA${i + 1}`, label: oa.label || `OA${i + 1}` }));
@@ -5351,12 +5393,14 @@
       const fmtS = iso => iso ? isoToDate(iso).toLocaleDateString('ca-ES', { day: 'numeric', month: 'short' }) : '';
       const list = arr => arr && arr.length ? arr.map(E).join(' · ') : '<span class="muted">—</span>';
       const bullets = txt => { const l = String(txt || '').split(/\r?\n/).map(x => x.replace(/^\s*[-•·*◆]\s+/, '').trim()).filter(Boolean); return l.length ? `<ul>${l.map(x => `<li>${R(x)}</li>`).join('')}</ul>` : ''; };
-      const critLabel = (ceId, code) => { const c = getCriteriaForCe(ceId).find(x => x.code === code); return c ? c.label.replace(new RegExp('^' + code.replace('.', '\\.') + '\\.?\\s*'), '') : ''; };
+      const critLabel = (ceId, code) => { const c = getCriteriaForCe(ceId, window.__paStage).find(x => x.code === code); return c ? c.label.replace(new RegExp('^' + code.replace('.', '\\.') + '\\.?\\s*'), '') : ''; };
       const crits = conf => (conf.curricularCriteria || '').split(/[-,\s]+/).filter(Boolean);
 
       let body = '';
       levels.forEach((levelName, li) => {
         const groups = lv[levelName] || [];
+        const gL = groups[0] && groups[0].g;
+        window.__paStage = stageOf(gL);
         // Agrupar SdA iguals (enllaçades o mateix títol) entre grups
         const sdaMap = new Map();
         groups.forEach(({ g }) => (g.sdas || []).forEach(s => {
@@ -5377,7 +5421,7 @@
           h += `<table class="t"><thead><tr><th style="width:22%">Situació d'aprenentatge</th><th style="width:20%">Competències específiques</th><th style="width:32%">Criteris d'avaluació</th><th>Sabers</th></tr></thead><tbody>
           ${its.map(it => {
             const sd = it.sda, comps = sd.competences || {}, pl = sd.plan || {};
-            const ces = OFFICIAL_CES.filter(ce => comps[ce.id] && comps[ce.id].active);
+            const ces = CES(gL).filter(ce => comps[ce.id] && comps[ce.id].active);
             const nSes = getSdaTotalSessions(pl);
             const who = multiTrim(it) ? `<div class="muted small">${it.uses.filter(u => u.s.trim === t).map(u => E(u.g.name)).join(', ')}</div>` : '';
             return `<tr>
@@ -5483,7 +5527,7 @@
       Object.entries(window.appData.groups || {}).forEach(([gId, g]) => { if (copies.some(c => c.g === g)) gIds.add(gId); });
       if (window.syncGroupEntityToCloud) gIds.forEach(id => window.syncGroupEntityToCloud(id));
       if (sda.shared && sda.shareKey && window.publishSharedSda) {
-        try { window.publishSharedSda(sda.shareKey, { title: sda.title, trim: sda.trim, trimWeight: sda.trimWeight, competences: sda.competences, plan: sda.plan }); } catch (e) {}
+        try { window.publishSharedSda(sda.shareKey, { title: sda.title, trim: sda.trim, trimWeight: sda.trimWeight, competences: sda.competences, plan: sda.plan, etapa: sda.etapa || "eso" }); } catch (e) {}
       }
       openSdaSessionsModal();
     };
@@ -5973,7 +6017,7 @@
       const mineKeys = new Set();
       Object.values(window.appData.groups || {}).forEach(g => (g.sdas || []).forEach(sd => { if (sd.shareKey) mineKeys.add(sd.shareKey); if (sd.sharedFrom && sd.sharedFrom.key) mineKeys.add(sd.sharedFrom.key); }));
 
-      const ceChips = i => OFFICIAL_CES.filter(ce => i.competences[ce.id] && i.competences[ce.id].active).map(ce => {
+      const ceChips = i => cesFor(i.etapa || 'eso').filter(ce => i.competences[ce.id] && i.competences[ce.id].active).map(ce => {
         const t = CE_COLOR_THEMES[ce.id];
         return `<span class="inline-flex items-center gap-1 text-[10px] px-2 py-0.5 rounded-md font-bold border ${t.header}" title="${escapeHtml(ce.name)}">${ce.id}<span class="font-mono font-semibold opacity-70">${i.competences[ce.id].weight || 0}%</span></span>`;
       }).join('');
@@ -6058,7 +6102,7 @@
         Object.keys(groups).map(g => `<option value="${g}">${escapeHtml(groups[g].name)}</option>`).join('');
       groupSel.value = libFilters.group;
       const ceSel = document.getElementById('libCeFilter');
-      ceSel.innerHTML = `<option value="all">Totes les CE</option>` + OFFICIAL_CES.map(ce => `<option value="${ce.id}">${ce.id} · ${ce.short}</option>`).join('');
+      ceSel.innerHTML = `<option value="all">Totes les CE</option>` + CES().map(ce => `<option value="${ce.id}">${ce.id} · ${ce.short}</option>`).join('');
       ceSel.value = libFilters.ce;
       document.querySelectorAll('#libTrimFilter [data-trim]').forEach(b => {
         b.className = `px-2.5 py-1.5 rounded-lg transition ${b.dataset.trim === String(libFilters.trim) ? 'bg-white text-zinc-900 shadow-subtle font-bold' : 'text-zinc-500 hover:text-zinc-900'}`;
@@ -6093,7 +6137,7 @@
         return;
       }
 
-      const ceChips = (item, small = false) => OFFICIAL_CES.filter(ce => item.competences[ce.id] && item.competences[ce.id].active).map(ce => {
+      const ceChips = (item, small = false) => cesFor(item.etapa || 'eso').filter(ce => item.competences[ce.id] && item.competences[ce.id].active).map(ce => {
         const t = CE_COLOR_THEMES[ce.id];
         return `<span class="inline-flex items-center gap-1 ${small ? 'text-[9px] px-1.5' : 'text-[10px] px-2'} py-0.5 rounded-md font-bold border ${t.header}" title="${escapeHtml(ce.name)}">${ce.id}<span class="font-mono font-semibold opacity-70">${item.competences[ce.id].weight || 0}%</span></span>`;
       }).join('');
@@ -6365,6 +6409,8 @@
 
     // ================== GESTIÓ DE CRITERIS ==================
 
+    function critKey() { return curStage() === 'batx' ? 'criteriaCatalogBatx' : 'criteriaCatalog'; }
+    function critDefaults() { return curStage() === 'batx' ? DEFAULT_CRITERIA_BATX : DEFAULT_CURRICULAR_CRITERIA_CATALOG; }
     window.openCriteriaModal = function(defaultCe = 'CE1') {
       window.appState.activeCriteriaModalCe = defaultCe;
       renderCriteriaModalTabs();
@@ -6384,7 +6430,7 @@
 
     function renderCriteriaModalTabs() {
       const container = document.getElementById('criteriaCeTabsContainer');
-      container.innerHTML = OFFICIAL_CES.map(ce => {
+      container.innerHTML = CES().map(ce => {
         const isActive = (ce.id === window.appState.activeCriteriaModalCe);
         return `
           <button type="button" onclick="selectCriteriaCeTab('${ce.id}')" class="px-3 py-1.5 rounded-xl font-bold text-xs whitespace-nowrap transition ${isActive ? 'bg-zinc-900 text-white shadow-subtle' : 'text-zinc-600 hover:text-zinc-900 hover:bg-zinc-200/60'}">
@@ -6392,7 +6438,7 @@
           </button>
         `;
       }).join('');
-      document.getElementById('critFormCeName').textContent = window.appState.activeCriteriaModalCe;
+      document.getElementById('critFormCeName').textContent = window.appState.activeCriteriaModalCe + (curStage() === 'batx' ? ' · Batxillerat' : ' · ESO');
     }
 
     window.selectCriteriaCeTab = function(ceId) {
@@ -6434,11 +6480,11 @@
       if (!code || !label) return alert("Introdueix tant el codi com la descripció del criteri.");
 
       const ceId = window.appState.activeCriteriaModalCe;
-      if (!window.appData.criteriaCatalog) window.appData.criteriaCatalog = JSON.parse(JSON.stringify(DEFAULT_CURRICULAR_CRITERIA_CATALOG));
-      if (!window.appData.criteriaCatalog[ceId]) window.appData.criteriaCatalog[ceId] = [];
+      if (!window.appData[critKey()]) window.appData[critKey()] = JSON.parse(JSON.stringify(critDefaults()));
+      if (!window.appData[critKey()][ceId]) window.appData[critKey()][ceId] = [];
 
       const fullLabel = label.startsWith(code) ? label : `${code}. ${label}`;
-      window.appData.criteriaCatalog[ceId].push({ code, label: fullLabel });
+      window.appData[critKey()][ceId].push({ code, label: fullLabel });
 
       codeInput.value = '';
       labelInput.value = '';
@@ -6450,8 +6496,8 @@
 
     window.updateCriterion = function(idx, field, value) {
       const ceId = window.appState.activeCriteriaModalCe;
-      if (!window.appData.criteriaCatalog || !window.appData.criteriaCatalog[ceId]) return;
-      window.appData.criteriaCatalog[ceId][idx][field] = value.trim();
+      if (!window.appData[critKey()] || !window.appData[critKey()][ceId]) return;
+      window.appData[critKey()][ceId][idx][field] = value.trim();
       saveToStorage();
       if (window.syncWholeAppToCloud) window.syncWholeAppToCloud();
     };
@@ -6459,7 +6505,7 @@
     window.deleteCriterion = function(idx) {
       const ceId = window.appState.activeCriteriaModalCe;
       if (confirm(`Vols eliminar aquest criteri d'avaluació de ${ceId}?`)) {
-        window.appData.criteriaCatalog[ceId].splice(idx, 1);
+        window.appData[critKey()][ceId].splice(idx, 1);
         saveToStorage();
         if (window.syncWholeAppToCloud) window.syncWholeAppToCloud();
         renderCriteriaItemsList();
@@ -6467,8 +6513,8 @@
     };
 
     window.resetOfficialCriteria = function() {
-      if (confirm("Vols restablir tots els criteris d'avaluació a la versió oficial del Decret 175/2022?")) {
-        window.appData.criteriaCatalog = JSON.parse(JSON.stringify(DEFAULT_CURRICULAR_CRITERIA_CATALOG));
+      if (confirm(`Vols restablir tots els criteris d'avaluació a la versió oficial (${curStage() === 'batx' ? 'Decret 171/2022, Batxillerat' : 'Decret 175/2022, ESO'})?`)) {
+        window.appData[critKey()] = JSON.parse(JSON.stringify(critDefaults()));
         saveToStorage();
         if (window.syncWholeAppToCloud) window.syncWholeAppToCloud();
         renderCriteriaItemsList();
@@ -6638,7 +6684,7 @@
       let totalWeightedScore = 0;
       let totalActiveWeight = 0;
 
-      OFFICIAL_CES.forEach(ce => {
+      CES().forEach(ce => {
         const conf = sda.competences[ce.id];
         if (conf && conf.active) {
           const score = getStudentCeScoreInSda(sda, stId, ce.id, group);
@@ -6807,7 +6853,7 @@
       } else {
         const weights = curGroup.finalCeWeights || DEFAULT_FINAL_CE_WEIGHTS;
         let totalWeighted = 0, activeWeight = 0;
-        OFFICIAL_CES.forEach(ce => {
+        CES().forEach(ce => {
           const avg = getStudentCeAvg(stId, ce.id, curGroup);
           if (avg !== null) {
             const w = weights[ce.id] !== undefined ? weights[ce.id] : 20;
@@ -6849,7 +6895,7 @@
       let sda = trimSdas.find(s => s.id === sel.value) || trimSdas[0];
       if (!sda) return;
 
-      const activeCes = OFFICIAL_CES.filter(ce => sda.competences && sda.competences[ce.id] && sda.competences[ce.id].active);
+      const activeCes = CES().filter(ce => sda.competences && sda.competences[ce.id] && sda.competences[ce.id].active);
       const anyExpanded = activeCes.some(ce => !window.appState.collapsedCes[ce.id]);
       
       activeCes.forEach(ce => {
@@ -6911,7 +6957,7 @@
         <div class="text-[11px] text-zinc-400 font-mono">${curGroup.name} · T${sda.trim}</div>
       `;
 
-      const activeCes = OFFICIAL_CES.filter(ce => sda.competences && sda.competences[ce.id] && sda.competences[ce.id].active);
+      const activeCes = CES().filter(ce => sda.competences && sda.competences[ce.id] && sda.competences[ce.id].active);
 
       let r1 = `<tr class="border-b border-zinc-200">
         <th rowspan="4" class="py-2.5 px-2.5 w-12 min-w-[48px] max-w-[48px] text-center font-mono text-zinc-500 font-bold bg-zinc-100 border-r border-zinc-200 sticky top-0 left-0 z-40">#</th>
@@ -7161,7 +7207,7 @@
       const sda = (curGroup.sdas || []).find(s => s.id === sdaId);
       if (!sda) return;
 
-      OFFICIAL_CES.forEach(ce => {
+      CES().forEach(ce => {
         const sc = getStudentCeScoreInSda(sda, stId, ce.id);
         const lvl = getLevel(sc);
         const cellSc = document.getElementById(`cell_${sda.id}_${stId}_${ce.id}_score`);
@@ -7369,6 +7415,8 @@
       window.appState.modalSharedFrom = null;
       setModalShareBox(!isNew && !!sda.shared, sda);
 
+      window.appState.sdaEditorEtapa = sda.etapa || stageOf(curGroup);
+      paintSdaEtapa();
       document.getElementById('modalSdaTitle').value = sda.title || '';
       document.getElementById('modalSdaTrim').value = sda.trim || window.appState.currentTrim;
       document.getElementById('modalSdaTrimWeight').value = sda.trimWeight !== undefined ? sda.trimWeight : 50;
@@ -7403,6 +7451,8 @@
       const delBtn = document.getElementById('modalDeleteSdaBtn');
       if (delBtn) delBtn.classList.add('hidden');
       setModalShareBox(false, { sharedFrom });
+      window.appState.sdaEditorEtapa = sda.etapa || 'eso';
+      paintSdaEtapa();
       document.getElementById('modalSdaTitle').value = sda.title || '';
       document.getElementById('modalSdaTrim').value = sda.trim || window.appState.currentTrim;
       document.getElementById('modalSdaTrimWeight').value = sda.trimWeight !== undefined ? sda.trimWeight : 50;
@@ -7470,11 +7520,35 @@
 
     window.closeSdaModal = function() {
       document.getElementById('sdaModal').classList.add('hidden');
+      window.appState.sdaEditorEtapa = null;
+    };
+
+    function paintSdaEtapa() {
+      const et = window.appState.sdaEditorEtapa || 'eso';
+      const on = 'px-2.5 py-0.5 rounded-md bg-zinc-900 text-white shadow-subtle', off = 'px-2.5 py-0.5 rounded-md text-zinc-500';
+      const a = document.getElementById('sdaEtapaEso'), b = document.getElementById('sdaEtapaBatx');
+      if (a) a.className = et === 'eso' ? on : off;
+      if (b) b.className = et === 'batx' ? on : off;
+    }
+    // Canviar d'etapa dins l'editor: es mantenen les CE marcades que existeixen a les dues etapes
+    window.setSdaEditorEtapa = function(et) {
+      if (window.appState.sdaEditorEtapa === et) return;
+      const comps = {};
+      CES().forEach(ce => {
+        const chk = document.getElementById(`check_${ce.id}`);
+        if (chk && chk.checked) comps[ce.id] = { active: true, weight: parseFloat((document.getElementById(`weight_${ce.id}`) || {}).value) || 0, curricularCriteria: '', oas: [] };
+      });
+      window.appState.sdaEditorEtapa = et;
+      paintSdaEtapa();
+      Object.keys(comps).forEach(k => { if (!CES().some(c => c.id === k)) delete comps[k]; });
+      renderModalCeCards({ competences: comps });
+      if (typeof renderSaberPicker === 'function') renderSaberPicker();
+      document.querySelectorAll('#plan_sabersList .plan-saber-bloc').forEach(sel => { const v = sel.value; sel.innerHTML = sabersBlocs().map(b => `<option value="${escapeHtml(b)}">${escapeHtml(b)}</option>`).join(''); sel.value = sabersBlocs().includes(v) ? v : sabersBlocs()[0]; });
     };
 
     function renderModalCeCards(sda) {
       const container = document.getElementById('modalCeCardsContainer');
-      container.innerHTML = OFFICIAL_CES.map(ce => {
+      container.innerHTML = CES().map(ce => {
         const conf = (sda.competences && sda.competences[ce.id]) || { active: false, weight: 0, curricularCriteria: '', oas: [] };
         const availableCriteria = getCriteriaForCe(ce.id);
         const currentCriteriaCodes = (conf.curricularCriteria || "").split(/[-,\s]+/).map(c => c.trim()).filter(c => c.length > 0);
@@ -7568,7 +7642,7 @@
 
     window.updateModalWeightSum = function() {
       let sum = 0;
-      OFFICIAL_CES.forEach(ce => {
+      CES().forEach(ce => {
         const chk = document.getElementById(`check_${ce.id}`);
         const wEl = document.getElementById(`weight_${ce.id}`);
         if (chk && chk.checked && wEl) {
@@ -7585,6 +7659,7 @@
     };
 
     window.saveSdaFromModal = function(openPosterAfter = false) {
+      const etapaSda = window.appState.sdaEditorEtapa || 'eso';
       let targetGroupIds = Array.from(document.querySelectorAll('.target-group-checkbox:checked')).map(cb => cb.value);
       
       if (targetGroupIds.length === 0) {
@@ -7608,7 +7683,7 @@
       const plan = collectPlanFromEditor();
       const centreChanged = saveCentreFromEditor();
 
-      OFFICIAL_CES.forEach(ce => {
+      CES().forEach(ce => {
         const chk = document.getElementById(`check_${ce.id}`);
         if (chk && chk.checked) {
           const weightEl = document.getElementById(`weight_${ce.id}`);
@@ -7689,13 +7764,15 @@
             title: title,
             trimWeight: trimWeight,
             competences: JSON.parse(JSON.stringify(competences)),
-            plan: JSON.parse(JSON.stringify(plan))
+            plan: JSON.parse(JSON.stringify(plan)),
+            etapa: etapaSda
           };
           grp.sdas.push(targetSda);
         } else {
           targetSda.trim = gTrim;
           targetSda.title = title;
           targetSda.trimWeight = trimWeight;
+          targetSda.etapa = etapaSda;
           targetSda.competences = JSON.parse(JSON.stringify(competences));
           const keepSes2 = (targetSda.plan && targetSda.plan.sessionsDesades) || (window.appState.modalSourceSda && window.appState.modalSourceSda.plan && window.appState.modalSourceSda.plan.sessionsDesades);
           targetSda.plan = JSON.parse(JSON.stringify(plan));
@@ -7717,7 +7794,7 @@
         savedCopies.forEach(c => { c.sda.shareKey = shareKey; c.sda.shared = true; });
         const ref0 = savedCopies[0] ? savedCopies[0].sda : null;
         if (ref0 && window.publishSharedSda) {
-          window.publishSharedSda(shareKey, { title: ref0.title, trim: ref0.trim, trimWeight: ref0.trimWeight, competences: ref0.competences, plan: ref0.plan || {} })
+          window.publishSharedSda(shareKey, { title: ref0.title, trim: ref0.trim, trimWeight: ref0.trimWeight, competences: ref0.competences, plan: ref0.plan || {}, etapa: ref0.etapa || "eso" })
             .catch(err => alert('No s\'ha pogut publicar a la biblioteca del departament.' + (String(err && err.message || '').includes('permission') || String(err && err.code || '').includes('PERMISSION') ? '\n\nCal actualitzar les regles de Firebase (Realtime Database → Reglas).' : '')));
         }
       } else if (wasShared) {
@@ -7860,7 +7937,7 @@
         </th>`;
       });
 
-      OFFICIAL_CES.forEach(ce => {
+      CES().forEach(ce => {
         headHtml += `<th class="py-2.5 px-2 text-center border-l border-zinc-800">
           <div class="font-bold text-zinc-100">${ce.id}</div>
           <div class="text-[9px] text-zinc-400 font-normal truncate max-w-[90px] mx-auto">${ce.short}</div>
@@ -7925,7 +8002,7 @@
           </td>`;
         });
 
-        OFFICIAL_CES.forEach(ce => {
+        CES().forEach(ce => {
           const avg = getStudentCeAvg(st.id, ce.id, curGroup, window.appState.currentTrim);
           const lvl = getLevel(avg);
 
@@ -8046,9 +8123,9 @@
       } else {
         panelTitle.innerHTML = `<i class="fa-solid fa-scale-balanced text-zinc-500"></i> Ponderació de les Competències Específiques (CEs)`;
         const cw = curGroup.finalCeWeights || DEFAULT_FINAL_CE_WEIGHTS;
-        OFFICIAL_CES.forEach(ce => sumWeights += (cw[ce.id] !== undefined ? cw[ce.id] : 20));
+        CES().forEach(ce => sumWeights += (cw[ce.id] !== undefined ? cw[ce.id] : 20));
 
-        weightsContainer.innerHTML = OFFICIAL_CES.map(ce => {
+        weightsContainer.innerHTML = CES().map(ce => {
           const w = cw[ce.id] !== undefined ? cw[ce.id] : 20;
           return `
             <div class="flex items-center gap-2 bg-zinc-50 border border-zinc-200/80 px-3 py-1.5 rounded-xl">
@@ -8089,7 +8166,7 @@
         `;
       } else {
         const cw = curGroup.finalCeWeights || DEFAULT_FINAL_CE_WEIGHTS;
-        OFFICIAL_CES.forEach(ce => {
+        CES().forEach(ce => {
           const w = cw[ce.id] !== undefined ? cw[ce.id] : 20;
           headHtml += `<th class="py-2 px-3 text-center border-l border-zinc-800">
             <div>${ce.id} (${ce.short})</div>
@@ -8134,7 +8211,7 @@
             </td>`;
           });
         } else {
-          OFFICIAL_CES.forEach(ce => {
+          CES().forEach(ce => {
             const avg = getStudentCeAvg(st.id, ce.id, curGroup);
             const lvl = getLevel(avg);
 
@@ -8238,7 +8315,7 @@
       const actRule = getAttitudeRule();
       const act = actRule.enabled ? getStudentAttitudeTrim(group, st.id, trim) : null;
       const ces = {};
-      OFFICIAL_CES.forEach(ce => { ces[ce.id] = getStudentCeAvg(st.id, ce.id, group, trim); });
+      CES().forEach(ce => { ces[ce.id] = getStudentCeAvg(st.id, ce.id, group, trim); });
       const injuredNow = !!getActiveInjury(group, st.id, todayISO());
       const penalized = isStudentPenalized(group, trim, st.id);
       const alerts = [];
@@ -8408,7 +8485,7 @@
     // Panell de detall d'un alumne (s'usa desplegat a la graella i al mode alumne a alumne)
     function renderAvalDetail(g, st, t, d) {
       const sdas = (g.sdas || []).filter(s => s.trim === t);
-      const activeCes = OFFICIAL_CES.filter(ce => sdas.some(s => s.competences && s.competences[ce.id] && s.competences[ce.id].active));
+      const activeCes = CES().filter(ce => sdas.some(s => s.competences && s.competences[ce.id] && s.competences[ce.id].active));
       const ai = getStudentAttitudeInfo(g, st.id, t);
       const rule = getAttitudeRule();
       const c = getComment(g, t, st.id);
@@ -8522,7 +8599,7 @@
       const mean = graded.length ? graded.reduce((a, r) => a + r.d.score, 0) / graded.length : null;
       const nComments = rows.filter(r => getComment(g, t, r.st.id)).length;
       const sdas = (g.sdas || []).filter(s => s.trim === t);
-      const activeCes = OFFICIAL_CES.filter(ce => sdas.some(s => s.competences && s.competences[ce.id] && s.competences[ce.id].active));
+      const activeCes = CES().filter(ce => sdas.some(s => s.competences && s.competences[ce.id] && s.competences[ce.id].active));
       const actOn = getAttitudeRule().enabled;
 
       let shown = rows.filter(r => filter === 'all' || (filter === 'risk' && r.d.risk) || (filter === 'nocomment' && !getComment(g, t, r.st.id)));
@@ -8688,7 +8765,7 @@
       let ceValues = [];
       let detailsHtml = '';
 
-      OFFICIAL_CES.forEach(ce => {
+      CES().forEach(ce => {
         const avg = getStudentCeAvg(st.id, ce.id, curGroup);
         ceValues.push(avg !== null ? avg : 0);
         const lvl = getLevel(avg);
@@ -8982,6 +9059,81 @@
       ] }
     ];
 
+    const PLAN_BLOCS_SABERS_BATX = [
+      'Vida activa i saludable',
+      'Resolució de situacions motrius',
+      'Organització i creació d\'activitats, produccions i esdeveniments',
+      'Valors, autoregulació emocional i interacció social'
+    ];
+    const SABERS_CATALOG_BATX = [
+      { bloc: 'Vida activa i saludable', groups: [
+        { name: 'Activitat física saludable', c12: [
+          'Disseny i planificació d\'un programa personal d\'activitat física',
+          'Autoavaluació de les capacitats físiques i coordinatives',
+          'Objectius personals i sistemes d\'entrenament',
+          'Autoregulació i control de la càrrega d\'entrenament',
+          'Progressió, avaluació de resultats i reorientació de les activitats',
+          'Planificació de mesures de seguretat en la pràctica'
+        ], c34: [] },
+        { name: 'Hàbits saludables', c12: [
+          'Anàlisi de dietes equilibrades adaptades a les característiques individuals',
+          'Planificació de tècniques de relaxació, respiració i educació postural',
+          'Efectes dels hàbits individuals i socials sobre la salut personal i col·lectiva'
+        ], c34: [] },
+        { name: 'Primers auxilis i prevenció de lesions', c12: [
+          'Protocols d\'actuació en primers auxilis (PAS, RCP, DEA)',
+          'Prevenció de lesions en la pràctica d\'activitat física'
+        ], c34: [] },
+        { name: 'Recursos digitals', c12: [
+          'Ús d\'aplicacions i recursos digitals per a la gestió i monitorització de l\'activitat física'
+        ], c34: [] }
+      ] },
+      { bloc: 'Resolució de situacions motrius', groups: [
+        { name: 'Habilitats motrius', c12: [
+          'Perfeccionament d\'habilitats tècniques, tàctiques i estratègiques en esports individuals, d\'adversari i col·lectius',
+          'Pràctica de diferents modalitats esportives, esports alternatius i adaptats',
+          'Esports i activitats al medi natural',
+          'Resolució de situacions motrius variades amb control i domini corporal'
+        ], c34: [] },
+        { name: 'Expressió i comunicació corporal', c12: [
+          'Utilització precisa d\'elements i tècniques d\'expressió corporal en representacions i dramatitzacions',
+          'Activitats ritmicomusicals amb intencionalitat estètica i expressiva'
+        ], c34: [] }
+      ] },
+      { bloc: 'Organització i creació d\'activitats, produccions i esdeveniments', groups: [
+        { name: 'Gestió d\'activitats fisicoesportives', c12: [
+          'Planificació i gestió d\'activitats fisicoesportives en diferents entorns',
+          'Assumpció de rols d\'organització: coordinació, direcció i dinamització de grups',
+          'Disseny d\'activitats segons objectius, entorn, seguretat, temps, espais, destinataris i material',
+          'Ús adequat, manteniment i millora de material, equipaments i espais',
+          'Organització d\'activitats al medi natural i urbà amb normes de seguretat i de conservació del medi'
+        ], c34: [] },
+        { name: 'Creació de composicions d\'expressió corporal', c12: [
+          'Creació de composicions individuals i col·lectives per comunicar històries, idees i sentiments',
+          'Incorporació crítica d\'elements socials i culturals en les produccions'
+        ], c34: [] },
+        { name: 'Sortides professionals i ús del temps de lleure', c12: [
+          'Activitats físiques, esportives i expressives com a ocupació activa del temps de lleure',
+          'Sortides professionals vinculades a l\'activitat física, la salut i les arts escèniques'
+        ], c34: [] }
+      ] },
+      { bloc: 'Valors, autoregulació emocional i interacció social', groups: [
+        { name: 'Gestió personal i emocional', c12: [
+          'Gestió i regulació assertiva d\'emocions i habilitats personals en situacions motrius'
+        ], c34: [] },
+        { name: 'Habilitats socials i valors', c12: [
+          'Escolta activa, diàleg i resolució de conflictes',
+          'Compromís social: integració, participació, cooperació i respecte a les diferències'
+        ], c34: [] },
+        { name: 'Activitat física, gènere i discriminació', c12: [
+          'Reconeixement i actitud proactiva davant conductes contràries a la convivència',
+          'Adaptació d\'activitats i normes per fomentar l\'equitat i la igualtat de gènere'
+        ], c34: [] }
+      ] }
+    ];
+    function sabersCatalog() { return curStage() === 'batx' ? SABERS_CATALOG_BATX : SABERS_CATALOG; }
+    function sabersBlocs() { return curStage() === 'batx' ? PLAN_BLOCS_SABERS_BATX : PLAN_BLOCS_SABERS; }
+
     function getCustomSabers() {
       const s = getSettings();
       return Array.isArray(s.customSabers) ? s.customSabers : [];
@@ -9044,7 +9196,7 @@
     function renderSaberPicker() {
       const box = document.getElementById('plan_saberPicker');
       if (!box) return;
-      const level = window.appState.saberLevel || guessSaberLevel() || '12';
+      const level = curStage() === 'batx' ? '12' : (window.appState.saberLevel || guessSaberLevel() || '12');
       const chosen = new Set(currentPlanSabers().map(s => s.text));
       const open = window.appState.saberOpen || {};
       const custom = getCustomSabers();
@@ -9060,11 +9212,11 @@
         <div class="flex flex-wrap items-center justify-between gap-2 mb-2">
           <span class="text-[11px] text-zinc-500"><i class="fa-solid fa-hand-pointer mr-1"></i>Toca un saber per afegir-lo o treure'l</span>
           <div class="inline-flex rounded-lg bg-zinc-100 p-0.5 text-[11px] font-semibold border border-zinc-200">
-            ${[['12', '1r i 2n'], ['34', '3r i 4t'], ['all', 'Tots']].map(([k, l]) => `<button type="button" onclick="setSaberLevel('${k}')" class="px-2.5 py-1 rounded-md ${level === k ? 'bg-white shadow-subtle text-zinc-900' : 'text-zinc-500'}">${l}</button>`).join('')}
+            ${(curStage() === 'batx' ? [['12', '1r Batxillerat']] : [['12', '1r i 2n'], ['34', '3r i 4t'], ['all', 'Tots']]).map(([k, l]) => `<button type="button" onclick="setSaberLevel('${k}')" class="px-2.5 py-1 rounded-md ${level === k ? 'bg-white shadow-subtle text-zinc-900' : 'text-zinc-500'}">${l}</button>`).join('')}
           </div>
         </div>
         <div class="space-y-1.5">
-          ${SABERS_CATALOG.map((B, i) => {
+          ${sabersCatalog().map((B, i) => {
             const mine = custom.filter(c => c.bloc === B.bloc);
             const nSel = currentPlanSabers().filter(s => s.bloc === B.bloc).length;
             const isOpen = open[i] !== undefined ? open[i] : i === 0;
@@ -9095,7 +9247,7 @@
       row.className = 'plan-saber-row flex flex-col sm:flex-row gap-2 bg-zinc-50 border border-zinc-200 rounded-xl p-2';
       row.innerHTML = `
         <select class="plan-saber-bloc sm:w-64 border border-zinc-200 rounded-lg p-1.5 bg-white text-[11px] font-semibold outline-none">
-          ${PLAN_BLOCS_SABERS.map(b => `<option value="${escapeHtml(b)}">${escapeHtml(b)}</option>`).join('')}
+          ${sabersBlocs().map(b => `<option value="${escapeHtml(b)}">${escapeHtml(b)}</option>`).join('')}
         </select>
         <input type="text" class="plan-saber-text flex-1 border border-zinc-200 rounded-lg p-1.5 bg-white text-xs outline-none" placeholder="Ex: Escalfament general i específic, autonomia en la seva execució">
         <button type="button" onclick="saveSaberToCatalog(this)" title="Desar als meus sabers (per triar-lo amb un clic a altres SdA)" class="text-zinc-300 hover:text-amber-500 px-1.5"><i class="fa-regular fa-star"></i></button>
@@ -9103,7 +9255,7 @@
       `;
       list.appendChild(row);
       if (saber) {
-        row.querySelector('.plan-saber-bloc').value = PLAN_BLOCS_SABERS.includes(saber.bloc) ? saber.bloc : PLAN_BLOCS_SABERS[0];
+        row.querySelector('.plan-saber-bloc').value = sabersBlocs().includes(saber.bloc) ? saber.bloc : sabersBlocs()[0];
         row.querySelector('.plan-saber-text').value = saber.text || '';
       } else {
         row.querySelector('.plan-saber-text').focus();
@@ -9653,7 +9805,7 @@
       const plan = sda.plan || {};
       const settings = getSettings();
       const comps = sda.competences || {};
-      const activeCes = OFFICIAL_CES.filter(ce => comps[ce.id] && comps[ce.id].active);
+      const activeCes = CES().filter(ce => comps[ce.id] && comps[ce.id].active);
       const totalSessions = getSdaTotalSessions(plan);
       const groupsNames = sharedSrc ? [] : getGroupsSharingSda(sda);
       const nCriteris = activeCes.reduce((acc, ce) => acc + (comps[ce.id].curricularCriteria || '').split(/[-,\s]+/).filter(Boolean).length, 0);
@@ -9741,7 +9893,7 @@
         </div>`;
 
       // Columna 3: sabers i metodologia
-      const sabersByBloc = PLAN_BLOCS_SABERS.map(b => ({ bloc: b, items: (plan.sabers || []).filter(s => s.bloc === b) })).filter(x => x.items.length);
+      const sabersByBloc = [...new Set([...PLAN_BLOCS_SABERS, ...PLAN_BLOCS_SABERS_BATX, ...(plan.sabers || []).map(x => x.bloc)])].map(b => ({ bloc: b, items: (plan.sabers || []).filter(s => s.bloc === b) })).filter(x => x.items.length);
       const sabersHtml = sabersByBloc.map(x => `
         <div style="margin-bottom:6px"><div style="color:var(--head);font-weight:700;font-size:10.5px;margin-bottom:2px">${escapeHtml(x.bloc)}</div>
         <ul class="sp-list">${x.items.map(s => `<li>${richText(s.text)}</li>`).join('')}</ul></div>
@@ -10006,20 +10158,20 @@
             const sda = (grp.sdas || []).find(s => s.title === selectedSdaTitle && s.trim === window.appState.currentTrim);
             if (sda) {
               score = getStudentOverallSdaScore(sda, st.id, grp);
-              OFFICIAL_CES.forEach(ce => {
+              CES().forEach(ce => {
                 const scCe = getStudentCeScoreInSda(sda, st.id, ce.id, grp);
                 if (scCe !== null) ceScoresAgg[ce.id].push(scCe);
               });
             }
           } else if (scopeType === 'trim') {
             score = getStudentTrimScore(st.id, grp);
-            OFFICIAL_CES.forEach(ce => {
+            CES().forEach(ce => {
               const avg = getStudentCeAvg(st.id, ce.id, grp, window.appState.currentTrim);
               if (avg !== null) ceScoresAgg[ce.id].push(avg);
             });
           } else if (scopeType === 'course') {
             score = getStudentCourseFinalScore(st.id, grp);
-            OFFICIAL_CES.forEach(ce => {
+            CES().forEach(ce => {
               const avg = getStudentCeAvg(st.id, ce.id, grp);
               if (avg !== null) ceScoresAgg[ce.id].push(avg);
             });
@@ -10045,7 +10197,7 @@
       document.getElementById('thAssolitRate').textContent = `% ≥ ${gradeThresholds.as} (Assolit)`;
 
       let ceAvgs = [];
-      OFFICIAL_CES.forEach(ce => {
+      CES().forEach(ce => {
         const arr = ceScoresAgg[ce.id];
         const avg = arr.length > 0 ? (arr.reduce((a, b) => a + b, 0) / arr.length) : null;
         ceAvgs.push({ id: ce.id, short: ce.short, avg: avg, count: arr.length });
@@ -10121,7 +10273,7 @@
       chartStatsCesInstance = new Chart(ctxCes, {
         type: 'bar',
         data: {
-          labels: OFFICIAL_CES.map(c => c.id),
+          labels: CES().map(c => c.id),
           datasets: [{
             data: ceAvgs.map(c => c.avg !== null ? Number(fs(c.avg)) : 0),
             backgroundColor: 'rgba(24, 24, 27, 0.8)',
@@ -10148,7 +10300,7 @@
       });
 
       const tbody = document.getElementById('statsTableBody');
-      tbody.innerHTML = OFFICIAL_CES.map(ce => {
+      tbody.innerHTML = CES().map(ce => {
         const item = ceAvgs.find(c => c.id === ce.id);
         const avg = item && item.avg !== null ? item.avg : null;
         const lvl = getLevel(avg);
@@ -10194,7 +10346,7 @@
         '1r Trim', 'Nivell T1',
         '2n Trim', 'Nivell T2',
         '3r Trim', 'Nivell T3',
-        ...OFFICIAL_CES.flatMap(ce => [`${ce.id} ${ce.short}`, `Nivell ${ce.id}`]),
+        ...CES().flatMap(ce => [`${ce.id} ${ce.short}`, `Nivell ${ce.id}`]),
         `Nota final (${methodLabel})`, 'Nivell final',
         'Mín. pràctica no assolit',
         'Sessions', 'Faltes', 'Faltes just.', 'Expulsions', 'Retards', 'No fa pràctica', 'Sense roba', '% pràctica (curs)', 'Actitud +', 'Actitud -',
@@ -10205,7 +10357,7 @@
 
       const rows = (curGroup.students || []).map(st => {
         const trims = [1, 2, 3].map(t => getStudentTrimScoreByTrim(st.id, t, curGroup));
-        const ces = OFFICIAL_CES.map(ce => getStudentCeAvg(st.id, ce.id, curGroup));
+        const ces = CES().map(ce => getStudentCeAvg(st.id, ce.id, curGroup));
         const finalScore = getStudentCourseFinalScore(st.id, curGroup);
         const penalizedTrims = [1, 2, 3].filter(t => isStudentPenalized(curGroup, t, st.id)).map(t => `T${t}`).join(' ');
         const obs = (curGroup.observations && curGroup.observations[st.id]) || '';
@@ -12844,7 +12996,7 @@
       renderAttitudeSettings();
       const rr = getRobaRule();
       const ceSel = document.getElementById('setRobaCe');
-      ceSel.innerHTML = `<option value="off">No restar nota</option>` + OFFICIAL_CES.map(c => `<option value="${c.id}">${c.id} · ${c.short}</option>`).join('');
+      ceSel.innerHTML = `<option value="off">No restar nota</option>` + CES().map(c => `<option value="${c.id}">${c.id} · ${c.short}</option>`).join('');
       ceSel.value = rr.enabled ? rr.ce : 'off';
       document.getElementById('setRobaStep').value = rr.step;
       document.getElementById('setRobaBase').value = rr.base;
