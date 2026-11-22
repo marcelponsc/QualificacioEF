@@ -2414,6 +2414,7 @@
             window.appData.criteriaCatalog = JSON.parse(JSON.stringify(DEFAULT_CURRICULAR_CRITERIA_CATALOG));
           }
           if (window.applyCloudThresholds) window.applyCloudThresholds(window.appData);
+          try { if (window.cleanActDescFromPlans) window.cleanActDescFromPlans(); } catch (e) {}
           localStorage.setItem('EF_COMPETENCIAL_DATA_V10', JSON.stringify(window.appData));
 
           if (window.appState?.currentScreen === 'class') {
@@ -2708,6 +2709,7 @@
     };
 
     window.appData = loadFromStorage();
+    try { cleanActDescFromPlans(); } catch (e) {}
 
     if (!window.appData.criteriaCatalog) {
       window.appData.criteriaCatalog = JSON.parse(JSON.stringify(DEFAULT_CURRICULAR_CRITERIA_CATALOG));
@@ -2748,6 +2750,30 @@
         }
       } catch (e) {}
       return JSON.parse(JSON.stringify(ORIGINAL_DEMO_DATA));
+    }
+
+    // Neteja (una sola vegada): treu de la part principal de les sessions el text que s'havia copiat
+    // automàticament de la descripció de l'activitat de la seqüència (només si és idèntic)
+    window.cleanActDescFromPlans = cleanActDescFromPlans;
+    function cleanActDescFromPlans() {
+      const d = window.appData;
+      if (!d || !d.groups || d.cleanedActDesc) return false;
+      let n = 0;
+      const clean = (pl, sda) => {
+        if (!pl || !sda || !sda.plan) return;
+        const act = (sda.plan.activitats || [])[pl.actIdx];
+        const pr = pl.parts && pl.parts.principal;
+        if (act && act.descripcio && pr && pr.text && pr.text.trim() === act.descripcio.trim()) { pr.text = ''; n++; }
+      };
+      Object.values(d.groups).forEach(g => {
+        const byId = {}; (g.sdas || []).forEach(s => { byId[s.id] = s; });
+        Object.values(g.plans || {}).forEach(pl => clean(pl, byId[pl && pl.sdaId]));
+        (g.sdas || []).forEach(s => ((s.plan && s.plan.sessionsDesades) || []).forEach(pl => clean(pl, s)));
+      });
+      d.cleanedActDesc = true;
+      try { localStorage.setItem('EF_COMPETENCIAL_DATA_V10', JSON.stringify(d)); } catch (e) {}
+      if (n && window.syncWholeAppToCloud) setTimeout(() => window.syncWholeAppToCloud(), 500);
+      return n > 0;
     }
 
     function saveToStorage() {
@@ -4927,8 +4953,6 @@
       if (!act) return;
       const t = document.getElementById('spmTitle');
       if (!t.value.trim()) t.value = act.titol || '';
-      const pr = document.getElementById('spmText_principal');
-      if (!pr.value.trim()) pr.value = act.descripcio || '';
       const mat = document.getElementById('spmMaterial');
       if (!mat.value.trim() && sda.plan.materials) mat.value = sda.plan.materials.replace(/\r?\n/g, ', ');
     };
@@ -5125,7 +5149,7 @@
         if (r.unit.saved) { plans[r.iso] = { ...JSON.parse(JSON.stringify(r.unit.saved)), sdaId: sda.id, reflexio: '' }; return; }
         plans[r.iso] = {
           title: r.unit.title, sdaId: sda.id, actIdx: r.unit.actIdx, objectiu: '',
-          parts: { escalfament: { text: '', min: 10 }, principal: { text: r.unit.text, min: Math.max(10, total - 15) }, tornada: { text: '', min: 5 } },
+          parts: { escalfament: { text: '', min: 10 }, principal: { text: '', min: Math.max(10, total - 15) }, tornada: { text: '', min: 5 } },
           material: sda.plan && sda.plan.materials ? sda.plan.materials.replace(/\r?\n/g, ', ') : '', reflexio: ''
         };
       });
@@ -9231,7 +9255,7 @@
       if (!confirm(`S'afegiran ${toAdd} sessions que falten segons la seqüència.${has ? `\n\nLes ${has} sessions que ja tens NO es toquen ni s'esborren.` : ''}`)) return;
       plan.forEach(a => {
         for (let k = a.have + 1; k <= a.n; k++) {
-          const nr = addPlanSesRow({ title: a.n > 1 ? `${a.titol} (${k}/${a.n})` : a.titol, actIdx: a.i, parts: { principal: { text: k === 1 ? a.desc : '', min: 35 } } });
+          const nr = addPlanSesRow({ title: a.n > 1 ? `${a.titol} (${k}/${a.n})` : a.titol, actIdx: a.i, parts: { principal: { text: '', min: 35 } } });
           // Col·locar-la després de l'última sessió d'aquesta activitat (o d'activitats anteriors)
           const before = rows().filter(r => r !== nr && actOf(r) >= 0 && actOf(r) <= a.i);
           if (before.length) before[before.length - 1].after(nr);
