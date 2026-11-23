@@ -1999,7 +1999,7 @@
   <div id="planShiftModal" class="fixed inset-0 bg-zinc-950/40 backdrop-blur-xs z-50 flex items-center justify-center p-4 hidden no-print">
     <div class="bg-white rounded-3xl shadow-card max-w-lg w-full max-h-[92vh] flex flex-col overflow-hidden border border-zinc-200">
       <div class="px-6 py-4 bg-zinc-900 text-white flex justify-between items-center">
-        <h3 class="text-sm font-bold flex items-center gap-2"><i class="fa-solid fa-forward text-amber-400"></i> Endarrerir la planificació?</h3>
+        <h3 id="planShiftHead" class="text-sm font-bold flex items-center gap-2"><i class="fa-solid fa-forward text-amber-400"></i> Endarrerir la planificació?</h3>
         <button onclick="closePlanShift()" class="text-zinc-400 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
       </div>
       <div class="p-6 space-y-3 text-xs overflow-y-auto">
@@ -2008,7 +2008,7 @@
       </div>
       <div class="px-6 py-3.5 bg-zinc-50 border-t border-zinc-200 flex justify-end gap-2 text-xs">
         <button onclick="closePlanShift()" class="px-3.5 py-1.5 border border-zinc-300 rounded-xl font-semibold text-zinc-600">No, deixar-ho igual</button>
-        <button onclick="applyPlanShift()" class="px-4 py-1.5 bg-zinc-900 hover:bg-zinc-800 text-white rounded-xl font-semibold"><i class="fa-solid fa-forward mr-1"></i>Endarrerir</button>
+        <button id="planShiftApply" onclick="applyPlanShift()" class="px-4 py-1.5 bg-zinc-900 hover:bg-zinc-800 text-white rounded-xl font-semibold"><i class="fa-solid fa-forward mr-1"></i>Endarrerir</button>
       </div>
     </div>
   </div>
@@ -5669,17 +5669,44 @@
       return { moves, mode };
     }
 
+    // Avançar: la sessió d'aquest dia (i les següents) passen al dia lliure anterior
+    function computePlanShiftBack(group, gId, iso, mode = 'sda') {
+      const plans = group.plans || {};
+      if (!planHasContent(plans[iso])) return null;
+      const dow = d => isoToDate(d).getDay();
+      const sessions = group.sessions || {};
+      const today = todayISO();
+      const keyOf = d => (plans[d] && plans[d].sdaId) ? plans[d].sdaId : '_' + d;
+      const k = keyOf(iso);
+      let W;
+      if (mode === 'seguit' || k.startsWith('_')) W = new Set(getGroupDays(group));
+      else { W = new Set(); Object.keys(plans).forEach(d => { if (keyOf(d) === k && planHasContent(plans[d])) W.add(dow(d)); }); }
+      // Dates de classe entre avui i aquest dia (dies de la SdA), lliures
+      const from = today < iso ? today : iso;
+      const all = getClassDates(group, gId, from, { count: 400, includeOff: false }).map(x => x.iso).filter(d => d < iso && W.has(dow(d)));
+      const free = all.filter(d => !sessions[d] && !planHasContent(plans[d]));
+      if (!free.length) return { moves: [], noFree: true, mode };
+      const target = free[free.length - 1];
+      const seq = Object.keys(plans).filter(d => d >= iso && planHasContent(plans[d]) && !sessions[d] && (mode === 'seguit' ? W.has(dow(d)) : keyOf(d) === k)).sort();
+      const pos = [target, ...seq.slice(0, -1)];
+      return { moves: seq.map((d, i) => ({ from: d, to: pos[i], plan: plans[d] })), mode, back: true };
+    }
+
     let planShiftCtx = null;
-    window.openPlanShift = function(gId, iso, auto = false, mode = null) {
+    window.openPlanShift = function(gId, iso, auto = false, mode = null, back = null) {
       const group = window.appData.groups[gId];
       if (!group) return;
-      mode = mode || (planShiftCtx && planShiftCtx.gId === gId && planShiftCtx.iso === iso && planShiftCtx.mode) || 'sda';
-      const res = computePlanShift(group, gId, iso, mode);
+      const same = planShiftCtx && planShiftCtx.gId === gId && planShiftCtx.iso === iso;
+      mode = mode || (same && planShiftCtx.mode) || 'sda';
+      back = back !== null ? back : !!(same && planShiftCtx.back);
+      const res = back ? computePlanShiftBack(group, gId, iso, mode) : computePlanShift(group, gId, iso, mode);
       if (!res || !res.moves.length) {
-        if (!auto) alert(res && res.tooFew ? 'No hi ha prou dies de classe per endarrerir les sessions (revisa l\'horari i els festius).' : 'Aquest dia no té cap sessió planificada per moure.');
+        if (!auto) alert(res && res.noFree ? 'No hi ha cap dia de classe lliure abans d\'aquesta sessió per avançar-la.' : res && res.tooFew ? 'No hi ha prou dies de classe per endarrerir les sessions (revisa l\'horari i els festius).' : 'Aquest dia no té cap sessió planificada per moure.');
         return;
       }
-      planShiftCtx = { gId, iso, moves: res.moves, mode };
+      planShiftCtx = { gId, iso, moves: res.moves, mode, back };
+      document.getElementById('planShiftHead').innerHTML = back ? '<i class="fa-solid fa-backward text-sky-400"></i> Avançar la planificació?' : '<i class="fa-solid fa-forward text-amber-400"></i> Endarrerir la planificació?';
+      document.getElementById('planShiftApply').innerHTML = back ? '<i class="fa-solid fa-backward mr-1"></i>Avançar' : '<i class="fa-solid fa-forward mr-1"></i>Endarrerir';
       const DOW = ['diumenge', 'dilluns', 'dimarts', 'dimecres', 'dijous', 'divendres', 'dissabte'];
       const f = d => isoToDate(d).toLocaleDateString('ca-ES', { weekday: 'short', day: 'numeric', month: 'short' });
       const sdaName = id => { const s = (group.sdas || []).find(x => x.id === id); return s ? s.title : ''; };
@@ -5691,6 +5718,11 @@
           <button onclick="openPlanShift('${gId}','${iso}',false,'sda')" class="${mode === 'sda' ? 'active' : ''}">Cada SdA als seus dies</button>
           <button onclick="openPlanShift('${gId}','${iso}',false,'seguit')" class="${mode === 'seguit' ? 'active' : ''}">Tot correlatiu</button>
         </div>
+        <div class="seg !text-[11px] mb-1">
+          <button onclick="openPlanShift('${gId}','${iso}',false,null,false)" class="${!back ? 'active' : ''}"><i class="fa-solid fa-forward mr-1"></i>Endarrerir</button>
+          <button onclick="openPlanShift('${gId}','${iso}',false,null,true)" class="${back ? 'active' : ''}"><i class="fa-solid fa-backward mr-1"></i>Avançar</button>
+        </div>
+        ${back ? '<div class="text-[11px] text-sky-700 font-semibold mb-1">Aquesta sessió passa al dia lliure anterior i les següents també avancen un dia.</div>' : ''}
         <div class="text-[11px] text-zinc-500">${mode === 'sda'
           ? `Cada SdA només es mou als dies que la fas: ${sdasMoved.map(id => `<b>${escapeHtml(sdaName(id))}</b> (${daysTxt(id)})`).join(', ') || '—'}. La resta no es toca.`
           : 'Totes les sessions següents passen al proper dia de classe, sigui el dia que sigui.'} Es mouen <b>${res.moves.length} sessions</b>.</div>`;
@@ -5867,7 +5899,8 @@
                       <button onclick="openSessionPlanModal('${gId}','${d.iso}')" class="text-[11px] font-semibold px-2.5 py-1.5 rounded-lg ${has ? 'bg-zinc-100 hover:bg-zinc-200 text-zinc-700' : 'bg-zinc-900 hover:bg-zinc-800 text-white'}">${has ? '<i class="fa-solid fa-pen text-[9px] mr-1"></i>Editar' : '<i class="fa-solid fa-plus text-[9px] mr-1"></i>Planificar'}</button>
                       <button onclick="openDiariFor('${gId}','${d.iso}')" class="text-[11px] font-semibold px-2.5 py-1.5 rounded-lg text-zinc-500 hover:text-zinc-900 hover:bg-zinc-100"><i class="fa-solid fa-clipboard-check text-[9px] mr-1"></i>Diari</button>
                       ${!session && range === 'next' ? `<button onclick="openCancelModal({ gId: '${gId}', iso: '${d.iso}', wholeDay: true })" title="Aquest dia no es fa classe" class="text-[11px] font-semibold px-2.5 py-1.5 rounded-lg text-zinc-500 hover:text-rose-700 hover:bg-rose-50"><i class="fa-solid fa-ban text-[9px] mr-1"></i>No es fa</button>` : ''}
-                      ${has && !session && range === 'next' ? `<button onclick="openPlanShift('${gId}','${d.iso}')" title="Moure aquesta sessió i les següents al proper dia de classe" class="text-[11px] font-semibold px-2.5 py-1.5 rounded-lg text-zinc-500 hover:text-amber-700 hover:bg-amber-50"><i class="fa-solid fa-forward text-[9px] mr-1"></i>Endarrerir</button>` : ''}
+                      ${has && !session && range === 'next' ? `<button onclick="openPlanShift('${gId}','${d.iso}')" title="Moure aquesta sessió i les següents al proper dia de classe" class="text-[11px] font-semibold px-2.5 py-1.5 rounded-lg text-zinc-500 hover:text-amber-700 hover:bg-amber-50"><i class="fa-solid fa-forward text-[9px] mr-1"></i>Endarrerir</button>
+                      <button onclick="openPlanShift('${gId}','${d.iso}',false,null,true)" title="Moure aquesta sessió i les següents al dia lliure anterior" class="text-[11px] font-semibold px-2.5 py-1.5 rounded-lg text-zinc-500 hover:text-sky-700 hover:bg-sky-50"><i class="fa-solid fa-backward text-[9px] mr-1"></i>Avançar</button>` : ''}
                     </div>
                   </div>`;
               }).join('')}
