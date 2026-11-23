@@ -1803,6 +1803,21 @@
             <select id="spmAct" onchange="onSpmActChange()" class="w-full border border-zinc-200 rounded-xl p-2.5 outline-none font-semibold bg-white focus:ring-2 focus:ring-zinc-900"></select>
           </div>
         </div>
+        <div id="spmExtraWrap" class="border border-dashed border-indigo-200 rounded-2xl p-3 bg-indigo-50/30">
+          <button type="button" id="spmExtraToggle" onclick="toggleSpmExtra()" class="text-[12px] font-semibold text-indigo-700"><i class="fa-solid fa-plus mr-1"></i>Treballar també una altra SdA aquest dia</button>
+          <div id="spmExtraBody" class="hidden space-y-2">
+            <div class="flex items-center justify-between">
+              <span class="font-bold text-indigo-900"><i class="fa-solid fa-layer-group mr-1.5"></i>Segona SdA d'aquesta sessió</span>
+              <button type="button" onclick="toggleSpmExtra(true)" class="text-[11px] font-semibold text-rose-600"><i class="fa-regular fa-trash-can mr-1"></i>Treure</button>
+            </div>
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
+              <select id="spmSda2" class="sm:col-span-2 w-full border border-zinc-200 rounded-xl p-2.5 outline-none font-semibold bg-white"></select>
+              <span class="flex items-center gap-1 text-zinc-500"><input type="number" min="0" step="5" id="spmMin2" class="w-16 text-center font-mono font-bold bg-white border border-zinc-200 rounded-lg p-2 outline-none text-zinc-800"> min</span>
+            </div>
+            <input type="text" id="spmTitle2" placeholder="Què es fa d'aquesta SdA (ex: Natació · respiració lateral)" class="w-full border border-zinc-200 rounded-xl p-2.5 outline-none font-semibold bg-white">
+            <textarea id="spmText2" rows="2" placeholder="Descripció de la part d'aquesta SdA..." class="plan-textarea"></textarea>
+          </div>
+        </div>
         <div id="spmEvalWrap" class="bg-zinc-50 border border-zinc-200 rounded-2xl p-3 space-y-2">
           <div class="flex items-center justify-between">
             <span class="font-bold text-zinc-800"><i class="fa-solid fa-pen-to-square text-zinc-400 mr-1.5"></i>Què avaluaràs avui?</span>
@@ -1884,6 +1899,9 @@
         </div>
         <label id="distUseSavedWrap" class="hidden flex items-center gap-2 font-semibold text-emerald-800 bg-emerald-50 border border-emerald-200 rounded-xl px-3 py-2">
           <input type="checkbox" id="distUseSaved" checked onchange="renderDistributePreview()" class="w-4 h-4 accent-emerald-600"> <span id="distUseSavedTxt">Fer servir les sessions desades a la SdA</span>
+        </label>
+        <label class="flex items-center gap-2 font-semibold text-zinc-700">
+          <input type="checkbox" id="distShare" onchange="if (this.checked) { document.getElementById('distOverwrite').checked = false; const st = document.getElementById('distStart'); if (st.options.length) st.selectedIndex = 0; } renderDistributePreview()" class="w-4 h-4 accent-indigo-600"> Compartir els dies ocupats (dues SdA la mateixa sessió)
         </label>
         <label class="flex items-center gap-2 font-semibold text-zinc-700">
           <input type="checkbox" id="distOverwrite" onchange="renderDistributePreview()" class="w-4 h-4 accent-zinc-900"> Substituir les sessions que ja estan planificades
@@ -4872,7 +4890,7 @@
     window.getSessionPlan = getSessionPlan;
 
     function planHasContent(p) {
-      return !!(p && (p.title || p.objectiu || p.material || (p.evalKeys && p.evalKeys.length) || (p.parts && Object.values(p.parts).some(x => x && x.text))));
+      return !!(p && (p.title || p.objectiu || p.material || (p.evalKeys && p.evalKeys.length) || (p.parts && Object.values(p.parts).some(x => x && x.text)) || (p.extra && (p.extra.sdaId || p.extra.title || p.extra.text))));
     }
 
     function getSlotForDate(group, iso) {
@@ -4934,6 +4952,13 @@
       document.getElementById('spmSda').value = (group.sdas || []).some(s => s.id === defaultSda) ? defaultSda : '';
       fillSpmActivities(plan.actIdx);
       renderSpmEvalChips(plan.evalKeys);
+      const ex = plan.extra || null;
+      document.getElementById('spmSda2').innerHTML = `<option value="">— Tria la SdA —</option>` + sdas.map(s => `<option value="${s.id}">T${s.trim} · ${escapeHtml(s.title)}</option>`).join('');
+      document.getElementById('spmSda2').value = ex && ex.sdaId ? ex.sdaId : '';
+      document.getElementById('spmTitle2').value = ex ? (ex.title || '') : '';
+      document.getElementById('spmText2').value = ex ? (ex.text || '') : '';
+      document.getElementById('spmMin2').value = ex && ex.min ? ex.min : '';
+      setSpmExtraOpen(!!ex);
 
       document.getElementById('spmTitle').value = plan.title || '';
       document.getElementById('spmObjectiu').value = plan.objectiu || '';
@@ -5023,9 +5048,28 @@
         parts,
         material: document.getElementById('spmMaterial').value.trim(),
         reflexio: document.getElementById('spmReflexio').value.trim(),
-        evalKeys: Array.from(document.querySelectorAll('input[name="spmEval"]:checked')).map(c => c.value)
+        evalKeys: Array.from(document.querySelectorAll('input[name="spmEval"]:checked')).map(c => c.value),
+        ...(collectSpmExtra() ? { extra: collectSpmExtra() } : {})
       };
     }
+    function collectSpmExtra() {
+      if (document.getElementById('spmExtraBody').classList.contains('hidden')) return null;
+      const sdaId = document.getElementById('spmSda2').value;
+      const title = document.getElementById('spmTitle2').value.trim();
+      const text = document.getElementById('spmText2').value.trim();
+      if (!sdaId && !title && !text) return null;
+      const g = spmTarget && window.appData.groups[spmTarget.gId];
+      const sd = g && (g.sdas || []).find(x => x.id === sdaId);
+      return { sdaId, sdaTitle: sd ? sd.title : '', title, text, min: parseFloat(document.getElementById('spmMin2').value) || 0 };
+    }
+    function setSpmExtraOpen(on) {
+      document.getElementById('spmExtraBody').classList.toggle('hidden', !on);
+      document.getElementById('spmExtraToggle').classList.toggle('hidden', on);
+    }
+    window.toggleSpmExtra = function(remove = false) {
+      if (remove) { ['spmSda2', 'spmTitle2', 'spmText2', 'spmMin2'].forEach(id => { document.getElementById(id).value = ''; }); setSpmExtraOpen(false); return; }
+      setSpmExtraOpen(true);
+    };
 
     window.closeSessionPlanModal = function() {
       document.getElementById('sessionPlanModal').classList.add('hidden');
@@ -5103,6 +5147,7 @@
       const firstFree = dates.find(d => !planHasContent(getSessionPlan(group, d.iso)));
       if (firstFree) document.getElementById('distStart').value = firstFree.iso;
       document.getElementById('distOverwrite').checked = false;
+      if (document.getElementById('distShare')) document.getElementById('distShare').checked = false;
       const DN = ['Diumenge', 'Dilluns', 'Dimarts', 'Dimecres', 'Dijous', 'Divendres', 'Dissabte'];
       window.appState.distSkip = {};
       document.getElementById('distDays').innerHTML = getGroupDays(group).map(d => `<label class="plan-chip"><input type="checkbox" class="dist-day" value="${d}" checked onchange="window.appState.distSkip = {}; renderDistributePreview()"><span><i class="fa-solid fa-check text-[9px] mr-1"></i>${DN[d]}</span></label>`).join('');
@@ -5146,7 +5191,11 @@
         if (skip[d.iso]) { rows.push({ iso: d.iso, slot: d.slot, skipped: true }); continue; }
         const existing = getSessionPlan(group, d.iso);
         if (planHasContent(existing) && !overwrite) {
-          rows.push({ iso: d.iso, slot: d.slot, keep: existing });
+          const share = document.getElementById('distShare') && document.getElementById('distShare').checked;
+          if (share && existing.sdaId !== sda.id && !existing.extra) {
+            rows.push({ iso: d.iso, slot: d.slot, unit: units[u], shareWith: existing });
+            u++;
+          } else rows.push({ iso: d.iso, slot: d.slot, keep: existing });
           continue;
         }
         rows.push({ iso: d.iso, slot: d.slot, unit: units[u], replaces: planHasContent(existing) ? existing : null });
@@ -5179,6 +5228,7 @@
               <span class="font-mono text-[11px] w-24 shrink-0 ${r.skipped ? 'line-through' : ''}">${isoToDate(r.iso).toLocaleDateString('ca-ES', { weekday: 'short', day: '2-digit', month: '2-digit' })}</span>
               <span class="flex-1 min-w-0 truncate ${r.keep || r.skipped ? 'italic' : 'font-semibold text-zinc-800'}">${r.keep ? `Ocupat: ${escapeHtml(r.keep.title || 'sessió planificada')}` : r.skipped ? 'Aquest dia no' : escapeHtml(r.unit.title)}</span>
               ${r.replaces ? '<span class="text-[10px] font-bold text-rose-600 shrink-0">substitueix</span>' : ''}
+              ${r.shareWith ? `<span class="text-[10px] font-bold text-indigo-600 shrink-0 truncate max-w-[40%]">+ amb ${escapeHtml(r.shareWith.title || 'la sessió que hi ha')}</span>` : ''}
             </div>`).join('')}
         </div>`;
     };
@@ -5199,6 +5249,12 @@
       const slotMinFor = iso => { const s = getSlotForDate(group, iso); return s ? timeToMin(s.end) - timeToMin(s.start) : 55; };
       toWrite.forEach(r => {
         const total = slotMinFor(r.iso);
+        if (r.shareWith) {
+          const sv = r.unit.saved;
+          const txt = sv ? SESSION_PARTS.map(pp => sv.parts && sv.parts[pp.id] && sv.parts[pp.id].text).filter(Boolean).join('\n') : '';
+          plans[r.iso].extra = { sdaId: sda.id, sdaTitle: sda.title, title: r.unit.title, text: txt, min: 0 };
+          return;
+        }
         if (r.unit.saved) { plans[r.iso] = { ...JSON.parse(JSON.stringify(r.unit.saved)), sdaId: sda.id, reflexio: '' }; return; }
         plans[r.iso] = {
           title: r.unit.title, sdaId: sda.id, actIdx: r.unit.actIdx, objectiu: '',
@@ -5497,8 +5553,12 @@
     // sda.plan.sessionsDesades = [{ title, objectiu, parts, material, actIdx, evalKeys }] (sense dates)
     function collectPlannedSessionsForSda(group, sdaId) {
       const plans = group.plans || {};
-      return Object.keys(plans).filter(iso => plans[iso] && plans[iso].sdaId === sdaId && planHasContent(plans[iso])).sort()
-        .map(iso => { const p = JSON.parse(JSON.stringify(plans[iso])); delete p.reflexio; delete p.sdaId; return p; });
+      return Object.keys(plans).filter(iso => plans[iso] && (plans[iso].sdaId === sdaId || (plans[iso].extra && plans[iso].extra.sdaId === sdaId)) && planHasContent(plans[iso])).sort()
+        .map(iso => {
+          const p0 = plans[iso];
+          if (p0.sdaId !== sdaId) { const ex = p0.extra; return { title: ex.title || 'Sessió', parts: { principal: { text: ex.text || '', min: ex.min || 0 } }, actIdx: -1 }; }
+          const p = JSON.parse(JSON.stringify(p0)); delete p.reflexio; delete p.sdaId; delete p.extra; return p;
+        });
     }
 
     window.openSdaSessionsModal = function() {
@@ -5682,8 +5742,19 @@
       setTimeout(() => { window.print(); setTimeout(() => document.body.classList.remove('print-planif'), 500); }, 100);
     };
 
+    // SdA principal + segona SdA (si n'hi ha) per mostrar-les juntes
+    function planSdaFind(group, p) {
+      if (!p || !group) return null;
+      const a = (group.sdas || []).find(s => s.id === p.sdaId);
+      const x = p.extra && p.extra.sdaId && (group.sdas || []).find(s => s.id === p.extra.sdaId);
+      if (!x) return a;
+      if (!a) return { ...x };
+      return { ...a, title: a.title + ' + ' + x.title };
+    }
+    window.planSdaFind = planSdaFind;
     function planPartsSummary(p) {
-      return SESSION_PARTS.map(sp => {
+      const ex = p.extra && (p.extra.title || p.extra.text) ? `<div class="flex flex-col sm:flex-row sm:gap-2 text-[11px] bg-indigo-50/60 rounded-md px-1 py-0.5"><span class="shrink-0 sm:w-36 font-semibold whitespace-nowrap text-indigo-700"><i class="fa-solid fa-layer-group text-[9px] mr-1"></i>${escapeHtml(p.extra.sdaTitle || 'Segona SdA')}${p.extra.min ? ` <span class="font-mono text-indigo-400">${p.extra.min}'</span>` : ''}</span><span class="text-zinc-700 whitespace-pre-line">${escapeHtml([p.extra.title, p.extra.text].filter(Boolean).join(' — '))}</span></div>` : '';
+      return ex + SESSION_PARTS.map(sp => {
         const part = p.parts && p.parts[sp.id];
         if (!part || !part.text) return '';
         return `<div class="flex flex-col sm:flex-row sm:gap-2 text-[11px]"><span class="shrink-0 sm:w-36 font-semibold whitespace-nowrap text-zinc-500"><i class="fa-solid ${sp.icon} text-[9px] mr-1 text-zinc-400"></i>${sp.label}${part.min ? ` <span class="font-mono text-zinc-400">${part.min}'</span>` : ''}</span><span class="text-zinc-700 whitespace-pre-line">${escapeHtml(part.text || '—')}</span></div>`;
@@ -5749,7 +5820,7 @@
                 const dt = isoToDate(d.iso);
                 const p = getSessionPlan(group, d.iso);
                 const has = planHasContent(p);
-                const sda = p && (group.sdas || []).find(s => s.id === p.sdaId);
+                const sda = planSdaFind(group, p);
                 const session = group.sessions && group.sessions[d.iso];
                 const isToday = d.iso === today;
                 const dateBlock = `
@@ -5816,7 +5887,7 @@
       const status = getClassDayStatus(group, gId, iso);
       const panel = document.getElementById('diariSessionPanel');
       if (!planHasContent(p) && status.off) return;
-      const sda = p && (group.sdas || []).find(s => s.id === p.sdaId);
+      const sda = planSdaFind(group, p);
       const open = window.appState.diariPlanOpen !== false;
       const html = planHasContent(p) ? `
         <div class="bg-amber-50/60 border border-amber-200 rounded-2xl p-3 space-y-2">
@@ -11880,7 +11951,7 @@
         const session = grp.sessions && grp.sessions[iso];
         const plan = getSessionPlan(grp, iso);
         const planned = planHasContent(plan);
-        const sda = plan && plan.sdaId ? (grp.sdas || []).find(s => s.id === plan.sdaId) : null;
+        const sda = planSdaFind(grp, plan);
         const isNow = isToday && timeToMin(e.start) <= nowMin && nowMin < timeToMin(e.end);
         let f = 0, n = (grp.students || []).length;
         if (session) (grp.students || []).forEach(st => { const r = getRecord(session, st.id); if (r.a === 'F' || r.a === 'FJ') f++; });
@@ -13255,7 +13326,7 @@
         const g = e.group;
         const p = getSessionPlan(g, iso);
         const has = planHasContent(p);
-        const sda = has && (g.sdas || []).find(s => s.id === p.sdaId);
+        const sda = has && planSdaFind(g, p);
         const theme = getGroupPastelTheme(g);
         const session = g.sessions && g.sessions[iso];
         return `
