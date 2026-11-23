@@ -1878,8 +1878,9 @@
           </div>
         </div>
         <div>
-          <label class="block font-semibold text-zinc-700 mb-1">Quins dies es fa aquesta SdA</label>
+          <label class="block font-semibold text-zinc-700 mb-1">Quins dies de la setmana es fa aquesta SdA</label>
           <div id="distDays" class="flex flex-wrap gap-1.5"></div>
+          <p class="text-[11px] text-zinc-500 mt-1">Toca un dia per treure'l o posar-lo. Ex.: si el dimecres tens poliesportiu i el divendres no, deixa només el dia que toqui per a aquesta SdA. A la llista de sota també pots treure dies concrets.</p>
         </div>
         <label id="distUseSavedWrap" class="hidden flex items-center gap-2 font-semibold text-emerald-800 bg-emerald-50 border border-emerald-200 rounded-xl px-3 py-2">
           <input type="checkbox" id="distUseSaved" checked onchange="renderDistributePreview()" class="w-4 h-4 accent-emerald-600"> <span id="distUseSavedTxt">Fer servir les sessions desades a la SdA</span>
@@ -5102,8 +5103,9 @@
       const firstFree = dates.find(d => !planHasContent(getSessionPlan(group, d.iso)));
       if (firstFree) document.getElementById('distStart').value = firstFree.iso;
       document.getElementById('distOverwrite').checked = false;
-      const DN = ['Dg', 'Dl', 'Dt', 'Dc', 'Dj', 'Dv', 'Ds'];
-      document.getElementById('distDays').innerHTML = getGroupDays(group).map(d => `<label class="plan-chip"><input type="checkbox" class="dist-day" value="${d}" checked onchange="renderDistributePreview()"><span>${DN[d]}</span></label>`).join('');
+      const DN = ['Diumenge', 'Dilluns', 'Dimarts', 'Dimecres', 'Dijous', 'Divendres', 'Dissabte'];
+      window.appState.distSkip = {};
+      document.getElementById('distDays').innerHTML = getGroupDays(group).map(d => `<label class="plan-chip"><input type="checkbox" class="dist-day" value="${d}" checked onchange="window.appState.distSkip = {}; renderDistributePreview()"><span><i class="fa-solid fa-check text-[9px] mr-1"></i>${DN[d]}</span></label>`).join('');
       renderDistributePreview();
       document.getElementById('distributeModal').classList.remove('hidden');
     };
@@ -5138,8 +5140,10 @@
       const dates = getClassDates(group, gId, start, { count: 200, includeOff: false }).filter(d => !selDays.length || selDays.includes(isoToDate(d.iso).getDay()));
       const rows = [];
       let u = 0;
+      const skip = window.appState.distSkip || {};
       for (const d of dates) {
         if (u >= units.length) break;
+        if (skip[d.iso]) { rows.push({ iso: d.iso, slot: d.slot, skipped: true }); continue; }
         const existing = getSessionPlan(group, d.iso);
         if (planHasContent(existing) && !overwrite) {
           rows.push({ iso: d.iso, slot: d.slot, keep: existing });
@@ -5170,12 +5174,19 @@
         <div class="text-[11px] text-zinc-500 mb-1"><b class="text-zinc-800">${units.length} sessions</b> · del ${planned[0] ? isoToDate(planned[0].iso).toLocaleDateString('ca-ES', { day: 'numeric', month: 'short' }) : '—'} al ${last ? isoToDate(last.iso).toLocaleDateString('ca-ES', { day: 'numeric', month: 'short' }) : '—'}${missing > 0 ? ` · <span class="text-rose-600 font-semibold">en falten ${missing} (no hi ha prou dies)</span>` : ''}</div>
         <div class="border border-zinc-200 rounded-xl divide-y divide-zinc-100 max-h-72 overflow-y-auto">
           ${rows.map(r => `
-            <div class="flex items-center gap-2 px-3 py-1.5 ${r.keep ? 'bg-zinc-50 text-zinc-400' : ''}">
-              <span class="font-mono text-[11px] w-24 shrink-0">${isoToDate(r.iso).toLocaleDateString('ca-ES', { weekday: 'short', day: '2-digit', month: '2-digit' })}</span>
-              <span class="flex-1 min-w-0 truncate ${r.keep ? 'italic' : 'font-semibold text-zinc-800'}">${r.keep ? `Es manté: ${escapeHtml(r.keep.title || 'sessió planificada')}` : escapeHtml(r.unit.title)}</span>
+            <div class="flex items-center gap-2 px-3 py-1.5 ${r.keep || r.skipped ? 'bg-zinc-50 text-zinc-400' : ''}">
+              ${r.keep ? '<span class="w-5 shrink-0"></span>' : `<button type="button" onclick="toggleDistDay('${r.iso}')" title="${r.skipped ? 'Fer-hi sessió' : 'Aquest dia no'}" class="w-5 h-5 shrink-0 rounded-md border flex items-center justify-center ${r.skipped ? 'border-zinc-300 bg-white' : 'border-zinc-900 bg-zinc-900 text-white'}">${r.skipped ? '' : '<i class="fa-solid fa-check text-[9px]"></i>'}</button>`}
+              <span class="font-mono text-[11px] w-24 shrink-0 ${r.skipped ? 'line-through' : ''}">${isoToDate(r.iso).toLocaleDateString('ca-ES', { weekday: 'short', day: '2-digit', month: '2-digit' })}</span>
+              <span class="flex-1 min-w-0 truncate ${r.keep || r.skipped ? 'italic' : 'font-semibold text-zinc-800'}">${r.keep ? `Ocupat: ${escapeHtml(r.keep.title || 'sessió planificada')}` : r.skipped ? 'Aquest dia no' : escapeHtml(r.unit.title)}</span>
               ${r.replaces ? '<span class="text-[10px] font-bold text-rose-600 shrink-0">substitueix</span>' : ''}
             </div>`).join('')}
         </div>`;
+    };
+
+    window.toggleDistDay = function(iso) {
+      const sk = window.appState.distSkip = window.appState.distSkip || {};
+      if (sk[iso]) delete sk[iso]; else sk[iso] = true;
+      renderDistributePreview();
     };
 
     window.applyDistribute = function() {
