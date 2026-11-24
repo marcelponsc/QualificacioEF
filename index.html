@@ -8651,6 +8651,17 @@
       }
       const l = getLevel(v); return `<span class="inline-flex items-center ${big ? 'text-xs px-2' : 'text-[10px] px-1.5'} py-0.5 rounded font-bold ring-1 ring-inset ${l.badge}">${l.label}</span>`; };
     const avalNum = v => v !== null && v !== undefined && !isNaN(v) ? fs(v) : '—';
+    // Nota del trimestre destacada: bloc gran amb el color del nivell (o de la franja a Batxillerat)
+    const AVAL_NOTA_COLORS = {
+      NA: 'bg-rose-600 text-white', EPA: 'bg-orange-500 text-white', AS: 'bg-amber-300 text-zinc-900', AN: 'bg-blue-600 text-white', AE: 'bg-emerald-600 text-white',
+      fail: 'bg-rose-600 text-white', mid: 'bg-amber-300 text-zinc-900', good: 'bg-blue-600 text-white', top: 'bg-emerald-600 text-white'
+    };
+    function avalNotaT(v) {
+      if (v === null || v === undefined || isNaN(v)) return '<span class="text-zinc-300 font-mono text-base">—</span>';
+      const l = getLevel(v);
+      const cls = AVAL_NOTA_COLORS[isN10() ? l.band : l.code] || 'bg-zinc-900 text-white';
+      return `<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-xl shadow-sm ${cls}"><b class="font-mono font-black text-base leading-none">${fs(v)}</b>${l.label ? `<span class="text-[10px] font-black opacity-90">${l.label}</span>` : ''}</span>`;
+    }
     const AVAL_EXEMPT = '<span class="inline-flex items-center text-[10px] font-bold text-sky-700 bg-sky-50 border border-sky-200 px-1.5 py-0.5 rounded">Exempt</span>';
 
     // Panell de detall d'un alumne (s'usa desplegat a la graella i al mode alumne a alumne)
@@ -8857,7 +8868,7 @@
                 ${sdas.map(s => `<th class="${th} border-l border-zinc-200" title="${escapeHtml(s.title)}"><div class="truncate normal-case text-left text-zinc-700 text-[11px] max-w-[92px] mx-auto">${escapeHtml(s.title)}</div><div class="font-mono text-zinc-400 normal-case">${s.trimWeight !== undefined ? s.trimWeight : Math.round(100 / sdas.length)}%</div></th>`).join('')}
                 ${activeCes.map((ce, i) => `<th class="${th} ${i === 0 ? 'border-l border-zinc-200' : ''}" title="${escapeHtml(ce.name)}">${ce.id}</th>`).join('')}
                 ${actOn ? `<th class="${th} border-l border-zinc-200" title="Actitud">Act.</th>` : ''}
-                <th class="${th} border-l border-zinc-300 bg-zinc-900 text-white">Nota T${t}</th>
+                <th class="${th} border-x-2 border-zinc-900 bg-zinc-900 text-white !text-[11px]">Nota T${t}</th>
                 ${t > 1 ? `<th class="${th}" title="Notes dels trimestres anteriors">Abans</th>` : ''}
                 <th class="${th} border-l border-zinc-200" title="% de pràctica">Pràct.</th>
                 <th class="${th}" title="Faltes sense justificar">F</th>
@@ -8882,7 +8893,7 @@
                 }).join('')}
                 ${activeCes.map((ce, k) => `<td class="text-center px-0.5 ${k === 0 ? 'border-l border-zinc-100' : ''}" title="${d.ces[ce.id] !== null ? ce.id + ': ' + fs(d.ces[ce.id]) : ''}">${avalLvl(d.ces[ce.id], false, true)}</td>`).join('')}
                 ${actOn ? `<td class="text-center font-mono border-l border-zinc-100 ${d.act !== null && d.act < gradeThresholds.as ? 'text-violet-700 font-bold' : 'text-zinc-600'}">${avalNum(d.act)}</td>` : ''}
-                <td class="text-center border-l border-zinc-300 bg-zinc-50 px-2 whitespace-nowrap"><b class="font-mono text-sm">${avalNum(d.score)}</b> ${avalLvl(d.score)}${getTrimBonus(g, t, st.id) ? '<div>' + trimBonusTag(g, t, st.id, true) + '</div>' : ''}</td>
+                <td class="text-center border-x-2 border-zinc-900 bg-zinc-100/70 px-2 py-1.5 whitespace-nowrap">${avalNotaT(d.score)}${getTrimBonus(g, t, st.id) ? '<div class="mt-0.5">' + trimBonusTag(g, t, st.id, true) + '</div>' : ''}</td>
                 ${t > 1 ? `<td class="text-center px-1 whitespace-nowrap text-[10px] font-mono text-zinc-500">${prev.map(p => `<span title="T${p.x}" class="mr-1">${avalNum(p.v)}</span>`).join('')}</td>` : ''}
                 <td class="text-center border-l border-zinc-100 px-1">${practicePctBadge(d.att.pct, d.min)}</td>
                 <td class="text-center font-mono ${d.att.F >= AVAL_LIMITS.F ? 'text-rose-600 font-bold' : 'text-zinc-500'}">${d.att.F || '·'}</td>
