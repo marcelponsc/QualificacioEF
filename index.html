@@ -777,7 +777,10 @@
               </h3>
               <p class="text-xs text-zinc-500 mt-0.5">Edita els noms directament sobre la taula o importa llistats complets.</p>
             </div>
-            <span id="rosterCountBadge" class="text-xs font-mono font-bold bg-zinc-100 text-zinc-800 px-3 py-1 rounded-full border border-zinc-200">0 alumnes</span>
+            <div class="flex items-center gap-2">
+              <button onclick="sortStudentsAlpha()" class="text-xs font-semibold px-3 py-1.5 rounded-xl border border-zinc-200 bg-white hover:bg-zinc-50 text-zinc-700" title="Ordenar la llista per cognoms"><i class="fa-solid fa-arrow-down-a-z mr-1"></i>Ordenar A-Z</button>
+              <span id="rosterCountBadge" class="text-xs font-mono font-bold bg-zinc-100 text-zinc-800 px-3 py-1 rounded-full border border-zinc-200">0 alumnes</span>
+            </div>
           </div>
 
           <div class="grid grid-cols-1 md:grid-cols-2 gap-3 bg-zinc-50/70 border border-zinc-200/80 p-3.5 rounded-2xl">
@@ -7502,19 +7505,40 @@
       `).join('');
     }
 
+    // Ordre alfabètic (català, sense tenir en compte accents ni majúscules)
+    function sortStudentsList(list) {
+      return list.sort((a, b) => String(a.name || '').localeCompare(String(b.name || ''), 'ca', { sensitivity: 'base', ignorePunctuation: true }));
+    }
+    function isAlphaSorted(list) {
+      for (let i = 1; i < list.length; i++) if (String(list[i - 1].name || '').localeCompare(String(list[i].name || ''), 'ca', { sensitivity: 'base', ignorePunctuation: true }) > 0) return false;
+      return true;
+    }
+    function afterRosterChange() {
+      saveToStorage();
+      if (window.syncGroupEntityToCloud) window.syncGroupEntityToCloud(window.appData.activeGroupId);
+      renderRosterTab();
+      renderSdaGrid();
+      populateReportStudents();
+    }
+    window.sortStudentsAlpha = function() {
+      const g = getCurrentGroup();
+      if (!g.students || g.students.length < 2) return;
+      if (isAlphaSorted(g.students)) { alert('La llista ja està en ordre alfabètic.'); return; }
+      sortStudentsList(g.students);
+      afterRosterChange();
+    };
+
     window.addSingleStudentFromRoster = function() {
       const input = document.getElementById('rosterNewStudentInput');
       const name = input.value.trim();
       if (!name) return;
       const curGroup = getCurrentGroup();
       if (!Array.isArray(curGroup.students)) curGroup.students = [];
+      const wasSorted = isAlphaSorted(curGroup.students);
       curGroup.students.push({ id: Date.now(), name: name });
+      if (wasSorted) sortStudentsList(curGroup.students);   // si la llista era alfabètica, el nou es col·loca al seu lloc
       input.value = '';
-      saveToStorage();
-      if (window.syncGroupEntityToCloud) window.syncGroupEntityToCloud(window.appData.activeGroupId);
-      renderRosterTab();
-      renderSdaGrid();
-      populateReportStudents();
+      afterRosterChange();
     };
 
     window.addBulkStudentsFromRoster = function() {
@@ -7523,13 +7547,11 @@
       if (!lines.length) return;
       const curGroup = getCurrentGroup();
       if (!Array.isArray(curGroup.students)) curGroup.students = [];
+      const wasSorted = isAlphaSorted(curGroup.students);
       lines.forEach((line, i) => curGroup.students.push({ id: Date.now() + i, name: line }));
+      if (wasSorted) sortStudentsList(curGroup.students);
       area.value = '';
-      saveToStorage();
-      if (window.syncGroupEntityToCloud) window.syncGroupEntityToCloud(window.appData.activeGroupId);
-      renderRosterTab();
-      renderSdaGrid();
-      populateReportStudents();
+      afterRosterChange();
     };
 
     window.updateStudentName = function(stId, newName) {
@@ -8849,7 +8871,7 @@
                 <select onchange="window.appState.avalStudent=+this.value; renderAvalView();" class="no-print text-xl font-black text-zinc-900 bg-transparent outline-none max-w-full">${shown.map(r => `<option value="${r.st.id}" ${r.st.id === cur.st.id ? 'selected' : ''}>${escapeHtml(r.st.name)}</option>`).join('')}</select>
                 <div class="text-[11px] text-zinc-500 font-semibold">${pos + 1} de ${shown.length}${d.alerts.length ? ' · ' : ''}${d.alerts.map(a => `<span class="text-[10px] font-bold px-1.5 py-0.5 rounded-md border ${a.c} ml-0.5">${a.t}</span>`).join('')}</div>
               </div>
-              <div class="text-right"><div class="text-3xl font-black font-mono leading-none">${avalNum(d.score)}</div><div class="mt-1">${avalLvl(d.score, true)}</div></div>
+              <div class="text-right"><div>${avalNotaT(d.score)}</div><div class="mt-1 flex items-center justify-end gap-1">${trimBonusTag(g, t, cur.st.id)}<button onclick="openTrimBonus(${cur.st.id}, ${t})" class="no-print text-[10px] font-bold px-2 py-1 rounded-lg bg-emerald-50 text-emerald-700 border border-emerald-200"><i class="fa-solid fa-arrow-up mr-1"></i>${getTrimBonus(g, t, cur.st.id) ? 'Canviar' : 'Pujar nota'}</button></div></div>
               <button onclick="avalMoveStudent(1)" class="no-print w-10 h-10 rounded-xl bg-zinc-900 text-white"><i class="fa-solid fa-chevron-right"></i></button>
             </div>
             ${renderAvalDetail(g, cur.st, t, d)}
@@ -8896,7 +8918,7 @@
                 }).join('')}
                 ${activeCes.map((ce, k) => `<td class="text-center px-0.5 ${k === 0 ? 'border-l border-zinc-100' : ''}" title="${d.ces[ce.id] !== null ? ce.id + ': ' + fs(d.ces[ce.id]) : ''}">${avalLvl(d.ces[ce.id], false, true)}</td>`).join('')}
                 ${actOn ? `<td class="text-center font-mono border-l border-zinc-100 ${d.act !== null && d.act < gradeThresholds.as ? 'text-violet-700 font-bold' : 'text-zinc-600'}">${avalNum(d.act)}</td>` : ''}
-                <td class="text-center border-x-2 border-zinc-900 bg-zinc-100/70 px-2 py-1.5 whitespace-nowrap">${avalNotaT(d.score)}${getTrimBonus(g, t, st.id) ? '<div class="mt-0.5">' + trimBonusTag(g, t, st.id, true) + '</div>' : ''}</td>
+                <td class="text-center border-x-2 border-zinc-900 bg-zinc-100/70 px-2 py-1.5 whitespace-nowrap">${avalNotaT(d.score)}<div class="mt-1 flex items-center justify-center gap-1">${trimBonusTag(g, t, st.id, true)}<button onclick="event.stopPropagation(); openTrimBonus(${st.id}, ${t})" title="Pujar la nota (treball extra)" class="no-print text-[9px] font-semibold px-1.5 py-0.5 rounded border ${getTrimBonus(g, t, st.id) ? 'border-emerald-300 text-emerald-700 bg-white' : 'border-zinc-200 text-zinc-400 bg-white hover:text-emerald-700 hover:border-emerald-300'}"><i class="fa-solid ${getTrimBonus(g, t, st.id) ? 'fa-pen' : 'fa-arrow-up'}"></i>${getTrimBonus(g, t, st.id) ? '' : ' Pujar'}</button></div></td>
                 ${t > 1 ? `<td class="text-center px-1 whitespace-nowrap text-[10px] font-mono text-zinc-500">${prev.map(p => `<span title="T${p.x}" class="mr-1">${avalNum(p.v)}</span>`).join('')}</td>` : ''}
                 <td class="text-center border-l border-zinc-100 px-1">${practicePctBadge(d.att.pct, d.min)}</td>
                 <td class="text-center font-mono ${d.att.F >= AVAL_LIMITS.F ? 'text-rose-600 font-bold' : 'text-zinc-500'}">${d.att.F || '·'}</td>
